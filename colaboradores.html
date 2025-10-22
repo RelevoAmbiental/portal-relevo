@@ -111,25 +111,31 @@
             font-size: 0.85rem;
         }
 
-        /* Card Destaque para Despesas */
+        /* Card Destaque para Despesas - TEXTO CENTRALIZADO */
         .card-destaque {
             grid-column: 1 / -1;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
             border-left: 4px solid var(--secondary-color);
+            text-align: center; /* TEXTO CENTRALIZADO */
+            padding: 40px 25px; /* MAIS ESPAÇO */
         }
 
         .card-destaque h3 {
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.8rem; /* TEXTO MAIOR */
+            margin-bottom: 15px;
         }
 
         .card-destaque p {
             color: rgba(255,255,255,0.9);
+            font-size: 1.1rem; /* TEXTO MAIOR */
+            margin-bottom: 10px;
         }
 
         .card-destaque small {
             color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
         }
 
         .logout-btn {
@@ -201,7 +207,7 @@
                 <small>Normas e procedimentos de segurança</small>
             </a>
 
-            <!-- Card Destaque: Registro de Despesas -->
+            <!-- Card Destaque: Registro de Despesas - TEXTO CENTRALIZADO -->
             <a href="despesas" class="card card-destaque">
                 <h3>💳 Registro de Despesas</h3>
                 <p>Registro de despesas de campo e viagens</p>
