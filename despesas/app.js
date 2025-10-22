@@ -97,40 +97,42 @@ class DespesasManager {
         valor: formData.get('valor')
       };
 
-      // Upload do comprovante se existir
+      console.log('Dados da despesa:', despesaData);
+
+      // PRIMEIRO: Upload do comprovante se existir
       const anexoInput = document.getElementById('anexo');
       let comprovanteUrl = '';
       
       if (anexoInput.files.length > 0) {
+        console.log('Tem arquivo para upload');
         comprovanteUrl = await this.uploadComprovante(
           anexoInput.files[0], 
           despesaData.nome
         );
+        console.log('Comprovante URL:', comprovanteUrl);
       }
 
-      // SALVAR NO FIREBASE (sistema principal)
+      // SEGUNDO: Enviar para Web App (Planilha + Drive)
+      console.log('Enviando para Web App...');
+      const webAppResult = await this.enviarParaWebApp({
+        ...despesaData,
+        comprovanteUrl: comprovanteUrl
+      });
+      console.log('Resposta Web App:', webAppResult);
+
+      // TERCEIRO: Salvar no Firebase (backup)
+      console.log('Salvando no Firebase...');
       const resultFirebase = await this.salvarDespesaFirebase({
         ...despesaData,
         comprovanteUrl
       });
 
-      // ENVIAR TAMBÉM PARA WEB APP (Planilha + Drive - backup)
-      try {
-        await this.enviarParaWebApp({
-          ...despesaData,
-          comprovanteUrl: comprovanteUrl
-        });
-        console.log('Dados enviados para planilha e Drive com sucesso');
-      } catch (webAppError) {
-        console.log('Web App offline, mas dados salvos no Firebase');
-      }
-
-      this.mostrarMensagem('Despesa registrada com sucesso! Dados salvos no sistema.', 'success');
+      this.mostrarMensagem('✅ Despesa registrada com sucesso! Dados salvos na planilha e no sistema.', 'success');
       this.limparFormulario();
 
     } catch (error) {
-      console.error('Erro:', error);
-      this.mostrarMensagem('Erro ao salvar despesa: ' + error.message, 'error');
+      console.error('Erro completo:', error);
+      this.mostrarMensagem('❌ Erro ao salvar despesa: ' + error.message, 'error');
     } finally {
       button.innerHTML = originalText;
       button.disabled = false;
@@ -170,6 +172,8 @@ class DespesasManager {
 
   async enviarParaWebApp(despesaData) {
     try {
+      console.log('Enviando dados para Web App:', despesaData);
+      
       const response = await fetch(WEB_APP_URL, {
         method: 'POST',
         headers: {
@@ -178,32 +182,63 @@ class DespesasManager {
         body: JSON.stringify(despesaData)
       });
 
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+
       const result = await response.json();
+      console.log('Web App respondeu:', result);
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Erro no Web App');
+      }
+      
       return result;
     } catch (error) {
       console.error('Erro ao enviar para Web App:', error);
-      throw error;
+      throw new Error('Falha na comunicação com a planilha: ' + error.message);
     }
   }
 
   async uploadComprovante(arquivo, nomeFuncionario) {
-    const formData = new FormData();
-    formData.append('anexo', arquivo);
-    formData.append('nome', nomeFuncionario);
-    formData.append('acao', 'upload');
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = async function(e) {
+        try {
+          console.log('Iniciando upload do comprovante...');
+          
+          const formData = new FormData();
+          formData.append('acao', 'upload');
+          formData.append('nome', nomeFuncionario);
+          formData.append('anexo', arquivo);
 
-    try {
-      const response = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: formData
-      });
+          const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: formData
+          });
 
-      const result = await response.json();
-      return result.url || '';
-    } catch (error) {
-      console.error('Erro no upload:', error);
-      return '';
-    }
+          if (!response.ok) {
+            throw new Error(`Erro HTTP no upload: ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log('Upload resposta:', result);
+          
+          if (result.success && result.url) {
+            resolve(result.url);
+          } else {
+            reject(new Error(result.message || 'Erro no upload'));
+          }
+        } catch (error) {
+          console.error('Erro no upload:', error);
+          reject(error);
+        }
+      };
+      
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+      reader.readAsDataURL(arquivo);
+    });
   }
 
   verificarConexao() {
