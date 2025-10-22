@@ -1,0 +1,87 @@
+/* despesas/styles.css - CSS ADICIONAL */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease;
+}
+
+.notification.success {
+    background: #4CAF50;
+}
+
+.notification.error {
+    background: #f44336;
+}
+
+.notification button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.preview-image, .preview-file {
+    text-align: center;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.preview-image img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 5px;
+}
+
+.preview-file i {
+    font-size: 48px;
+    color: #666;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Loading states */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .notification {
+        left: 10px;
+        right: 10px;
+        min-width: auto;
+    }
+    
+    .preview-image img {
+        max-width: 150px;
+    }
+}
