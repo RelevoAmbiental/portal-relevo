@@ -1,4 +1,4 @@
-// Configurações fixas (substitui o google.script.run)
+// Configurações fixas
 const CONFIG = {
   projetos: ['BR-135/BA', 'Panra Diamantina', 'Habilis-GO'],
   funcionarios: ['Gleisson', 'Júlio', 'Samuel', 'Tiago', 'Yuri'],
@@ -11,7 +11,7 @@ const CONFIG = {
   ]
 };
 
-// Sistema Offline com Firebase
+// Sistema de Despesas
 class DespesasManager {
   constructor() {
     this.init();
@@ -20,6 +20,7 @@ class DespesasManager {
   async init() {
     this.carregarConfiguracoes();
     this.verificarConexao();
+    this.configurarEventListeners();
   }
 
   carregarConfiguracoes() {
@@ -29,135 +30,57 @@ class DespesasManager {
     document.getElementById('data').valueAsDate = new Date();
   }
 
-  async salvarDespesa(despesaData) {
-    try {
-      // Salvar no Firebase Firestore
-      const docRef = await db.collection('despesas').add({
-        ...despesaData,
-        valor: parseFloat(despesaData.valor.replace('R$', '').replace('.', '').replace(',', '.').trim()),
-        status: 'pendente',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      return { success: true, id: docRef.id, message: 'Despesa salva com sucesso!' };
-    } catch (error) {
-      console.error('Erro ao salvar no Firebase:', error);
-      throw error;
-    }
-  }
-
-  async uploadComprovante(arquivo, nomeFuncionario) {
-    const formData = new FormData();
-    formData.append('anexo', arquivo);
-    formData.append('nome', nomeFuncionario);
-    formData.append('acao', 'upload');
-
-    const response = await fetch(WEB_APP_URL, {
-      method: 'POST',
-      body: formData
+  configurarEventListeners() {
+    // Máscara monetária
+    document.getElementById('valor').addEventListener('blur', function(e) {
+      formatarMoeda(e.target);
     });
 
-    const result = await response.json();
-    return result.url || '';
-  }
-
-  verificarConexao() {
-    const mostrarStatus = (online) => {
-      let statusBar = document.getElementById('status-offline');
-      if (!statusBar) {
-        statusBar = document.createElement('div');
-        statusBar.id = 'status-offline';
-        document.body.appendChild(statusBar);
+    document.getElementById('valor').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 0) {
+        e.target.value = 'R$ ' + (value / 100).toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+,)/g, '$1.');
       }
+    });
 
-      if (online) {
-        statusBar.textContent = '✅ Conectado';
-        statusBar.style.backgroundColor = '#4caf50';
-        statusBar.style.display = 'block';
-        setTimeout(() => statusBar.style.display = 'none', 3000);
+    // Mostrar/ocultar descrição
+    document.getElementById('tipo_despesa').addEventListener('change', function(e) {
+      const descricaoGroup = document.getElementById('descricao-group');
+      const descricaoInput = document.getElementById('descricao');
+      
+      if (e.target.value === 'Outros') {
+        descricaoGroup.style.display = 'block';
+        descricaoInput.required = true;
       } else {
-        statusBar.textContent = '📱 Modo Offline - Dados salvos localmente';
-        statusBar.style.backgroundColor = '#ff9800';
-        statusBar.style.display = 'block';
+        descricaoGroup.style.display = 'none';
+        descricaoInput.required = false;
+        descricaoInput.value = '';
       }
-    };
+    });
 
-    mostrarStatus(navigator.onLine);
-    window.addEventListener('online', () => mostrarStatus(true));
-    window.addEventListener('offline', () => mostrarStatus(false));
+    // Preview da imagem
+    document.getElementById('anexo').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('preview');
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Submit do formulário
+    document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await this.processarFormulario();
+    });
   }
-}
 
-// Inicializar gerenciador
-const despesasManager = new DespesasManager();
-
-// Funções auxiliares
-function carregarDropdown(elementId, opcoes) {
-  const select = document.getElementById(elementId);
-  opcoes.forEach(opcao => {
-    const option = document.createElement('option');
-    option.value = opcao;
-    option.textContent = opcao;
-    select.appendChild(option);
-  });
-}
-
-function formatarMoeda(input) {
-  let value = input.value.replace(/\D/g, '');
-  value = (value / 100).toFixed(2);
-  value = 'R$ ' + value.replace('.', ',').replace(/(\d)(?=(\d{3})+,)/g, '$1.');
-  input.value = value;
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-  // Máscara monetária
-  document.getElementById('valor').addEventListener('blur', function(e) {
-    formatarMoeda(e.target);
-  });
-
-  document.getElementById('valor').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 0) {
-      e.target.value = 'R$ ' + (value / 100).toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+,)/g, '$1.');
-    }
-  });
-
-  // Mostrar/ocultar descrição
-  document.getElementById('tipo_despesa').addEventListener('change', function(e) {
-    const descricaoGroup = document.getElementById('descricao-group');
-    const descricaoInput = document.getElementById('descricao');
-    
-    if (e.target.value === 'Outros') {
-      descricaoGroup.style.display = 'block';
-      descricaoInput.required = true;
-    } else {
-      descricaoGroup.style.display = 'none';
-      descricaoInput.required = false;
-      descricaoInput.value = '';
-    }
-  });
-
-  // Preview da imagem
-  document.getElementById('anexo').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const preview = document.getElementById('preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      }
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // Submit do formulário
-  document.getElementById('expenseForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
+  async processarFormulario() {
+    const formData = new FormData(document.getElementById('expenseForm'));
     const button = document.getElementById('submitBtn');
     const originalText = button.innerHTML;
     
@@ -179,51 +102,174 @@ document.addEventListener('DOMContentLoaded', function() {
       let comprovanteUrl = '';
       
       if (anexoInput.files.length > 0) {
-        comprovanteUrl = await despesasManager.uploadComprovante(
+        comprovanteUrl = await this.uploadComprovante(
           anexoInput.files[0], 
           despesaData.nome
         );
       }
 
       // Salvar no Firebase
-      const result = await despesasManager.salvarDespesa({
+      const result = await this.salvarDespesa({
         ...despesaData,
         comprovanteUrl
       });
 
-      mostrarMensagem(result.message, 'success');
-      limparFormulario();
+      this.mostrarMensagem(result.message, 'success');
+      this.limparFormulario();
 
     } catch (error) {
       console.error('Erro:', error);
-      mostrarMensagem('Erro ao salvar despesa: ' + error.message, 'error');
+      this.mostrarMensagem('Erro ao salvar despesa: ' + error.message, 'error');
     } finally {
       button.innerHTML = originalText;
       button.disabled = false;
     }
-  });
-});
+  }
 
-function mostrarMensagem(mensagem, tipo) {
-  const messageDiv = document.getElementById('message');
-  messageDiv.textContent = mensagem;
-  messageDiv.className = `message ${tipo}`;
-  messageDiv.style.display = 'block';
+  async salvarDespesa(despesaData) {
+    try {
+      // Converter valor para numérico
+      const valorNumerico = parseFloat(
+        despesaData.valor.replace('R$', '')
+          .replace(/\./g, '')
+          .replace(',', '.')
+          .trim()
+      );
+
+      // Salvar no Firebase Firestore
+      const docRef = await db.collection('despesas').add({
+        projeto: despesaData.projeto,
+        nome: despesaData.nome,
+        data: despesaData.data,
+        tipo_despesa: despesaData.tipo_despesa,
+        descricao: despesaData.descricao,
+        valor: valorNumerico,
+        comprovanteUrl: despesaData.comprovanteUrl,
+        status: 'pendente',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      return { success: true, id: docRef.id, message: 'Despesa registrada com sucesso!' };
+    } catch (error) {
+      console.error('Erro ao salvar no Firebase:', error);
+      throw error;
+    }
+  }
+
+  async uploadComprovante(arquivo, nomeFuncionario) {
+    const formData = new FormData();
+    formData.append('anexo', arquivo);
+    formData.append('nome', nomeFuncionario);
+    formData.append('acao', 'upload');
+
+    try {
+      const response = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.text();
+      // Tenta parsear como JSON, se falhar retorna texto
+      try {
+        const jsonResult = JSON.parse(result);
+        return jsonResult.url || '';
+      } catch {
+        return result.includes('http') ? result : '';
+      }
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      return '';
+    }
+  }
+
+  verificarConexao() {
+    const mostrarStatus = (online) => {
+      let statusBar = document.getElementById('status-offline');
+      if (!statusBar) {
+        statusBar = document.createElement('div');
+        statusBar.id = 'status-offline';
+        statusBar.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          padding: 12px;
+          text-align: center;
+          font-weight: 600;
+          z-index: 10000;
+          animation: slideDown 0.3s ease;
+        `;
+        document.body.appendChild(statusBar);
+      }
+
+      if (online) {
+        statusBar.textContent = '✅ Conectado';
+        statusBar.style.backgroundColor = '#4caf50';
+        statusBar.style.color = 'white';
+        statusBar.style.display = 'block';
+        setTimeout(() => statusBar.style.display = 'none', 3000);
+      } else {
+        statusBar.textContent = '📱 Modo Offline - Dados salvos localmente';
+        statusBar.style.backgroundColor = '#ff9800';
+        statusBar.style.color = 'white';
+        statusBar.style.display = 'block';
+      }
+    };
+
+    mostrarStatus(navigator.onLine);
+    window.addEventListener('online', () => mostrarStatus(true));
+    window.addEventListener('offline', () => mostrarStatus(false));
+  }
+
+  mostrarMensagem(mensagem, tipo) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = mensagem;
+    messageDiv.className = `message ${tipo}`;
+    messageDiv.style.display = 'block';
+    
+    setTimeout(() => {
+      messageDiv.style.display = 'none';
+    }, 5000);
+  }
+
+  limparFormulario() {
+    document.getElementById('expenseForm').reset();
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('data').valueAsDate = new Date();
+    document.getElementById('descricao-group').style.display = 'none';
+  }
+}
+
+// Funções auxiliares
+function carregarDropdown(elementId, opcoes) {
+  const select = document.getElementById(elementId);
+  // Limpar opções existentes exceto a primeira
+  while (select.children.length > 1) {
+    select.removeChild(select.lastChild);
+  }
   
-  setTimeout(() => {
-    messageDiv.style.display = 'none';
-  }, 5000);
+  opcoes.forEach(opcao => {
+    const option = document.createElement('option');
+    option.value = opcao;
+    option.textContent = opcao;
+    select.appendChild(option);
+  });
 }
 
-function limparFormulario() {
-  document.getElementById('expenseForm').reset();
-  document.getElementById('preview').style.display = 'none';
-  document.getElementById('data').valueAsDate = new Date();
-  document.getElementById('descricao-group').style.display = 'none';
-  localStorage.removeItem('rascunhoDespesa');
+function formatarMoeda(input) {
+  let value = input.value.replace(/\D/g, '');
+  value = (value / 100).toFixed(2);
+  value = 'R$ ' + value.replace('.', ',').replace(/(\d)(?=(\d{3})+,)/g, '$1.');
+  input.value = value;
 }
 
-// Funções de câmera
+// Funções globais
 function capturePhoto() {
   document.getElementById('anexo').click();
 }
+
+// Inicializar quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+  new DespesasManager();
+});
