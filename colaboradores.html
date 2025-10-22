@@ -1,367 +1,282 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal do Colaborador | Relevo Consultoria Ambiental</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Relevo - Colaboradores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
 
-  <!-- Fonte Montserrat -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        :root {
+            --primary-color: #26C04C;
+            --primary-dark: #396B45;
+            --secondary-color: #EB8807;
+            --accent-dark: #2D4132;
+            --light-color: #f8f9fa;
+            --dark-color: #333;
+            --text-color: #444;
+            --gray-light: #e9ecef;
+        }
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f7f7f7;
-      color: #333;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    header {
-      background-color: #2E7D32;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px 40px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
 
-    header img.logo {
-      height: 50px;
-    }
+        .logo {
+            height: 60px;
+            margin-bottom: 15px;
+        }
 
-    .hero {
-      text-align: center;
-      padding: 60px 20px 40px;
-      background: linear-gradient(to right, #1565C0, #2E7D32);
-      color: white;
-    }
+        .header h1 {
+            color: var(--accent-dark);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
 
-    .hero h1 {
-      font-size: 2.2em;
-      margin-bottom: 10px;
-    }
+        .header p {
+            color: var(--text-color);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
 
-    .hero p {
-      font-size: 1.1em;
-      opacity: 0.9;
-    }
+        .user-info {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: inline-block;
+        }
 
-    /* Acesso Rápido */
-    .acesso-rapido {
-      padding: 40px 20px 20px;
-      text-align: center;
-    }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
 
-    .acesso-rapido h2 {
-      color: #2E7D32;
-      margin-bottom: 30px;
-      font-size: 1.8em;
-    }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            display: block;
+        }
 
-    .links-rapidos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 25px;
-      padding: 0 40px 40px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: var(--primary-color);
+        }
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+        .card h3 {
+            color: var(--accent-dark);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
 
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+        .card p {
+            color: var(--text-color);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
 
-    .card img {
-      width: 60px;
-      margin-bottom: 15px;
-    }
+        .card small {
+            color: #666;
+            font-size: 0.85rem;
+        }
 
-    .card h3 {
-      color: #2E7D32;
-      margin-bottom: 10px;
-      font-size: 1.2em;
-    }
+        .card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
 
-    .card a {
-      text-decoration: none;
-      color: #2E7D32;
-      font-weight: 600;
-      display: inline-block;
-      padding: 8px 16px;
-      border: 2px solid #2E7D32;
-      border-radius: 6px;
-      transition: all 0.3s;
-    }
+        .logout-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            text-align: center;
+            text-decoration: none;
+            width: 200px;
+        }
 
-    .card a:hover {
-      background: #2E7D32;
-      color: white;
-    }
+        .logout-btn:hover {
+            background: #d97a06;
+            transform: translateY(-2px);
+        }
 
-    /* Botão de Despesas com DESTAQUE */
-    .botao-despesas-container {
-      text-align: center;
-      padding: 30px 0;
-      background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
-      margin: 20px 40px;
-      border-radius: 12px;
-      border: 2px dashed #2E7D32;
-    }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            opacity: 0.8;
+        }
 
-    .botao-despesas {
-      display: inline-block;
-      background: linear-gradient(135deg, #2E7D32, #4CAF50);
-      color: white;
-      text-decoration: none;
-      padding: 16px 35px;
-      border-radius: 50px;
-      font-weight: bold;
-      font-size: 1.1em;
-      margin: 10px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
-      border: none;
-      cursor: pointer;
-    }
-
-    .botao-despesas:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
-      background: linear-gradient(135deg, #1B5E20, #2E7D32);
-    }
-
-    .destaque-texto {
-      color: #2E7D32;
-      font-weight: 600;
-      margin-bottom: 15px;
-      font-size: 1.1em;
-    }
-
-    /* Botão Voltar */
-    .botao-voltar-container {
-      text-align: center;
-      padding: 40px 0;
-    }
-
-    .botao-voltar {
-      display: inline-block;
-      background-color: #2E7D32;
-      color: white;
-      text-decoration: none;
-      padding: 12px 28px;
-      border-radius: 30px;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-
-    .botao-voltar:hover {
-      background-color: #1B5E20;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: #1B5E20;
-      color: white;
-      font-size: 0.9em;
-    }
-
-    .logout-btn {
-      background: transparent;
-      color: white;
-      border: 1px solid white;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-left: 20px;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    .logout-btn:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    /* RESPONSIVIDADE MOBILE */
-    @media (max-width: 768px) {
-      header {
-        padding: 12px 15px;
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      header img.logo {
-        height: 40px;
-      }
-      
-      .logout-btn {
-        margin-left: 0;
-        padding: 10px 20px;
-      }
-      
-      .hero {
-        padding: 40px 15px 30px;
-      }
-      
-      .hero h1 {
-        font-size: 1.6rem;
-      }
-      
-      .hero p {
-        font-size: 1rem;
-      }
-      
-      .acesso-rapido {
-        padding: 30px 10px 15px;
-      }
-      
-      .acesso-rapido h2 {
-        font-size: 1.4rem;
-      }
-      
-      .links-rapidos {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        padding: 0 10px 20px;
-        max-width: 100%;
-      }
-      
-      .card {
-        padding: 20px 15px;
-      }
-      
-      .card img {
-        width: 50px;
-        height: 50px;
-      }
-      
-      .card h3 {
-        font-size: 1.1rem;
-      }
-      
-      .botao-despesas-container {
-        margin: 15px;
-        padding: 20px 15px;
-      }
-      
-      .botao-despesas {
-        width: 100%;
-        max-width: 280px;
-        padding: 14px 20px;
-        font-size: 1rem;
-      }
-      
-      .botao-voltar-container {
-        padding: 30px 0;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero h1 {
-        font-size: 1.4rem;
-      }
-      
-      .hero p {
-        font-size: 0.9rem;
-      }
-      
-      .card {
-        padding: 15px 12px;
-      }
-    }
-  </style>
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            body {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <header>
-    <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental" class="logo">
-    <button class="logout-btn" onclick="logout()">Sair</button>
-  </header>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" class="logo">
+            <h1>Portal do Colaborador</h1>
+            <p>Recursos e ferramentas para a equipe Relevo</p>
+            <div class="user-info">
+                <i class="fas fa-user"></i> 
+                <span id="userName">Carregando...</span>
+            </div>
+        </div>
 
-  <section class="hero">
-    <h1>Portal do Colaborador</h1>
-    <p>Acesso rápido aos principais recursos internos da Relevo</p>
-  </section>
+        <!-- Grid de Cards -->
+        <div class="cards-grid">
+            <!-- Card 1: Drive da Empresa -->
+            <a href="https://drive.google.com/drive/folders/1sRf2o7s0GwJ2Jm9Xqkz8Q6Y4bLwM1nNp" target="_blank" class="card">
+                <i class="fas fa-folder-open"></i>
+                <h3>📁 Drive da Empresa</h3>
+                <p>Documentos, relatórios e recursos compartilhados</p>
+                <small>Acesso a todos os arquivos da empresa</small>
+            </a>
 
-  <!-- Acesso Rápido -->
-  <section class="acesso-rapido">
-    <h2>Recursos da Equipe</h2>
+            <!-- Card 2: Controle de Despesas -->
+            <a href="/portal-relevo/despesas" class="card">
+                <i class="fas fa-receipt"></i>
+                <h3>💳 Controle de Despesas</h3>
+                <p>Registro de despesas de campo e viagens</p>
+                <small>Disponível para instalação no celular</small>
+            </a>
+
+            <!-- Card 3: SST e Segurança -->
+            <a href="https://drive.google.com/drive/folders/1tS3g4h5jK6L7m8N9p0Q1r2S3t4U5v6W7" target="_blank" class="card">
+                <i class="fas fa-hard-hat"></i>
+                <h3>🛡️ SST e Segurança</h3>
+                <p>Procedimentos de segurança e documentos SST</p>
+                <small>Normas e procedimentos de segurança</small>
+            </a>
+
+            <!-- Card 4: Relatórios de Campo -->
+            <a href="https://drive.google.com/drive/folders/1uT4g5h6kL7m8N9p0Q1r2S3t4U5v6W7X8" target="_blank" class="card">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>📊 Relatórios de Campo</h3>
+                <p>Modelos e formulários para relatórios</p>
+                <small>Padronização de documentação</small>
+            </a>
+
+            <!-- Card 5: Equipamentos -->
+            <a href="https://drive.google.com/drive/folders/1vT5g6h7kL8m9N0p1Q2r3S4t5U6v7W8X9" target="_blank" class="card">
+                <i class="fas fa-tools"></i>
+                <h3>🔧 Equipamentos</h3>
+                <p>Controle e manutenção de equipamentos</p>
+                <small>Checklists e manuais técnicos</small>
+            </a>
+
+            <!-- Card 6: Comunicação -->
+            <a href="https://chat.google.com" target="_blank" class="card">
+                <i class="fas fa-comments"></i>
+                <h3>💬 Comunicação</h3>
+                <p>Canais de comunicação da equipe</p>
+                <small>Google Chat e grupos de trabalho</small>
+            </a>
+        </div>
+
+        <!-- Logout Button -->
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Sair do Portal
+        </button>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2024 Relevo Consultoria Ambiental. Todos os direitos reservados.</p>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
     
-    <div class="links-rapidos">
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/arquivos.png" alt="Ícone de pasta de dados">
-        <h3>Pasta de Dados</h3>
-        <a href="https://drive.google.com/drive/folders/19Y_vvDe6cPI6eTQNePBFI62CHA_gQsfg?usp=drive_link" target="_blank">Acessar</a>
-      </div>
+    <script>
+        // Verificar autenticação
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                // Buscar dados do usuário no Firestore
+                firebase.firestore().collection('users').doc(user.uid).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            document.getElementById('userName').textContent = userData.nome;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao buscar dados do usuário:', error);
+                    });
+            } else {
+                // Redirecionar para login se não estiver autenticado
+                window.location.href = 'index.html';
+            }
+        });
 
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/SegurancaJuridica.png" alt="Ícone de fichas de SST">
-        <h3>Fichas de SST</h3>
-        <a href="https://drive.google.com/drive/folders/12fEU0bPCOT8ThPQWYEZjt2opdXjJdOuG?usp=sharing" target="_blank">Visualizar</a>
-      </div>
-    </div>
-
-    <!-- Botão de Despesas com DESTAQUE -->
-    <div class="botao-despesas-container">
-      <div class="destaque-texto">📋 Registrar despesa de campo?</div>
-      <a class="botao-despesas" href="https://script.google.com/macros/s/AKfycbzns8tQtMpdAfOo_cfmpUfTq1g3hBbGv-dCLIO3M3NRDcgQxUh_N8QYNO9k9ZV9hTlA/exec" target="_blank">
-        🚀 Cadastrar Nova Despesa
-      </a>
-      <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
-        Formulário rápido para despesas de campo
-      </div>
-    </div>
-  </section>
-
-  <div class="botao-voltar-container">
-    <a class="botao-voltar" href="index.html">Voltar ao Login</a>
-  </div>
-
-  <footer>
-    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
-  </footer>
-
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
-      authDomain: "portal-relevo.firebaseapp.com",
-      projectId: "portal-relevo",
-      storageBucket: "portal-relevo.firebasestorage.app",
-      messagingSenderId: "182759626683",
-      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // Verificar autenticação
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-      }
-    });
-
-    function logout() {
-      auth.signOut().then(() => {
-        window.location.href = 'index.html';
-      });
-    }
-  </script>
+        // Logout
+        function logout() {
+            firebase.auth().signOut()
+                .then(() => {
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    console.error('Erro ao fazer logout:', error);
+                });
+        }
+    </script>
 </body>
 </html>
