@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO CORRIGIDA
+// despesas/app.js - VERSÃO COMPLETA CORRIGIDA
 class DespesasApp {
     constructor() {
         // Configurações fixas - FÁCIL DE MODIFICAR
@@ -59,21 +59,30 @@ class DespesasApp {
         const loading = document.getElementById('authLoading');
         if (loading) loading.style.display = 'flex';
         
-        auth.onAuthStateChanged((user) => {
+        console.log('Verificando estado de autenticação...');
+        
+        // Usar firebase.auth() diretamente para evitar problemas de escopo
+        firebase.auth().onAuthStateChanged((user) => {
             console.log('Estado da autenticação:', user ? 'Logado' : 'Não logado');
             
             // Esconder loading
-            if (loading) loading.style.display = 'none';
+            if (loading) {
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 500);
+            }
             
             if (user) {
                 console.log('Usuário autenticado:', user.email);
                 // Usuário logado - pode continuar na página
+                // Garantir que o formulário fique visível
+                document.getElementById('formDespesa').style.display = 'block';
             } else {
-                console.log('Usuário não autenticado, redirecionando...');
+                console.log('Usuário não autenticado, redirecionando para login...');
                 // Redirecionar para login se não estiver autenticado
                 setTimeout(() => {
                     window.location.href = '../index.html';
-                }, 1000);
+                }, 1500);
             }
         });
     }
