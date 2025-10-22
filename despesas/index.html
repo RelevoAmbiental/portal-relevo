@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- CSS Principal -->
-  <link rel="stylesheet" href="../styles.css">
+  <!-- <link rel="stylesheet" href="../styles.css"> -->
   <!-- CSS Específico das Despesas -->
   <link rel="stylesheet" href="styles.css">
   
@@ -541,6 +541,26 @@
         100% { transform: rotate(360deg); }
     }
   </style>
+  <script>
+// Limpar Service Workers antigos
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+            console.log('Service Worker removido:', registration);
+        }
+    });
+    
+    // Limpar cache
+    caches.keys().then(function(names) {
+        for (let name of names) {
+            caches.delete(name);
+            console.log('Cache limpo:', name);
+        }
+    });
+}
+</script>
 </body>
 </html>
+
 
