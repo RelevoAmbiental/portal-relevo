@@ -84,4 +84,21 @@ button:disabled {
     .preview-image img {
         max-width: 150px;
     }
+
+}
+/* AJUSTES DO CAMPO DESCRIÇÃO - REDUZIDO 1/3 */
+#descricao {
+    min-height: 80px !important; /* Reduzido de 120px para 80px */
+    resize: vertical;
+}
+
+/* Melhorar visualização dos selects no mobile */
+select {
+    background-color: white !important;
+}
+
+/* Garantir que os dropdowns funcionem */
+select:focus {
+    border-color: var(--primary-color) !important;
+    outline: none !important;
 }
