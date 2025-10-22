@@ -55,17 +55,22 @@ class DespesasApp {
     }
 
     checkAuthState() {
-        firebase.auth().onAuthStateChanged((user) => {
+        auth.onAuthStateChanged((user) => {
+            console.log('Estado da autenticação:', user ? 'Logado' : 'Não logado');
+            
             if (user) {
                 console.log('Usuário autenticado:', user.email);
                 document.getElementById('userEmail').textContent = user.email;
+                // Usuário logado - pode continuar na página
             } else {
+                console.log('Usuário não autenticado, redirecionando...');
                 // Redirecionar para login se não estiver autenticado
-                window.location.href = '../index.html';
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 1000);
             }
         });
     }
-
     carregarProjetos() {
         const select = document.getElementById('projeto');
         select.innerHTML = '<option value="">Selecione o projeto</option>';
@@ -346,3 +351,4 @@ if ('serviceWorker' in navigator) {
         .then(registration => console.log('SW registered'))
         .catch(error => console.log('SW registration failed'));
 }
+
