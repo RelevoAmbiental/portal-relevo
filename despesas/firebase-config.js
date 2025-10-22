@@ -1,4 +1,4 @@
-// despesas/firebase-config.js - CONFIGURAÇÃO ESPECÍFICA DAS DESPESAS
+// despesas/firebase-config.js - CONFIGURAÇÃO COMPLETA CORRIGIDA
 const firebaseConfig = {
     apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
     authDomain: "app-despesas-7029f.firebaseapp.com",
@@ -15,7 +15,7 @@ if (!firebase.apps.length) {
     firebase.app(); // Já inicializado, usar essa instância
 }
 
-// Inicializar serviços
+// Inicializar serviços - USANDO firebase. diretamente
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
