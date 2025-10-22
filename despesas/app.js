@@ -1,14 +1,28 @@
-// despesas/app.js
+// despesas/app.js - VERSÃO COM CONFIGURAÇÃO FÁCIL
 class DespesasApp {
     constructor() {
+        // Configurações fixas - FÁCIL DE MODIFICAR
+        this.CONFIG = {
+            projetos: ['BR-135/BA', 'Panra Diamantina', 'Habilis-GO'],
+            funcionarios: ['Gleisson', 'Júlio', 'Samuel', 'Tiago', 'Yuri'],
+            tiposDespesa: [
+                'Água', 'Almoço / Jantar', 'Aluguel de Carro', 'Café da Manhã', 
+                'Combustível', 'Correios', 'EPI', 'Ferramentas', 'Hospedagem / Hotel', 
+                'Lanche / Refeição Leve', 'Lavagem do Veículo', 'Manutenção de Equipamento', 
+                'Material de Escritório', 'Passagens', 'Pedágio', 'Táxi / Uber / Aplicativos', 
+                'Outros'
+            ]
+        };
+
         this.init();
         this.setupEventListeners();
         this.checkAuthState();
     }
 
     init() {
-        // Inicializar selects
+        // Inicializar selects com as configurações
         this.carregarProjetos();
+        this.carregarFuncionarios();
         this.carregarTiposDespesa();
         
         // Configurar data atual
@@ -35,7 +49,7 @@ class DespesasApp {
         });
 
         // Mobile menu
-        document.querySelector('.menu-toggle').addEventListener('click', () => {
+        document.querySelector('.menu-toggle')?.addEventListener('click', () => {
             this.toggleMobileMenu();
         });
     }
@@ -53,19 +67,10 @@ class DespesasApp {
     }
 
     carregarProjetos() {
-        const projetos = [
-            "BR-135/BA",
-            "BR-116/RS", 
-            "BR-101/SC",
-            "BR-230/PA",
-            "BR-163/MT",
-            "Administrativo"
-        ];
-
         const select = document.getElementById('projeto');
         select.innerHTML = '<option value="">Selecione o projeto</option>';
         
-        projetos.forEach(projeto => {
+        this.CONFIG.projetos.forEach(projeto => {
             const option = document.createElement('option');
             option.value = projeto;
             option.textContent = projeto;
@@ -73,21 +78,23 @@ class DespesasApp {
         });
     }
 
-    carregarTiposDespesa() {
-        const tipos = [
-            "Combustível",
-            "Alimentação",
-            "Hospedagem",
-            "Pedágio",
-            "Manutenção Veicular",
-            "Materiais",
-            "Outros"
-        ];
+    carregarFuncionarios() {
+        const select = document.getElementById('funcionario');
+        select.innerHTML = '<option value="">Selecione o funcionário</option>';
+        
+        this.CONFIG.funcionarios.forEach(funcionario => {
+            const option = document.createElement('option');
+            option.value = funcionario;
+            option.textContent = funcionario;
+            select.appendChild(option);
+        });
+    }
 
+    carregarTiposDespesa() {
         const select = document.getElementById('tipo');
         select.innerHTML = '<option value="">Selecione o tipo</option>';
         
-        tipos.forEach(tipo => {
+        this.CONFIG.tiposDespesa.forEach(tipo => {
             const option = document.createElement('option');
             option.value = tipo;
             option.textContent = tipo;
@@ -97,13 +104,16 @@ class DespesasApp {
 
     formatarValor(input) {
         let valor = input.value.replace(/\D/g, '');
-        valor = (valor / 100).toFixed(2);
+        if (valor === '') {
+            input.value = '';
+            return;
+        }
+        valor = (parseInt(valor) / 100).toFixed(2);
         input.value = 'R$ ' + valor.replace('.', ',');
     }
 
     previewComprovante(file) {
         const preview = document.getElementById('comprovantePreview');
-        const label = document.querySelector('.file-label');
         
         if (file) {
             if (file.type.startsWith('image/')) {
@@ -125,10 +135,8 @@ class DespesasApp {
                     </div>
                 `;
             }
-            label.textContent = 'Alterar Comprovante';
         } else {
             preview.innerHTML = '';
-            label.textContent = 'Anexar Comprovante';
         }
     }
 
@@ -146,14 +154,14 @@ class DespesasApp {
                 funcionario: document.getElementById('funcionario').value,
                 data: document.getElementById('data').value,
                 tipo: document.getElementById('tipo').value,
-                descricao: document.getElementById('descricao').value,
+                descricao: document.getElementById('descricao').value, // Não obrigatório
                 valor: this.parseValor(document.getElementById('valor').value),
                 status: 'pendente',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Validar dados
+            // Validar dados (descrição NÃO é obrigatória)
             if (!this.validarFormulario(despesaData)) {
                 return;
             }
@@ -183,32 +191,49 @@ class DespesasApp {
     }
 
     validarFormulario(data) {
-        const camposObrigatorios = ['projeto', 'funcionario', 'data', 'tipo', 'descricao'];
+        // Campos obrigatórios (descrição NÃO é obrigatória)
+        const camposObrigatorios = ['projeto', 'funcionario', 'data', 'tipo'];
         
         for (let campo of camposObrigatorios) {
             if (!data[campo]) {
-                this.mostrarErro(`Por favor, preencha o campo: ${campo}`);
+                this.mostrarErro(`Por favor, preencha o campo: ${this.formatarNomeCampo(campo)}`);
+                // Focar no campo que está faltando
+                document.getElementById(campo)?.focus();
                 return false;
             }
         }
 
         if (!data.valor || data.valor <= 0) {
             this.mostrarErro('Por favor, informe um valor válido');
+            document.getElementById('valor').focus();
             return false;
         }
 
         return true;
     }
 
+    formatarNomeCampo(campo) {
+        const nomes = {
+            'projeto': 'Projeto',
+            'funcionario': 'Funcionário', 
+            'data': 'Data',
+            'tipo': 'Tipo de Despesa',
+            'valor': 'Valor'
+        };
+        return nomes[campo] || campo;
+    }
+
     parseValor(valorString) {
-        return parseFloat(valorString.replace('R$', '').replace(',', '.').trim());
+        if (!valorString) return 0;
+        return parseFloat(valorString.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
     }
 
     async uploadComprovante(file) {
         try {
             // Criar nome único para o arquivo
+            const user = firebase.auth().currentUser;
             const timestamp = Date.now();
-            const nomeArquivo = `comprovantes/${timestamp}_${file.name}`;
+            const nomeArquivo = `comprovantes/${user.uid}/${timestamp}_${file.name}`;
             
             // Fazer upload para Firebase Storage
             const storageRef = storage.ref();
@@ -261,7 +286,6 @@ class DespesasApp {
     limparFormulario() {
         document.getElementById('formDespesa').reset();
         document.getElementById('comprovantePreview').innerHTML = '';
-        document.querySelector('.file-label').textContent = 'Anexar Comprovante';
         document.getElementById('data').valueAsDate = new Date();
     }
 
@@ -299,6 +323,11 @@ class DespesasApp {
             this.mostrarSucesso('Dados offline sincronizados!');
         }
     }
+}
+
+// Função global para captura de foto (mantida para compatibilidade)
+function capturePhoto() {
+    document.getElementById('comprovante').click();
 }
 
 // Inicializar app quando DOM estiver pronto
