@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão Interna | Relevo Consultoria Ambiental</title>
+
+  <!-- Fonte Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* RESET E BASE */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    /* HEADER MOBILE FIRST */
+    header {
+      background-color: #2E7D32;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    header img.logo {
+      height: 40px;
+      width: auto;
+    }
+
+    /* Menu de navegação - mobile */
+    nav {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .logout-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      text-align: center;
+      padding: 40px 20px 30px;
+      background: linear-gradient(to right, #1565C0, #2E7D32);
+      color: #fff;
+    }
+
+    .hero h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ACESSO RÁPIDO - MOBILE */
+    .acesso-rapido {
+      padding: 30px 15px 15px;
+      text-align: center;
+    }
+
+    .acesso-rapido h2 {
+      color: #2E7D32;
+      margin-bottom: 25px;
+      font-size: 1.5rem;
+    }
+
+    .links-rapidos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 0 15px 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 15px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 12px;
+      object-fit: contain;
+    }
+
+    .card h3 {
+      color: #2E7D32;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .card a {
+      text-decoration: none;
+      color: #2E7D32;
+      font-weight: 600;
+      display: inline-block;
+      padding: 8px 16px;
+      border: 2px solid #2E7D32;
+      border-radius: 6px;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    /* BOTÃO DESPESAS MOBILE */
+    .botao-despesas-container {
+      text-align: center;
+      padding: 25px 15px;
+      background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
+      margin: 15px;
+      border-radius: 12px;
+      border: 2px dashed #2E7D32;
+    }
+
+    .botao-despesas {
+      display: inline-block;
+      background: linear-gradient(135deg, #2E7D32, #4CAF50);
+      color: white;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1rem;
+      margin: 8px 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .destaque-texto {
+      color: #2E7D32;
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+
+    /* DASHBOARD MOBILE */
+    .dashboard {
+      padding: 30px 15px;
+      text-align: center;
+    }
+
+    .dashboard h2 {
+      color: #2E7D32;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    iframe.clickup-embed {
+      width: 100%;
+      height: 500px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .error-msg {
+      color: #b71c1c;
+      background: #ffebee;
+      border: 1px solid #f44336;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    /* NOTIFICAÇÕES E MODIFICAÇÕES MOBILE */
+    .notificacoes, .modificacoes {
+      padding: 30px 15px;
+    }
+
+    .notificacoes h2, .modificacoes h2 {
+      color: #2E7D32;
+      border-left: 6px solid #2E7D32;
+      padding-left: 10px;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .notificacoes-lista {
+      list-style: none;
+      padding: 0;
+    }
+
+    .notificacoes-lista li {
+      background: #fff;
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #2E7D32;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* FOOTER MOBILE */
+    footer {
+      text-align: center;
+      padding: 20px 15px;
+      background: #1B5E20;
+      color: white;
+      font-size: 0.85rem;
+    }
+
+    /* MEDIA QUERIES PARA TELAS MAIORES */
+    @media (min-width: 768px) {
+      header {
+        padding: 15px 40px;
+      }
+      
+      header img.logo {
+        height: 50px;
+      }
+      
+      nav a {
+        font-size: 1rem;
+        padding: 8px 16px;
+      }
+      
+      .logout-btn {
+        padding: 8px 16px;
+        font-size: 1rem;
+      }
+      
+      .hero {
+        padding: 60px 20px 40px;
+      }
+      
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+      
+      .acesso-rapido {
+        padding: 40px 20px 20px;
+      }
+      
+      .links-rapidos {
+        padding: 0 40px 40px;
+        gap: 25px;
+      }
+      
+      .card {
+        padding: 25px 20px;
+      }
+      
+      .card img {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .botao-despesas-container {
+        margin: 20px 40px;
+        padding: 30px 20px;
+      }
+      
+      .botao-despesas {
+        width: auto;
+        padding: 16px 35px;
+      }
+      
+      .dashboard {
+        padding: 40px;
+      }
+      
+      iframe.clickup-embed {
+        height: 700px;
+      }
+      
+      .notificacoes, .modificacoes {
+        padding: 40px;
+      }
+      
+      table {
+        font-size: 1rem;
+      }
+      
+      th, td {
+        padding: 12px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .links-rapidos {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    /* MELHORIAS ESPECÍFICAS PARA MOBILE */
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 1.5rem;
+      }
+      
+      .hero p {
+        font-size: 0.9rem;
+      }
+      
+      .acesso-rapido h2,
+      .dashboard h2,
+      .notificacoes h2,
+      .modificacoes h2 {
+        font-size: 1.3rem;
+      }
+      
+      .links-rapidos {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 0 10px 20px;
+      }
+      
+      .card {
+        padding: 15px 12px;
+      }
+      
+      .card h3 {
+        font-size: 1rem;
+      }
+      
+      iframe.clickup-embed {
+        height: 400px;
+      }
+      
+      /* Melhorar legibilidade da tabela em mobile */
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+
+    /* ORIENTAÇÃO LANDSCAPE */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .hero {
+        padding: 30px 20px 20px;
+      }
+      
+      iframe.clickup-embed {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental" class="logo">
+    <nav>
+      <a href="gestao.html">Gestão</a>
+      <a href="colaboradores.html">Equipe</a>
+      <a href="clientes.html">Clientes</a>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Gestão Interna</h1>
+    <p>Central de controle e informações administrativas da Relevo Consultoria Ambiental</p>
+  </section>
+
+  <!-- Acesso Rápido -->
+  <section class="acesso-rapido">
+    <h2>Acesso Rápido</h2>
+    
+    <div class="links-rapidos">
+      <div class="card">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/arquivos.png" alt="Ícone de Drive da empresa">
+        <h3>Drive da Empresa</h3>
+        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link" target="_blank">Acessar</a>
+      </div>
+
+      <div class="card">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone de relatórios de clientes">
+        <h3>Relatórios de Clientes</h3>
+        <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL?usp=drive_link" target="_blank">Visualizar</a>
+      </div>
+
+      <div class="card">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/SegurancaJuridica.png" alt="Ícone de segurança e SST">
+        <h3>SST e Segurança</h3>
+        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link" target="_blank">Acessar</a>
+      </div>
+
+      <div class="card">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Gastos.png" alt="Ícone de despesas e custos">
+        <h3>Controle de Despesas</h3>
+        <a href="https://docs.google.com/spreadsheets/d/1RaLjZ0bY_RNI6qW91ktmqMgKoz68DOLfBdvrzd1exQI/edit?usp=sharing" target="_blank">Ver Planilha</a>
+      </div>
+    </div>
+
+    <!-- Botão de Despesas -->
+    <div class="botao-despesas-container">
+      <div class="destaque-texto">📋 Precisa registrar uma nova despesa?</div>
+      <a class="botao-despesas" href="https://script.google.com/macros/s/AKfycbzns8tQtMpdAfOo_cfmpUfTq1g3hBbGv-dCLIO3M3NRDcgQxUh_N8QYNO9k9ZV9hTlA/exec" target="_blank">
+        🚀 Cadastrar Nova Despesa
+      </a>
+      <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+        Clique para abrir o formulário de despesas
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard -->
+  <section class="dashboard">
+    <h2>Dashboard de Indicadores</h2>
+    <iframe class="clickup-embed" src="https://sharing.clickup.com/90132343455/b/h/2ky4wumz-293/48959d213ba4ffb" onerror="document.querySelector('.error-msg').style.display='block'"></iframe>
+    <div class="error-msg">Dashboard indisponível no momento. Tente novamente mais tarde.</div>
+  </section>
+
+  <!-- Notificações -->
+  <section class="notificacoes">
+    <h2>Notificações Recentes</h2>
+    <ul class="notificacoes-lista">
+      <li>✅ Sistema atualizado com sucesso - 15/01/2025</li>
+      <li>📊 Novo relatório mensal disponível para download</li>
+      <li>👥 Reunião de equipe agendada para sexta-feira</li>
+    </ul>
+  </section>
+
+  <!-- Modificações -->
+  <section class="modificacoes">
+    <h2>Últimas Modificações no Drive</h2>
+    <table id="tabelaModificacoes">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Usuário</th>
+          <th>Arquivo</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>15/01/2025</td>
+          <td>Administrador</td>
+          <td>Relatório Mensal.pdf</td>
+          <td>Atualização de dados do trimestre</td>
+        </tr>
+        <tr>
+          <td>14/01/2025</td>
+          <td>Maria Santos</td>
+          <td>Planilha de Despesas.xlsx</td>
+          <td>Adição de novas despesas de campo</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
+  </footer>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+      authDomain: "portal-relevo.firebaseapp.com",
+      projectId: "portal-relevo",
+      storageBucket: "portal-relevo.firebasestorage.app",
+      messagingSenderId: "182759626683",
+      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Verificar autenticação
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = 'index.html';
+      });
+    }
+
+    // Melhorar experiência mobile
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prevenir zoom em inputs no iOS
+      document.addEventListener('touchstart', function() {}, { passive: true });
+    });
+  </script>
+</body>
+</html>

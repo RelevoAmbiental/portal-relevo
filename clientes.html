@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal do Cliente | Relevo Consultoria Ambiental</title>
+
+  <!-- Fonte Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --verde: #26C04C;
+      --verde-esc: #2E7D32;
+      --bg: #f7f7f7;
+      --card: #fff;
+      --muted: #666;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: #222;
+    }
+
+    header {
+      background: linear-gradient(90deg, #1565C0, var(--verde-esc));
+      padding: 14px 28px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header img {
+      height: 48px;
+    }
+
+    .hero {
+      padding: 44px 20px;
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(90deg, #1565C0, var(--verde-esc));
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 1.9rem;
+    }
+
+    .hero p {
+      margin: 8px 0 0;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 18px;
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card img {
+      width: 68px;
+      height: 68px;
+      object-fit: contain;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      color: var(--verde-esc);
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 12px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      border-radius: 28px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--verde-esc);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1B5E20;
+      transform: translateY(-2px);
+    }
+
+    .btn-light {
+      background: #f1f1f1;
+      color: #222;
+      border: 1px solid #e6e6e6;
+    }
+
+    .btn-light:hover {
+      background: #e6e6e6;
+    }
+
+    footer {
+      background: #1B5E20;
+      color: #fff;
+      text-align: center;
+      padding: 16px;
+      margin-top: 28px;
+    }
+
+    .logout-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 20px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .welcome-message {
+      text-align: center;
+      color: var(--verde-esc);
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    /* RESPONSIVIDADE MOBILE */
+    @media (max-width: 768px) {
+      header {
+        padding: 12px 15px;
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      header img {
+        height: 40px;
+      }
+      
+      .logout-btn {
+        margin-left: 0;
+        padding: 10px 20px;
+      }
+      
+      .hero {
+        padding: 40px 15px 30px;
+      }
+      
+      .hero h1 {
+        font-size: 1.6rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .container {
+        padding: 0 15px;
+        margin: 20px auto;
+      }
+      
+      .section h2 {
+        font-size: 1.4rem;
+        padding-left: 8px;
+      }
+      
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .card {
+        padding: 20px 15px;
+      }
+      
+      .card img {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .card h3 {
+        font-size: 1.1rem;
+      }
+      
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 1.4rem;
+      }
+      
+      .hero p {
+        font-size: 0.9rem;
+      }
+      
+      .card {
+        padding: 15px 12px;
+      }
+      
+      .card img {
+        width: 45px;
+        height: 45px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental">
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Portal do Cliente</h1>
+      <p id="hero-subtitle">Acesso rápido e seguro aos documentos do seu projeto</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <!-- Mensagem de Boas-Vindas Personalizada -->
+    <div class="welcome-message" id="welcome-message">
+      Carregando...
+    </div>
+
+    <!-- Dados Cadastrais Relevo -->
+    <section class="section">
+      <h2 style="color:var(--verde-esc);margin:0 0 12px;border-left:6px solid var(--verde-esc);padding-left:10px">Dados Cadastrais Relevo</h2>
+      <div class="grid" style="margin-top:12px">
+        <div class="card" role="region" aria-labelledby="cadastro-title">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/arquivos.png" alt="Ícone pasta de dados cadastrais">
+          <h3 id="cadastro-title">Dados Cadastrais</h3>
+          <p>Acesso à pasta de dados cadastrais da Relevo.</p>
+          <a class="btn btn-primary" href="https://drive.google.com/drive/folders/1FYLVclzIJBzMlENBAQpSuAKLyTYLnEE4" target="_blank" rel="noopener noreferrer">Abrir Dados Cadastrais</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pasta do Projeto do Cliente (APARECE APENAS SE TIVER PROJETO) -->
+    <section class="section" style="margin-top:28px" id="projeto-section" style="display: none;">
+      <h2 style="color:var(--verde-esc);margin:0 0 12px;border-left:6px solid var(--verde-esc);padding-left:10px">Seu Projeto</h2>
+      <div class="grid" style="margin-top:12px" id="projeto-container">
+        <!-- Conteúdo carregado dinamicamente pelo JavaScript -->
+      </div>
+    </section>
+
+    <div style="text-align:center;margin:28px 0">
+      <a class="btn btn-primary" href="index.html" style="text-decoration:none">Voltar ao Login</a>
+    </div>
+  </main>
+
+  <footer>© 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.</footer>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+      authDomain: "portal-relevo.firebaseapp.com",
+      projectId: "portal-relevo",
+      storageBucket: "portal-relevo.firebasestorage.app",
+      messagingSenderId: "182759626683",
+      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Mapeamento de projetos para links
+    const projetos = {
+      'jgp': {
+        nome: 'JGP - BR-135/BA',
+        link: 'https://drive.google.com/drive/folders/1u4_aYfnNJ22mMWVEWy5zZByZGszosrwh',
+        descricao: 'Documentos técnicos, relatórios e entregas do projeto JGP'
+      },
+      'dossel': {
+        nome: 'Dossel - Projeto Serra Dourada',
+        link: 'https://drive.google.com/drive/folders/1AlebDIVnQkVqiL2YlMQlhd7yYbZpAWjE',
+        descricao: 'Relatórios e entregas relacionadas ao projeto Serra Dourada'
+      },
+      'habilis': {
+        nome: 'Habilis - GO',
+        link: 'https://drive.google.com/drive/folders/1sSfpz5P5I5siG9ZKkd8qXeO8cRyEO4Tw',
+        descricao: 'Documentação técnica e entregas do projeto Habilis'
+      }
+    };
+
+    // Verificar autenticação e carregar dados do usuário
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        // Buscar dados do usuário no Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          
+          // Atualizar mensagem de boas-vindas
+          document.getElementById('welcome-message').textContent = 
+            `Bem-vindo, ${userData.nome || userData.username}!`;
+          
+          // Se o usuário tem um projeto específico, mostrar apenas esse projeto
+          if (userData.projeto && projetos[userData.projeto]) {
+            const projeto = projetos[userData.projeto];
+            
+            // Mostrar seção do projeto
+            document.getElementById('projeto-section').style.display = 'block';
+            
+            // Atualizar container do projeto
+            document.getElementById('projeto-container').innerHTML = `
+              <div class="card" role="region" aria-labelledby="projeto-title">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta ${projeto.nome}">
+                <h3 id="projeto-title">${projeto.nome}</h3>
+                <p>${projeto.descricao}</p>
+                <a class="btn btn-light" href="${projeto.link}" target="_blank" rel="noopener noreferrer">Abrir Pasta do Projeto</a>
+              </div>
+            `;
+            
+            // Atualizar subtítulo do hero
+            document.getElementById('hero-subtitle').textContent = 
+              `Acesso aos documentos do projeto ${projeto.nome}`;
+              
+          } else {
+            // Se não tem projeto específico, mostrar todas as pastas (comportamento antigo)
+            document.getElementById('projeto-section').style.display = 'block';
+            document.getElementById('projeto-container').innerHTML = `
+              <div class="card" role="region" aria-labelledby="jgp-title">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta JGP">
+                <h3 id="jgp-title">JGP - BR-135/BA</h3>
+                <p>Documentos técnicos, relatórios e entregas deste projeto.</p>
+                <a class="btn btn-light" href="https://drive.google.com/drive/folders/1u4_aYfnNJ22mMWVEWy5zZByZGszosrwh" target="_blank" rel="noopener noreferrer">Abrir Pasta JGP</a>
+              </div>
+
+              <div class="card" role="region" aria-labelledby="dossel-title">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta Dossel - Serra Dourada">
+                <h3 id="dossel-title">Dossel - Projeto Serra Dourada</h3>
+                <p>Relatórios e entregas relacionadas ao projeto Serra Dourada.</p>
+                <a class="btn btn-light" href="https://drive.google.com/drive/folders/1AlebDIVnQkVqiL2YlMQlhd7yYbZpAWjE" target="_blank" rel="noopener noreferrer">Abrir Pasta Dossel</a>
+              </div>
+
+              <div class="card" role="region" aria-labelledby="habilis-title">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta Habilis - GO">
+                <h3 id="habilis-title">Habilis - GO</h3>
+                <p>Documentação técnica e entregas do projeto Habilis.</p>
+                <a class="btn btn-light" href="https://drive.google.com/drive/folders/1sSfpz5P5I5siG9ZKkd8qXeO8cRyEO4Tw" target="_blank" rel="noopener noreferrer">Abrir Pasta Habilis</a>
+              </div>
+            `;
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = 'index.html';
+      });
+    }
+  </script>
+</body>
+</html>
