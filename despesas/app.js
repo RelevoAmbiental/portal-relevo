@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO COM CONFIGURAÇÃO FÁCIL
+// despesas/app.js - VERSÃO CORRIGIDA
 class DespesasApp {
     constructor() {
         // Configurações fixas - FÁCIL DE MODIFICAR
@@ -55,12 +55,18 @@ class DespesasApp {
     }
 
     checkAuthState() {
+        // Mostrar loading
+        const loading = document.getElementById('authLoading');
+        if (loading) loading.style.display = 'flex';
+        
         auth.onAuthStateChanged((user) => {
             console.log('Estado da autenticação:', user ? 'Logado' : 'Não logado');
             
+            // Esconder loading
+            if (loading) loading.style.display = 'none';
+            
             if (user) {
                 console.log('Usuário autenticado:', user.email);
-                document.getElementById('userEmail').textContent = user.email;
                 // Usuário logado - pode continuar na página
             } else {
                 console.log('Usuário não autenticado, redirecionando...');
@@ -71,6 +77,7 @@ class DespesasApp {
             }
         });
     }
+
     carregarProjetos() {
         const select = document.getElementById('projeto');
         select.innerHTML = '<option value="">Selecione o projeto</option>';
@@ -351,4 +358,3 @@ if ('serviceWorker' in navigator) {
         .then(registration => console.log('SW registered'))
         .catch(error => console.log('SW registration failed'));
 }
-
