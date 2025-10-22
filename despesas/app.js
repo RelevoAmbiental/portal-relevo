@@ -108,13 +108,24 @@ class DespesasManager {
         );
       }
 
-      // Salvar no Firebase
-      const result = await this.salvarDespesa({
+      // SALVAR NO FIREBASE (sistema principal)
+      const resultFirebase = await this.salvarDespesaFirebase({
         ...despesaData,
         comprovanteUrl
       });
 
-      this.mostrarMensagem(result.message, 'success');
+      // ENVIAR TAMBÉM PARA WEB APP (Planilha + Drive - backup)
+      try {
+        await this.enviarParaWebApp({
+          ...despesaData,
+          comprovanteUrl: comprovanteUrl
+        });
+        console.log('Dados enviados para planilha e Drive com sucesso');
+      } catch (webAppError) {
+        console.log('Web App offline, mas dados salvos no Firebase');
+      }
+
+      this.mostrarMensagem('Despesa registrada com sucesso! Dados salvos no sistema.', 'success');
       this.limparFormulario();
 
     } catch (error) {
@@ -126,7 +137,7 @@ class DespesasManager {
     }
   }
 
-  async salvarDespesa(despesaData) {
+  async salvarDespesaFirebase(despesaData) {
     try {
       // Converter valor para numérico
       const valorNumerico = parseFloat(
@@ -150,9 +161,27 @@ class DespesasManager {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      return { success: true, id: docRef.id, message: 'Despesa registrada com sucesso!' };
+      return { success: true, id: docRef.id, message: 'Despesa salva no Firebase!' };
     } catch (error) {
       console.error('Erro ao salvar no Firebase:', error);
+      throw error;
+    }
+  }
+
+  async enviarParaWebApp(despesaData) {
+    try {
+      const response = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(despesaData)
+      });
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Erro ao enviar para Web App:', error);
       throw error;
     }
   }
@@ -169,14 +198,8 @@ class DespesasManager {
         body: formData
       });
 
-      const result = await response.text();
-      // Tenta parsear como JSON, se falhar retorna texto
-      try {
-        const jsonResult = JSON.parse(result);
-        return jsonResult.url || '';
-      } catch {
-        return result.includes('http') ? result : '';
-      }
+      const result = await response.json();
+      return result.url || '';
     } catch (error) {
       console.error('Erro no upload:', error);
       return '';
