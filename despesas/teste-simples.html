@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Simples - Despesas</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .success { background: green; color: white; padding: 10px; }
+    .error { background: red; color: white; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>✅ Teste de Autenticação SIMPLES</h1>
+  <div id="status">Verificando...</div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
+        authDomain: "app-despesas-7029f.firebaseapp.com",
+        projectId: "app-despesas-7029f", 
+        storageBucket: "app-despesas-7029f.appspot.com",
+        messagingSenderId: "843931176271",
+        appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    
+    firebase.auth().onAuthStateChanged((user) => {
+        const status = document.getElementById('status');
+        if (user) {
+            status.innerHTML = '<div class="success">✅ LOGADO: ' + user.email + '</div>';
+            status.innerHTML += '<p><a href="index.html">➡ Ir para formulário completo</a></p>';
+        } else {
+            status.innerHTML = '<div class="error">❌ NÃO LOGADO</div>';
+            status.innerHTML += '<p>Redirecionando para login...</p>';
+            setTimeout(() => window.location.href = '../index.html', 2000);
+        }
+    });
+  </script>
+</body>
+</html>
