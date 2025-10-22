@@ -12,12 +12,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Firebase -->
+  <!-- CSS Principal -->
+  <link rel="stylesheet" href="../styles.css">
+  <!-- CSS Específico das Despesas -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Firebase SDKs COMPLETOS -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script> <!-- ADICIONADO STORAGE -->
   
   <style>
-    /* SEU CSS ATUAL COMPLETO */
+    /* SEU CSS ATUAL COMPLETO - MANTIDO IGUAL */
     * {
       margin: 0;
       padding: 0;
@@ -405,7 +412,7 @@
   <!-- Formulário principal COMPLETO -->
   <div class="container">
     <div class="form-container">
-      <form id="expenseForm">
+      <form id="formDespesa"> <!-- MUDADO: expenseForm → formDespesa -->
         <div class="form-group">
           <label for="projeto">Projeto:</label>
           <select id="projeto" name="projeto" required>
@@ -414,8 +421,8 @@
         </div>
         
         <div class="form-group">
-          <label for="nome">Nome do Funcionário:</label>
-          <select id="nome" name="nome" required>
+          <label for="funcionario">Nome do Funcionário:</label> <!-- MUDADO: nome → funcionario -->
+          <select id="funcionario" name="funcionario" required> <!-- MUDADO: nome → funcionario -->
             <option value="">Selecione o funcionário...</option>
           </select>
         </div>
@@ -426,16 +433,16 @@
         </div>
         
         <div class="form-group">
-          <label for="tipo_despesa">Tipo de Despesa:</label>
-          <select id="tipo_despesa" name="tipo_despesa" required>
+          <label for="tipo">Tipo de Despesa:</label> <!-- MUDADO: tipo_despesa → tipo -->
+          <select id="tipo" name="tipo" required> <!-- MUDADO: tipo_despesa → tipo -->
             <option value="">Selecione o tipo...</option>
           </select>
         </div>
         
-        <!-- Campo de Descrição (inicialmente oculto) -->
-        <div class="form-group" id="descricao-group" style="display: none;">
+        <!-- Campo de Descrição (sempre visível) -->
+        <div class="form-group" id="descricao-group"> <!-- REMOVIDO: style="display: none;" -->
           <label for="descricao">Descrição da Despesa:</label>
-          <textarea id="descricao" name="descricao" rows="3" placeholder="Descreva detalhadamente esta despesa..."></textarea>
+          <textarea id="descricao" name="descricao" rows="3" placeholder="Descreva detalhadamente esta despesa..." required></textarea> <!-- ADICIONADO: required -->
         </div>
         
         <div class="form-group">
@@ -444,15 +451,18 @@
         </div>
         
         <div class="form-group">
-          <label for="anexo">Comprovante (Foto):</label>
-          <input type="file" id="anexo" name="anexo" accept="image/*" capture="environment" style="display: none;">
+          <label for="comprovante">Comprovante (Foto):</label> <!-- MUDADO: anexo → comprovante -->
+          <input type="file" id="comprovante" name="comprovante" accept="image/*,application/pdf" capture="environment" style="display: none;"> <!-- MUDADO: anexo → comprovante -->
           <small style="color: #666; display: block; margin-top: 5px; margin-bottom: 10px;">* Capture a foto do comprovante diretamente pela câmera</small>
+          
+          <!-- Preview do comprovante -->
+          <div id="comprovantePreview"></div> <!-- NOVO: Área para preview -->
           
           <div class="camera-buttons">
             <button type="button" class="btn camera-btn" onclick="capturePhoto()">
               <i class="fas fa-camera"></i> Tirar Foto
             </button>
-            <button type="button" class="btn camera-btn" onclick="document.getElementById('anexo').click()">
+            <button type="button" class="btn camera-btn" onclick="document.getElementById('comprovante').click()">
               <i class="fas fa-folder-open"></i> Escolher Arquivo
             </button>
           </div>
@@ -489,8 +499,17 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="firebase-config.js"></script>
-  <script src="app.js"></script>
+  <!-- Scripts Firebase -->
+  <script src="firebase-config.js"></script> <!-- Config específica das despesas -->
+  <script src="app.js"></script> <!-- App.js atualizado -->
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => console.log('Service Worker registrado'))
+        .catch(error => console.log('Falha no registro do Service Worker'));
+    }
+  </script>
 </body>
 </html>
