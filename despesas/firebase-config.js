@@ -1,4 +1,4 @@
-// despesas/firebase-config.js - CONFIGURAÇÃO COMPLETA CORRIGIDA
+// despesas/firebase-config.js - SEM AUTENTICAÇÃO
 const firebaseConfig = {
     apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
     authDomain: "app-despesas-7029f.firebaseapp.com",
@@ -8,15 +8,12 @@ const firebaseConfig = {
     appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
 };
 
-// Inicializar Firebase APENAS se não existir
+// Inicializar Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-} else {
-    firebase.app(); // Já inicializado, usar essa instância
 }
 
-// Inicializar serviços - USANDO firebase. diretamente
-const auth = firebase.auth();
+// Inicializar serviços - SEM auth
 const db = firebase.firestore();
 const storage = firebase.storage();
 
@@ -26,4 +23,4 @@ db.enablePersistence()
       console.log('Persistência falhou: ', err);
   });
 
-console.log('Firebase Despesas configurado!');
+console.log('Firebase Despesas configurado! SEM AUTENTICAÇÃO');
