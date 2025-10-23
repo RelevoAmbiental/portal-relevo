@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO SEM AUTENTICAÇÃO
+// despesas/app.js - VERSÃO COMPLETA CORRIGIDA
 class DespesasApp {
     constructor() {
         // Configurações fixas - FÁCIL DE MODIFICAR
@@ -135,6 +135,8 @@ class DespesasApp {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             submitBtn.disabled = true;
 
+            console.log('Iniciando salvamento da despesa...');
+
             // Coletar dados do formulário
             const despesaData = {
                 projeto: document.getElementById('projeto').value,
@@ -148,29 +150,45 @@ class DespesasApp {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            console.log('Dados coletados:', despesaData);
+
             // Validar dados
             if (!this.validarFormulario(despesaData)) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
                 return;
             }
 
             // Upload do comprovante se existir
             const comprovanteFile = document.getElementById('comprovante').files[0];
             if (comprovanteFile) {
-                const comprovanteUrl = await this.uploadComprovante(comprovanteFile);
-                despesaData.comprovanteUrl = comprovanteUrl;
-                despesaData.comprovanteNome = comprovanteFile.name;
+                console.log('Iniciando upload do comprovante...');
+                try {
+                    const comprovanteUrl = await this.uploadComprovante(comprovanteFile);
+                    despesaData.comprovanteUrl = comprovanteUrl;
+                    despesaData.comprovanteNome = comprovanteFile.name;
+                    console.log('Comprovante salvo com sucesso:', comprovanteUrl);
+                } catch (uploadError) {
+                    console.error('Erro no upload do comprovante:', uploadError);
+                    this.mostrarErro('Erro no upload do comprovante. Salvando sem comprovante...');
+                    // Continua sem o comprovante
+                }
+            } else {
+                console.log('Nenhum comprovante para upload');
             }
 
             // Salvar no Firestore
+            console.log('Salvando no Firestore...');
             const docRef = await db.collection('despesas').add(despesaData);
             
-            console.log('Despesa salva com ID:', docRef.id);
+            console.log('✅ Despesa salva com ID:', docRef.id);
             this.mostrarSucesso('Despesa registrada com sucesso!');
             this.limparFormulario();
 
         } catch (error) {
-            console.error('Erro ao salvar despesa:', error);
-            this.mostrarErro('Erro ao salvar despesa. Tente novamente.');
+            console.error('❌ Erro ao salvar despesa:', error);
+            console.error('Detalhes do erro:', error.message, error.stack);
+            this.mostrarErro('Erro ao salvar despesa: ' + error.message);
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -209,30 +227,88 @@ class DespesasApp {
     }
 
     parseValor(valorString) {
-        if (!valorString) return 0;
-        return parseFloat(valorString.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+        if (!valorString || valorString.trim() === '') return 0;
+        
+        try {
+            // Remove "R$", espaços e converte para número
+            let valorLimpo = valorString.replace('R$', '').replace(/\s/g, '').trim();
+            
+            // Se já tem ponto decimal, assume formato brasileiro
+            if (valorLimpo.includes(',') && valorLimpo.includes('.')) {
+                // Formato: 1.500,00 → remove pontos, troca vírgula por ponto
+                valorLimpo = valorLimpo.replace(/\./g, '').replace(',', '.');
+            } else if (valorLimpo.includes(',')) {
+                // Formato: 1500,00 → troca vírgula por ponto
+                valorLimpo = valorLimpo.replace(',', '.');
+            }
+            
+            const valorNumerico = parseFloat(valorLimpo);
+            
+            if (isNaN(valorNumerico)) {
+                console.error('Valor não pôde ser convertido:', valorString);
+                return 0;
+            }
+            
+            console.log('Valor convertido:', valorString, '→', valorNumerico);
+            return valorNumerico;
+        } catch (error) {
+            console.error('Erro ao converter valor:', error);
+            return 0;
+        }
     }
 
     async uploadComprovante(file) {
-        try {
-            // Criar nome único para o arquivo - SEM user ID
-            const timestamp = Date.now();
-            const nomeArquivo = `comprovantes/${timestamp}_${file.name}`;
-            
-            // Fazer upload para Firebase Storage
-            const storageRef = storage.ref();
-            const fileRef = storageRef.child(nomeArquivo);
-            const snapshot = await fileRef.put(file);
-            
-            // Obter URL de download
-            const downloadURL = await snapshot.ref.getDownloadURL();
-            console.log('Comprovante salvo:', downloadURL);
-            
-            return downloadURL;
-        } catch (error) {
-            console.error('Erro no upload do comprovante:', error);
-            throw new Error('Falha no upload do comprovante');
-        }
+        return new Promise((resolve, reject) => {
+            try {
+                console.log('Iniciando upload do arquivo:', file.name, file.size);
+                
+                // Validar tamanho do arquivo (máximo 10MB)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    reject(new Error('Arquivo muito grande. Máximo 10MB.'));
+                    return;
+                }
+
+                // Criar nome único para o arquivo
+                const timestamp = Date.now();
+                const nomeArquivo = `comprovantes/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                
+                console.log('Nome do arquivo no storage:', nomeArquivo);
+
+                // Fazer upload para Firebase Storage
+                const storageRef = firebase.storage().ref();
+                const fileRef = storageRef.child(nomeArquivo);
+                
+                const uploadTask = fileRef.put(file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // Progresso do upload (opcional)
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Upload progress: ' + progress + '%');
+                    },
+                    (error) => {
+                        console.error('Erro durante upload:', error);
+                        reject(new Error('Falha no upload: ' + error.message));
+                    },
+                    async () => {
+                        try {
+                            // Upload completo, obter URL
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            console.log('✅ Upload concluído. URL:', downloadURL);
+                            resolve(downloadURL);
+                        } catch (urlError) {
+                            console.error('Erro ao obter URL:', urlError);
+                            reject(new Error('Falha ao obter URL do arquivo'));
+                        }
+                    }
+                );
+
+            } catch (error) {
+                console.error('Erro no uploadComprovante:', error);
+                reject(error);
+            }
+        });
     }
 
     mostrarSucesso(mensagem) {
@@ -269,6 +345,11 @@ class DespesasApp {
         document.getElementById('formDespesa').reset();
         document.getElementById('comprovantePreview').innerHTML = '';
         document.getElementById('data').valueAsDate = new Date();
+        
+        // Restaurar texto dos botões de câmera
+        const buttons = document.querySelectorAll('.camera-btn');
+        if (buttons[0]) buttons[0].innerHTML = '<i class="fas fa-camera"></i> Tirar Foto';
+        if (buttons[1]) buttons[1].innerHTML = '<i class="fas fa-folder-open"></i> Escolher Arquivo';
     }
 
     toggleMobileMenu() {
