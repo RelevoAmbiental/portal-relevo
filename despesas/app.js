@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO COMPLETA CORRIGIDA
+// despesas/app.js - VERSÃO SEM AUTENTICAÇÃO
 class DespesasApp {
     constructor() {
         // Configurações fixas - FÁCIL DE MODIFICAR
@@ -16,7 +16,6 @@ class DespesasApp {
 
         this.init();
         this.setupEventListeners();
-        this.checkAuthState();
     }
 
     init() {
@@ -28,7 +27,7 @@ class DespesasApp {
         // Configurar data atual
         document.getElementById('data').valueAsDate = new Date();
         
-        console.log('Sistema de Despesas inicializado');
+        console.log('Sistema de Despesas inicializado - SEM AUTENTICAÇÃO');
     }
 
     setupEventListeners() {
@@ -51,39 +50,6 @@ class DespesasApp {
         // Mobile menu
         document.querySelector('.menu-toggle')?.addEventListener('click', () => {
             this.toggleMobileMenu();
-        });
-    }
-
-    checkAuthState() {
-        // Mostrar loading
-        const loading = document.getElementById('authLoading');
-        if (loading) loading.style.display = 'flex';
-        
-        console.log('Verificando estado de autenticação...');
-        
-        // Usar firebase.auth() diretamente para evitar problemas de escopo
-        firebase.auth().onAuthStateChanged((user) => {
-            console.log('Estado da autenticação:', user ? 'Logado' : 'Não logado');
-            
-            // Esconder loading
-            if (loading) {
-                setTimeout(() => {
-                    loading.style.display = 'none';
-                }, 500);
-            }
-            
-            if (user) {
-                console.log('Usuário autenticado:', user.email);
-                // Usuário logado - pode continuar na página
-                // Garantir que o formulário fique visível
-                document.getElementById('formDespesa').style.display = 'block';
-            } else {
-                console.log('Usuário não autenticado, redirecionando para login...');
-                // Redirecionar para login se não estiver autenticado
-                setTimeout(() => {
-                    window.location.href = '../index.html';
-                }, 1500);
-            }
         });
     }
 
@@ -175,14 +141,14 @@ class DespesasApp {
                 funcionario: document.getElementById('funcionario').value,
                 data: document.getElementById('data').value,
                 tipo: document.getElementById('tipo').value,
-                descricao: document.getElementById('descricao').value, // Não obrigatório
+                descricao: document.getElementById('descricao').value,
                 valor: this.parseValor(document.getElementById('valor').value),
                 status: 'pendente',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Validar dados (descrição NÃO é obrigatória)
+            // Validar dados
             if (!this.validarFormulario(despesaData)) {
                 return;
             }
@@ -212,13 +178,11 @@ class DespesasApp {
     }
 
     validarFormulario(data) {
-        // Campos obrigatórios (descrição NÃO é obrigatória)
         const camposObrigatorios = ['projeto', 'funcionario', 'data', 'tipo'];
         
         for (let campo of camposObrigatorios) {
             if (!data[campo]) {
                 this.mostrarErro(`Por favor, preencha o campo: ${this.formatarNomeCampo(campo)}`);
-                // Focar no campo que está faltando
                 document.getElementById(campo)?.focus();
                 return false;
             }
@@ -251,10 +215,9 @@ class DespesasApp {
 
     async uploadComprovante(file) {
         try {
-            // Criar nome único para o arquivo
-            const user = firebase.auth().currentUser;
+            // Criar nome único para o arquivo - SEM user ID
             const timestamp = Date.now();
-            const nomeArquivo = `comprovantes/${user.uid}/${timestamp}_${file.name}`;
+            const nomeArquivo = `comprovantes/${timestamp}_${file.name}`;
             
             // Fazer upload para Firebase Storage
             const storageRef = storage.ref();
@@ -281,7 +244,6 @@ class DespesasApp {
     }
 
     showNotification(mensagem, tipo) {
-        // Remover notificação anterior se existir
         const notifAnterior = document.querySelector('.notification');
         if (notifAnterior) {
             notifAnterior.remove();
@@ -296,7 +258,6 @@ class DespesasApp {
 
         document.body.appendChild(notification);
 
-        // Auto-remove após 5 segundos
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.remove();
@@ -314,39 +275,9 @@ class DespesasApp {
         const nav = document.querySelector('nav');
         nav.classList.toggle('active');
     }
-
-    // Função para salvar dados offline (fallback)
-    salvarOffline(despesaData) {
-        const despesasOffline = JSON.parse(localStorage.getItem('despesasOffline') || '[]');
-        despesasOffline.push({
-            ...despesaData,
-            id: Date.now(),
-            offline: true
-        });
-        localStorage.setItem('despesasOffline', JSON.stringify(despesasOffline));
-    }
-
-    // Sincronizar dados offline quando online
-    async sincronizarOffline() {
-        const despesasOffline = JSON.parse(localStorage.getItem('despesasOffline') || '[]');
-        
-        if (despesasOffline.length > 0 && navigator.onLine) {
-            for (let despesa of despesasOffline) {
-                try {
-                    await db.collection('despesas').add(despesa);
-                    console.log('Despesa offline sincronizada:', despesa.id);
-                } catch (error) {
-                    console.error('Erro ao sincronizar despesa offline:', error);
-                }
-            }
-            // Limpar dados sincronizados
-            localStorage.removeItem('despesasOffline');
-            this.mostrarSucesso('Dados offline sincronizados!');
-        }
-    }
 }
 
-// Função global para captura de foto (mantida para compatibilidade)
+// Função global para captura de foto
 function capturePhoto() {
     document.getElementById('comprovante').click();
 }
@@ -354,16 +285,4 @@ function capturePhoto() {
 // Inicializar app quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
     window.despesasApp = new DespesasApp();
-    
-    // Sincronizar dados offline quando online
-    window.addEventListener('online', () => {
-        window.despesasApp.sincronizarOffline();
-    });
 });
-
-// Service Worker para funcionalidade offline
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-        .then(registration => console.log('SW registered'))
-        .catch(error => console.log('SW registration failed'));
-}
