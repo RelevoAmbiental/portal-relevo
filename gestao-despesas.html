@@ -415,8 +415,8 @@
                     return;
                 }
         
-                // Criar cabeçalho do CSV
-                let csvContent = "DATA,PROJETO,FUNCIONÁRIO,TIPO,DESCRIÇÃO,VALOR,STATUS,COMPROVANTE\r\n";
+                // Criar cabeçalho do CSV (usando vírgula e quebra de linha Windows)
+                let csvContent = "DATA,PROJETO,FUNCIONÁRIO,TIPO,DESCRIÇÃO,VALOR (R$),STATUS,COMPROVANTE\r\n";
                 
                 // Adicionar dados formatados
                 dados.forEach(despesa => {
@@ -426,12 +426,11 @@
                         escapeCSV(despesa.funcionario || ''),
                         escapeCSV(despesa.tipo || ''),
                         escapeCSV(despesa.descricao || ''),
-                        (despesa.valor || 0).toString().replace('.', ','),
+                        (despesa.valor || 0).toFixed(2).replace('.', ','), // Formato brasileiro
                         despesa.status || 'pendente',
                         despesa.comprovanteUrl ? 'Sim' : 'Não'
-                    ].join(';'); // Usar ponto e vírgula para melhor compatibilidade com Excel BR
-                    
-                    csvContent += linha + '\n';
+                    ].join(','); // Usar vírgula como delimitador
+                    csvContent += linha + '\r\n'; // Quebra de linha Windows
                 });
         
                 // Criar e fazer download do arquivo
@@ -469,45 +468,11 @@
         
         function escapeCSV(texto) {
             if (!texto) return '';
-            // Escapar aspas e quebras de linha
-            return `"${texto.toString().replace(/"/g, '""').replace(/\n/g, ' ')}"`;
-        }
-        
-        function mostrarNotificacao(mensagem, tipo) {
-            // Remover notificação anterior se existir
-            const notifAnterior = document.querySelector('.export-notification');
-            if (notifAnterior) notifAnterior.remove();
-        
-            const notification = document.createElement('div');
-            notification.className = 'export-notification';
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                color: white;
-                z-index: 10000;
-                min-width: 300px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                animation: slideIn 0.3s ease;
-                background: ${tipo === 'success' ? '#4CAF50' : '#f44336'};
-                font-weight: 500;
-            `;
-            
-            notification.innerHTML = `
-                <span>${mensagem}</span>
-                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer; font-size: 18px;">×</button>
-            `;
-        
-            document.body.appendChild(notification);
-        
-            // Auto-remover após 5 segundos
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 5000);
+            // Se o texto contiver vírgula ou aspas, colocar entre aspas
+            if (texto.toString().includes(',') || texto.toString().includes('"') || texto.toString().includes('\n')) {
+                return `"${texto.toString().replace(/"/g, '""')}"`;
+            }
+            return texto.toString();
         }
     </script>
 </body>
