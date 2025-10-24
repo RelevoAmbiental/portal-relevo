@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO COM GOOGLE DRIVE
+// despesas/app.js - VERSÃO COM FIREBASE STORAGE
 class DespesasApp {
     constructor() {
         // Configurações fixas
@@ -27,7 +27,7 @@ class DespesasApp {
         // Configurar data atual
         document.getElementById('data').valueAsDate = new Date();
         
-        console.log('🚀 Sistema de Despesas inicializado - COM GOOGLE DRIVE');
+        console.log('🚀 Sistema de Despesas inicializado - COM FIREBASE STORAGE');
     }
 
     setupEventListeners() {
@@ -135,6 +135,83 @@ class DespesasApp {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
+    async uploadComprovante(file) {
+        return new Promise((resolve, reject) => {
+            try {
+                console.log('📤 Iniciando upload Firebase Storage:', file.name);
+                console.log('🔥 Storage Bucket:', firebase.app().options.storageBucket);
+                
+                // Validar tamanho do arquivo
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    reject(new Error('Arquivo muito grande. Máximo 10MB.'));
+                    return;
+                }
+
+                // Criar nome único para o arquivo
+                const timestamp = Date.now();
+                const nomeArquivo = `comprovantes/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                
+                console.log('📁 Nome do arquivo no storage:', nomeArquivo);
+
+                // Fazer upload para Firebase Storage
+                const storageRef = firebase.storage().ref();
+                const fileRef = storageRef.child(nomeArquivo);
+                
+                console.log('🔄 Iniciando upload...');
+                
+                const uploadTask = fileRef.put(file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // Progresso
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log(`📊 Upload ${progress.toFixed(1)}% completo`);
+                    },
+                    (error) => {
+                        console.error('❌ Erro durante upload:', error);
+                        console.error('Código:', error.code);
+                        console.error('Mensagem:', error.message);
+                        
+                        // Mensagens de erro mais amigáveis
+                        let mensagemErro = 'Falha no upload. ';
+                        switch (error.code) {
+                            case 'storage/unauthorized':
+                                mensagemErro += 'Problema de CORS.';
+                                break;
+                            case 'storage/canceled':
+                                mensagemErro += 'Upload cancelado.';
+                                break;
+                            case 'storage/unknown':
+                                mensagemErro += 'Erro desconhecido.';
+                                break;
+                            default:
+                                mensagemErro += error.message;
+                        }
+                        
+                        reject(new Error(mensagemErro));
+                    },
+                    async () => {
+                        try {
+                            // Upload completo, obter URL de download
+                            console.log('✅ Upload concluído, obtendo URL...');
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            console.log('🔗 URL do comprovante:', downloadURL);
+                            resolve(downloadURL);
+                        } catch (urlError) {
+                            console.error('❌ Erro ao obter URL:', urlError);
+                            reject(new Error('Falha ao obter URL do arquivo'));
+                        }
+                    }
+                );
+
+            } catch (error) {
+                console.error('❌ Erro no uploadComprovante:', error);
+                reject(error);
+            }
+        });
+    }
+
     async salvarDespesa() {
         const submitBtn = document.getElementById('submitBtn');
         const originalText = submitBtn.innerHTML;
@@ -167,21 +244,15 @@ class DespesasApp {
                 return;
             }
 
-            // Upload do comprovante para Google Drive
+            // Upload do comprovante para Firebase Storage
             const comprovanteFile = document.getElementById('comprovante').files[0];
             if (comprovanteFile) {
-                console.log('📤 Iniciando upload para Google Drive...');
+                console.log('📤 Iniciando upload para Firebase Storage...');
                 try {
-                    // Inicializar Drive Uploader
-                    if (window.driveUploader) {
-                        await window.driveUploader.init();
-                        const comprovanteUrl = await window.driveUploader.uploadFile(comprovanteFile);
-                        despesaData.comprovanteUrl = comprovanteUrl;
-                        despesaData.comprovanteNome = comprovanteFile.name;
-                        console.log('✅ Comprovante salvo no Drive:', comprovanteUrl);
-                    } else {
-                        console.warn('⚠️ Drive Uploader não disponível - salvando sem comprovante');
-                    }
+                    const comprovanteUrl = await this.uploadComprovante(comprovanteFile);
+                    despesaData.comprovanteUrl = comprovanteUrl;
+                    despesaData.comprovanteNome = comprovanteFile.name;
+                    console.log('✅ Comprovante salvo no Storage:', comprovanteUrl);
                 } catch (uploadError) {
                     console.error('❌ Erro no upload do comprovante:', uploadError);
                     this.mostrarErro('Erro no upload do comprovante. Salvando sem comprovante...');
@@ -325,5 +396,5 @@ function capturePhoto() {
 // Inicializar app quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
     window.despesasApp = new DespesasApp();
-    console.log('🎯 App de Despesas carregado com Google Drive!');
+    console.log('🎯 App de Despesas carregado com Firebase Storage!');
 });
