@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO OTIMIZADA
+// despesas/app.js - VERSÃO COMPATÍVEL COM FIREBASE v9
 class DespesasApp {
     constructor() {
         this.CONFIG = {
@@ -13,14 +13,30 @@ class DespesasApp {
             ]
         };
 
+        // Verificar se Firebase está carregado
+        this.verificarFirebase();
         this.init();
     }
 
+    verificarFirebase() {
+        if (typeof firebase === 'undefined') {
+            console.error('❌ Firebase não carregado!');
+            return false;
+        }
+        console.log('✅ Firebase carregado:', typeof firebase);
+        return true;
+    }
+
     init() {
+        if (!this.verificarFirebase()) {
+            this.mostrarNotificacao('Erro: Firebase não carregado. Recarregue a página.', 'error');
+            return;
+        }
+
         this.carregarSelects();
         document.getElementById('data').valueAsDate = new Date();
         this.setupEventListeners();
-        console.log('🚀 App de Despesas inicializado');
+        console.log('🚀 App de Despesas inicializado com Firebase v9');
     }
 
     setupEventListeners() {
@@ -101,6 +117,12 @@ class DespesasApp {
 
     async uploadComprovante(file) {
         return new Promise((resolve, reject) => {
+            // Verificar se storage está disponível
+            if (typeof firebase === 'undefined' || !firebase.storage) {
+                reject(new Error('Firebase Storage não disponível'));
+                return;
+            }
+
             // Validar tamanho
             const maxSize = 10 * 1024 * 1024;
             if (file.size > maxSize) {
@@ -112,14 +134,20 @@ class DespesasApp {
             const timestamp = Date.now();
             const nomeArquivo = `comprovantes/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
             
-            // Upload
+            console.log('📤 Iniciando upload:', nomeArquivo);
+
+            // Upload usando Firebase v9 compat
             const storageRef = firebase.storage().ref();
             const fileRef = storageRef.child(nomeArquivo);
             
             const uploadTask = fileRef.put(file);
 
             uploadTask.on('state_changed',
-                null,
+                (snapshot) => {
+                    // Progresso
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log(`📊 Upload ${progress.toFixed(1)}% completo`);
+                },
                 (error) => {
                     console.error('❌ Erro upload:', error);
                     reject(new Error('Falha no upload: ' + error.message));
@@ -127,9 +155,11 @@ class DespesasApp {
                 async () => {
                     try {
                         const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        console.log('✅ Upload concluído:', downloadURL);
                         resolve(downloadURL);
                     } catch (urlError) {
-                        reject(new Error('Falha ao obter URL'));
+                        console.error('❌ Erro ao obter URL:', urlError);
+                        reject(new Error('Falha ao obter URL do arquivo'));
                     }
                 }
             );
@@ -144,6 +174,11 @@ class DespesasApp {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             submitBtn.disabled = true;
 
+            // Verificar se Firebase está disponível
+            if (typeof firebase === 'undefined' || !firebase.firestore) {
+                throw new Error('Firebase não carregado corretamente');
+            }
+
             // Coletar dados
             const despesaData = {
                 projeto: document.getElementById('projeto').value,
@@ -153,8 +188,11 @@ class DespesasApp {
                 descricao: document.getElementById('descricao').value,
                 valor: this.parseValor(document.getElementById('valor').value),
                 status: 'pendente',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
+
+            console.log('💾 Dados coletados:', despesaData);
 
             // Validar
             if (!this.validarFormulario(despesaData)) {
@@ -165,22 +203,27 @@ class DespesasApp {
             const comprovanteFile = document.getElementById('comprovante').files[0];
             if (comprovanteFile) {
                 try {
+                    console.log('📤 Iniciando upload do comprovante...');
                     const comprovanteUrl = await this.uploadComprovante(comprovanteFile);
                     despesaData.comprovanteUrl = comprovanteUrl;
                     despesaData.comprovanteNome = comprovanteFile.name;
+                    console.log('✅ Comprovante salvo:', comprovanteUrl);
                 } catch (uploadError) {
-                    this.mostrarNotificacao('Erro no upload do comprovante. Salvando sem comprovante...', 'error');
+                    console.warn('⚠️ Erro no upload do comprovante:', uploadError);
+                    this.mostrarNotificacao('Aviso: Comprovante não foi salvo, mas a despesa será registrada.', 'error');
                 }
             }
 
             // Salvar no Firestore
-            await db.collection('despesas').add(despesaData);
+            console.log('💾 Salvando no Firestore...');
+            const docRef = await firebase.firestore().collection('despesas').add(despesaData);
             
+            console.log('✅ Despesa salva com ID:', docRef.id);
             this.mostrarNotificacao('Despesa registrada com sucesso! ✅', 'success');
             this.limparFormulario();
 
         } catch (error) {
-            console.error('❌ Erro ao salvar:', error);
+            console.error('❌ Erro ao salvar despesa:', error);
             this.mostrarNotificacao('Erro ao salvar despesa: ' + error.message, 'error');
         } finally {
             submitBtn.innerHTML = originalText;
@@ -220,7 +263,8 @@ class DespesasApp {
                 valorLimpo = valorLimpo.replace(',', '.');
             }
             
-            return parseFloat(valorLimpo) || 0;
+            const valorNumerico = parseFloat(valorLimpo);
+            return isNaN(valorNumerico) ? 0 : valorNumerico;
         } catch (error) {
             return 0;
         }
@@ -256,7 +300,10 @@ class DespesasApp {
     }
 }
 
-// Inicializar app
+// Inicializar app quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
-    window.despesasApp = new DespesasApp();
+    // Aguardar um pouco para garantir que Firebase carregou
+    setTimeout(() => {
+        window.despesasApp = new DespesasApp();
+    }, 100);
 });
