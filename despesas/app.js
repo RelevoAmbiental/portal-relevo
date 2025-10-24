@@ -1,4 +1,4 @@
-// despesas/app.js - VERSÃO COMPATÍVEL COM FIREBASE v9
+// despesas/app.js - VERSÃO COMPLETA COM UPLOAD (CORS CONFIGURADO)
 class DespesasApp {
     constructor() {
         this.CONFIG = {
@@ -13,30 +13,14 @@ class DespesasApp {
             ]
         };
 
-        // Verificar se Firebase está carregado
-        this.verificarFirebase();
         this.init();
     }
 
-    verificarFirebase() {
-        if (typeof firebase === 'undefined') {
-            console.error('❌ Firebase não carregado!');
-            return false;
-        }
-        console.log('✅ Firebase carregado:', typeof firebase);
-        return true;
-    }
-
     init() {
-        if (!this.verificarFirebase()) {
-            this.mostrarNotificacao('Erro: Firebase não carregado. Recarregue a página.', 'error');
-            return;
-        }
-
         this.carregarSelects();
         document.getElementById('data').valueAsDate = new Date();
         this.setupEventListeners();
-        console.log('🚀 App de Despesas inicializado com Firebase v9');
+        console.log('🚀 App de Despesas - Upload de comprovantes HABILITADO');
     }
 
     setupEventListeners() {
@@ -117,11 +101,7 @@ class DespesasApp {
 
     async uploadComprovante(file) {
         return new Promise((resolve, reject) => {
-            // Verificar se storage está disponível
-            if (typeof firebase === 'undefined' || !firebase.storage) {
-                reject(new Error('Firebase Storage não disponível'));
-                return;
-            }
+            console.log('📤 Iniciando upload para Firebase Storage...');
 
             // Validar tamanho
             const maxSize = 10 * 1024 * 1024;
@@ -134,9 +114,9 @@ class DespesasApp {
             const timestamp = Date.now();
             const nomeArquivo = `comprovantes/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
             
-            console.log('📤 Iniciando upload:', nomeArquivo);
+            console.log('📁 Upload para:', nomeArquivo);
 
-            // Upload usando Firebase v9 compat
+            // Upload para Firebase Storage (CORS CONFIGURADO!)
             const storageRef = firebase.storage().ref();
             const fileRef = storageRef.child(nomeArquivo);
             
@@ -149,11 +129,12 @@ class DespesasApp {
                     console.log(`📊 Upload ${progress.toFixed(1)}% completo`);
                 },
                 (error) => {
-                    console.error('❌ Erro upload:', error);
+                    console.error('❌ Erro no upload:', error);
                     reject(new Error('Falha no upload: ' + error.message));
                 },
                 async () => {
                     try {
+                        // Upload completo, obter URL
                         const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
                         console.log('✅ Upload concluído:', downloadURL);
                         resolve(downloadURL);
@@ -174,12 +155,7 @@ class DespesasApp {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             submitBtn.disabled = true;
 
-            // Verificar se Firebase está disponível
-            if (typeof firebase === 'undefined' || !firebase.firestore) {
-                throw new Error('Firebase não carregado corretamente');
-            }
-
-            // Coletar dados
+            // Coletar dados básicos
             const despesaData = {
                 projeto: document.getElementById('projeto').value,
                 funcionario: document.getElementById('funcionario').value,
@@ -199,7 +175,7 @@ class DespesasApp {
                 return;
             }
 
-            // Upload comprovante
+            // Upload do comprovante (AGORA FUNCIONA - CORS CONFIGURADO)
             const comprovanteFile = document.getElementById('comprovante').files[0];
             if (comprovanteFile) {
                 try {
@@ -209,8 +185,9 @@ class DespesasApp {
                     despesaData.comprovanteNome = comprovanteFile.name;
                     console.log('✅ Comprovante salvo:', comprovanteUrl);
                 } catch (uploadError) {
-                    console.warn('⚠️ Erro no upload do comprovante:', uploadError);
-                    this.mostrarNotificacao('Aviso: Comprovante não foi salvo, mas a despesa será registrada.', 'error');
+                    console.error('❌ Erro no upload do comprovante:', uploadError);
+                    this.mostrarNotificacao('Aviso: Comprovante não foi salvo. ' + uploadError.message, 'error');
+                    // Continua sem o comprovante
                 }
             }
 
@@ -219,12 +196,18 @@ class DespesasApp {
             const docRef = await firebase.firestore().collection('despesas').add(despesaData);
             
             console.log('✅ Despesa salva com ID:', docRef.id);
-            this.mostrarNotificacao('Despesa registrada com sucesso! ✅', 'success');
+            
+            if (despesaData.comprovanteUrl) {
+                this.mostrarNotificacao('✅ Despesa salva com sucesso! Comprovante anexado.', 'success');
+            } else {
+                this.mostrarNotificacao('✅ Despesa salva com sucesso! (sem comprovante)', 'success');
+            }
+            
             this.limparFormulario();
 
         } catch (error) {
             console.error('❌ Erro ao salvar despesa:', error);
-            this.mostrarNotificacao('Erro ao salvar despesa: ' + error.message, 'error');
+            this.mostrarNotificacao('❌ Erro ao salvar despesa: ' + error.message, 'error');
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -302,8 +285,5 @@ class DespesasApp {
 
 // Inicializar app quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar um pouco para garantir que Firebase carregou
-    setTimeout(() => {
-        window.despesasApp = new DespesasApp();
-    }, 100);
+    window.despesasApp = new DespesasApp();
 });
