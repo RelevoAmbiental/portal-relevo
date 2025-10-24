@@ -1,17 +1,17 @@
-// despesas/firebase-config.js - CONFIGURAÇÃO CORRETA COM STORAGE
+// despesas/firebase-config.js - CONFIGURAÇÃO UNIFICADA
 const firebaseConfig = {
-    apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
-    authDomain: "app-despesas-7029f.firebaseapp.com",
-    projectId: "app-despesas-7029f",
-    storageBucket: "app-despesas-7029f.firebasestorage.app", // BUCKET CORRETO!
-    messagingSenderId: "843931176271",
-    appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
+    apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+    authDomain: "portal-relevo.firebaseapp.com",
+    projectId: "portal-relevo",
+    storageBucket: "portal-relevo.firebasestorage.app",
+    messagingSenderId: "182759626683",
+    appId: "1:182759626683:web:2dde2eeef910d4c288569e"
 };
 
-// Inicializar Firebase
+// Inicializar Firebase apenas uma vez
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    console.log('🔥 Firebase inicializado com Storage');
+    console.log('🔥 Firebase inicializado - PROJETO UNIFICADO: portal-relevo');
 }
 
 // Inicializar serviços
@@ -24,5 +24,4 @@ db.enablePersistence()
       console.log('Persistência falhou: ', err);
   });
 
-console.log('✅ Firebase configurado!');
-console.log('📦 Storage Bucket:', firebase.app().options.storageBucket);
+console.log('✅ Firebase configurado com projeto unificado!');
