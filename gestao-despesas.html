@@ -1,350 +1,879 @@
-// Configuração do Firebase - PROJETO DESPESAS
-const firebaseConfig = {
-    apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
-    authDomain: "app-despesas-7029f.firebasestorage.app",
-    projectId: "app-despesas-7029f",
-    storageBucket: "app-despesas-7029f.firebasestorage.app",
-    messagingSenderId: "843931176271",
-    appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
-};
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Despesas | Relevo Consultoria</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        :root {
+            --primary-color: #26C04C;
+            --primary-dark: #2E7D32;
+            --secondary-color: #EB8807;
+            --accent-dark: #2D4132;
+            --light-color: #f8f9fa;
+            --dark-color: #333;
+            --text-color: #444;
+            --gray-light: #e9ecef;
+            --gray-medium: #6c757d;
+            --border-color: #dee2e6;
+        }
 
-// Variáveis globais
-let despesas = [];
-let filteredDespesas = [];
-let charts = {};
+        body {
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
 
-// Inicializar
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Dashboard inicializado');
-    carregarDespesas();
-    inicializarFiltros();
-});
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-// Inicializar filtros
-function inicializarFiltros() {
-    console.log('🎛️ Filtros inicializados');
-}
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-// Carregar despesas
-async function carregarDespesas() {
-    try {
-        console.log('📊 Carregando despesas...');
-        
-        const snapshot = await db.collection('despesas')
-            .orderBy('createdAt', 'desc')
-            .get();
-        
-        despesas = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            despesas.push({
-                id: doc.id,
-                ...data,
-                data: data.data || '',
-                valor: data.valor || 0
-            });
+        .logo {
+            height: 40px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navegação */
+        .view-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .view-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--border-color);
+            background: white;
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card h3 {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card h3 {
+            color: var(--accent-dark);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container-sm {
+            height: 250px;
+        }
+
+        /* Filtros */
+        .filters-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-dark);
+            font-size: 0.9rem;
+        }
+
+        .filter-group select {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Tabela */
+        .table-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: none;
+        }
+
+        .table-section.active {
+            display: block;
+        }
+
+        .table-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--light-color);
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-dark);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pago {
+            background: #d1edff;
+            color: #0c5460;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-medium);
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .view-navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_horizontal.png" 
+                 alt="Relevo Consultoria Ambiental" class="logo">
+            <h1>Gestão de Despesas</h1>
+            <div class="nav-buttons">
+                <a href="gestao.html" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Voltar à Gestão
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container Principal -->
+    <div class="container">
+        <!-- Navegação -->
+        <div class="view-navigation">
+            <button class="view-btn active" onclick="showView('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="view-btn" onclick="showView('lista')">
+                <i class="fas fa-list"></i> Lista de Despesas
+            </button>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Gasto</h3>
+                <div class="stat-value" id="totalGasto">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Despesas Este Mês</h3>
+                <div class="stat-value" id="despesasMes">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ticket Médio</h3>
+                <div class="stat-value" id="ticketMedio">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Eficiência</h3>
+                <div class="stat-value" id="eficiencia">0%</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <section class="filters-section">
+            <h3 style="margin-bottom: 20px; color: var(--accent-dark);">Filtros</h3>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filterProjeto">Projeto</label>
+                    <select id="filterProjeto">
+                        <option value="">Todos os projetos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterFuncionario">Funcionário</label>
+                    <select id="filterFuncionario">
+                        <option value="">Todos os funcionários</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterTipo">Tipo de Despesa</label>
+                    <select id="filterTipo">
+                        <option value="">Todos os tipos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-secondary" onclick="limparFiltros()">
+                    <i class="fas fa-times"></i> Limpar
+                </button>
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <i class="fas fa-filter"></i> Aplicar
+                </button>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <div id="dashboardView">
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3>
+                    <div class="chart-container">
+                        <canvas id="chartEvolucao"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3>
+                    <div class="chart-container">
+                        <canvas id="chartTipos"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-bar"></i> Top Projetos</h3>
+                    <div class="chart-container">
+                        <canvas id="chartProjetos"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-users"></i> Gastos por Funcionário</h3>
+                    <div class="chart-container">
+                        <canvas id="chartFuncionarios"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <section id="listaView" class="table-section">
+            <div class="table-header">
+                <h3>Lista de Despesas</h3>
+                <button class="btn btn-primary" onclick="exportarExcel()">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="tabelaDespesas">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Projeto</th>
+                            <th>Funcionário</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyDespesas">
+                        <tr>
+                            <td colspan="7" class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Carregando despesas...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Configuração do Firebase - PROJETO DESPESAS
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
+            authDomain: "app-despesas-7029f.firebaseapp.com",
+            projectId: "app-despesas-7029f",
+            storageBucket: "app-despesas-7029f.firebasestorage.app",
+            messagingSenderId: "843931176271",
+            appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Variáveis globais
+        let despesas = [];
+        let filteredDespesas = [];
+        let charts = {};
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Dashboard inicializado');
+            carregarDespesas();
+            inicializarFiltros();
         });
 
-        console.log(`✅ ${despesas.length} despesas carregadas`);
-        atualizarDashboard();
-        atualizarFiltros();
-
-    } catch (error) {
-        console.error('❌ Erro ao carregar despesas:', error);
-        mostrarErro('Erro ao carregar despesas: ' + error.message);
-    }
-}
-
-// Atualizar dashboard
-function atualizarDashboard() {
-    atualizarEstatisticas();
-    atualizarTabela();
-    atualizarGraficos();
-}
-
-// Atualizar estatísticas
-function atualizarEstatisticas() {
-    const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
-    const total = dados.reduce((sum, d) => sum + (d.valor || 0), 0);
-    const ticketMedio = dados.length > 0 ? total / dados.length : 0;
-    const despesasPagas = dados.filter(d => d.status === 'pago').length;
-    const eficiencia = dados.length > 0 ? (despesasPagas / dados.length) * 100 : 0;
-
-    // Atualizar mês atual
-    const mesAtual = new Date().getMonth();
-    const despesasMes = dados.filter(d => {
-        const dataDespesa = new Date(d.data);
-        return dataDespesa.getMonth() === mesAtual;
-    }).length;
-
-    document.getElementById('totalGasto').textContent = formatarMoeda(total);
-    document.getElementById('despesasMes').textContent = despesasMes;
-    document.getElementById('ticketMedio').textContent = formatarMoeda(ticketMedio);
-    document.getElementById('eficiencia').textContent = eficiencia.toFixed(1) + '%';
-}
-
-// Atualizar tabela
-function atualizarTabela() {
-    const tbody = document.getElementById('tbodyDespesas');
-    const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
-    
-    if (dados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6c757d;">Nenhuma despesa encontrada</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = dados.map(despesa => `
-        <tr>
-            <td>${formatarData(despesa.data)}</td>
-            <td>${despesa.projeto || '-'}</td>
-            <td>${despesa.funcionario || '-'}</td>
-            <td>${despesa.tipo || '-'}</td>
-            <td><strong>${formatarMoeda(despesa.valor)}</strong></td>
-            <td>
-                <span class="status-badge status-${despesa.status || 'pendente'}">
-                    ${despesa.status || 'pendente'}
-                </span>
-            </td>
-            <td>
-                <div class="action-buttons">
-                    <button class="edit-btn" onclick="editarDespesa('${despesa.id}')" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="delete-btn" onclick="excluirDespesa('${despesa.id}')" title="Excluir">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// Atualizar gráficos
-function atualizarGraficos() {
-    const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
-    
-    atualizarGraficoEvolucao(dados);
-    atualizarGraficoTipos(dados);
-    atualizarGraficoProjetos(dados);
-    atualizarGraficoFuncionarios(dados);
-}
-
-// Gráfico de Evolução
-function atualizarGraficoEvolucao(dados) {
-    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const currentYear = new Date().getFullYear();
-    
-    const dadosMensais = {};
-    meses.forEach((mes, index) => {
-        dadosMensais[mes] = 0;
-    });
-
-    dados.forEach(despesa => {
-        const data = new Date(despesa.data);
-        if (data.getFullYear() === currentYear) {
-            const mes = meses[data.getMonth()];
-            dadosMensais[mes] += despesa.valor || 0;
+        // Inicializar filtros
+        function inicializarFiltros() {
+            console.log('🎛️ Filtros inicializados');
         }
-    });
 
-    const ctx = document.getElementById('chartEvolucao').getContext('2d');
-    if (charts.evolucao) charts.evolucao.destroy();
+        // Carregar despesas
+        async function carregarDespesas() {
+            try {
+                console.log('📊 Carregando despesas...');
+                
+                const snapshot = await db.collection('despesas')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                despesas = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    despesas.push({
+                        id: doc.id,
+                        ...data,
+                        data: data.data || '',
+                        valor: data.valor || 0
+                    });
+                });
 
-    charts.evolucao = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: meses,
-            datasets: [{
-                label: 'Gastos Mensais (R$)',
-                data: Object.values(dadosMensais),
-                borderColor: '#26C04C',
-                backgroundColor: 'rgba(38, 192, 76, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
+                console.log(`✅ ${despesas.length} despesas carregadas`);
+                atualizarDashboard();
+                atualizarFiltros();
+
+            } catch (error) {
+                console.error('❌ Erro ao carregar despesas:', error);
+                mostrarErro('Erro ao carregar despesas: ' + error.message);
+            }
         }
-    });
-}
 
-// Gráfico de Tipos
-function atualizarGraficoTipos(dados) {
-    const tiposData = {};
-    dados.forEach(d => {
-        if (d.tipo) {
-            tiposData[d.tipo] = (tiposData[d.tipo] || 0) + (d.valor || 0);
+        // Atualizar dashboard
+        function atualizarDashboard() {
+            atualizarEstatisticas();
+            atualizarTabela();
+            atualizarGraficos();
         }
-    });
 
-    const ctx = document.getElementById('chartTipos').getContext('2d');
-    if (charts.tipos) charts.tipos.destroy();
+        // Atualizar estatísticas
+        function atualizarEstatisticas() {
+            const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
+            const total = dados.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const ticketMedio = dados.length > 0 ? total / dados.length : 0;
+            const despesasPagas = dados.filter(d => d.status === 'pago').length;
+            const eficiencia = dados.length > 0 ? (despesasPagas / dados.length) * 100 : 0;
 
-    charts.tipos = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(tiposData),
-            datasets: [{
-                data: Object.values(tiposData),
-                backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132']
-            }]
+            // Atualizar mês atual
+            const mesAtual = new Date().getMonth();
+            const despesasMes = dados.filter(d => {
+                const dataDespesa = new Date(d.data);
+                return dataDespesa.getMonth() === mesAtual;
+            }).length;
+
+            document.getElementById('totalGasto').textContent = formatarMoeda(total);
+            document.getElementById('despesasMes').textContent = despesasMes;
+            document.getElementById('ticketMedio').textContent = formatarMoeda(ticketMedio);
+            document.getElementById('eficiencia').textContent = eficiencia.toFixed(1) + '%';
         }
-    });
-}
 
-// Gráfico de Projetos
-function atualizarGraficoProjetos(dados) {
-    const projetosData = {};
-    dados.forEach(d => {
-        if (d.projeto) {
-            projetosData[d.projeto] = (projetosData[d.projeto] || 0) + (d.valor || 0);
+        // Atualizar tabela
+        function atualizarTabela() {
+            const tbody = document.getElementById('tbodyDespesas');
+            const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
+            
+            if (dados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6c757d;">Nenhuma despesa encontrada</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = dados.map(despesa => `
+                <tr>
+                    <td>${formatarData(despesa.data)}</td>
+                    <td>${despesa.projeto || '-'}</td>
+                    <td>${despesa.funcionario || '-'}</td>
+                    <td>${despesa.tipo || '-'}</td>
+                    <td><strong>${formatarMoeda(despesa.valor)}</strong></td>
+                    <td>
+                        <span class="status-badge status-${despesa.status || 'pendente'}">
+                            ${despesa.status || 'pendente'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editarDespesa('${despesa.id}')" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" onclick="excluirDespesa('${despesa.id}')" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
         }
-    });
 
-    const projetosOrdenados = Object.entries(projetosData)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 6);
-
-    const ctx = document.getElementById('chartProjetos').getContext('2d');
-    if (charts.projetos) charts.projetos.destroy();
-
-    charts.projetos = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: projetosOrdenados.map(([projeto]) => projeto),
-            datasets: [{
-                label: 'Valor (R$)',
-                data: projetosOrdenados.map(([,valor]) => valor),
-                backgroundColor: '#26C04C'
-            }]
+        // Atualizar gráficos
+        function atualizarGraficos() {
+            const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
+            
+            atualizarGraficoEvolucao(dados);
+            atualizarGraficoTipos(dados);
+            atualizarGraficoProjetos(dados);
+            atualizarGraficoFuncionarios(dados);
         }
-    });
-}
 
-// Gráfico de Funcionários
-function atualizarGraficoFuncionarios(dados) {
-    const funcionariosData = {};
-    dados.forEach(d => {
-        if (d.funcionario) {
-            funcionariosData[d.funcionario] = (funcionariosData[d.funcionario] || 0) + (d.valor || 0);
+        // Gráfico de Evolução
+        function atualizarGraficoEvolucao(dados) {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const currentYear = new Date().getFullYear();
+            
+            const dadosMensais = {};
+            meses.forEach((mes, index) => {
+                dadosMensais[mes] = 0;
+            });
+
+            dados.forEach(despesa => {
+                const data = new Date(despesa.data);
+                if (data.getFullYear() === currentYear) {
+                    const mes = meses[data.getMonth()];
+                    dadosMensais[mes] += despesa.valor || 0;
+                }
+            });
+
+            const ctx = document.getElementById('chartEvolucao').getContext('2d');
+            if (charts.evolucao) charts.evolucao.destroy();
+
+            charts.evolucao = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: meses,
+                    datasets: [{
+                        label: 'Gastos Mensais (R$)',
+                        data: Object.values(dadosMensais),
+                        borderColor: '#26C04C',
+                        backgroundColor: 'rgba(38, 192, 76, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                }
+            });
         }
-    });
 
-    const funcionariosOrdenados = Object.entries(funcionariosData)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 6);
+        // Gráfico de Tipos
+        function atualizarGraficoTipos(dados) {
+            const tiposData = {};
+            dados.forEach(d => {
+                if (d.tipo) {
+                    tiposData[d.tipo] = (tiposData[d.tipo] || 0) + (d.valor || 0);
+                }
+            });
 
-    const ctx = document.getElementById('chartFuncionarios').getContext('2d');
-    if (charts.funcionarios) charts.funcionarios.destroy();
+            const ctx = document.getElementById('chartTipos').getContext('2d');
+            if (charts.tipos) charts.tipos.destroy();
 
-    charts.funcionarios = new Chart(ctx, {
-        type: 'polarArea',
-        data: {
-            labels: funcionariosOrdenados.map(([funcionario]) => funcionario),
-            datasets: [{
-                data: funcionariosOrdenados.map(([,valor]) => valor),
-                backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132', '#6B5539']
-            }]
+            charts.tipos = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(tiposData),
+                    datasets: [{
+                        data: Object.values(tiposData),
+                        backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132']
+                    }]
+                }
+            });
         }
-    });
-}
 
-// Atualizar filtros
-function atualizarFiltros() {
-    const projetos = [...new Set(despesas.map(d => d.projeto).filter(Boolean))];
-    const funcionarios = [...new Set(despesas.map(d => d.funcionario).filter(Boolean))];
-    const tipos = [...new Set(despesas.map(d => d.tipo).filter(Boolean))];
+        // Gráfico de Projetos
+        function atualizarGraficoProjetos(dados) {
+            const projetosData = {};
+            dados.forEach(d => {
+                if (d.projeto) {
+                    projetosData[d.projeto] = (projetosData[d.projeto] || 0) + (d.valor || 0);
+                }
+            });
 
-    const selectProjeto = document.getElementById('filterProjeto');
-    const selectFuncionario = document.getElementById('filterFuncionario');
-    const selectTipo = document.getElementById('filterTipo');
+            const projetosOrdenados = Object.entries(projetosData)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6);
 
-    selectProjeto.innerHTML = '<option value="">Todos os projetos</option>';
-    projetos.forEach(projeto => {
-        selectProjeto.innerHTML += `<option value="${projeto}">${projeto}</option>`;
-    });
+            const ctx = document.getElementById('chartProjetos').getContext('2d');
+            if (charts.projetos) charts.projetos.destroy();
 
-    selectFuncionario.innerHTML = '<option value="">Todos os funcionários</option>';
-    funcionarios.forEach(funcionario => {
-        selectFuncionario.innerHTML += `<option value="${funcionario}">${funcionario}</option>`;
-    });
+            charts.projetos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: projetosOrdenados.map(([projeto]) => projeto),
+                    datasets: [{
+                        label: 'Valor (R$)',
+                        data: projetosOrdenados.map(([,valor]) => valor),
+                        backgroundColor: '#26C04C'
+                    }]
+                }
+            });
+        }
 
-    selectTipo.innerHTML = '<option value="">Todos os tipos</option>';
-    tipos.forEach(tipo => {
-        selectTipo.innerHTML += `<option value="${tipo}">${tipo}</option>`;
-    });
-}
+        // Gráfico de Funcionários
+        function atualizarGraficoFuncionarios(dados) {
+            const funcionariosData = {};
+            dados.forEach(d => {
+                if (d.funcionario) {
+                    funcionariosData[d.funcionario] = (funcionariosData[d.funcionario] || 0) + (d.valor || 0);
+                }
+            });
 
-// Aplicar filtros
-function aplicarFiltros() {
-    const projeto = document.getElementById('filterProjeto').value;
-    const funcionario = document.getElementById('filterFuncionario').value;
-    const tipo = document.getElementById('filterTipo').value;
+            const funcionariosOrdenados = Object.entries(funcionariosData)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6);
 
-    filteredDespesas = despesas.filter(despesa => {
-        if (projeto && despesa.projeto !== projeto) return false;
-        if (funcionario && despesa.funcionario !== funcionario) return false;
-        if (tipo && despesa.tipo !== tipo) return false;
-        return true;
-    });
+            const ctx = document.getElementById('chartFuncionarios').getContext('2d');
+            if (charts.funcionarios) charts.funcionarios.destroy();
 
-    atualizarDashboard();
-}
+            charts.funcionarios = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: funcionariosOrdenados.map(([funcionario]) => funcionario),
+                    datasets: [{
+                        data: funcionariosOrdenados.map(([,valor]) => valor),
+                        backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132', '#6B5539']
+                    }]
+                }
+            });
+        }
 
-// Limpar filtros
-function limparFiltros() {
-    document.getElementById('filterProjeto').value = '';
-    document.getElementById('filterFuncionario').value = '';
-    document.getElementById('filterTipo').value = '';
-    filteredDespesas = [];
-    atualizarDashboard();
-}
+        // Atualizar filtros
+        function atualizarFiltros() {
+            const projetos = [...new Set(despesas.map(d => d.projeto).filter(Boolean))];
+            const funcionarios = [...new Set(despesas.map(d => d.funcionario).filter(Boolean))];
+            const tipos = [...new Set(despesas.map(d => d.tipo).filter(Boolean))];
 
-// Alternar views
-function showView(view) {
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
-    document.getElementById('listaView').classList.toggle('active', view === 'lista');
-}
+            const selectProjeto = document.getElementById('filterProjeto');
+            const selectFuncionario = document.getElementById('filterFuncionario');
+            const selectTipo = document.getElementById('filterTipo');
 
-// Funções auxiliares
-function formatarData(dataString) {
-    if (!dataString) return '-';
-    const data = new Date(dataString);
-    return data.toLocaleDateString('pt-BR');
-}
+            selectProjeto.innerHTML = '<option value="">Todos os projetos</option>';
+            projetos.forEach(projeto => {
+                selectProjeto.innerHTML += `<option value="${projeto}">${projeto}</option>`;
+            });
 
-function formatarMoeda(valor) {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(valor || 0);
-}
+            selectFuncionario.innerHTML = '<option value="">Todos os funcionários</option>';
+            funcionarios.forEach(funcionario => {
+                selectFuncionario.innerHTML += `<option value="${funcionario}">${funcionario}</option>`;
+            });
 
-function mostrarErro(mensagem) {
-    alert('Erro: ' + mensagem);
-}
+            selectTipo.innerHTML = '<option value="">Todos os tipos</option>';
+            tipos.forEach(tipo => {
+                selectTipo.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+            });
+        }
 
-// Funções futuras (placeholder)
-function editarDespesa(id) {
-    alert('Editar despesa ' + id + ' - Funcionalidade em desenvolvimento');
-}
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const projeto = document.getElementById('filterProjeto').value;
+            const funcionario = document.getElementById('filterFuncionario').value;
+            const tipo = document.getElementById('filterTipo').value;
 
-function excluirDespesa(id) {
-    if (confirm('Tem certeza que deseja excluir esta despesa?')) {
-        alert('Excluir despesa ' + id + ' - Funcionalidade em desenvolvimento');
-    }
-}
+            filteredDespesas = despesas.filter(despesa => {
+                if (projeto && despesa.projeto !== projeto) return false;
+                if (funcionario && despesa.funcionario !== funcionario) return false;
+                if (tipo && despesa.tipo !== tipo) return false;
+                return true;
+            });
 
-function exportarExcel() {
-    alert('Exportar para Excel - Funcionalidade em desenvolvimento');
-}
+            atualizarDashboard();
+        }
 
-function logout() {
-    window.location.href = 'gestao.html';
-}
+        // Limpar filtros
+        function limparFiltros() {
+            document.getElementById('filterProjeto').value = '';
+            document.getElementById('filterFuncionario').value = '';
+            document.getElementById('filterTipo').value = '';
+            filteredDespesas = [];
+            atualizarDashboard();
+        }
+
+        // Alternar views
+        function showView(view) {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
+            document.getElementById('listaView').classList.toggle('active', view === 'lista');
+        }
+
+        // Funções auxiliares
+        function formatarData(dataString) {
+            if (!dataString) return '-';
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor || 0);
+        }
+
+        function mostrarErro(mensagem) {
+            alert('Erro: ' + mensagem);
+        }
+
+        // Funções futuras (placeholder)
+        function editarDespesa(id) {
+            alert('Editar despesa ' + id + ' - Funcionalidade em desenvolvimento');
+        }
+
+        function excluirDespesa(id) {
+            if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+                alert('Excluir despesa ' + id + ' - Funcionalidade em desenvolvimento');
+            }
+        }
+
+        function exportarExcel() {
+            alert('Exportar para Excel - Funcionalidade em desenvolvimento');
+        }
+    </script>
+</body>
+</html>
