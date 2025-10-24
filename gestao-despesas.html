@@ -391,9 +391,9 @@
                 <a href="gestao.html" class="btn btn-primary">
                     <i class="fas fa-arrow-left"></i> Voltar à Gestão
                 </a>
-                <button class="btn btn-secondary" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
+                <a href="gestao.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Portal
+                </a>
             </div>
         </div>
     </header>
@@ -555,16 +555,7 @@
             verificarAutenticacao();
             carregarDespesas();
         });
-
-        // Verificar autenticação
-        function verificarAutenticacao() {
-            auth.onAuthStateChanged((user) => {
-                if (!user) {
-                    window.location.href = 'index.html';
-                }
-            });
-        }
-
+        
         // Carregar despesas
         async function carregarDespesas() {
             try {
