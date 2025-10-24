@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Intranet - Relevo Consultoria Ambiental</title>
+  
+  <!-- Fonte Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Global Harmonizado -->
+  <link rel="stylesheet" href="styles/global.css">
   
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -12,35 +17,13 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
   <style>
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      font-family: 'Montserrat', sans-serif; 
-    }
-    
-    :root {
-      --primary-color: #26C04C;
-      --primary-dark: #396B45;
-      --accent-dark: #2D4132;
-      --gray-light: #e9ecef;
-      --text-color: #444;
-      --light-color: #f8f9fa;
-    }
-    
-    body {
-      color: var(--text-color);
-      background-color: var(--light-color);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-    
+    /* ESTILOS ESPECÍFICOS DO LOGIN */
     .login-container {
       display: flex; 
       justify-content: center; 
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--accent-dark), var(--primary-dark));
+      background: linear-gradient(135deg, var(--verde-accent), var(--verde-escuro));
       position: relative; 
       overflow: hidden;
       padding: 20px;
@@ -53,7 +36,7 @@
       left: 0; 
       right: 0; 
       bottom: 0;
-      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/refs/heads/main/DSC00582.JPG');
+      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC00582.JPG');
       background-size: cover; 
       background-position: center; 
       opacity: 0.3;
@@ -61,7 +44,7 @@
     
     .login-box {
       background: white; 
-      border-radius: 8px; 
+      border-radius: 10px; 
       box-shadow: 0 15px 35px rgba(0,0,0,0.2);
       padding: 2.5rem 3rem; 
       width: 100%; 
@@ -73,7 +56,7 @@
     .logo-text { 
       font-size: 2.2rem; 
       font-weight: 700; 
-      color: var(--accent-dark); 
+      color: var(--verde-accent); 
       text-align: center; 
       margin-bottom: 0.5rem;
     }
@@ -81,14 +64,14 @@
     .logo-subtitle { 
       text-align: center; 
       font-size: 0.9rem; 
-      color: var(--text-color); 
+      color: var(--texto-escuro); 
       margin-bottom: 1rem; 
     }
     
     .login-title { 
       text-align: center; 
       margin-bottom: 1.8rem; 
-      color: var(--accent-dark); 
+      color: var(--verde-accent); 
       font-weight: 600; 
       font-size: 1.4rem;
     }
@@ -101,47 +84,24 @@
       display: block; 
       margin-bottom: 0.5rem; 
       font-weight: 500; 
-      color: var(--accent-dark);
+      color: var(--verde-accent);
     }
     
     .form-input {
       width: 100%; 
       padding: 0.9rem 1.2rem; 
-      border: 1px solid var(--gray-light);
+      border: 1px solid var(--borda-cinza);
       border-radius: 4px; 
       font-size: 1rem; 
-      background-color: var(--light-color);
+      background-color: var(--bg-claro);
       transition: all 0.3s;
     }
     
     .form-input:focus { 
-      border-color: var(--primary-color); 
+      border-color: var(--verde-primario); 
       outline: none; 
       box-shadow: 0 0 0 2px rgba(38,192,76,0.2); 
       background-color: white; 
-    }
-    
-    .login-button {
-      width: 100%; 
-      padding: 0.9rem; 
-      background-color: var(--primary-color);
-      color: white; 
-      border: none; 
-      border-radius: 4px;
-      font-size: 1rem; 
-      font-weight: 600; 
-      cursor: pointer; 
-      transition: all 0.3s;
-      margin-top: 0.5rem;
-    }
-    
-    .login-button:hover { 
-      background-color: var(--primary-dark); 
-    }
-    
-    .login-button:disabled { 
-      background-color: #cccccc; 
-      cursor: not-allowed; 
     }
     
     .error-message, .success-message {
@@ -160,19 +120,19 @@
     }
     
     .success-message { 
-      color: var(--primary-dark); 
+      color: var(--verde-escuro); 
       background-color: #e8f5e9; 
       font-weight: 600; 
-      border: 1px solid #4caf50;
+      border: 1px solid var(--verde-primario);
     }
     
     .login-footer { 
       text-align: center; 
       margin-top: 1.8rem; 
       font-size: 0.85rem; 
-      color: #666;
+      color: var(--texto-cinza);
       padding-top: 1rem;
-      border-top: 1px solid var(--gray-light);
+      border-top: 1px solid var(--borda-cinza);
     }
 
     @media (max-width: 480px) {
@@ -205,7 +165,7 @@
           <input type="password" id="password" class="form-input" placeholder="Digite sua senha" required>
         </div>
         
-        <button type="submit" class="login-button" id="login-btn">Entrar</button>
+        <button type="submit" class="btn btn-primary" id="login-btn">Entrar</button>
         
         <div id="error-message" class="error-message"></div>
         <div id="success-message" class="success-message"></div>
@@ -219,7 +179,7 @@
   </div>
 
   <script>
-    // CONFIGURAÇÃO DO FIREBASE - COLE SUA CONFIGURAÇÃO REAL AQUI
+    // CONFIGURAÇÃO DO FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
       authDomain: "portal-relevo.firebaseapp.com",
@@ -230,17 +190,10 @@
       measurementId: "G-W8TTP3D3YQ"
     };
 
-    // TESTE: Verificar se Firebase carregou corretamente
-    console.log("🔥 Firebase configurado:", firebaseConfig.projectId);
-
     // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-
-    // Verificar se os serviços carregaram
-    console.log("🔐 Auth carregado:", typeof auth.signInWithEmailAndPassword);
-    console.log("📊 Firestore carregado:", typeof db.collection);
 
     const form = document.getElementById("login-form");
     const errorMsg = document.getElementById("error-message");
@@ -264,24 +217,14 @@
         hideError();
 
         try {
-            console.log("🔑 Tentando login:", username);
-            
-            // IMPORTANTE: Agora usamos o username DIRETO como email
             const email = username + "@relevo.com";
-            console.log("📧 Email formatado:", email);
-
-            // 1. Primeiro tenta fazer login
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
-            console.log("✅ Login Firebase OK, user ID:", user.uid);
 
-            // 2. Busca dados no Firestore - AGORA pelo UID do usuário
             const userDoc = await db.collection('users').doc(user.uid).get();
-            console.log("📄 Firestore document encontrado:", userDoc.exists);
 
             if (userDoc.exists) {
                 const userData = userDoc.data();
-                console.log("👤 Dados do usuário:", userData);
                 showSuccess(`Bem-vindo, ${userData.nome}!`);
                 
                 setTimeout(() => {
@@ -292,7 +235,7 @@
             }
             
         } catch (error) {
-            console.error("❌ ERRO COMPLETO:", error);
+            console.error("❌ ERRO:", error);
             hideSuccess();
             
             if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
@@ -331,7 +274,6 @@
     // Verifica se já está logado
     auth.onAuthStateChanged((user) => {
         if (user) {
-            console.log("🔄 Usuário já logado, redirecionando...");
             db.collection('users').doc(user.uid).get().then((doc) => {
                 if (doc.exists) {
                     window.location.href = doc.data().tipo + ".html";
