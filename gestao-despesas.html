@@ -121,7 +121,8 @@
         <section id="listaView" class="table-section">
             <div class="table-header">
                 <h3>Lista de Despesas</h3>
-                <button class="btn btn-primary" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                <button class="btn btn-primary" onclick="exportarExcel()" id="exportBtn"><i class="fas fa-file-excel"></i> <span id="exportText">Exportar Excel</span>
+                </button>
             </div>
             <div class="table-container">
                 <table id="tabelaDespesas">
@@ -396,42 +397,50 @@
         }
 
         function exportarExcel() {
+            const exportBtn = document.getElementById('exportBtn');
+            const exportText = document.getElementById('exportText');
+            const originalHTML = exportBtn.innerHTML;
+            
             try {
+                // Mostrar loading
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportando...';
+                
                 console.log('📊 Iniciando exportação para Excel...');
                 
                 const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
                 
                 if (dados.length === 0) {
-                    alert('Nenhuma despesa para exportar.');
+                    mostrarNotificacao('⚠️ Nenhuma despesa para exportar.', 'error');
                     return;
                 }
         
                 // Criar cabeçalho do CSV
                 let csvContent = "DATA,PROJETO,FUNCIONÁRIO,TIPO,DESCRIÇÃO,VALOR,STATUS,COMPROVANTE\n";
                 
-                // Adicionar dados
+                // Adicionar dados formatados
                 dados.forEach(despesa => {
                     const linha = [
-                        formatarData(despesa.data),
-                        `"${despesa.projeto || ''}"`,
-                        `"${despesa.funcionario || ''}"`,
-                        `"${despesa.tipo || ''}"`,
-                        `"${(despesa.descricao || '').replace(/"/g, '""')}"`,
-                        formatarMoeda(despesa.valor).replace('R$', '').trim(),
+                        formatarDataExcel(despesa.data),
+                        escapeCSV(despesa.projeto || ''),
+                        escapeCSV(despesa.funcionario || ''),
+                        escapeCSV(despesa.tipo || ''),
+                        escapeCSV(despesa.descricao || ''),
+                        (despesa.valor || 0).toString().replace('.', ','),
                         despesa.status || 'pendente',
                         despesa.comprovanteUrl ? 'Sim' : 'Não'
-                    ].join(',');
+                    ].join(';'); // Usar ponto e vírgula para melhor compatibilidade com Excel BR
                     
                     csvContent += linha + '\n';
                 });
         
-                // Criar arquivo e fazer download
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                // Criar e fazer download do arquivo
+                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 
                 link.setAttribute('href', url);
-                link.setAttribute('download', `despesas_relevo_${new Date().toISOString().split('T')[0]}.csv`);
+                link.setAttribute('download', `despesas_relevo_${formatarDataExcel(new Date())}.csv`);
                 link.style.visibility = 'hidden';
                 
                 document.body.appendChild(link);
@@ -444,30 +453,51 @@
             } catch (error) {
                 console.error('❌ Erro ao exportar para Excel:', error);
                 mostrarNotificacao('❌ Erro ao exportar: ' + error.message, 'error');
+            } finally {
+                // Restaurar botão
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = originalHTML;
             }
         }
         
-        // Função auxiliar para mostrar notificações (se não existir)
+        // Funções auxiliares para formatação
+        function formatarDataExcel(dataString) {
+            if (!dataString) return '';
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+        
+        function escapeCSV(texto) {
+            if (!texto) return '';
+            // Escapar aspas e quebras de linha
+            return `"${texto.toString().replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+        }
+        
         function mostrarNotificacao(mensagem, tipo) {
-            // Criar elemento de notificação
+            // Remover notificação anterior se existir
+            const notifAnterior = document.querySelector('.export-notification');
+            if (notifAnterior) notifAnterior.remove();
+        
             const notification = document.createElement('div');
+            notification.className = 'export-notification';
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
                 padding: 15px 20px;
-                border-radius: 5px;
+                border-radius: 8px;
                 color: white;
-                z-index: 1000;
+                z-index: 10000;
                 min-width: 300px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 animation: slideIn 0.3s ease;
                 background: ${tipo === 'success' ? '#4CAF50' : '#f44336'};
+                font-weight: 500;
             `;
             
             notification.innerHTML = `
                 <span>${mensagem}</span>
-                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer;">×</button>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer; font-size: 18px;">×</button>
             `;
         
             document.body.appendChild(notification);
