@@ -1,7 +1,6 @@
-// despesas/app.js - VERSÃO COM FIREBASE STORAGE
+// despesas/app.js - VERSÃO OTIMIZADA
 class DespesasApp {
     constructor() {
-        // Configurações fixas
         this.CONFIG = {
             projetos: ['BR-135/BA', 'Panra Diamantina', 'Habilis-GO'],
             funcionarios: ['Gleisson', 'Júlio', 'Samuel', 'Tiago', 'Yuri'],
@@ -15,77 +14,41 @@ class DespesasApp {
         };
 
         this.init();
-        this.setupEventListeners();
     }
 
     init() {
-        // Inicializar selects com as configurações
-        this.carregarProjetos();
-        this.carregarFuncionarios();
-        this.carregarTiposDespesa();
-        
-        // Configurar data atual
+        this.carregarSelects();
         document.getElementById('data').valueAsDate = new Date();
-        
-        console.log('🚀 Sistema de Despesas inicializado - COM FIREBASE STORAGE');
+        this.setupEventListeners();
+        console.log('🚀 App de Despesas inicializado');
     }
 
     setupEventListeners() {
-        // Form submission
         document.getElementById('formDespesa').addEventListener('submit', (e) => {
             e.preventDefault();
             this.salvarDespesa();
         });
 
-        // Comprovante change
         document.getElementById('comprovante').addEventListener('change', (e) => {
             this.previewComprovante(e.target.files[0]);
         });
 
-        // Valor formatting
         document.getElementById('valor').addEventListener('blur', (e) => {
             this.formatarValor(e.target);
         });
-
-        // Mobile menu
-        document.querySelector('.menu-toggle')?.addEventListener('click', () => {
-            this.toggleMobileMenu();
-        });
     }
 
-    carregarProjetos() {
-        const select = document.getElementById('projeto');
-        select.innerHTML = '<option value="">Selecione o projeto</option>';
-        
-        this.CONFIG.projetos.forEach(projeto => {
-            const option = document.createElement('option');
-            option.value = projeto;
-            option.textContent = projeto;
-            select.appendChild(option);
-        });
+    carregarSelects() {
+        this.carregarOptions('projeto', this.CONFIG.projetos);
+        this.carregarOptions('funcionario', this.CONFIG.funcionarios);
+        this.carregarOptions('tipo', this.CONFIG.tiposDespesa);
     }
 
-    carregarFuncionarios() {
-        const select = document.getElementById('funcionario');
-        select.innerHTML = '<option value="">Selecione o funcionário</option>';
-        
-        this.CONFIG.funcionarios.forEach(funcionario => {
-            const option = document.createElement('option');
-            option.value = funcionario;
-            option.textContent = funcionario;
-            select.appendChild(option);
-        });
-    }
-
-    carregarTiposDespesa() {
-        const select = document.getElementById('tipo');
-        select.innerHTML = '<option value="">Selecione o tipo</option>';
-        
-        this.CONFIG.tiposDespesa.forEach(tipo => {
-            const option = document.createElement('option');
-            option.value = tipo;
-            option.textContent = tipo;
-            select.appendChild(option);
+    carregarOptions(selectId, options) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '<option value="">Selecione...</option>';
+        options.forEach(option => {
+            select.innerHTML += `<option value="${option}">${option}</option>`;
         });
     }
 
@@ -102,28 +65,29 @@ class DespesasApp {
     previewComprovante(file) {
         const preview = document.getElementById('comprovantePreview');
         
-        if (file) {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.innerHTML = `
-                        <div class="preview-image">
-                            <img src="${e.target.result}" alt="Preview do comprovante">
-                            <small>${file.name} (${this.formatFileSize(file.size)})</small>
-                        </div>
-                    `;
-                };
-                reader.readAsDataURL(file);
-            } else {
+        if (!file) {
+            preview.innerHTML = '';
+            return;
+        }
+
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
                 preview.innerHTML = `
-                    <div class="preview-file">
-                        <i class="fas fa-file"></i>
+                    <div class="preview-image">
+                        <img src="${e.target.result}" alt="Preview do comprovante">
                         <small>${file.name} (${this.formatFileSize(file.size)})</small>
                     </div>
                 `;
-            }
+            };
+            reader.readAsDataURL(file);
         } else {
-            preview.innerHTML = '';
+            preview.innerHTML = `
+                <div class="preview-file">
+                    <i class="fas fa-file"></i>
+                    <small>${file.name} (${this.formatFileSize(file.size)})</small>
+                </div>
+            `;
         }
     }
 
@@ -137,78 +101,38 @@ class DespesasApp {
 
     async uploadComprovante(file) {
         return new Promise((resolve, reject) => {
-            try {
-                console.log('📤 Iniciando upload Firebase Storage:', file.name);
-                console.log('🔥 Storage Bucket:', firebase.app().options.storageBucket);
-                
-                // Validar tamanho do arquivo
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    reject(new Error('Arquivo muito grande. Máximo 10MB.'));
-                    return;
-                }
-
-                // Criar nome único para o arquivo
-                const timestamp = Date.now();
-                const nomeArquivo = `comprovantes/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-                
-                console.log('📁 Nome do arquivo no storage:', nomeArquivo);
-
-                // Fazer upload para Firebase Storage
-                const storageRef = firebase.storage().ref();
-                const fileRef = storageRef.child(nomeArquivo);
-                
-                console.log('🔄 Iniciando upload...');
-                
-                const uploadTask = fileRef.put(file);
-
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        // Progresso
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        console.log(`📊 Upload ${progress.toFixed(1)}% completo`);
-                    },
-                    (error) => {
-                        console.error('❌ Erro durante upload:', error);
-                        console.error('Código:', error.code);
-                        console.error('Mensagem:', error.message);
-                        
-                        // Mensagens de erro mais amigáveis
-                        let mensagemErro = 'Falha no upload. ';
-                        switch (error.code) {
-                            case 'storage/unauthorized':
-                                mensagemErro += 'Problema de CORS.';
-                                break;
-                            case 'storage/canceled':
-                                mensagemErro += 'Upload cancelado.';
-                                break;
-                            case 'storage/unknown':
-                                mensagemErro += 'Erro desconhecido.';
-                                break;
-                            default:
-                                mensagemErro += error.message;
-                        }
-                        
-                        reject(new Error(mensagemErro));
-                    },
-                    async () => {
-                        try {
-                            // Upload completo, obter URL de download
-                            console.log('✅ Upload concluído, obtendo URL...');
-                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                            console.log('🔗 URL do comprovante:', downloadURL);
-                            resolve(downloadURL);
-                        } catch (urlError) {
-                            console.error('❌ Erro ao obter URL:', urlError);
-                            reject(new Error('Falha ao obter URL do arquivo'));
-                        }
-                    }
-                );
-
-            } catch (error) {
-                console.error('❌ Erro no uploadComprovante:', error);
-                reject(error);
+            // Validar tamanho
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                reject(new Error('Arquivo muito grande. Máximo 10MB.'));
+                return;
             }
+
+            // Nome único
+            const timestamp = Date.now();
+            const nomeArquivo = `comprovantes/${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+            
+            // Upload
+            const storageRef = firebase.storage().ref();
+            const fileRef = storageRef.child(nomeArquivo);
+            
+            const uploadTask = fileRef.put(file);
+
+            uploadTask.on('state_changed',
+                null,
+                (error) => {
+                    console.error('❌ Erro upload:', error);
+                    reject(new Error('Falha no upload: ' + error.message));
+                },
+                async () => {
+                    try {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        resolve(downloadURL);
+                    } catch (urlError) {
+                        reject(new Error('Falha ao obter URL'));
+                    }
+                }
+            );
         });
     }
 
@@ -220,9 +144,7 @@ class DespesasApp {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             submitBtn.disabled = true;
 
-            console.log('💾 Iniciando salvamento da despesa...');
-
-            // Coletar dados do formulário
+            // Coletar dados
             const despesaData = {
                 projeto: document.getElementById('projeto').value,
                 funcionario: document.getElementById('funcionario').value,
@@ -231,48 +153,35 @@ class DespesasApp {
                 descricao: document.getElementById('descricao').value,
                 valor: this.parseValor(document.getElementById('valor').value),
                 status: 'pendente',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            console.log('📊 Dados coletados:', despesaData);
-
-            // Validar dados
+            // Validar
             if (!this.validarFormulario(despesaData)) {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
                 return;
             }
 
-            // Upload do comprovante para Firebase Storage
+            // Upload comprovante
             const comprovanteFile = document.getElementById('comprovante').files[0];
             if (comprovanteFile) {
-                console.log('📤 Iniciando upload para Firebase Storage...');
                 try {
                     const comprovanteUrl = await this.uploadComprovante(comprovanteFile);
                     despesaData.comprovanteUrl = comprovanteUrl;
                     despesaData.comprovanteNome = comprovanteFile.name;
-                    console.log('✅ Comprovante salvo no Storage:', comprovanteUrl);
                 } catch (uploadError) {
-                    console.error('❌ Erro no upload do comprovante:', uploadError);
-                    this.mostrarErro('Erro no upload do comprovante. Salvando sem comprovante...');
-                    // Continua sem o comprovante
+                    this.mostrarNotificacao('Erro no upload do comprovante. Salvando sem comprovante...', 'error');
                 }
-            } else {
-                console.log('📝 Nenhum comprovante para upload');
             }
 
             // Salvar no Firestore
-            console.log('💾 Salvando no Firestore...');
-            const docRef = await db.collection('despesas').add(despesaData);
+            await db.collection('despesas').add(despesaData);
             
-            console.log('✅ Despesa salva com ID:', docRef.id);
-            this.mostrarSucesso('Despesa registrada com sucesso! ✅');
+            this.mostrarNotificacao('Despesa registrada com sucesso! ✅', 'success');
             this.limparFormulario();
 
         } catch (error) {
-            console.error('❌ Erro ao salvar despesa:', error);
-            this.mostrarErro('Erro ao salvar despesa: ' + error.message);
+            console.error('❌ Erro ao salvar:', error);
+            this.mostrarNotificacao('Erro ao salvar despesa: ' + error.message, 'error');
         } finally {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -284,14 +193,14 @@ class DespesasApp {
         
         for (let campo of camposObrigatorios) {
             if (!data[campo]) {
-                this.mostrarErro(`Por favor, preencha o campo: ${this.formatarNomeCampo(campo)}`);
+                this.mostrarNotificacao(`Preencha o campo: ${campo}`, 'error');
                 document.getElementById(campo)?.focus();
                 return false;
             }
         }
 
         if (!data.valor || data.valor <= 0) {
-            this.mostrarErro('Por favor, informe um valor válido');
+            this.mostrarNotificacao('Informe um valor válido', 'error');
             document.getElementById('valor').focus();
             return false;
         }
@@ -299,62 +208,30 @@ class DespesasApp {
         return true;
     }
 
-    formatarNomeCampo(campo) {
-        const nomes = {
-            'projeto': 'Projeto',
-            'funcionario': 'Funcionário', 
-            'data': 'Data',
-            'tipo': 'Tipo de Despesa',
-            'valor': 'Valor'
-        };
-        return nomes[campo] || campo;
-    }
-
     parseValor(valorString) {
-        if (!valorString || valorString.trim() === '') return 0;
+        if (!valorString) return 0;
         
         try {
-            // Remove "R$", espaços e converte para número
             let valorLimpo = valorString.replace('R$', '').replace(/\s/g, '').trim();
             
-            // Se já tem ponto decimal, assume formato brasileiro
             if (valorLimpo.includes(',') && valorLimpo.includes('.')) {
-                // Formato: 1.500,00 → remove pontos, troca vírgula por ponto
                 valorLimpo = valorLimpo.replace(/\./g, '').replace(',', '.');
             } else if (valorLimpo.includes(',')) {
-                // Formato: 1500,00 → troca vírgula por ponto
                 valorLimpo = valorLimpo.replace(',', '.');
             }
             
-            const valorNumerico = parseFloat(valorLimpo);
-            
-            if (isNaN(valorNumerico)) {
-                console.error('Valor não pôde ser convertido:', valorString);
-                return 0;
-            }
-            
-            console.log('💰 Valor convertido:', valorString, '→', valorNumerico);
-            return valorNumerico;
+            return parseFloat(valorLimpo) || 0;
         } catch (error) {
-            console.error('Erro ao converter valor:', error);
             return 0;
         }
     }
 
-    mostrarSucesso(mensagem) {
-        this.showNotification(mensagem, 'success');
-    }
-
-    mostrarErro(mensagem) {
-        this.showNotification(mensagem, 'error');
-    }
-
-    showNotification(mensagem, tipo) {
+    mostrarNotificacao(mensagem, tipo) {
+        // Remover notificação anterior
         const notifAnterior = document.querySelector('.notification');
-        if (notifAnterior) {
-            notifAnterior.remove();
-        }
+        if (notifAnterior) notifAnterior.remove();
 
+        // Criar nova
         const notification = document.createElement('div');
         notification.className = `notification ${tipo}`;
         notification.innerHTML = `
@@ -364,6 +241,7 @@ class DespesasApp {
 
         document.body.appendChild(notification);
 
+        // Auto-remover
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.remove();
@@ -375,26 +253,10 @@ class DespesasApp {
         document.getElementById('formDespesa').reset();
         document.getElementById('comprovantePreview').innerHTML = '';
         document.getElementById('data').valueAsDate = new Date();
-        
-        // Restaurar texto dos botões de câmera
-        const buttons = document.querySelectorAll('.camera-btn');
-        if (buttons[0]) buttons[0].innerHTML = '<i class="fas fa-camera"></i> Tirar Foto';
-        if (buttons[1]) buttons[1].innerHTML = '<i class="fas fa-folder-open"></i> Escolher Arquivo';
-    }
-
-    toggleMobileMenu() {
-        const nav = document.querySelector('nav');
-        nav.classList.toggle('active');
     }
 }
 
-// Função global para captura de foto
-function capturePhoto() {
-    document.getElementById('comprovante').click();
-}
-
-// Inicializar app quando DOM estiver pronto
+// Inicializar app
 document.addEventListener('DOMContentLoaded', () => {
     window.despesasApp = new DespesasApp();
-    console.log('🎯 App de Despesas carregado com Firebase Storage!');
 });
