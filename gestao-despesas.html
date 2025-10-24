@@ -398,81 +398,91 @@
 
         function exportarExcel() {
             const exportBtn = document.getElementById('exportBtn');
-            const exportText = document.getElementById('exportText');
             const originalHTML = exportBtn.innerHTML;
             
             try {
-                // Mostrar loading
                 exportBtn.disabled = true;
                 exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportando...';
-                
-                console.log('📊 Iniciando exportação para Excel...');
                 
                 const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
                 
                 if (dados.length === 0) {
-                    mostrarNotificacao('⚠️ Nenhuma despesa para exportar.', 'error');
+                    alert('⚠️ Nenhuma despesa para exportar.');
                     return;
                 }
         
-                // Criar cabeçalho do CSV (usando vírgula e quebra de linha Windows)
-                let csvContent = "DATA,PROJETO,FUNCIONÁRIO,TIPO,DESCRIÇÃO,VALOR (R$),STATUS,COMPROVANTE\r\n";
+                // Criar conteúdo HTML para Excel (funciona melhor)
+                let htmlContent = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="UTF-8">
+                        <!--[if gte mso 9]>
+                        <xml>
+                            <x:ExcelWorkbook>
+                                <x:ExcelWorksheets>
+                                    <x:ExcelWorksheet>
+                                        <x:Name>Despesas Relevo</x:Name>
+                                        <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+                                    </x:ExcelWorksheet>
+                                </x:ExcelWorksheets>
+                            </x:ExcelWorkbook>
+                        </xml>
+                        <![endif]-->
+                    </head>
+                    <body>
+                        <table border="1">
+                            <tr style="background-color: #26C04C; color: white; font-weight: bold;">
+                                <th>DATA</th>
+                                <th>PROJETO</th>
+                                <th>FUNCIONÁRIO</th>
+                                <th>TIPO</th>
+                                <th>DESCRIÇÃO</th>
+                                <th>VALOR (R$)</th>
+                                <th>STATUS</th>
+                                <th>COMPROVANTE</th>
+                            </tr>
+                `;
                 
-                // Adicionar dados formatados
+                // Adicionar dados
                 dados.forEach(despesa => {
-                    const linha = [
-                        formatarDataExcel(despesa.data),
-                        escapeCSV(despesa.projeto || ''),
-                        escapeCSV(despesa.funcionario || ''),
-                        escapeCSV(despesa.tipo || ''),
-                        escapeCSV(despesa.descricao || ''),
-                        (despesa.valor || 0).toFixed(2).replace('.', ','), // Formato brasileiro
-                        despesa.status || 'pendente',
-                        despesa.comprovanteUrl ? 'Sim' : 'Não'
-                    ].join(','); // Usar vírgula como delimitador
-                    csvContent += linha + '\r\n'; // Quebra de linha Windows
+                    htmlContent += `
+                        <tr>
+                            <td>${formatarData(despesa.data)}</td>
+                            <td>${despesa.projeto || ''}</td>
+                            <td>${despesa.funcionario || ''}</td>
+                            <td>${despesa.tipo || ''}</td>
+                            <td>${despesa.descricao || ''}</td>
+                            <td>${formatarMoeda(despesa.valor)}</td>
+                            <td>${despesa.status || 'pendente'}</td>
+                            <td>${despesa.comprovanteUrl ? 'Sim' : 'Não'}</td>
+                        </tr>
+                    `;
                 });
-        
-                // Criar e fazer download do arquivo
-                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                
+                htmlContent += '</table></body></html>';
+                
+                // Criar e fazer download
+                const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 
                 link.setAttribute('href', url);
-                link.setAttribute('download', `despesas_relevo_${formatarDataExcel(new Date())}.csv`);
-                link.style.visibility = 'hidden';
+                link.setAttribute('download', `despesas_relevo_${new Date().toISOString().split('T')[0]}.xls`);
                 
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 
                 console.log(`✅ ${dados.length} despesas exportadas com sucesso!`);
-                mostrarNotificacao(`✅ ${dados.length} despesas exportadas com sucesso!`, 'success');
+                alert(`✅ ${dados.length} despesas exportadas com sucesso!`);
                 
             } catch (error) {
-                console.error('❌ Erro ao exportar para Excel:', error);
-                mostrarNotificacao('❌ Erro ao exportar: ' + error.message, 'error');
+                console.error('❌ Erro ao exportar:', error);
+                alert('❌ Erro ao exportar: ' + error.message);
             } finally {
-                // Restaurar botão
                 exportBtn.disabled = false;
                 exportBtn.innerHTML = originalHTML;
             }
-        }
-        
-        // Funções auxiliares para formatação
-        function formatarDataExcel(dataString) {
-            if (!dataString) return '';
-            const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
-        }
-        
-        function escapeCSV(texto) {
-            if (!texto) return '';
-            // Se o texto contiver vírgula ou aspas, colocar entre aspas
-            if (texto.toString().includes(',') || texto.toString().includes('"') || texto.toString().includes('\n')) {
-                return `"${texto.toString().replace(/"/g, '""')}"`;
-            }
-            return texto.toString();
         }
     </script>
 </body>
