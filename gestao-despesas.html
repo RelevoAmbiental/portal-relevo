@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     
-    <!-- Chart.js para gráficos -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Font Awesome -->
@@ -103,14 +103,14 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        /* Container Principal */
+        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Navegação entre Dashboard e Lista */
+        /* Navegação */
         .view-navigation {
             display: flex;
             gap: 10px;
@@ -141,11 +141,7 @@
             border-color: var(--primary-color);
         }
 
-        .view-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Cards de Estatísticas */
+        /* Estatísticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -159,11 +155,6 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border-left: 4px solid var(--primary-color);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
         }
 
         .stat-card h3 {
@@ -171,30 +162,15 @@
             font-size: 0.9rem;
             margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
             color: var(--primary-dark);
-            margin-bottom: 5px;
         }
 
-        .stat-trend {
-            font-size: 0.8rem;
-            color: var(--gray-medium);
-        }
-
-        .stat-trend.positive {
-            color: #28a745;
-        }
-
-        .stat-trend.negative {
-            color: #dc3545;
-        }
-
-        /* Dashboard Grid */
+        /* Dashboard */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -207,12 +183,6 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .dashboard-card:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
         }
 
         .dashboard-card h3 {
@@ -261,19 +231,12 @@
             font-size: 0.9rem;
         }
 
-        .filter-group select,
-        .filter-group input {
+        .filter-group select {
             padding: 12px;
             border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .filter-group select:focus,
-        .filter-group input:focus {
-            border-color: var(--primary-color);
-            outline: none;
+            background: white;
         }
 
         .filter-actions {
@@ -303,11 +266,6 @@
             align-items: center;
         }
 
-        .table-header h3 {
-            color: var(--accent-dark);
-            font-size: 1.1rem;
-        }
-
         .table-container {
             overflow-x: auto;
         }
@@ -324,18 +282,11 @@
             font-weight: 600;
             color: var(--accent-dark);
             border-bottom: 2px solid var(--border-color);
-            font-size: 0.9rem;
-            white-space: nowrap;
         }
 
         td {
             padding: 12px;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
         }
 
         .status-badge {
@@ -343,7 +294,6 @@
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
-            text-transform: uppercase;
         }
 
         .status-pendente {
@@ -354,21 +304,6 @@
         .status-pago {
             background: #d1edff;
             color: #0c5460;
-        }
-
-        .comprovante-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: background 0.3s ease;
-        }
-
-        .comprovante-btn:hover {
-            background: var(--primary-dark);
         }
 
         .action-buttons {
@@ -382,7 +317,6 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.8rem;
-            transition: all 0.3s ease;
         }
 
         .edit-btn {
@@ -393,97 +327,6 @@
         .delete-btn {
             background: #dc3545;
             color: white;
-        }
-
-        .edit-btn:hover {
-            background: #e0a800;
-        }
-
-        .delete-btn:hover {
-            background: #c82333;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 0;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .modal-header {
-            padding: 20px 25px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            color: var(--accent-dark);
-            margin: 0;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray-medium);
-        }
-
-        .modal-body {
-            padding: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--accent-dark);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        .modal-footer {
-            padding: 20px 25px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
         }
 
         /* Loading */
@@ -508,7 +351,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -526,11 +368,6 @@
 
             .filters-grid {
                 grid-template-columns: 1fr;
-            }
-
-            th, td {
-                padding: 8px 6px;
-                font-size: 0.8rem;
             }
 
             .container {
@@ -563,7 +400,7 @@
 
     <!-- Container Principal -->
     <div class="container">
-        <!-- Navegação entre Dashboard e Lista -->
+        <!-- Navegação -->
         <div class="view-navigation">
             <button class="view-btn active" onclick="showView('dashboard')">
                 <i class="fas fa-chart-line"></i> Dashboard
@@ -573,33 +410,29 @@
             </button>
         </div>
 
-        <!-- Cards de Estatísticas -->
+        <!-- Estatísticas -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Gasto</h3>
                 <div class="stat-value" id="totalGasto">R$ 0,00</div>
-                <div class="stat-trend" id="trendTotal">Carregando...</div>
             </div>
             <div class="stat-card">
                 <h3>Despesas Este Mês</h3>
                 <div class="stat-value" id="despesasMes">0</div>
-                <div class="stat-trend" id="trendMes">Carregando...</div>
             </div>
             <div class="stat-card">
                 <h3>Ticket Médio</h3>
                 <div class="stat-value" id="ticketMedio">R$ 0,00</div>
-                <div class="stat-trend" id="trendTicket">Carregando...</div>
             </div>
             <div class="stat-card">
                 <h3>Eficiência</h3>
                 <div class="stat-value" id="eficiencia">0%</div>
-                <div class="stat-trend" id="trendEficiencia">Carregando...</div>
             </div>
         </div>
 
         <!-- Filtros -->
         <section class="filters-section">
-            <h3 style="margin-bottom: 20px; color: var(--accent-dark);">Filtros do Dashboard</h3>
+            <h3 style="margin-bottom: 20px; color: var(--accent-dark);">Filtros</h3>
             <div class="filters-grid">
                 <div class="filter-group">
                     <label for="filterProjeto">Projeto</label>
@@ -619,37 +452,19 @@
                         <option value="">Todos os tipos</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label for="filterPeriodo">Período</label>
-                    <select id="filterPeriodo" onchange="aplicarFiltrosDashboard()">
-                        <option value="30">Últimos 30 dias</option>
-                        <option value="90">Últimos 3 meses</option>
-                        <option value="365">Último ano</option>
-                        <option value="custom">Personalizado</option>
-                    </select>
-                </div>
-                <div class="filter-group" id="customDateGroup" style="display: none;">
-                    <label for="filterDataInicio">Data Início</label>
-                    <input type="date" id="filterDataInicio">
-                </div>
-                <div class="filter-group" id="customDateGroupFim" style="display: none;">
-                    <label for="filterDataFim">Data Fim</label>
-                    <input type="date" id="filterDataFim">
-                </div>
             </div>
             <div class="filter-actions">
-                <button class="btn btn-secondary" onclick="limparFiltrosDashboard()">
-                    <i class="fas fa-times"></i> Limpar Filtros
+                <button class="btn btn-secondary" onclick="limparFiltros()">
+                    <i class="fas fa-times"></i> Limpar
                 </button>
-                <button class="btn btn-primary" onclick="aplicarFiltrosDashboard()">
-                    <i class="fas fa-filter"></i> Aplicar Filtros
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <i class="fas fa-filter"></i> Aplicar
                 </button>
             </div>
         </section>
 
         <!-- Dashboard -->
         <div id="dashboardView">
-            <!-- Primeira Linha de Gráficos -->
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3>
@@ -665,7 +480,6 @@
                 </div>
             </div>
 
-            <!-- Segunda Linha de Gráficos -->
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <h3><i class="fas fa-chart-bar"></i> Top Projetos</h3>
@@ -680,43 +494,15 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Terceira Linha de Gráficos -->
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <h3><i class="fas fa-exchange-alt"></i> Status das Despesas</h3>
-                    <div class="chart-container chart-container-sm">
-                        <canvas id="chartStatus"></canvas>
-                    </div>
-                </div>
-                <div class="dashboard-card">
-                    <h3><i class="fas fa-trophy"></i> Maiores Despesas</h3>
-                    <div class="chart-container chart-container-sm">
-                        <canvas id="chartTopDespesas"></canvas>
-                    </div>
-                </div>
-                <div class="dashboard-card">
-                    <h3><i class="fas fa-calendar"></i> Tendência Semanal</h3>
-                    <div class="chart-container chart-container-sm">
-                        <canvas id="chartTendencia"></canvas>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- Tabela de Despesas -->
+        <!-- Tabela -->
         <section id="listaView" class="table-section">
             <div class="table-header">
                 <h3>Lista de Despesas</h3>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <span id="contadorDespesas">0 despesas encontradas</span>
-                    <button class="btn btn-primary" onclick="exportarExcel()">
-                        <i class="fas fa-file-excel"></i> Exportar Excel
-                    </button>
-                    <button class="btn btn-secondary" onclick="exportarRelatorioMensal()">
-                        <i class="fas fa-chart-bar"></i> Relatório Mensal
-                    </button>
-                </div>
+                <button class="btn btn-primary" onclick="exportarExcel()">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
             </div>
             <div class="table-container">
                 <table id="tabelaDespesas">
@@ -726,16 +512,14 @@
                             <th>Projeto</th>
                             <th>Funcionário</th>
                             <th>Tipo</th>
-                            <th>Descrição</th>
                             <th>Valor</th>
                             <th>Status</th>
-                            <th>Comprovante</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyDespesas">
                         <tr>
-                            <td colspan="9" class="loading">
+                            <td colspan="7" class="loading">
                                 <div class="loading-spinner"></div>
                                 <p>Carregando despesas...</p>
                             </td>
@@ -746,65 +530,8 @@
         </section>
     </div>
 
-    <!-- Modal Editar Despesa -->
-    <div id="modalEditar" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Despesa</h3>
-                <button class="close-btn" onclick="fecharModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="formEditar">
-                    <input type="hidden" id="editId">
-                    <div class="form-group">
-                        <label for="editProjeto">Projeto</label>
-                        <select id="editProjeto" required>
-                            <option value="">Selecione o projeto</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editFuncionario">Funcionário</label>
-                        <select id="editFuncionario" required>
-                            <option value="">Selecione o funcionário</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editData">Data</label>
-                        <input type="date" id="editData" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTipo">Tipo de Despesa</label>
-                        <select id="editTipo" required>
-                            <option value="">Selecione o tipo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editDescricao">Descrição</label>
-                        <textarea id="editDescricao" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="editValor">Valor (R$)</label>
-                        <input type="number" id="editValor" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editStatus">Status</label>
-                        <select id="editStatus" required>
-                            <option value="pendente">Pendente</option>
-                            <option value="pago">Pago</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarEdicao()">Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
     <script>
-        // Configuração do Firebase
+        // Configuração do Firebase UNIFICADA
         const firebaseConfig = {
             apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
             authDomain: "portal-relevo.firebaseapp.com",
@@ -821,46 +548,13 @@
         // Variáveis globais
         let despesas = [];
         let filteredDespesas = [];
-        let chartProjetos, chartTipos, chartEvolucao, chartFuncionarios, chartStatus, chartTopDespesas, chartTendencia;
-        let currentView = 'dashboard';
+        let charts = {};
 
-        // Inicializar quando DOM estiver pronto
+        // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
             verificarAutenticacao();
             carregarDespesas();
-            inicializarFiltros();
-            setupPeriodoFilter();
         });
-
-        // Configurar filtro de período
-        function setupPeriodoFilter() {
-            document.getElementById('filterPeriodo').addEventListener('change', function() {
-                const customGroup = document.getElementById('customDateGroup');
-                const customGroupFim = document.getElementById('customDateGroupFim');
-                if (this.value === 'custom') {
-                    customGroup.style.display = 'flex';
-                    customGroupFim.style.display = 'flex';
-                } else {
-                    customGroup.style.display = 'none';
-                    customGroupFim.style.display = 'none';
-                }
-            });
-        }
-
-        // Alternar entre Dashboard e Lista
-        function showView(view) {
-            currentView = view;
-            
-            // Atualizar botões
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Mostrar/ocultar seções
-            document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
-            document.getElementById('listaView').classList.toggle('active', view === 'lista');
-        }
 
         // Verificar autenticação
         function verificarAutenticacao() {
@@ -871,7 +565,7 @@
             });
         }
 
-        // Carregar despesas do Firestore
+        // Carregar despesas
         async function carregarDespesas() {
             try {
                 console.log('📊 Carregando despesas...');
@@ -887,7 +581,7 @@
                         id: doc.id,
                         ...data,
                         data: data.data || '',
-                        valor: typeof data.valor === 'string' ? parseFloat(data.valor) : data.valor
+                        valor: data.valor || 0
                     });
                 });
 
@@ -897,87 +591,36 @@
 
             } catch (error) {
                 console.error('❌ Erro ao carregar despesas:', error);
-                document.getElementById('tbodyDespesas').innerHTML = 
-                    '<tr><td colspan="9" style="text-align: center; color: #dc3545; padding: 40px;">Erro ao carregar despesas</td></tr>';
+                mostrarErro('Erro ao carregar despesas');
             }
         }
 
-        // Atualizar dashboard completo
+        // Atualizar dashboard
         function atualizarDashboard() {
             atualizarEstatisticas();
             atualizarTabela();
             atualizarGraficos();
-            atualizarEstatisticasMes();
         }
 
         // Atualizar estatísticas
         function atualizarEstatisticas() {
             const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
             const total = dados.reduce((sum, d) => sum + (d.valor || 0), 0);
-            
+            const ticketMedio = dados.length > 0 ? total / dados.length : 0;
+            const despesasPagas = dados.filter(d => d.status === 'pago').length;
+            const eficiencia = dados.length > 0 ? (despesasPagas / dados.length) * 100 : 0;
+
+            // Atualizar mês atual
             const mesAtual = new Date().getMonth();
             const despesasMes = dados.filter(d => {
                 const dataDespesa = new Date(d.data);
                 return dataDespesa.getMonth() === mesAtual;
             }).length;
 
-            // Ticket médio
-            const ticketMedio = dados.length > 0 ? total / dados.length : 0;
-
-            // Eficiência (percentual de despesas pagas)
-            const despesasPagas = dados.filter(d => d.status === 'pago').length;
-            const eficiencia = dados.length > 0 ? (despesasPagas / dados.length) * 100 : 0;
-
-            // Comparação com período anterior
-            const periodoAnterior = calcularPeriodoAnterior();
-            const totalAnterior = periodoAnterior.reduce((sum, d) => sum + (d.valor || 0), 0);
-            const variacaoTotal = totalAnterior > 0 ? ((total - totalAnterior) / totalAnterior) * 100 : 0;
-
-            // Atualizar DOM
             document.getElementById('totalGasto').textContent = formatarMoeda(total);
             document.getElementById('despesasMes').textContent = despesasMes;
             document.getElementById('ticketMedio').textContent = formatarMoeda(ticketMedio);
             document.getElementById('eficiencia').textContent = eficiencia.toFixed(1) + '%';
-
-            // Atualizar trends
-            document.getElementById('trendTotal').textContent = variacaoTotal >= 0 ? 
-                `+${variacaoTotal.toFixed(1)}% vs período anterior` : 
-                `${variacaoTotal.toFixed(1)}% vs período anterior`;
-            document.getElementById('trendTotal').className = `stat-trend ${variacaoTotal >= 0 ? 'positive' : 'negative'}`;
-
-            document.getElementById('trendMes').textContent = 'Este mês';
-            document.getElementById('trendTicket').textContent = 'Média por despesa';
-            document.getElementById('trendEficiencia').textContent = 'Despesas pagas';
-        }
-
-        // Calcular período anterior para comparação
-        function calcularPeriodoAnterior() {
-            const periodo = document.getElementById('filterPeriodo').value;
-            if (periodo === 'custom') {
-                // Lógica para período customizado
-                return despesas.slice(0, Math.floor(despesas.length / 2));
-            }
-            
-            const dias = parseInt(periodo);
-            const dataLimite = new Date();
-            dataLimite.setDate(dataLimite.getDate() - dias * 2);
-            
-            return despesas.filter(d => new Date(d.data) < dataLimite);
-        }
-
-        // Atualizar estatísticas do mês
-        function atualizarEstatisticasMes() {
-            const mesAtual = new Date().getMonth();
-            const anoAtual = new Date().getFullYear();
-            
-            const despesasMes = despesas.filter(despesa => {
-                const dataDespesa = new Date(despesa.data);
-                return dataDespesa.getMonth() === mesAtual && dataDespesa.getFullYear() === anoAtual;
-            });
-
-            const totalMes = despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0);
-            const maiorDespesa = despesasMes.length > 0 ? Math.max(...despesasMes.map(d => d.valor || 0)) : 0;
-            const mediaMes = despesasMes.length > 0 ? totalMes / despesasMes.length : 0;
         }
 
         // Atualizar tabela
@@ -985,11 +628,8 @@
             const tbody = document.getElementById('tbodyDespesas');
             const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
             
-            document.getElementById('contadorDespesas').textContent = 
-                `${dados.length} despesa${dados.length !== 1 ? 's' : ''} encontrada${dados.length !== 1 ? 's' : ''}`;
-
             if (dados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">Nenhuma despesa encontrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6c757d;">Nenhuma despesa encontrada</td></tr>';
                 return;
             }
 
@@ -999,7 +639,6 @@
                     <td>${despesa.projeto || '-'}</td>
                     <td>${despesa.funcionario || '-'}</td>
                     <td>${despesa.tipo || '-'}</td>
-                    <td title="${despesa.descricao || ''}">${limitarTexto(despesa.descricao, 30)}</td>
                     <td><strong>${formatarMoeda(despesa.valor)}</strong></td>
                     <td>
                         <span class="status-badge status-${despesa.status || 'pendente'}">
@@ -1007,19 +646,11 @@
                         </span>
                     </td>
                     <td>
-                        ${despesa.comprovanteUrl ? 
-                            `<button class="comprovante-btn" onclick="verComprovante('${despesa.comprovanteUrl}')">
-                                <i class="fas fa-eye"></i> Ver
-                            </button>` : 
-                            '<span style="color: #6c757d;">-</span>'
-                        }
-                    </td>
-                    <td>
                         <div class="action-buttons">
                             <button class="edit-btn" onclick="editarDespesa('${despesa.id}')" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="delete-btn" onclick="confirmarExclusao('${despesa.id}')" title="Excluir">
+                            <button class="delete-btn" onclick="excluirDespesa('${despesa.id}')" title="Excluir">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1028,7 +659,7 @@
             `).join('');
         }
 
-        // Atualizar todos os gráficos
+        // Atualizar gráficos
         function atualizarGraficos() {
             const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
             
@@ -1036,12 +667,9 @@
             atualizarGraficoTipos(dados);
             atualizarGraficoProjetos(dados);
             atualizarGraficoFuncionarios(dados);
-            atualizarGraficoStatus(dados);
-            atualizarGraficoTopDespesas(dados);
-            atualizarGraficoTendencia(dados);
         }
 
-        // Gráfico de Evolução Mensal
+        // Gráfico de Evolução
         function atualizarGraficoEvolucao(dados) {
             const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
             const currentYear = new Date().getFullYear();
@@ -1060,9 +688,9 @@
             });
 
             const ctx = document.getElementById('chartEvolucao').getContext('2d');
-            if (chartEvolucao) chartEvolucao.destroy();
+            if (charts.evolucao) charts.evolucao.destroy();
 
-            chartEvolucao = new Chart(ctx, {
+            charts.evolucao = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: meses,
@@ -1074,25 +702,11 @@
                         tension: 0.4,
                         fill: true
                     }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
-                                }
-                            }
-                        }
-                    }
                 }
             });
         }
 
-        // Gráfico de Tipos (Pizza)
+        // Gráfico de Tipos
         function atualizarGraficoTipos(dados) {
             const tiposData = {};
             dados.forEach(d => {
@@ -1102,34 +716,21 @@
             });
 
             const ctx = document.getElementById('chartTipos').getContext('2d');
-            if (chartTipos) chartTipos.destroy();
+            if (charts.tipos) charts.tipos.destroy();
 
-            chartTipos = new Chart(ctx, {
+            charts.tipos = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(tiposData),
                     datasets: [{
                         data: Object.values(tiposData),
-                        backgroundColor: [
-                            '#26C04C', '#EB8807', '#2E7D32', '#396B45',
-                            '#2D4132', '#6B5539', '#4E296B', '#1565C0',
-                            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'
-                        ]
+                        backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132']
                     }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        }
-                    }
                 }
             });
         }
 
-        // Gráfico de Projetos (Barras)
+        // Gráfico de Projetos
         function atualizarGraficoProjetos(dados) {
             const projetosData = {};
             dados.forEach(d => {
@@ -1138,39 +739,22 @@
                 }
             });
 
-            // Ordenar e pegar top 8
             const projetosOrdenados = Object.entries(projetosData)
                 .sort(([,a], [,b]) => b - a)
-                .slice(0, 8);
+                .slice(0, 6);
 
             const ctx = document.getElementById('chartProjetos').getContext('2d');
-            if (chartProjetos) chartProjetos.destroy();
+            if (charts.projetos) charts.projetos.destroy();
 
-            chartProjetos = new Chart(ctx, {
+            charts.projetos = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: projetosOrdenados.map(([projeto]) => projeto),
                     datasets: [{
                         label: 'Valor (R$)',
                         data: projetosOrdenados.map(([,valor]) => valor),
-                        backgroundColor: '#26C04C',
-                        borderColor: '#2E7D32',
-                        borderWidth: 1
+                        backgroundColor: '#26C04C'
                     }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
-                                }
-                            }
-                        }
-                    }
                 }
             });
         }
@@ -1184,169 +768,26 @@
                 }
             });
 
-            // Ordenar e pegar top 6
             const funcionariosOrdenados = Object.entries(funcionariosData)
                 .sort(([,a], [,b]) => b - a)
                 .slice(0, 6);
 
             const ctx = document.getElementById('chartFuncionarios').getContext('2d');
-            if (chartFuncionarios) chartFuncionarios.destroy();
+            if (charts.funcionarios) charts.funcionarios.destroy();
 
-            chartFuncionarios = new Chart(ctx, {
+            charts.funcionarios = new Chart(ctx, {
                 type: 'polarArea',
                 data: {
                     labels: funcionariosOrdenados.map(([funcionario]) => funcionario),
                     datasets: [{
                         data: funcionariosOrdenados.map(([,valor]) => valor),
-                        backgroundColor: [
-                            '#26C04C', '#EB8807', '#2E7D32', '#396B45',
-                            '#2D4132', '#6B5539'
-                        ]
+                        backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132', '#6B5539']
                     }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        }
-                    }
                 }
             });
         }
 
-        // Gráfico de Status
-        function atualizarGraficoStatus(dados) {
-            const statusData = {
-                'Pendente': 0,
-                'Pago': 0
-            };
-
-            dados.forEach(d => {
-                const status = d.status || 'pendente';
-                statusData[status === 'pago' ? 'Pago' : 'Pendente']++;
-            });
-
-            const ctx = document.getElementById('chartStatus').getContext('2d');
-            if (chartStatus) chartStatus.destroy();
-
-            chartStatus = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Pendente', 'Pago'],
-                    datasets: [{
-                        data: [statusData['Pendente'], statusData['Pago']],
-                        backgroundColor: ['#FFC107', '#28A745']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-
-        // Gráfico das Maiores Despesas
-        function atualizarGraficoTopDespesas(dados) {
-            // Ordenar por valor e pegar top 5
-            const topDespesas = [...dados]
-                .sort((a, b) => (b.valor || 0) - (a.valor || 0))
-                .slice(0, 5);
-
-            const ctx = document.getElementById('chartTopDespesas').getContext('2d');
-            if (chartTopDespesas) chartTopDespesas.destroy();
-
-            chartTopDespesas = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: topDespesas.map(d => 
-                        `${d.projeto?.substring(0, 15)}... - ${formatarMoeda(d.valor)}`
-                    ),
-                    datasets: [{
-                        label: 'Valor (R$)',
-                        data: topDespesas.map(d => d.valor),
-                        backgroundColor: '#EB8807'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Gráfico de Tendência Semanal
-        function atualizarGraficoTendencia(dados) {
-            const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            const tendenciaData = {};
-
-            // Últimas 4 semanas
-            for (let i = 0; i < 7; i++) {
-                tendenciaData[dias[i]] = 0;
-            }
-
-            dados.forEach(d => {
-                const data = new Date(d.data);
-                const diaSemana = data.getDay();
-                tendenciaData[dias[diaSemana]] += d.valor || 0;
-            });
-
-            const ctx = document.getElementById('chartTendencia').getContext('2d');
-            if (chartTendencia) chartTendencia.destroy();
-
-            chartTendencia = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dias,
-                    datasets: [{
-                        label: 'Gastos por Dia (R$)',
-                        data: Object.values(tendenciaData),
-                        borderColor: '#4E296B',
-                        backgroundColor: 'rgba(78, 41, 107, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Inicializar filtros
-        function inicializarFiltros() {
-            const dataFim = new Date();
-            const dataInicio = new Date();
-            dataInicio.setDate(dataInicio.getDate() - 30);
-
-            document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
-            document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
-        }
-
-        // Atualizar opções dos filtros
+        // Atualizar filtros
         function atualizarFiltros() {
             const projetos = [...new Set(despesas.map(d => d.projeto).filter(Boolean))];
             const funcionarios = [...new Set(despesas.map(d => d.funcionario).filter(Boolean))];
@@ -1356,89 +797,96 @@
             const selectFuncionario = document.getElementById('filterFuncionario');
             const selectTipo = document.getElementById('filterTipo');
 
-            // Atualizar projetos
             selectProjeto.innerHTML = '<option value="">Todos os projetos</option>';
             projetos.forEach(projeto => {
                 selectProjeto.innerHTML += `<option value="${projeto}">${projeto}</option>`;
             });
 
-            // Atualizar funcionários
             selectFuncionario.innerHTML = '<option value="">Todos os funcionários</option>';
             funcionarios.forEach(funcionario => {
                 selectFuncionario.innerHTML += `<option value="${funcionario}">${funcionario}</option>`;
             });
 
-            // Atualizar tipos
             selectTipo.innerHTML = '<option value="">Todos os tipos</option>';
             tipos.forEach(tipo => {
                 selectTipo.innerHTML += `<option value="${tipo}">${tipo}</option>`;
             });
-
-            // Atualizar selects do modal
-            document.getElementById('editProjeto').innerHTML = '<option value="">Selecione o projeto</option>' +
-                projetos.map(p => `<option value="${p}">${p}</option>`).join('');
-            
-            document.getElementById('editFuncionario').innerHTML = '<option value="">Selecione o funcionário</option>' +
-                funcionarios.map(f => `<option value="${f}">${f}</option>`).join('');
-            
-            document.getElementById('editTipo').innerHTML = '<option value="">Selecione o tipo</option>' +
-                tipos.map(t => `<option value="${t}">${t}</option>`).join('');
         }
 
-        // Aplicar filtros do dashboard
-        function aplicarFiltrosDashboard() {
+        // Aplicar filtros
+        function aplicarFiltros() {
             const projeto = document.getElementById('filterProjeto').value;
             const funcionario = document.getElementById('filterFuncionario').value;
             const tipo = document.getElementById('filterTipo').value;
-            const periodo = document.getElementById('filterPeriodo').value;
-
-            let dataInicio, dataFim;
-
-            if (periodo === 'custom') {
-                dataInicio = document.getElementById('filterDataInicio').value;
-                dataFim = document.getElementById('filterDataFim').value;
-            } else {
-                const dias = parseInt(periodo);
-                dataFim = new Date();
-                dataInicio = new Date();
-                dataInicio.setDate(dataInicio.getDate() - dias);
-                
-                dataFim = dataFim.toISOString().split('T')[0];
-                dataInicio = dataInicio.toISOString().split('T')[0];
-            }
 
             filteredDespesas = despesas.filter(despesa => {
                 if (projeto && despesa.projeto !== projeto) return false;
                 if (funcionario && despesa.funcionario !== funcionario) return false;
                 if (tipo && despesa.tipo !== tipo) return false;
-                if (dataInicio && despesa.data < dataInicio) return false;
-                if (dataFim && despesa.data > dataFim) return false;
                 return true;
             });
 
             atualizarDashboard();
         }
 
-        // Limpar filtros do dashboard
-        function limparFiltrosDashboard() {
+        // Limpar filtros
+        function limparFiltros() {
             document.getElementById('filterProjeto').value = '';
             document.getElementById('filterFuncionario').value = '';
             document.getElementById('filterTipo').value = '';
-            document.getElementById('filterPeriodo').value = '30';
-            document.getElementById('customDateGroup').style.display = 'none';
-            document.getElementById('customDateGroupFim').style.display = 'none';
-            
             filteredDespesas = [];
             atualizarDashboard();
         }
 
-        // Restante das funções permanecem iguais (verComprovante, editarDespesa, fecharModal, salvarEdicao, confirmarExclusao, excluirDespesa, exportarExcel, exportarRelatorioMensal, exportarPorPeriodo, logout, funções utilitárias)
+        // Alternar views
+        function showView(view) {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
+            document.getElementById('listaView').classList.toggle('active', view === 'lista');
+        }
 
-        // ... (as funções restantes são as mesmas do código anterior)
-        // Ver comprovante, editar despesa, fechar modal, salvar edição, confirmar exclusão, excluir despesa, exportar Excel, exportar relatório mensal, exportar por período, logout e funções utilitárias
+        // Funções auxiliares
+        function formatarData(dataString) {
+            if (!dataString) return '-';
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
 
-        // [As funções restantes são exatamente as mesmas do código anterior - mantendo por questão de espaço]
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor || 0);
+        }
 
+        function mostrarErro(mensagem) {
+            alert('Erro: ' + mensagem);
+        }
+
+        // Funções futuras (placeholder)
+        function editarDespesa(id) {
+            alert('Editar despesa ' + id + ' - Funcionalidade em desenvolvimento');
+        }
+
+        function excluirDespesa(id) {
+            if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+                alert('Excluir despesa ' + id + ' - Funcionalidade em desenvolvimento');
+            }
+        }
+
+        function exportarExcel() {
+            alert('Exportar para Excel - Funcionalidade em desenvolvimento');
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
     </script>
 </body>
 </html>
