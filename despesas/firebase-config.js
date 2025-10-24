@@ -1,4 +1,4 @@
-// despesas/firebase-config.js - CONFIGURAÇÃO UNIFICADA
+// despesas/firebase-config.js - CONFIGURAÇÃO UNIFICADA FIREBASE v9
 const firebaseConfig = {
     apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
     authDomain: "portal-relevo.firebaseapp.com",
@@ -11,10 +11,12 @@ const firebaseConfig = {
 // Inicializar Firebase apenas uma vez
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    console.log('🔥 Firebase inicializado - PROJETO UNIFICADO: portal-relevo');
+    console.log('🔥 Firebase v9 inicializado - PROJETO UNIFICADO: portal-relevo');
+} else {
+    firebase.app(); // Já inicializado
 }
 
-// Inicializar serviços
+// Inicializar serviços - USANDO COMPATibilidade
 const db = firebase.firestore();
 const storage = firebase.storage();
 
@@ -24,4 +26,9 @@ db.enablePersistence()
       console.log('Persistência falhou: ', err);
   });
 
-console.log('✅ Firebase configurado com projeto unificado!');
+console.log('✅ Firebase configurado! DB:', typeof db, 'Storage:', typeof storage);
+
+// Tornar global para debug
+window.firebaseApp = firebase.app();
+window.firebaseDB = db;
+window.firebaseStorage = storage;
