@@ -1,25 +1,27 @@
-// js/firebase-config.js - CONFIGURAÇÃO COMPLETA DO PORTAL PRINCIPAL
+// despesas/firebase-config.js - CONFIGURAÇÃO UNIFICADA
 const firebaseConfig = {
-  apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
-  authDomain: "app-despesas-7029f.firebaseapp.com",
-  projectId: "app-despesas-7029f",
-  storageBucket: "app-despesas-7029f.appspot.com", // ADICIONADO STORAGE
-  messagingSenderId: "843931176271",
-  appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
+    apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+    authDomain: "portal-relevo.firebaseapp.com",
+    projectId: "portal-relevo",
+    storageBucket: "portal-relevo.firebasestorage.app",
+    messagingSenderId: "182759626683",
+    appId: "1:182759626683:web:2dde2eeef910d4c288569e"
 };
 
-// Inicializar Firebase
-const app = firebase.initializeApp(firebaseConfig);
+// Inicializar Firebase apenas uma vez
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    console.log('🔥 Firebase inicializado - PROJETO UNIFICADO: portal-relevo');
+}
 
-// Inicializar serviços Firebase
-const auth = firebase.auth();
+// Inicializar serviços
 const db = firebase.firestore();
-const storage = firebase.storage(); // ADICIONADO STORAGE
+const storage = firebase.storage();
 
-// Configurar persistência offline do Firestore
+// Configurar persistência
 db.enablePersistence()
   .catch((err) => {
-    console.log('Persistência do Firestore falhou: ', err);
+      console.log('Persistência falhou: ', err);
   });
 
-console.log('Firebase configurado com sucesso!');
+console.log('✅ Firebase configurado com projeto unificado!');
