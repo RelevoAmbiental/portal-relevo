@@ -1,4 +1,6 @@
-/* despesas/styles.css - CSS ADICIONAL */
+/* despesas/styles.css - CSS CONSOLIDADO */
+
+/* Notificações */
 .notification {
     position: fixed;
     top: 20px;
@@ -37,6 +39,7 @@
     to { transform: translateX(0); opacity: 1; }
 }
 
+/* Preview */
 .preview-image, .preview-file {
     text-align: center;
     padding: 10px;
@@ -58,7 +61,7 @@
     margin-bottom: 5px;
 }
 
-/* Loading states */
+/* Loading */
 button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -73,7 +76,7 @@ button:disabled {
     100% { transform: rotate(360deg); }
 }
 
-/* Mobile optimizations */
+/* Mobile */
 @media (max-width: 768px) {
     .notification {
         left: 10px;
@@ -84,21 +87,4 @@ button:disabled {
     .preview-image img {
         max-width: 150px;
     }
-
-}
-/* AJUSTES DO CAMPO DESCRIÇÃO - REDUZIDO 1/3 */
-#descricao {
-    min-height: 80px !important; /* Reduzido de 120px para 80px */
-    resize: vertical;
-}
-
-/* Melhorar visualização dos selects no mobile */
-select {
-    background-color: white !important;
-}
-
-/* Garantir que os dropdowns funcionem */
-select:focus {
-    border-color: var(--primary-color) !important;
-    outline: none !important;
 }
