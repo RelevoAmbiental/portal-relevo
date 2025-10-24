@@ -8,260 +8,289 @@
   <!-- Fonte Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- CSS Global Harmonizado -->
+  <link rel="stylesheet" href="styles/global.css">
+
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
   <style>
-    :root {
-      --verde: #26C04C;
-      --verde-esc: #2E7D32;
-      --bg: #f7f7f7;
-      --card: #fff;
-      --muted: #666;
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: #222;
-    }
-
-    header {
-      background: linear-gradient(90deg, #1565C0, var(--verde-esc));
-      padding: 14px 28px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    header img {
-      height: 48px;
-    }
-
-    .hero {
-      padding: 44px 20px;
-      text-align: center;
-      color: #fff;
-      background: linear-gradient(90deg, #1565C0, var(--verde-esc));
-    }
-
-    .hero h1 {
-      margin: 0;
-      font-size: 1.9rem;
-    }
-
-    .hero p {
-      margin: 8px 0 0;
-      color: rgba(255,255,255,0.9);
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 28px auto;
-      padding: 0 18px;
-    }
-
-    .section {
-      margin-top: 18px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 18px;
-      text-align: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-    }
-
-    .card img {
-      width: 68px;
-      height: 68px;
-      object-fit: contain;
-      margin-bottom: 12px;
-    }
-
-    .card h3 {
-      color: var(--verde-esc);
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-    }
-
-    .card p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin: 0 0 12px;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 10px 18px;
-      border-radius: 28px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: all 0.3s;
-    }
-
-    .btn-primary {
-      background: var(--verde-esc);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: #1B5E20;
-      transform: translateY(-2px);
-    }
-
-    .btn-light {
-      background: #f1f1f1;
-      color: #222;
-      border: 1px solid #e6e6e6;
-    }
-
-    .btn-light:hover {
-      background: #e6e6e6;
-    }
-
-    footer {
-      background: #1B5E20;
-      color: #fff;
-      text-align: center;
-      padding: 16px;
-      margin-top: 28px;
-    }
-
-    .logout-btn {
-      background: transparent;
-      color: white;
-      border: 1px solid white;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-left: 20px;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    .logout-btn:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
+    /* ESTILOS ESPECÍFICOS DOS CLIENTES */
+    
     .welcome-message {
       text-align: center;
-      color: var(--verde-esc);
-      font-size: 1.2rem;
-      margin-bottom: 20px;
+      color: var(--verde-accent);
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+      font-weight: 600;
+      padding: 15px;
+      background: rgba(38, 192, 76, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid var(--verde-primario);
+    }
+
+    .section-title {
+      color: var(--verde-accent);
+      margin: 0 0 20px;
+      border-left: 6px solid var(--verde-primario);
+      padding-left: 15px;
+      font-size: 1.6rem;
       font-weight: 600;
     }
 
-    /* RESPONSIVIDADE MOBILE */
+    .project-card {
+      background: var(--card-branco);
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--verde-primario);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    .project-card img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      margin: 0 auto 15px;
+      display: block;
+    }
+
+    .project-card h3 {
+      color: var(--verde-escuro);
+      margin: 0 0 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .project-card p {
+      color: var(--texto-cinza);
+      font-size: 0.95rem;
+      margin: 0 0 20px;
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+      margin: 20px 0;
+    }
+
+    /* Botões específicos para clientes */
+    .btn-client {
+      display: inline-block;
+      padding: 12px 25px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-client-primary {
+      background: var(--verde-primario);
+      color: white;
+      border: 2px solid var(--verde-primario);
+    }
+
+    .btn-client-primary:hover {
+      background: var(--verde-escuro);
+      border-color: var(--verde-escuro);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(38, 192, 76, 0.3);
+    }
+
+    .btn-client-light {
+      background: var(--cinza-claro);
+      color: var(--texto-escuro);
+      border: 1px solid var(--borda-cinza);
+    }
+
+    .btn-client-light:hover {
+      background: #e6e6e6;
+      transform: translateY(-1px);
+    }
+
+    /* Header específico para clientes */
+    .header-clientes {
+      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header-clientes-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-clientes .logo {
+      height: 50px;
+      width: auto;
+    }
+
+    /* Hero específico para clientes */
+    .hero-clientes {
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .hero-clientes h1 {
+      color: white;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      font-size: 2.2rem;
+    }
+
+    .hero-clientes p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Seções com espaçamento melhorado */
+    .content-section {
+      margin: 40px 0;
+    }
+
+    .content-section:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Botão voltar estilizado */
+    .back-button {
+      text-align: center;
+      margin: 40px 0 20px;
+    }
+
+    /* Loading states */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--texto-cinza);
+      font-style: italic;
+    }
+
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--verde-primario);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsividade */
     @media (max-width: 768px) {
-      header {
-        padding: 12px 15px;
+      .header-clientes-content {
         flex-direction: column;
-        gap: 10px;
-      }
-      
-      header img {
-        height: 40px;
-      }
-      
-      .logout-btn {
-        margin-left: 0;
-        padding: 10px 20px;
-      }
-      
-      .hero {
-        padding: 40px 15px 30px;
-      }
-      
-      .hero h1 {
-        font-size: 1.6rem;
-      }
-      
-      .hero p {
-        font-size: 1rem;
-      }
-      
-      .container {
-        padding: 0 15px;
-        margin: 20px auto;
-      }
-      
-      .section h2 {
-        font-size: 1.4rem;
-        padding-left: 8px;
-      }
-      
-      .grid {
-        grid-template-columns: 1fr;
         gap: 15px;
+        text-align: center;
       }
-      
-      .card {
-        padding: 20px 15px;
+
+      .hero-clientes {
+        padding: 40px 15px;
       }
-      
-      .card img {
-        width: 50px;
-        height: 50px;
+
+      .hero-clientes h1 {
+        font-size: 1.8rem;
       }
-      
-      .card h3 {
+
+      .project-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .project-card {
+        padding: 20px;
+      }
+
+      .project-card img {
+        width: 60px;
+        height: 60px;
+      }
+
+      .welcome-message {
         font-size: 1.1rem;
+        margin-bottom: 25px;
       }
-      
-      .btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
+
+      .section-title {
+        font-size: 1.4rem;
       }
     }
 
     @media (max-width: 480px) {
-      .hero h1 {
-        font-size: 1.4rem;
+      .hero-clientes h1 {
+        font-size: 1.6rem;
       }
-      
-      .hero p {
+
+      .project-card {
+        padding: 15px;
+      }
+
+      .project-card h3 {
+        font-size: 1.1rem;
+      }
+
+      .btn-client {
+        padding: 10px 20px;
         font-size: 0.9rem;
       }
-      
-      .card {
-        padding: 15px 12px;
+
+      .welcome-message {
+        font-size: 1rem;
+        padding: 12px;
       }
-      
-      .card img {
-        width: 45px;
-        height: 45px;
+    }
+
+    @media (min-width: 1200px) {
+      .project-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental">
-    <button class="logout-btn" onclick="logout()">Sair</button>
+  <!-- Header Clientes -->
+  <header class="header-clientes">
+    <div class="header-clientes-content">
+      <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental" class="logo">
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
   </header>
 
-  <section class="hero">
+  <!-- Hero Clientes -->
+  <section class="hero-clientes">
     <div class="container">
       <h1>Portal do Cliente</h1>
       <p id="hero-subtitle">Acesso rápido e seguro aos documentos do seu projeto</p>
@@ -275,32 +304,40 @@
     </div>
 
     <!-- Dados Cadastrais Relevo -->
-    <section class="section">
-      <h2 style="color:var(--verde-esc);margin:0 0 12px;border-left:6px solid var(--verde-esc);padding-left:10px">Dados Cadastrais Relevo</h2>
-      <div class="grid" style="margin-top:12px">
-        <div class="card" role="region" aria-labelledby="cadastro-title">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/arquivos.png" alt="Ícone pasta de dados cadastrais">
-          <h3 id="cadastro-title">Dados Cadastrais</h3>
-          <p>Acesso à pasta de dados cadastrais da Relevo.</p>
-          <a class="btn btn-primary" href="https://drive.google.com/drive/folders/1FYLVclzIJBzMlENBAQpSuAKLyTYLnEE4" target="_blank" rel="noopener noreferrer">Abrir Dados Cadastrais</a>
+    <section class="content-section">
+      <h2 class="section-title">Dados Cadastrais Relevo</h2>
+      <div class="project-grid">
+        <div class="project-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/arquivos.png" alt="Ícone pasta de dados cadastrais">
+          <h3>Dados Cadastrais</h3>
+          <p>Acesso à pasta de dados cadastrais da Relevo Consultoria Ambiental</p>
+          <a class="btn btn-client-primary" href="https://drive.google.com/drive/folders/1FYLVclzIJBzMlENBAQpSuAKLyTYLnEE4" target="_blank" rel="noopener noreferrer">Abrir Dados Cadastrais</a>
         </div>
       </div>
     </section>
 
     <!-- Pasta do Projeto do Cliente (APARECE APENAS SE TIVER PROJETO) -->
-    <section class="section" style="margin-top:28px" id="projeto-section" style="display: none;">
-      <h2 style="color:var(--verde-esc);margin:0 0 12px;border-left:6px solid var(--verde-esc);padding-left:10px">Seu Projeto</h2>
-      <div class="grid" style="margin-top:12px" id="projeto-container">
+    <section class="content-section" id="projeto-section" style="display: none;">
+      <h2 class="section-title">Seu Projeto</h2>
+      <div class="project-grid" id="projeto-container">
         <!-- Conteúdo carregado dinamicamente pelo JavaScript -->
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Carregando informações do projeto...</p>
+        </div>
       </div>
     </section>
 
-    <div style="text-align:center;margin:28px 0">
-      <a class="btn btn-primary" href="index.html" style="text-decoration:none">Voltar ao Login</a>
+    <div class="back-button">
+      <a class="btn btn-client-light" href="index.html" style="text-decoration:none">
+        <i class="fas fa-arrow-left"></i> Voltar ao Login
+      </a>
     </div>
   </main>
 
-  <footer>© 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.</footer>
+  <footer>
+    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
+  </footer>
 
   <script>
     // Configuração do Firebase
@@ -363,11 +400,11 @@
             
             // Atualizar container do projeto
             document.getElementById('projeto-container').innerHTML = `
-              <div class="card" role="region" aria-labelledby="projeto-title">
-                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta ${projeto.nome}">
-                <h3 id="projeto-title">${projeto.nome}</h3>
+              <div class="project-card">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/compartilhados.png" alt="Ícone pasta ${projeto.nome}">
+                <h3>${projeto.nome}</h3>
                 <p>${projeto.descricao}</p>
-                <a class="btn btn-light" href="${projeto.link}" target="_blank" rel="noopener noreferrer">Abrir Pasta do Projeto</a>
+                <a class="btn btn-client-light" href="${projeto.link}" target="_blank" rel="noopener noreferrer">Abrir Pasta do Projeto</a>
               </div>
             `;
             
@@ -379,39 +416,55 @@
             // Se não tem projeto específico, mostrar todas as pastas (comportamento antigo)
             document.getElementById('projeto-section').style.display = 'block';
             document.getElementById('projeto-container').innerHTML = `
-              <div class="card" role="region" aria-labelledby="jgp-title">
-                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta JGP">
-                <h3 id="jgp-title">JGP - BR-135/BA</h3>
+              <div class="project-card">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/compartilhados.png" alt="Ícone pasta JGP">
+                <h3>JGP - BR-135/BA</h3>
                 <p>Documentos técnicos, relatórios e entregas deste projeto.</p>
-                <a class="btn btn-light" href="https://drive.google.com/drive/folders/1u4_aYfnNJ22mMWVEWy5zZByZGszosrwh" target="_blank" rel="noopener noreferrer">Abrir Pasta JGP</a>
+                <a class="btn btn-client-light" href="https://drive.google.com/drive/folders/1u4_aYfnNJ22mMWVEWy5zZByZGszosrwh" target="_blank" rel="noopener noreferrer">Abrir Pasta JGP</a>
               </div>
 
-              <div class="card" role="region" aria-labelledby="dossel-title">
-                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta Dossel - Serra Dourada">
-                <h3 id="dossel-title">Dossel - Projeto Serra Dourada</h3>
+              <div class="project-card">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/compartilhados.png" alt="Ícone pasta Dossel - Serra Dourada">
+                <h3>Dossel - Projeto Serra Dourada</h3>
                 <p>Relatórios e entregas relacionadas ao projeto Serra Dourada.</p>
-                <a class="btn btn-light" href="https://drive.google.com/drive/folders/1AlebDIVnQkVqiL2YlMQlhd7yYbZpAWjE" target="_blank" rel="noopener noreferrer">Abrir Pasta Dossel</a>
+                <a class="btn btn-client-light" href="https://drive.google.com/drive/folders/1AlebDIVnQkVqiL2YlMQlhd7yYbZpAWjE" target="_blank" rel="noopener noreferrer">Abrir Pasta Dossel</a>
               </div>
 
-              <div class="card" role="region" aria-labelledby="habilis-title">
-                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone pasta Habilis - GO">
-                <h3 id="habilis-title">Habilis - GO</h3>
+              <div class="project-card">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/compartilhados.png" alt="Ícone pasta Habilis - GO">
+                <h3>Habilis - GO</h3>
                 <p>Documentação técnica e entregas do projeto Habilis.</p>
-                <a class="btn btn-light" href="https://drive.google.com/drive/folders/1sSfpz5P5I5siG9ZKkd8qXeO8cRyEO4Tw" target="_blank" rel="noopener noreferrer">Abrir Pasta Habilis</a>
+                <a class="btn btn-client-light" href="https://drive.google.com/drive/folders/1sSfpz5P5I5siG9ZKkd8qXeO8cRyEO4Tw" target="_blank" rel="noopener noreferrer">Abrir Pasta Habilis</a>
               </div>
             `;
           }
         }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
+        document.getElementById('welcome-message').textContent = 'Erro ao carregar dados.';
+        document.getElementById('welcome-message').style.background = '#ffebee';
+        document.getElementById('welcome-message').style.color = '#c62828';
+        document.getElementById('welcome-message').style.borderLeftColor = '#c62828';
       }
     });
 
     function logout() {
       auth.signOut().then(() => {
         window.location.href = 'index.html';
+      }).catch((error) => {
+        console.error('Erro ao fazer logout:', error);
+        alert('Erro ao fazer logout. Tente novamente.');
       });
     }
+
+    // Adicionar Font Awesome para o ícone de voltar
+    document.addEventListener('DOMContentLoaded', function() {
+      const head = document.head || document.getElementsByTagName('head')[0];
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+      head.appendChild(link);
+    });
   </script>
 </body>
 </html>
