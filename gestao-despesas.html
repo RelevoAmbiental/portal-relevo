@@ -1126,6 +1126,147 @@
                 fecharModal();
             }
         }
+                // Exportar para Excel
+        function exportarExcel() {
+            try {
+                console.log('📊 Gerando relatório Excel...');
+                
+                const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
+                
+                if (dados.length === 0) {
+                    alert('❌ Nenhuma despesa para exportar!');
+                    return;
+                }
+        
+                // Criar cabeçalho do Excel
+                let csvContent = "DATA,PROJETO,FUNCIONARIO,TIPO,DESCRICAO,VALOR,STATUS,COMPROVANTE\n";
+                
+                // Adicionar dados
+                dados.forEach(despesa => {
+                    const linha = [
+                        formatarDataExcel(despesa.data),
+                        `"${despesa.projeto || ''}"`,
+                        `"${despesa.funcionario || ''}"`,
+                        `"${despesa.tipo || ''}"`,
+                        `"${(despesa.descricao || '').replace(/"/g, '""')}"`,
+                        formatarValorExcel(despesa.valor),
+                        `"${despesa.status || 'pendente'}"`,
+                        `"${despesa.comprovanteUrl || 'Sem comprovante'}"`
+                    ].join(',');
+                    
+                    csvContent += linha + '\n';
+                });
+        
+                // Criar e baixar arquivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                const dataAtual = new Date().toISOString().split('T')[0];
+                link.setAttribute('href', url);
+                link.setAttribute('download', `relatorio_despesas_${dataAtual}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('✅ Relatório Excel gerado com sucesso!');
+                alert('✅ Relatório Excel baixado com sucesso!');
+                
+            } catch (error) {
+                console.error('❌ Erro ao exportar Excel:', error);
+                alert('❌ Erro ao gerar relatório: ' + error.message);
+            }
+        }
+        
+        // Exportar Relatório Mensal
+        function exportarRelatorioMensal() {
+            try {
+                const mesAtual = new Date().getMonth();
+                const anoAtual = new Date().getFullYear();
+                
+                const despesasMes = despesas.filter(despesa => {
+                    const dataDespesa = new Date(despesa.data);
+                    return dataDespesa.getMonth() === mesAtual && dataDespesa.getFullYear() === anoAtual;
+                });
+        
+                if (despesasMes.length === 0) {
+                    alert('❌ Nenhuma despesa encontrada para o mês atual!');
+                    return;
+                }
+        
+                // Criar relatório detalhado
+                let csvContent = "RELATÓRIO MENSAL DE DESPESAS - " + new Date().toLocaleDateString('pt-BR') + "\n\n";
+                csvContent += "DATA,PROJETO,FUNCIONARIO,TIPO,DESCRICAO,VALOR,STATUS\n";
+                
+                // Adicionar dados
+                despesasMes.forEach(despesa => {
+                    const linha = [
+                        formatarDataExcel(despesa.data),
+                        `"${despesa.projeto || ''}"`,
+                        `"${despesa.funcionario || ''}"`,
+                        `"${despesa.tipo || ''}"`,
+                        `"${(despesa.descricao || '').replace(/"/g, '""')}"`,
+                        formatarValorExcel(despesa.valor),
+                        `"${despesa.status || 'pendente'}"`
+                    ].join(',');
+                    
+                    csvContent += linha + '\n';
+                });
+        
+                // Adicionar totais
+                const totalMes = despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0);
+                csvContent += `\nTOTAL DO MÊS:,${formatarValorExcel(totalMes)}\n`;
+                
+                // Estatísticas por projeto
+                csvContent += "\nRESUMO POR PROJETO:\n";
+                csvContent += "PROJETO,VALOR TOTAL\n";
+                
+                const porProjeto = {};
+                despesasMes.forEach(d => {
+                    if (d.projeto) {
+                        porProjeto[d.projeto] = (porProjeto[d.projeto] || 0) + (d.valor || 0);
+                    }
+                });
+                
+                Object.entries(porProjeto).forEach(([projeto, valor]) => {
+                    csvContent += `"${projeto}",${formatarValorExcel(valor)}\n`;
+                });
+        
+                // Criar e baixar arquivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                const nomeMes = new Date().toLocaleDateString('pt-BR', { month: 'long' });
+                link.setAttribute('href', url);
+                link.setAttribute('download', `relatorio_mensal_${nomeMes}_${anoAtual}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('✅ Relatório mensal gerado com sucesso!');
+                alert('✅ Relatório mensal baixado com sucesso!');
+                
+            } catch (error) {
+                console.error('❌ Erro ao exportar relatório mensal:', error);
+                alert('❌ Erro ao gerar relatório mensal: ' + error.message);
+            }
+        }
+        
+        // Funções auxiliares para formatação
+        function formatarDataExcel(dataString) {
+            if (!dataString) return '';
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+        
+        function formatarValorExcel(valor) {
+            return (valor || 0).toFixed(2).replace('.', ',');
+        }
     </script>
 </body>
 </html>
