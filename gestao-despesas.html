@@ -5,137 +5,596 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Despesas | Relevo Consultoria</title>
     
+    <!-- CSS Global Harmonizado -->
+    <link rel="stylesheet" href="styles/global.css">
+    
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        :root {
-            --primary-color: #26C04C; --primary-dark: #2E7D32; --secondary-color: #EB8807;
-            --accent-dark: #2D4132; --light-color: #f8f9fa; --text-color: #444;
-            --gray-light: #e9ecef; --gray-medium: #6c757d; --border-color: #dee2e6;
+        /* ESTILOS ESPECÍFICOS DO DASHBOARD DE DESPESAS */
+        
+        /* Header Especial */
+        .header-dashboard {
+            background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
+            color: white;
+            padding: 25px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
         }
-        body { background-color: #f5f5f5; color: var(--text-color); line-height: 1.6; }
-        .header { background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; padding: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header-content { max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { height: 40px; }
-        .header h1 { font-size: 1.8rem; font-weight: 600; }
-        .nav-buttons { display: flex; gap: 15px; }
-        .btn { padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: white; color: var(--primary-dark); }
-        .btn-secondary { background: transparent; color: white; border: 1px solid white; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .view-navigation { display: flex; gap: 10px; margin-bottom: 25px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .view-btn { padding: 12px 24px; border: 2px solid var(--border-color); background: white; color: var(--text-color); border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
-        .view-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-left: 4px solid var(--primary-color); }
-        .stat-card h3 { color: var(--gray-medium); font-size: 0.9rem; margin-bottom: 10px; text-transform: uppercase; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary-dark); }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-bottom: 30px; }
-        .dashboard-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .dashboard-card h3 { color: var(--accent-dark); margin-bottom: 20px; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        .chart-container { position: relative; height: 300px; }
-        .filters-section { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 30px; }
-        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .filter-group { display: flex; flex-direction: column; }
-        .filter-group label { font-weight: 600; margin-bottom: 8px; color: var(--accent-dark); font-size: 0.9rem; }
-        .filter-group select { padding: 12px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 14px; background: white; }
-        .filter-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        .table-section { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; display: none; }
-        .table-section.active { display: block; }
-        .table-header { padding: 20px 25px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: var(--light-color); padding: 15px 12px; text-align: left; font-weight: 600; color: var(--accent-dark); border-bottom: 2px solid var(--border-color); }
-        td { padding: 12px; border-bottom: 1px solid var(--border-color); }
-        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
-        .status-pendente { background: #fff3cd; color: #856404; }
-        .status-pago { background: #d1edff; color: #0c5460; }
-        .action-buttons { display: flex; gap: 5px; }
-        .edit-btn, .delete-btn { padding: 6px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-        .edit-btn { background: #ffc107; color: white; }
-        .delete-btn { background: #dc3545; color: white; }
-        .loading { text-align: center; padding: 40px; color: var(--gray-medium); }
-        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .header-dashboard-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-dashboard .logo {
+            height: 45px;
+        }
+
+        .header-dashboard h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Navegação de Views */
+        .view-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: var(--card-branco);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+        }
+
+        .view-btn {
+            padding: 14px 28px;
+            border: 2px solid var(--borda-cinza);
+            background: var(--card-branco);
+            color: var(--texto-escuro);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .view-btn.active {
+            background: var(--verde-primario);
+            color: white;
+            border-color: var(--verde-primario);
+            box-shadow: 0 4px 12px rgba(38, 192, 76, 0.3);
+        }
+
+        .view-btn:hover:not(.active) {
+            border-color: var(--verde-primario);
+            color: var(--verde-primario);
+        }
+
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-branco);
+            padding: 30px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--verde-primario);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-card h3 {
+            color: var(--texto-cinza);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--verde-escuro);
+            line-height: 1.2;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-card {
+            background: var(--card-branco);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--verde-primario);
+        }
+
+        .dashboard-card h3 {
+            color: var(--verde-accent);
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Filtros */
+        .filters-section {
+            background: var(--card-branco);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+
+        .filters-section h3 {
+            color: var(--verde-accent);
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--verde-accent);
+            font-size: 0.95rem;
+        }
+
+        .filter-group select {
+            padding: 14px;
+            border: 2px solid var(--borda-cinza);
+            border-radius: 8px;
+            font-size: 15px;
+            background: var(--card-branco);
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus {
+            border-color: var(--verde-primario);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(38, 192, 76, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /* Tabela */
+        .table-section {
+            background: var(--card-branco);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .table-section.active {
+            display: block;
+        }
+
+        .table-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid var(--borda-cinza);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--cinza-claro);
+        }
+
+        .table-header h3 {
+            color: var(--verde-accent);
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: var(--verde-primario);
+            color: white;
+            padding: 18px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--borda-cinza);
+            color: var(--texto-escuro);
+        }
+
+        tr:hover {
+            background: rgba(38, 192, 76, 0.05);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-pago {
+            background: #d1edff;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Botões de Ação */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #e0a800;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--texto-cinza);
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--verde-primario);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsividade */
         @media (max-width: 768px) {
-            .header-content { flex-direction: column; gap: 15px; text-align: center; }
-            .dashboard-grid, .stats-grid, .filters-grid { grid-template-columns: 1fr; }
-            .container { padding: 15px; }
-            .view-navigation { flex-direction: column; }
+            .header-dashboard-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .view-navigation {
+                flex-direction: column;
+            }
+
+            .view-btn {
+                min-width: auto;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                justify-content: center;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .stat-card {
+                padding: 20px 15px;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+
+            .dashboard-card {
+                padding: 20px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-dashboard h1 {
+                font-size: 1.6rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filters-section {
+                padding: 20px 15px;
+            }
+
+            .table-header {
+                padding: 20px 15px;
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" class="logo">
+    <header class="header-dashboard">
+        <div class="header-dashboard-content">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" class="logo">
             <h1>Gestão de Despesas</h1>
             <div class="nav-buttons">
-                <a href="gestao.html" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Voltar à Gestão</a>
+                <a href="gestao.html" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Voltar à Gestão
+                </a>
             </div>
         </div>
     </header>
 
     <div class="container">
         <div class="view-navigation">
-            <button class="view-btn active" onclick="showView('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
-            <button class="view-btn" onclick="showView('lista')"><i class="fas fa-list"></i> Lista de Despesas</button>
+            <button class="view-btn active" onclick="showView('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="view-btn" onclick="showView('lista')">
+                <i class="fas fa-list"></i> Lista de Despesas
+            </button>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card"><h3>Total Gasto</h3><div class="stat-value" id="totalGasto">R$ 0,00</div></div>
-            <div class="stat-card"><h3>Despesas Este Mês</h3><div class="stat-value" id="despesasMes">0</div></div>
-            <div class="stat-card"><h3>Ticket Médio</h3><div class="stat-value" id="ticketMedio">R$ 0,00</div></div>
-            <div class="stat-card"><h3>Eficiência</h3><div class="stat-value" id="eficiencia">0%</div></div>
+            <div class="stat-card">
+                <h3>Total Gasto</h3>
+                <div class="stat-value" id="totalGasto">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Despesas Este Mês</h3>
+                <div class="stat-value" id="despesasMes">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ticket Médio</h3>
+                <div class="stat-value" id="ticketMedio">R$ 0,00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Eficiência</h3>
+                <div class="stat-value" id="eficiencia">0%</div>
+            </div>
         </div>
 
         <section class="filters-section">
-            <h3 style="margin-bottom: 20px; color: var(--accent-dark);">Filtros</h3>
+            <h3>Filtros</h3>
             <div class="filters-grid">
-                <div class="filter-group"><label for="filterProjeto">Projeto</label><select id="filterProjeto"><option value="">Todos os projetos</option></select></div>
-                <div class="filter-group"><label for="filterFuncionario">Funcionário</label><select id="filterFuncionario"><option value="">Todos os funcionários</option></select></div>
-                <div class="filter-group"><label for="filterTipo">Tipo de Despesa</label><select id="filterTipo"><option value="">Todos os tipos</option></select></div>
+                <div class="filter-group">
+                    <label for="filterProjeto">Projeto</label>
+                    <select id="filterProjeto">
+                        <option value="">Todos os projetos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterFuncionario">Funcionário</label>
+                    <select id="filterFuncionario">
+                        <option value="">Todos os funcionários</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterTipo">Tipo de Despesa</label>
+                    <select id="filterTipo">
+                        <option value="">Todos os tipos</option>
+                    </select>
+                </div>
             </div>
             <div class="filter-actions">
-                <button class="btn btn-secondary" onclick="limparFiltros()"><i class="fas fa-times"></i> Limpar</button>
-                <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Aplicar</button>
+                <button class="btn btn-secondary" onclick="limparFiltros()">
+                    <i class="fas fa-times"></i> Limpar Filtros
+                </button>
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <i class="fas fa-filter"></i> Aplicar Filtros
+                </button>
             </div>
         </section>
 
         <div id="dashboardView">
             <div class="dashboard-grid">
-                <div class="dashboard-card"><h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3><div class="chart-container"><canvas id="chartEvolucao"></canvas></div></div>
-                <div class="dashboard-card"><h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3><div class="chart-container"><canvas id="chartTipos"></canvas></div></div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3>
+                    <div class="chart-container">
+                        <canvas id="chartEvolucao"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3>
+                    <div class="chart-container">
+                        <canvas id="chartTipos"></canvas>
+                    </div>
+                </div>
             </div>
             <div class="dashboard-grid">
-                <div class="dashboard-card"><h3><i class="fas fa-chart-bar"></i> Top Projetos</h3><div class="chart-container"><canvas id="chartProjetos"></canvas></div></div>
-                <div class="dashboard-card"><h3><i class="fas fa-users"></i> Gastos por Funcionário</h3><div class="chart-container"><canvas id="chartFuncionarios"></canvas></div></div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-bar"></i> Top Projetos</h3>
+                    <div class="chart-container">
+                        <canvas id="chartProjetos"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-users"></i> Gastos por Funcionário</h3>
+                    <div class="chart-container">
+                        <canvas id="chartFuncionarios"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
         <section id="listaView" class="table-section">
             <div class="table-header">
                 <h3>Lista de Despesas</h3>
-                <button class="btn btn-primary" onclick="exportarExcel()" id="exportBtn"><i class="fas fa-file-excel"></i> <span id="exportText">Exportar Excel</span>
+                <button class="btn btn-primary" onclick="exportarExcel()" id="exportBtn">
+                    <i class="fas fa-file-excel"></i> 
+                    <span id="exportText">Exportar Excel</span>
                 </button>
             </div>
             <div class="table-container">
                 <table id="tabelaDespesas">
                     <thead>
-                        <tr><th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Ações</th></tr>
+                        <tr>
+                            <th>Data</th>
+                            <th>Projeto</th>
+                            <th>Funcionário</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
                     </thead>
                     <tbody id="tbodyDespesas">
-                        <tr><td colspan="7" class="loading"><div class="loading-spinner"></div><p>Carregando despesas...</p></td></tr>
+                        <tr>
+                            <td colspan="7" class="loading">
+                                <div class="loading-spinner"></div>
+                                <p>Carregando despesas...</p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </section>
     </div>
+
+    <footer>
+        © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
+    </footer>
 
     <script>
         const firebaseConfig = {
@@ -155,7 +614,7 @@
         let charts = {};
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Dashboard inicializado');
+            console.log('🚀 Dashboard de Despesas inicializado');
             carregarDespesas();
             inicializarFiltros();
         });
@@ -172,7 +631,8 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     despesas.push({
-                        id: doc.id, ...data,
+                        id: doc.id,
+                        ...data,
                         data: data.data || '',
                         valor: data.valor || 0
                     });
@@ -215,7 +675,7 @@
             const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
             
             if (dados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #6c757d;">Nenhuma despesa encontrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--texto-cinza);">Nenhuma despesa encontrada</td></tr>';
                 return;
             }
 
@@ -229,8 +689,12 @@
                     <td><span class="status-badge status-${despesa.status || 'pendente'}">${despesa.status || 'pendente'}</span></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="edit-btn" onclick="editarDespesa('${despesa.id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button class="delete-btn" onclick="excluirDespesa('${despesa.id}')" title="Excluir"><i class="fas fa-trash"></i></button>
+                            <button class="edit-btn" onclick="editarDespesa('${despesa.id}')" title="Editar">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="delete-btn" onclick="excluirDespesa('${despesa.id}')" title="Excluir">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -269,8 +733,19 @@
                         borderColor: '#26C04C',
                         backgroundColor: 'rgba(38, 192, 76, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 3
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
                 }
             });
         }
@@ -286,8 +761,17 @@
                     labels: Object.keys(tiposData),
                     datasets: [{
                         data: Object.values(tiposData),
-                        backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132']
+                        backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132', '#6B5539']
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
                 }
             });
         }
@@ -307,6 +791,15 @@
                         data: projetosOrdenados.map(([,valor]) => valor),
                         backgroundColor: '#26C04C'
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
                 }
             });
         }
@@ -325,6 +818,15 @@
                         data: funcionariosOrdenados.map(([,valor]) => valor),
                         backgroundColor: ['#26C04C', '#EB8807', '#2E7D32', '#396B45', '#2D4132', '#6B5539']
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
                 }
             });
         }
@@ -411,11 +913,11 @@
                 const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
                 
                 if (dados.length === 0) {
-                    mostrarNotificacao('⚠️ Nenhuma despesa para exportar.', 'error');
+                    alert('⚠️ Nenhuma despesa para exportar.');
                     return;
                 }
         
-                // Criar cabeçalho do CSV - VOLTAR ao ponto e vírgula
+                // Criar cabeçalho do CSV
                 let csvContent = "DATA;PROJETO;FUNCIONÁRIO;TIPO;DESCRIÇÃO;VALOR;STATUS;COMPROVANTE\n";
                 
                 // Adicionar dados formatados
@@ -425,16 +927,15 @@
                         despesa.projeto || '',
                         despesa.funcionario || '',
                         despesa.tipo || '',
-                        (despesa.descricao || '').replace(/;/g, ','), // Substituir ; por , para não quebrar
-                        (despesa.valor || 0).toString().replace('.', ','), // Formato brasileiro
+                        (despesa.descricao || '').replace(/;/g, ','),
+                        (despesa.valor || 0).toString().replace('.', ','),
                         despesa.status || 'pendente',
                         despesa.comprovanteUrl ? 'Sim' : 'Não'
-                    ].join(';'); // MANTER ponto e vírgula
+                    ].join(';');
                     
                     csvContent += linha + '\n';
                 });
         
-                // Usar tipo específico para Excel
                 const blob = new Blob([csvContent], { 
                     type: 'data:text/csv;charset=utf-8;' 
                 });
@@ -450,11 +951,11 @@
                 document.body.removeChild(link);
                 
                 console.log(`✅ ${dados.length} despesas exportadas com sucesso!`);
-                mostrarNotificacao(`✅ ${dados.length} despesas exportadas com sucesso! O arquivo CSV usa ";" como separador.`, 'success');
+                alert(`✅ ${dados.length} despesas exportadas com sucesso!`);
                 
             } catch (error) {
                 console.error('❌ Erro ao exportar para Excel:', error);
-                mostrarNotificacao('❌ Erro ao exportar: ' + error.message, 'error');
+                alert('❌ Erro ao exportar: ' + error.message);
             } finally {
                 // Restaurar botão
                 exportBtn.disabled = false;
