@@ -396,7 +396,88 @@
         }
 
         function exportarExcel() {
-            alert('Exportar para Excel - Funcionalidade em desenvolvimento');
+            try {
+                console.log('📊 Iniciando exportação para Excel...');
+                
+                const dados = filteredDespesas.length > 0 ? filteredDespesas : despesas;
+                
+                if (dados.length === 0) {
+                    alert('Nenhuma despesa para exportar.');
+                    return;
+                }
+        
+                // Criar cabeçalho do CSV
+                let csvContent = "DATA,PROJETO,FUNCIONÁRIO,TIPO,DESCRIÇÃO,VALOR,STATUS,COMPROVANTE\n";
+                
+                // Adicionar dados
+                dados.forEach(despesa => {
+                    const linha = [
+                        formatarData(despesa.data),
+                        `"${despesa.projeto || ''}"`,
+                        `"${despesa.funcionario || ''}"`,
+                        `"${despesa.tipo || ''}"`,
+                        `"${(despesa.descricao || '').replace(/"/g, '""')}"`,
+                        formatarMoeda(despesa.valor).replace('R$', '').trim(),
+                        despesa.status || 'pendente',
+                        despesa.comprovanteUrl ? 'Sim' : 'Não'
+                    ].join(',');
+                    
+                    csvContent += linha + '\n';
+                });
+        
+                // Criar arquivo e fazer download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', `despesas_relevo_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log(`✅ ${dados.length} despesas exportadas com sucesso!`);
+                mostrarNotificacao(`✅ ${dados.length} despesas exportadas com sucesso!`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Erro ao exportar para Excel:', error);
+                mostrarNotificacao('❌ Erro ao exportar: ' + error.message, 'error');
+            }
+        }
+        
+        // Função auxiliar para mostrar notificações (se não existir)
+        function mostrarNotificacao(mensagem, tipo) {
+            // Criar elemento de notificação
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                z-index: 1000;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+                background: ${tipo === 'success' ? '#4CAF50' : '#f44336'};
+            `;
+            
+            notification.innerHTML = `
+                <span>${mensagem}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer;">×</button>
+            `;
+        
+            document.body.appendChild(notification);
+        
+            // Auto-remover após 5 segundos
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
         }
     </script>
 </body>
