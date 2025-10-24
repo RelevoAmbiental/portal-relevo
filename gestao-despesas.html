@@ -566,6 +566,64 @@
             </div>
         </section>
 
+        <!-- Relatórios Rápidos -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <h3>Relatórios Rápidos</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="exportarRelatorioMensal()" style="padding: 15px;">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>Relatório Mensal</div>
+                        <small>Despesas deste mês</small>
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportarExcel()" style="padding: 15px;">
+                        <i class="fas fa-file-excel"></i>
+                        <div>Exportar Tudo</div>
+                        <small>Todas as despesas</small>
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h4 style="margin-bottom: 10px; color: var(--accent-dark);">Estatísticas do Mês</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                        <div>
+                            <strong>Total Gasto:</strong>
+                            <div id="statsTotalMes">R$ 0,00</div>
+                        </div>
+                        <div>
+                            <strong>Nº de Despesas:</strong>
+                            <div id="statsQuantidadeMes">0</div>
+                        </div>
+                        <div>
+                            <strong>Maior Despesa:</strong>
+                            <div id="statsMaiorDespesa">R$ 0,00</div>
+                        </div>
+                        <div>
+                            <strong>Média por Despesa:</strong>
+                            <div id="statsMediaMes">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Exportação Avançada</h3>
+                <div style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="exportDataInicio">Data Início</label>
+                        <input type="date" id="exportDataInicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="exportDataFim">Data Fim</label>
+                        <input type="date" id="exportDataFim">
+                    </div>
+                    <button class="btn btn-primary" onclick="exportarPorPeriodo()" style="width: 100%;">
+                        <i class="fas fa-download"></i> Exportar por Período
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <!-- Gráficos -->
         <section class="charts-section">
             <div class="chart-card">
@@ -588,8 +646,11 @@
                 <h3>Lista de Despesas</h3>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <span id="contadorDespesas">0 despesas encontradas</span>
-                    <button class="btn btn-primary" onclick="exportarPDF()">
-                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    <button class="btn btn-primary" onclick="exportarExcel()">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportarRelatorioMensal()">
+                        <i class="fas fa-chart-bar"></i> Relatório Mensal
                     </button>
                 </div>
             </div>
@@ -741,6 +802,7 @@
                 atualizarTabela();
                 atualizarGraficos();
                 atualizarFiltros();
+                atualizarEstatisticasMes();
 
             } catch (error) {
                 console.error('❌ Erro ao carregar despesas:', error);
@@ -788,6 +850,26 @@
             document.getElementById('trendTotal').textContent = `${despesas.length} despesas no total`;
             document.getElementById('trendMes').textContent = 'Este mês';
             document.getElementById('trendMedia').textContent = 'Média por despesa';
+        }
+
+        // Atualizar estatísticas do mês
+        function atualizarEstatisticasMes() {
+            const mesAtual = new Date().getMonth();
+            const anoAtual = new Date().getFullYear();
+            
+            const despesasMes = despesas.filter(despesa => {
+                const dataDespesa = new Date(despesa.data);
+                return dataDespesa.getMonth() === mesAtual && dataDespesa.getFullYear() === anoAtual;
+            });
+
+            const totalMes = despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0);
+            const maiorDespesa = despesasMes.length > 0 ? Math.max(...despesasMes.map(d => d.valor || 0)) : 0;
+            const mediaMes = despesasMes.length > 0 ? totalMes / despesasMes.length : 0;
+
+            document.getElementById('statsTotalMes').textContent = formatarMoeda(totalMes);
+            document.getElementById('statsQuantidadeMes').textContent = despesasMes.length;
+            document.getElementById('statsMaiorDespesa').textContent = formatarMoeda(maiorDespesa);
+            document.getElementById('statsMediaMes').textContent = formatarMoeda(mediaMes);
         }
 
         // Atualizar tabela
@@ -928,6 +1010,11 @@
 
             document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
             document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
+
+            // Configurar datas de exportação (mês atual)
+            const primeiroDiaMes = new Date(dataFim.getFullYear(), dataFim.getMonth(), 1);
+            document.getElementById('exportDataInicio').value = primeiroDiaMes.toISOString().split('T')[0];
+            document.getElementById('exportDataFim').value = dataFim.toISOString().split('T')[0];
         }
 
         // Atualizar opções dos filtros
@@ -1087,46 +1174,7 @@
             }
         }
 
-        // Exportar PDF (simulação)
-        function exportarPDF() {
-            alert('📊 Funcionalidade de exportação PDF será implementada na FASE 2B!');
-            // Aqui será implementado na próxima fase
-        }
-
-        // Logout
-        function logout() {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html';
-            });
-        }
-
-        // Funções utilitárias
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor || 0);
-        }
-
-        function formatarData(dataString) {
-            if (!dataString) return '-';
-            const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
-        }
-
-        function limitarTexto(texto, limite) {
-            if (!texto) return '-';
-            return texto.length > limite ? texto.substring(0, limite) + '...' : texto;
-        }
-
-        // Fechar modal ao clicar fora
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalEditar');
-            if (event.target === modal) {
-                fecharModal();
-            }
-        }
-                // Exportar para Excel
+        // Exportar para Excel
         function exportarExcel() {
             try {
                 console.log('📊 Gerando relatório Excel...');
@@ -1256,6 +1304,72 @@
                 alert('❌ Erro ao gerar relatório mensal: ' + error.message);
             }
         }
+
+        // Exportar por período personalizado
+        function exportarPorPeriodo() {
+            try {
+                const dataInicio = document.getElementById('exportDataInicio').value;
+                const dataFim = document.getElementById('exportDataFim').value;
+                
+                if (!dataInicio || !dataFim) {
+                    alert('❌ Selecione o período para exportação!');
+                    return;
+                }
+
+                const despesasPeriodo = despesas.filter(despesa => {
+                    return despesa.data >= dataInicio && despesa.data <= dataFim;
+                });
+
+                if (despesasPeriodo.length === 0) {
+                    alert('❌ Nenhuma despesa encontrada para o período selecionado!');
+                    return;
+                }
+
+                // Criar relatório
+                let csvContent = "RELATÓRIO DE DESPESAS - PERÍODO: " + 
+                                formatarDataExcel(dataInicio) + " a " + formatarDataExcel(dataFim) + "\n\n";
+                csvContent += "DATA,PROJETO,FUNCIONARIO,TIPO,DESCRICAO,VALOR,STATUS,COMPROVANTE\n";
+                
+                despesasPeriodo.forEach(despesa => {
+                    const linha = [
+                        formatarDataExcel(despesa.data),
+                        `"${despesa.projeto || ''}"`,
+                        `"${despesa.funcionario || ''}"`,
+                        `"${despesa.tipo || ''}"`,
+                        `"${(despesa.descricao || '').replace(/"/g, '""')}"`,
+                        formatarValorExcel(despesa.valor),
+                        `"${despesa.status || 'pendente'}"`,
+                        `"${despesa.comprovanteUrl || 'Sem comprovante'}"`
+                    ].join(',');
+                    
+                    csvContent += linha + '\n';
+                });
+
+                // Adicionar totais
+                const totalPeriodo = despesasPeriodo.reduce((sum, d) => sum + (d.valor || 0), 0);
+                csvContent += `\nTOTAL DO PERÍODO:,${formatarValorExcel(totalPeriodo)}\n`;
+
+                // Criar e baixar arquivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', `relatorio_periodo_${dataInicio}_a_${dataFim}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('✅ Relatório por período gerado com sucesso!');
+                alert('✅ Relatório por período baixado com sucesso!');
+                
+            } catch (error) {
+                console.error('❌ Erro ao exportar por período:', error);
+                alert('❌ Erro ao gerar relatório: ' + error.message);
+            }
+        }
         
         // Funções auxiliares para formatação
         function formatarDataExcel(dataString) {
@@ -1266,6 +1380,40 @@
         
         function formatarValorExcel(valor) {
             return (valor || 0).toFixed(2).replace('.', ',');
+        }
+
+        // Logout
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Funções utilitárias
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor || 0);
+        }
+
+        function formatarData(dataString) {
+            if (!dataString) return '-';
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+
+        function limitarTexto(texto, limite) {
+            if (!texto) return '-';
+            return texto.length > limite ? texto.substring(0, limite) + '...' : texto;
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditar');
+            if (event.target === modal) {
+                fecharModal();
+            }
         }
     </script>
 </body>
