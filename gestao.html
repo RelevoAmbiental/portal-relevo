@@ -7,6 +7,10 @@
 
   <!-- Fonte Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- CSS Global Harmonizado -->
+  <link rel="stylesheet" href="styles/global.css">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -14,228 +18,167 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
   <style>
-    /* RESET E BASE */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ESTILOS ESPECÍFICOS DA GESTÃO */
     
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f7f7f7;
-      color: #333;
-      line-height: 1.6;
-    }
-
-    /* HEADER MOBILE FIRST */
-    header {
-      background-color: #2E7D32;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: relative;
-    }
-
-    header img.logo {
-      height: 40px;
-      width: auto;
-    }
-
-    /* Menu de navegação - mobile */
-    nav {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9rem;
-      padding: 6px 12px;
-      border-radius: 4px;
-      transition: background-color 0.3s ease;
-    }
-
-    nav a:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    .logout-btn {
-      background: transparent;
-      color: white;
-      border: 1px solid white;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.9rem;
-      white-space: nowrap;
-    }
-
-    /* HERO SECTION */
-    .hero {
-      text-align: center;
-      padding: 40px 20px 30px;
-      background: linear-gradient(to right, #1565C0, #2E7D32);
-      color: #fff;
-    }
-
-    .hero h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-      line-height: 1.3;
-    }
-
-    .hero p {
-      font-size: 1rem;
-      opacity: 0.9;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* ACESSO RÁPIDO - MOBILE */
+    /* Acesso Rápido */
     .acesso-rapido {
-      padding: 30px 15px 15px;
+      padding: 30px 0;
       text-align: center;
     }
 
     .acesso-rapido h2 {
-      color: #2E7D32;
+      color: var(--verde-accent);
       margin-bottom: 25px;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
+      position: relative;
+    }
+
+    .acesso-rapido h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--verde-primario);
     }
 
     .links-rapidos {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
-      padding: 0 15px 30px;
-      max-width: 1200px;
-      margin: 0 auto;
+      margin-bottom: 30px;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px 15px;
+    .card-link {
+      background: var(--card-branco);
+      border-radius: 10px;
+      padding: 25px 20px;
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--verde-primario);
+      text-decoration: none;
+      color: inherit;
     }
 
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .card-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
 
-    .card img {
+    .card-link img {
       width: 50px;
       height: 50px;
-      margin-bottom: 12px;
+      margin-bottom: 15px;
       object-fit: contain;
     }
 
-    .card h3 {
-      color: #2E7D32;
+    .card-link h3 {
+      color: var(--verde-accent);
       margin-bottom: 10px;
       font-size: 1.1rem;
     }
 
-    .card a {
-      text-decoration: none;
-      color: #2E7D32;
-      font-weight: 600;
-      display: inline-block;
-      padding: 8px 16px;
-      border: 2px solid #2E7D32;
-      border-radius: 6px;
-      transition: all 0.3s;
+    .card-link p {
+      color: var(--texto-cinza);
       font-size: 0.9rem;
+      margin-bottom: 15px;
     }
 
-    /* BOTÃO DESPESAS MOBILE */
+    /* Botão Despesas Destaque */
     .botao-despesas-container {
-      text-align: center;
-      padding: 25px 15px;
       background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
-      margin: 15px;
+      padding: 30px;
       border-radius: 12px;
-      border: 2px dashed #2E7D32;
+      border: 2px dashed var(--verde-primario);
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .destaque-texto {
+      color: var(--verde-accent);
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
     }
 
     .botao-despesas {
       display: inline-block;
-      background: linear-gradient(135deg, #2E7D32, #4CAF50);
+      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
       color: white;
       text-decoration: none;
-      padding: 14px 28px;
+      padding: 16px 35px;
       border-radius: 50px;
       font-weight: bold;
-      font-size: 1rem;
-      margin: 8px 0;
+      font-size: 1.1rem;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+      box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
       border: none;
       cursor: pointer;
-      width: 100%;
-      max-width: 300px;
     }
 
-    .destaque-texto {
-      color: #2E7D32;
-      font-weight: 600;
-      margin-bottom: 12px;
-      font-size: 1rem;
+    .botao-despesas:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(38, 192, 76, 0.4);
     }
 
-    /* DASHBOARD MOBILE */
+    /* Dashboard */
     .dashboard {
-      padding: 30px 15px;
+      padding: 30px 0;
       text-align: center;
     }
 
     .dashboard h2 {
-      color: #2E7D32;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--verde-accent);
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      position: relative;
+    }
+
+    .dashboard h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--verde-primario);
     }
 
     iframe.clickup-embed {
       width: 100%;
-      height: 500px;
-      border: 1px solid #ccc;
+      height: 600px;
+      border: 1px solid var(--borda-cinza);
       border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: var(--card-branco);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     .error-msg {
       color: #b71c1c;
       background: #ffebee;
       border: 1px solid #f44336;
-      padding: 12px;
+      padding: 15px;
       border-radius: 6px;
       display: none;
       font-size: 0.9rem;
+      margin-top: 15px;
     }
 
-    /* NOTIFICAÇÕES E MODIFICAÇÕES MOBILE */
+    /* Notificações e Modificações */
     .notificacoes, .modificacoes {
-      padding: 30px 15px;
+      padding: 30px 0;
     }
 
     .notificacoes h2, .modificacoes h2 {
-      color: #2E7D32;
-      border-left: 6px solid #2E7D32;
-      padding-left: 10px;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--verde-accent);
+      border-left: 4px solid var(--verde-primario);
+      padding-left: 12px;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
     }
 
     .notificacoes-lista {
@@ -244,119 +187,113 @@
     }
 
     .notificacoes-lista li {
-      background: #fff;
-      margin-bottom: 10px;
-      padding: 12px 15px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      font-size: 0.9rem;
+      background: var(--card-branco);
+      margin-bottom: 12px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      font-size: 0.95rem;
+      border-left: 3px solid var(--verde-primario);
     }
 
+    /* Tabela */
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
-      border-radius: 6px;
+      background: var(--card-branco);
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      font-size: 0.9rem;
     }
 
     th, td {
-      padding: 10px 8px;
-      border-bottom: 1px solid #eee;
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--borda-cinza);
       text-align: left;
     }
 
     th {
-      background: #2E7D32;
+      background: var(--verde-primario);
       color: white;
       font-weight: 600;
     }
 
-    /* FOOTER MOBILE */
-    footer {
-      text-align: center;
-      padding: 20px 15px;
-      background: #1B5E20;
-      color: white;
-      font-size: 0.85rem;
+    tr:hover {
+      background: var(--cinza-claro);
     }
 
-    /* MEDIA QUERIES PARA TELAS MAIORES */
-    @media (min-width: 768px) {
-      header {
-        padding: 15px 40px;
-      }
-      
-      header img.logo {
-        height: 50px;
-      }
-      
-      nav a {
-        font-size: 1rem;
-        padding: 8px 16px;
-      }
-      
-      .logout-btn {
-        padding: 8px 16px;
-        font-size: 1rem;
-      }
-      
-      .hero {
-        padding: 60px 20px 40px;
-      }
-      
-      .hero h1 {
-        font-size: 2.2rem;
-      }
-      
-      .acesso-rapido {
-        padding: 40px 20px 20px;
-      }
-      
+    /* Menu Mobile */
+    .menu-mobile {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
       .links-rapidos {
-        padding: 0 40px 40px;
-        gap: 25px;
+        grid-template-columns: 1fr;
+        gap: 15px;
       }
-      
-      .card {
-        padding: 25px 20px;
+
+      .menu-toggle {
+        display: block;
       }
-      
-      .card img {
-        width: 60px;
-        height: 60px;
+
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--verde-escuro);
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       }
-      
-      .botao-despesas-container {
-        margin: 20px 40px;
-        padding: 30px 20px;
+
+      .nav-links.mobile-open {
+        display: flex;
       }
-      
-      .botao-despesas {
-        width: auto;
-        padding: 16px 35px;
-      }
-      
-      .dashboard {
-        padding: 40px;
-      }
-      
-      iframe.clickup-embed {
-        height: 700px;
-      }
-      
-      .notificacoes, .modificacoes {
-        padding: 40px;
-      }
-      
-      table {
-        font-size: 1rem;
-      }
-      
-      th, td {
+
+      .nav-links a {
         padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .nav-links a:last-child {
+        border-bottom: none;
+      }
+
+      iframe.clickup-embed {
+        height: 400px;
+      }
+
+      .botao-despesas-container {
+        padding: 20px 15px;
+        margin: 15px 0;
+      }
+
+      .botao-despesas {
+        padding: 14px 25px;
+        font-size: 1rem;
+        width: 100%;
+      }
+
+      /* Melhorar legibilidade da tabela em mobile */
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
       }
     }
 
@@ -366,57 +303,29 @@
       }
     }
 
-    /* MELHORIAS ESPECÍFICAS PARA MOBILE */
     @media (max-width: 480px) {
       .hero h1 {
-        font-size: 1.5rem;
-      }
-      
-      .hero p {
-        font-size: 0.9rem;
+        font-size: 1.6rem;
       }
       
       .acesso-rapido h2,
       .dashboard h2,
       .notificacoes h2,
       .modificacoes h2 {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
       }
       
-      .links-rapidos {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        padding: 0 10px 20px;
+      .card-link {
+        padding: 20px 15px;
       }
       
-      .card {
-        padding: 15px 12px;
-      }
-      
-      .card h3 {
-        font-size: 1rem;
+      .card-link img {
+        width: 40px;
+        height: 40px;
       }
       
       iframe.clickup-embed {
-        height: 400px;
-      }
-      
-      /* Melhorar legibilidade da tabela em mobile */
-      table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-      }
-    }
-
-    /* ORIENTAÇÃO LANDSCAPE */
-    @media (max-width: 768px) and (orientation: landscape) {
-      .hero {
-        padding: 30px 20px 20px;
-      }
-      
-      iframe.clickup-embed {
-        height: 300px;
+        height: 350px;
       }
     }
   </style>
@@ -424,115 +333,144 @@
 
 <body>
   <!-- Header -->
-  <header>
-    <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental" class="logo">
-    <nav>
-      <a href="gestao.html">Gestão</a>
-      <a href="colaboradores.html">Equipe</a>
-      <a href="clientes.html">Clientes</a>
-      <button class="logout-btn" onclick="logout()">Sair</button>
-    </nav>
+  <header class="header">
+    <div class="header-content">
+      <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_vertical.png" alt="Logo Relevo Consultoria Ambiental" class="logo">
+      
+      <button class="menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      
+      <nav class="nav-links">
+        <a href="gestao.html">Gestão</a>
+        <a href="colaboradores.html">Equipe</a>
+        <a href="clientes.html">Clientes</a>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </nav>
+    </div>
   </header>
 
   <!-- Hero -->
   <section class="hero">
-    <h1>Gestão Interna</h1>
-    <p>Central de controle e informações administrativas da Relevo Consultoria Ambiental</p>
+    <div class="container">
+      <h1>Gestão Interna</h1>
+      <p>Central de controle e informações administrativas da Relevo Consultoria Ambiental</p>
+    </div>
   </section>
 
   <!-- Acesso Rápido -->
   <section class="acesso-rapido">
-    <h2>Acesso Rápido</h2>
-    
-    <div class="links-rapidos">
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/arquivos.png" alt="Ícone de Drive da empresa">
-        <h3>Drive da Empresa</h3>
-        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link" target="_blank">Acessar</a>
+    <div class="container">
+      <h2>Acesso Rápido</h2>
+      
+      <div class="links-rapidos">
+        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link" target="_blank" class="card-link">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/arquivos.png" alt="Ícone de Drive da empresa">
+          <h3>Drive da Empresa</h3>
+          <p>Acesso completo aos documentos corporativos</p>
+          <span class="btn btn-primary">Acessar</span>
+        </a>
+
+        <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL?usp=drive_link" target="_blank" class="card-link">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/compartilhados.png" alt="Ícone de relatórios de clientes">
+          <h3>Relatórios de Clientes</h3>
+          <p>Documentação técnica e relatórios entregues</p>
+          <span class="btn btn-primary">Visualizar</span>
+        </a>
+
+        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link" target="_blank" class="card-link">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/SegurancaJuridica.png" alt="Ícone de segurança e SST">
+          <h3>SST e Segurança</h3>
+          <p>Procedimentos de saúde e segurança no trabalho</p>
+          <span class="btn btn-primary">Acessar</span>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1RaLjZ0bY_RNI6qW91ktmqMgKoz68DOLfBdvrzd1exQI/edit?usp=sharing" target="_blank" class="card-link">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Gastos.png" alt="Ícone de despesas e custos">
+          <h3>Controle de Despesas</h3>
+          <p>Planilha geral de custos e despesas</p>
+          <span class="btn btn-primary">Ver Planilha</span>
+        </a>
       </div>
 
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/compartilhados.png" alt="Ícone de relatórios de clientes">
-        <h3>Relatórios de Clientes</h3>
-        <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL?usp=drive_link" target="_blank">Visualizar</a>
+      <!-- Card Gestão de Despesas -->
+      <div class="card" style="max-width: 400px; margin: 0 auto 20px;">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Gastos.png" alt="Ícone gestão de despesas" style="width: 60px; height: 60px; margin: 0 auto 15px; display: block;">
+        <h3 style="text-align: center;">Gestão de Despesas</h3>
+        <p style="text-align: center;">Painel completo para visualizar e gerenciar todas as despesas</p>
+        <a class="btn btn-primary" href="gestao-despesas.html" target="_blank" style="display: block; text-align: center;">Abrir Painel</a>
       </div>
 
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/SegurancaJuridica.png" alt="Ícone de segurança e SST">
-        <h3>SST e Segurança</h3>
-        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link" target="_blank">Acessar</a>
-      </div>
-
-      <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Gastos.png" alt="Ícone de despesas e custos">
-        <h3>Controle de Despesas</h3>
-        <a href="https://docs.google.com/spreadsheets/d/1RaLjZ0bY_RNI6qW91ktmqMgKoz68DOLfBdvrzd1exQI/edit?usp=sharing" target="_blank">Ver Planilha</a>
-      </div>
-    </div>
-
-    <div class="card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Gastos.png" alt="Ícone gestão de despesas">
-        <h3>Gestão de Despesas</h3>
-        <p>Painel completo para visualizar e gerenciar todas as despesas</p>
-        <a class="btn btn-light" href="gestao-despesas.html" target="_blank">Abrir Painel</a>
-    </div>
-
-    <!-- Botão de Despesas - ÚNICA MUDANÇA: Link atualizado -->
-    <div class="botao-despesas-container">
-      <div class="destaque-texto">📋 Precisa registrar uma nova despesa?</div>
-      <a class="botao-despesas" href="despesas">
-        🚀 Cadastrar Nova Despesa
-      </a>
-      <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
-        Clique para abrir o formulário de despesas
+      <!-- Botão de Despesas em Destaque -->
+      <div class="botao-despesas-container">
+        <div class="destaque-texto">📋 Precisa registrar uma nova despesa?</div>
+        <a class="botao-despesas" href="despesas">
+          🚀 Cadastrar Nova Despesa
+        </a>
+        <div style="margin-top: 12px; font-size: 0.9em; color: var(--texto-cinza);">
+          Clique para abrir o formulário de despesas
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Dashboard -->
   <section class="dashboard">
-    <h2>Dashboard de Indicadores</h2>
-    <iframe class="clickup-embed" src="https://sharing.clickup.com/90132343455/b/h/2ky4wumz-293/48959d213ba4ffb" onerror="document.querySelector('.error-msg').style.display='block'"></iframe>
-    <div class="error-msg">Dashboard indisponível no momento. Tente novamente mais tarde.</div>
+    <div class="container">
+      <h2>Dashboard de Indicadores</h2>
+      <iframe class="clickup-embed" src="https://sharing.clickup.com/90132343455/b/h/2ky4wumz-293/48959d213ba4ffb" onerror="document.querySelector('.error-msg').style.display='block'"></iframe>
+      <div class="error-msg">Dashboard indisponível no momento. Tente novamente mais tarde.</div>
+    </div>
   </section>
 
   <!-- Notificações -->
   <section class="notificacoes">
-    <h2>Notificações Recentes</h2>
-    <ul class="notificacoes-lista">
-      <li>✅ Sistema atualizado com sucesso - 15/01/2025</li>
-      <li>📊 Novo relatório mensal disponível para download</li>
-      <li>👥 Reunião de equipe agendada para sexta-feira</li>
-    </ul>
+    <div class="container">
+      <h2>Notificações Recentes</h2>
+      <ul class="notificacoes-lista">
+        <li>✅ Sistema atualizado com sucesso - 15/01/2025</li>
+        <li>📊 Novo relatório mensal disponível para download</li>
+        <li>👥 Reunião de equipe agendada para sexta-feira</li>
+        <li>🔧 Manutenção programada para o próximo sábado</li>
+      </ul>
+    </div>
   </section>
 
   <!-- Modificações -->
   <section class="modificacoes">
-    <h2>Últimas Modificações no Drive</h2>
-    <table id="tabelaModificacoes">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Usuário</th>
-          <th>Arquivo</th>
-          <th>Descrição</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>15/01/2025</td>
-          <td>Administrador</td>
-          <td>Relatório Mensal.pdf</td>
-          <td>Atualização de dados do trimestre</td>
-        </tr>
-        <tr>
-          <td>14/01/2025</td>
-          <td>Maria Santos</td>
-          <td>Planilha de Despesas.xlsx</td>
-          <td>Adição de novas despesas de campo</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="container">
+      <h2>Últimas Modificações no Drive</h2>
+      <table id="tabelaModificacoes">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Usuário</th>
+            <th>Arquivo</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>15/01/2025</td>
+            <td>Administrador</td>
+            <td>Relatório Mensal.pdf</td>
+            <td>Atualização de dados do trimestre</td>
+          </tr>
+          <tr>
+            <td>14/01/2025</td>
+            <td>Maria Santos</td>
+            <td>Planilha de Despesas.xlsx</td>
+            <td>Adição de novas despesas de campo</td>
+          </tr>
+          <tr>
+            <td>13/01/2025</td>
+            <td>João Silva</td>
+            <td>Projeto_JGP_Relatorio.pdf</td>
+            <td>Revisão técnica finalizada</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <footer>
@@ -566,6 +504,20 @@
       });
     }
 
+    // Menu Mobile
+    function toggleMobileMenu() {
+      const navLinks = document.querySelector('.nav-links');
+      navLinks.classList.toggle('mobile-open');
+    }
+
+    // Fechar menu ao clicar em um link (mobile)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.classList.remove('mobile-open');
+      });
+    });
+
     // Melhorar experiência mobile
     document.addEventListener('DOMContentLoaded', function() {
       // Prevenir zoom em inputs no iOS
@@ -574,4 +526,3 @@
   </script>
 </body>
 </html>
-
