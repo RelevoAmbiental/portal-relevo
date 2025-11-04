@@ -1,6 +1,13 @@
-/* styles/global.css - CSS GLOBAL HARMONIZADO COM SITE RELEVO */
+/* ============================================
+   PORTAL RELEVO - CSS GLOBAL HARMONIZADO
+   Versão Otimizada 2025
+   ============================================ */
+
+/* ============================================
+   VARIÁVEIS CSS (PALETA OFICIAL RELEVO)
+   ============================================ */
 :root {
-  /* PALETA OFICIAL RELEVO */
+  /* Cores Principais */
   --verde-primario: #26C04C;
   --verde-escuro: #396B45;
   --verde-accent: #2D4132;
@@ -8,116 +15,203 @@
   --marrom: #6B5539;
   --roxo: #4E296B;
   
-  /* CORES NEUTRAS */
+  /* Cores Neutras */
   --bg-claro: #f8f9fa;
   --card-branco: #ffffff;
   --texto-escuro: #444444;
   --texto-cinza: #666666;
   --borda-cinza: #e9ecef;
   --cinza-claro: #f7f7f7;
+  
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 15px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 25px rgba(0,0,0,0.12);
+  
+  /* Transições */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
 }
 
-/* RESET E BASE */
+/* ============================================
+   RESET E BASE
+   ============================================ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background-color: var(--bg-claro);
   color: var(--texto-escuro);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* TIPOGRAFIA MONTSEERRAT */
+/* ============================================
+   TIPOGRAFIA
+   ============================================ */
 h1, h2, h3, h4, h5, h6 {
   color: var(--verde-accent);
   margin-bottom: 1rem;
   font-weight: 700;
+  line-height: 1.3;
 }
 
-h1 { font-size: 2.2rem; }
-h2 { font-size: 1.8rem; }
-h3 { font-size: 1.4rem; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h3 { font-size: clamp(1.2rem, 2.5vw, 1.6rem); }
+h4 { font-size: 1.3rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1rem; }
 
 p {
   margin-bottom: 1rem;
+  line-height: 1.7;
 }
 
-/* BOTÕES HARMONIZADOS */
+a {
+  color: var(--verde-primario);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--verde-escuro);
+}
+
+/* ============================================
+   BOTÕES HARMONIZADOS
+   ============================================ */
 .btn {
   display: inline-block;
   padding: 12px 24px;
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   cursor: pointer;
   text-align: center;
   border: none;
   font-size: 0.95rem;
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Botão Primário (Verde) */
 .btn-primary {
   background: var(--verde-primario);
   color: white;
   border: 2px solid var(--verde-primario);
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--verde-escuro);
   border-color: var(--verde-escuro);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(38, 192, 76, 0.3);
 }
 
+/* Botão Secundário (Outline) */
 .btn-secondary {
   background: transparent;
   color: var(--verde-primario);
   border: 2px solid var(--verde-primario);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background: var(--verde-primario);
   color: white;
   transform: translateY(-2px);
 }
 
+/* Botão Claro */
 .btn-light {
   background: var(--cinza-claro);
   color: var(--texto-escuro);
   border: 1px solid var(--borda-cinza);
 }
 
-.btn-light:hover {
+.btn-light:hover:not(:disabled) {
   background: #e6e6e6;
   transform: translateY(-1px);
 }
 
-/* CARDS ELEGANTES */
+/* Botão Laranja */
+.btn-orange {
+  background: var(--laranja);
+  color: white;
+  border: 2px solid var(--laranja);
+}
+
+.btn-orange:hover:not(:disabled) {
+  background: #d97a06;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(235, 136, 7, 0.3);
+}
+
+/* Botão de tamanho completo */
+.btn-full {
+  width: 100%;
+  display: block;
+}
+
+/* ============================================
+   CARDS ELEGANTES
+   ============================================ */
 .card {
   background: var(--card-branco);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
   border-left: 4px solid var(--verde-primario);
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-lg);
 }
 
-/* HEADER UNIFICADO */
+.card h3 {
+  color: var(--verde-accent);
+  margin-bottom: 15px;
+}
+
+.card p {
+  color: var(--texto-cinza);
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   HEADER UNIFICADO
+   ============================================ */
 .header {
   background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
   color: white;
   padding: 15px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-content {
@@ -127,17 +221,24 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
 }
 
 .logo {
   height: 45px;
   width: auto;
+  transition: transform var(--transition-fast);
+}
+
+.logo:hover {
+  transform: scale(1.05);
 }
 
 .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 15px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .nav-links a {
@@ -145,8 +246,9 @@ p {
   text-decoration: none;
   font-weight: 500;
   padding: 8px 16px;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+  border-radius: 6px;
+  transition: background-color var(--transition-fast);
+  font-size: 0.95rem;
 }
 
 .nav-links a:hover {
@@ -158,29 +260,54 @@ p {
   color: white;
   border: 1px solid white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .logout-btn:hover {
   background: rgba(255,255,255,0.1);
+  transform: translateY(-1px);
 }
 
-/* HERO SECTIONS */
+/* ============================================
+   HERO SECTIONS
+   ============================================ */
 .hero {
   text-align: center;
   padding: 50px 20px;
   background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
   color: white;
   margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero h1 {
   color: white;
   margin-bottom: 15px;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .hero p {
@@ -190,11 +317,14 @@ p {
   margin: 0 auto;
 }
 
-/* CONTAINERS E GRIDS */
+/* ============================================
+   CONTAINERS E GRIDS
+   ============================================ */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  width: 100%;
 }
 
 .grid {
@@ -204,16 +334,197 @@ p {
   margin: 20px 0;
 }
 
-/* FOOTER UNIFICADO */
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* ============================================
+   FORMULÁRIOS
+   ============================================ */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-weight: 600;
+  color: var(--verde-accent);
+  font-size: 0.95rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid var(--borda-cinza);
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: var(--bg-claro);
+  transition: all var(--transition-normal);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--verde-primario);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38,192,76,0.1);
+  background-color: white;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ============================================
+   TABELAS
+   ============================================ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-branco);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.9rem;
+}
+
+thead {
+  background: var(--verde-primario);
+  color: white;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--borda-cinza);
+}
+
+th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+tbody tr:hover {
+  background: var(--cinza-claro);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================
+   FOOTER UNIFICADO
+   ============================================ */
 footer {
   background: var(--verde-accent);
   color: white;
   text-align: center;
   padding: 25px 20px;
   margin-top: 40px;
+  font-size: 0.9rem;
 }
 
-/* RESPONSIVIDADE */
+footer strong {
+  font-weight: 600;
+}
+
+/* ============================================
+   UTILITÁRIOS
+   ============================================ */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+/* ============================================
+   ANIMAÇÕES
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease;
+}
+
+/* ============================================
+   LOADING
+   ============================================ */
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--texto-cinza);
+}
+
+.loading-spinner {
+  border: 4px solid var(--borda-cinza);
+  border-top: 4px solid var(--verde-primario);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVIDADE TABLET (768px)
+   ============================================ */
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
@@ -231,10 +542,6 @@ footer {
     padding: 40px 15px;
   }
   
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-  
   .grid {
     grid-template-columns: 1fr;
     gap: 15px;
@@ -243,19 +550,118 @@ footer {
   .container {
     padding: 0 15px;
   }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  th, td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
 }
 
+/* ============================================
+   RESPONSIVIDADE MOBILE (480px)
+   ============================================ */
 @media (max-width: 480px) {
   .hero h1 {
     font-size: 1.6rem;
   }
   
-  .btn {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-  }
-  
   .card {
     padding: 15px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .logo {
+    height: 40px;
+  }
+
+  .nav-links a,
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 0.75rem 1rem;
+    font-size: 16px; /* Previne zoom no iOS */
+  }
+
+  th, td {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ============================================
+   TELAS GRANDES (1200px+)
+   ============================================ */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1400px;
+  }
+
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================
+   ACESSIBILIDADE
+   ============================================ */
+*:focus {
+  outline: 2px solid var(--verde-primario);
+  outline-offset: 2px;
+}
+
+button:focus,
+a:focus {
+  outline: 2px solid var(--verde-primario);
+}
+
+/* Reduzir movimento para usuários com preferência */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   IMPRESSÃO
+   ============================================ */
+@media print {
+  .header,
+  .nav-links,
+  .logout-btn,
+  footer {
+    display: none;
+  }
+
+  body {
+    background: white;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
   }
 }
