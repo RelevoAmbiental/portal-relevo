@@ -8,16 +8,21 @@
   <!-- Fonte Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- CSS Global Harmonizado -->
+  <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css">
   
-  <!-- Firebase -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
   <style>
     /* ESTILOS ESPECÍFICOS DO LOGIN */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
     .login-container {
       display: flex; 
       justify-content: center; 
@@ -29,6 +34,7 @@
       padding: 20px;
     }
     
+    /* Imagem de fundo do login */
     .login-container::before {
       content: ""; 
       position: absolute; 
@@ -40,11 +46,12 @@
       background-size: cover; 
       background-position: center; 
       opacity: 0.3;
+      z-index: 0;
     }
     
     .login-box {
       background: white; 
-      border-radius: 10px; 
+      border-radius: 12px; 
       box-shadow: 0 15px 35px rgba(0,0,0,0.2);
       padding: 2.5rem 3rem; 
       width: 100%; 
@@ -59,18 +66,20 @@
       color: var(--verde-accent); 
       text-align: center; 
       margin-bottom: 0.5rem;
+      letter-spacing: 1px;
     }
     
     .logo-subtitle { 
       text-align: center; 
       font-size: 0.9rem; 
-      color: var(--texto-escuro); 
-      margin-bottom: 1rem; 
+      color: var(--texto-cinza); 
+      margin-bottom: 1.5rem; 
+      font-weight: 500;
     }
     
     .login-title { 
       text-align: center; 
-      margin-bottom: 1.8rem; 
+      margin-bottom: 2rem; 
       color: var(--verde-accent); 
       font-weight: 600; 
       font-size: 1.4rem;
@@ -82,59 +91,101 @@
     
     .form-label { 
       display: block; 
-      margin-bottom: 0.5rem; 
-      font-weight: 500; 
+      margin-bottom: 0.6rem; 
+      font-weight: 600; 
       color: var(--verde-accent);
+      font-size: 0.95rem;
     }
     
     .form-input {
       width: 100%; 
       padding: 0.9rem 1.2rem; 
-      border: 1px solid var(--borda-cinza);
-      border-radius: 4px; 
+      border: 2px solid var(--borda-cinza);
+      border-radius: 6px; 
       font-size: 1rem; 
       background-color: var(--bg-claro);
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
     }
     
     .form-input:focus { 
       border-color: var(--verde-primario); 
       outline: none; 
-      box-shadow: 0 0 0 2px rgba(38,192,76,0.2); 
+      box-shadow: 0 0 0 3px rgba(38,192,76,0.1); 
       background-color: white; 
     }
     
-    .error-message, .success-message {
+    /* Mensagens de erro/sucesso */
+    .message {
       text-align: center; 
       margin-top: 1rem; 
-      padding: 0.7rem; 
-      border-radius: 4px;
+      padding: 0.8rem; 
+      border-radius: 6px;
       font-size: 0.9rem; 
       display: none;
+      font-weight: 500;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .error-message { 
-      color: #e74c3c; 
-      background-color: #ffeaea; 
-      border: 1px solid #f44336;
+      color: #c62828; 
+      background-color: #ffebee; 
+      border: 1px solid #ef5350;
     }
     
     .success-message { 
       color: var(--verde-escuro); 
       background-color: #e8f5e9; 
-      font-weight: 600; 
       border: 1px solid var(--verde-primario);
     }
     
     .login-footer { 
       text-align: center; 
-      margin-top: 1.8rem; 
+      margin-top: 2rem; 
       font-size: 0.85rem; 
       color: var(--texto-cinza);
-      padding-top: 1rem;
+      padding-top: 1.5rem;
       border-top: 1px solid var(--borda-cinza);
+      line-height: 1.6;
     }
 
+    /* Botão de loading */
+    .btn-loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+      position: relative;
+    }
+
+    .btn-loading::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      right: 15px;
+      margin-top: -8px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spinner 0.6s linear infinite;
+    }
+
+    @keyframes spinner {
+      to { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVIDADE */
     @media (max-width: 480px) {
       .login-box {
         padding: 2rem 1.5rem;
@@ -143,6 +194,28 @@
       
       .logo-text {
         font-size: 1.8rem;
+      }
+
+      .login-title {
+        font-size: 1.2rem;
+      }
+
+      .form-input {
+        padding: 0.8rem 1rem;
+      }
+    }
+
+    @media (max-height: 700px) {
+      .login-box {
+        padding: 1.5rem 2rem;
+      }
+
+      .login-title {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.2rem;
       }
     }
   </style>
@@ -154,32 +227,48 @@
       <div class="logo-subtitle">Sistema Interno</div>
       <h2 class="login-title">Acesso à Intranet</h2>
 
-      <form id="login-form">
+      <form id="login-form" autocomplete="on">
         <div class="form-group">
           <label for="username" class="form-label">Usuário</label>
-          <input type="text" id="username" class="form-input" placeholder="Digite seu usuário" required>
+          <input 
+            type="text" 
+            id="username" 
+            class="form-input" 
+            placeholder="Digite seu usuário" 
+            autocomplete="username"
+            required>
         </div>
         
         <div class="form-group">
           <label for="password" class="form-label">Senha</label>
-          <input type="password" id="password" class="form-input" placeholder="Digite sua senha" required>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-input" 
+            placeholder="Digite sua senha"
+            autocomplete="current-password" 
+            required>
         </div>
         
-        <button type="submit" class="btn btn-primary" id="login-btn">Entrar</button>
+        <button type="submit" class="btn btn-primary" id="login-btn">
+          Entrar
+        </button>
         
-        <div id="error-message" class="error-message"></div>
-        <div id="success-message" class="success-message"></div>
+        <div id="error-message" class="message error-message"></div>
+        <div id="success-message" class="message success-message"></div>
       </form>
 
       <div class="login-footer">
         Sistema interno - Acesso restrito aos colaboradores<br>
-        Relevo Consultoria Ambiental © 2025
+        <strong>Relevo Consultoria Ambiental © 2025</strong>
       </div>
     </div>
   </div>
 
   <script>
+    // ============================================
     // CONFIGURAÇÃO DO FIREBASE
+    // ============================================
     const firebaseConfig = {
       apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
       authDomain: "portal-relevo.firebaseapp.com",
@@ -190,102 +279,178 @@
       measurementId: "G-W8TTP3D3YQ"
     };
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
+    // Inicializar Firebase apenas uma vez
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      console.log('✅ Firebase inicializado com sucesso');
+    }
+
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // ============================================
+    // ELEMENTOS DO DOM
+    // ============================================
     const form = document.getElementById("login-form");
     const errorMsg = document.getElementById("error-message");
     const successMsg = document.getElementById("success-message");
     const loginBtn = document.getElementById("login-btn");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
 
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-
-        if (!username || !password) {
-            showError("Preencha todos os campos.");
-            return;
-        }
-
-        loginBtn.disabled = true;
-        loginBtn.textContent = "Entrando...";
-        showSuccess("Verificando credenciais...");
-        hideError();
-
-        try {
-            const email = username + "@relevo.com";
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-
-            const userDoc = await db.collection('users').doc(user.uid).get();
-
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                showSuccess(`Bem-vindo, ${userData.nome}!`);
-                
-                setTimeout(() => {
-                    window.location.href = userData.tipo + ".html";
-                }, 1000);
-            } else {
-                throw new Error("Dados do usuário não encontrados no Firestore");
-            }
-            
-        } catch (error) {
-            console.error("❌ ERRO:", error);
-            hideSuccess();
-            
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-                showError("Usuário ou senha incorretos");
-            } else if (error.code === 'auth/user-not-found') {
-                showError("Usuário não encontrado");
-            } else if (error.code === 'auth/invalid-email') {
-                showError("Formato de usuário inválido");
-            } else {
-                showError("Erro: " + (error.message || error.code));
-            }
-        } finally {
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Entrar";
-        }
-    });
-
+    // ============================================
+    // FUNÇÕES AUXILIARES
+    // ============================================
+    
+    // Mostrar mensagem de erro
     function showError(message) {
-        errorMsg.textContent = message;
-        errorMsg.style.display = 'block';
+      hideSuccess();
+      errorMsg.textContent = message;
+      errorMsg.style.display = 'block';
     }
 
+    // Esconder mensagem de erro
     function hideError() {
-        errorMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
     }
 
+    // Mostrar mensagem de sucesso
     function showSuccess(message) {
-        successMsg.textContent = message;
-        successMsg.style.display = 'block';
+      hideError();
+      successMsg.textContent = message;
+      successMsg.style.display = 'block';
     }
 
+    // Esconder mensagem de sucesso
     function hideSuccess() {
-        successMsg.style.display = 'none';
+      successMsg.style.display = 'none';
     }
 
-    // Verifica se já está logado
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            db.collection('users').doc(user.uid).get().then((doc) => {
-                if (doc.exists) {
-                    window.location.href = doc.data().tipo + ".html";
-                }
-            });
+    // Desabilitar botão durante login
+    function setLoadingState(isLoading) {
+      loginBtn.disabled = isLoading;
+      if (isLoading) {
+        loginBtn.classList.add('btn-loading');
+        loginBtn.textContent = 'Entrando...';
+      } else {
+        loginBtn.classList.remove('btn-loading');
+        loginBtn.textContent = 'Entrar';
+      }
+    }
+
+    // ============================================
+    // LÓGICA DE LOGIN
+    // ============================================
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      // Validação básica
+      if (!username || !password) {
+        showError("⚠️ Preencha todos os campos.");
+        return;
+      }
+
+      // Iniciar processo de login
+      setLoadingState(true);
+      showSuccess("🔐 Verificando credenciais...");
+
+      try {
+        // Converter username para email (padrão do Firebase)
+        const email = username + "@relevo.com";
+        
+        // Tentar fazer login no Firebase Authentication
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        console.log('✅ Autenticação bem-sucedida:', user.uid);
+
+        // Buscar dados do usuário no Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const tipo = userData.tipo || 'colaboradores'; // Tipo padrão
+          const nome = userData.nome || username;
+
+          console.log('✅ Dados do usuário carregados:', userData);
+          
+          showSuccess(`✅ Bem-vindo, ${nome}!`);
+          
+          // Redirecionar após 1 segundo
+          setTimeout(() => {
+            window.location.href = tipo + ".html";
+          }, 1000);
+          
+        } else {
+          throw new Error("Dados do usuário não encontrados no sistema");
         }
+        
+      } catch (error) {
+        console.error("❌ Erro no login:", error);
+        setLoadingState(false);
+        hideSuccess();
+        
+        // Mensagens de erro amigáveis
+        if (error.code === 'auth/invalid-credential' || 
+            error.code === 'auth/wrong-password' ||
+            error.code === 'auth/invalid-email') {
+          showError("❌ Usuário ou senha incorretos");
+        } else if (error.code === 'auth/user-not-found') {
+          showError("❌ Usuário não encontrado no sistema");
+        } else if (error.code === 'auth/too-many-requests') {
+          showError("⏸️ Muitas tentativas. Aguarde alguns minutos.");
+        } else if (error.code === 'auth/network-request-failed') {
+          showError("🌐 Erro de conexão. Verifique sua internet.");
+        } else {
+          showError("❌ Erro ao fazer login: " + (error.message || 'Tente novamente'));
+        }
+      }
     });
 
-    // Foco automático no campo de usuário
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('username').focus();
+    // ============================================
+    // VERIFICAR SE JÁ ESTÁ LOGADO
+    // ============================================
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        console.log('👤 Usuário já autenticado:', user.uid);
+        try {
+          const userDoc = await db.collection('users').doc(user.uid).get();
+          if (userDoc.exists) {
+            const tipo = userDoc.data().tipo || 'colaboradores';
+            console.log('↪️ Redirecionando para:', tipo + '.html');
+            window.location.href = tipo + ".html";
+          }
+        } catch (error) {
+          console.error('❌ Erro ao verificar usuário:', error);
+        }
+      }
     });
+
+    // ============================================
+    // MELHORIAS DE UX
+    // ============================================
+    
+    // Foco automático no campo de usuário quando página carrega
+    document.addEventListener('DOMContentLoaded', function() {
+      usernameInput.focus();
+    });
+
+    // Limpar mensagens ao começar a digitar
+    usernameInput.addEventListener('input', () => {
+      hideError();
+      hideSuccess();
+    });
+
+    passwordInput.addEventListener('input', () => {
+      hideError();
+      hideSuccess();
+    });
+
+    // Prevenir zoom em dispositivos iOS
+    document.addEventListener('touchstart', function() {}, { passive: true });
   </script>
 </body>
 </html>
