@@ -5,17 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Despesas | Relevo Consultoria</title>
     
-    <!-- CSS Global Harmonizado -->
+    <!-- CSS Global -->
     <link rel="stylesheet" href="styles/global.css">
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDK - PROJETO DE DESPESAS -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        /* ESTILOS ESPECÍFICOS DO DASHBOARD DE DESPESAS */
+        /* ============================================
+           ESTILOS ESPECÍFICOS DO DASHBOARD DE DESPESAS
+           ============================================ */
         
         /* Header Especial */
         .header-dashboard {
@@ -39,6 +45,7 @@
 
         .header-dashboard .logo {
             height: 45px;
+            filter: brightness(0) invert(1);
         }
 
         .header-dashboard h1 {
@@ -81,6 +88,7 @@
             flex: 1;
             min-width: 200px;
             justify-content: center;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .view-btn.active {
@@ -133,7 +141,7 @@
             line-height: 1.2;
         }
 
-        /* Dashboard Grid */
+        /* Dashboard Grid para Gráficos */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -207,6 +215,7 @@
             font-size: 15px;
             background: var(--card-branco);
             transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .filter-group select:focus {
@@ -256,31 +265,6 @@
             overflow-x: auto;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95rem;
-        }
-
-        th {
-            background: var(--verde-primario);
-            color: white;
-            padding: 18px 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        td {
-            padding: 16px;
-            border-bottom: 1px solid var(--borda-cinza);
-            color: var(--texto-escuro);
-        }
-
-        tr:hover {
-            background: rgba(38, 192, 76, 0.05);
-        }
-
         /* Status Badges */
         .status-badge {
             padding: 6px 12px;
@@ -319,6 +303,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .edit-btn {
@@ -349,7 +334,7 @@
         }
 
         .loading-spinner {
-            border: 4px solid #f3f3f3;
+            border: 4px solid var(--borda-cinza);
             border-top: 4px solid var(--verde-primario);
             border-radius: 50%;
             width: 50px;
@@ -363,7 +348,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsividade */
+        /* RESPONSIVIDADE */
         @media (max-width: 768px) {
             .header-dashboard-content {
                 flex-direction: column;
@@ -456,7 +441,9 @@
 <body>
     <header class="header-dashboard">
         <div class="header-dashboard-content">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" class="logo">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_horizontal.png" 
+                 alt="Relevo Consultoria Ambiental" 
+                 class="logo">
             <h1>Gestão de Despesas</h1>
             <div class="nav-buttons">
                 <a href="gestao.html" class="btn btn-primary">
@@ -467,6 +454,7 @@
     </header>
 
     <div class="container">
+        <!-- Navegação de Views -->
         <div class="view-navigation">
             <button class="view-btn active" onclick="showView('dashboard')">
                 <i class="fas fa-chart-line"></i> Dashboard
@@ -476,6 +464,7 @@
             </button>
         </div>
 
+        <!-- Estatísticas -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Gasto</h3>
@@ -490,11 +479,12 @@
                 <div class="stat-value" id="ticketMedio">R$ 0,00</div>
             </div>
             <div class="stat-card">
-                <h3>Eficiência</h3>
+                <h3>Taxa de Aprovação</h3>
                 <div class="stat-value" id="eficiencia">0%</div>
             </div>
         </div>
 
+        <!-- Filtros -->
         <section class="filters-section">
             <h3>Filtros</h3>
             <div class="filters-grid">
@@ -527,6 +517,7 @@
             </div>
         </section>
 
+        <!-- Dashboard View -->
         <div id="dashboardView">
             <div class="dashboard-grid">
                 <div class="dashboard-card">
@@ -558,12 +549,12 @@
             </div>
         </div>
 
+        <!-- Lista View -->
         <section id="listaView" class="table-section">
             <div class="table-header">
                 <h3>Lista de Despesas</h3>
                 <button class="btn btn-primary" onclick="exportarExcel()" id="exportBtn">
-                    <i class="fas fa-file-excel"></i> 
-                    <span id="exportText">Exportar Excel</span>
+                    <i class="fas fa-file-excel"></i> Exportar Excel
                 </button>
             </div>
             <div class="table-container">
@@ -597,6 +588,9 @@
     </footer>
 
     <script>
+        // ============================================
+        // CONFIGURAÇÃO DO FIREBASE - PROJETO DESPESAS
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
             authDomain: "app-despesas-7029f.firebaseapp.com",
@@ -606,13 +600,22 @@
             appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase Despesas inicializado');
+        }
+
         const db = firebase.firestore();
 
+        // Variáveis globais
         let despesas = [];
         let filteredDespesas = [];
         let charts = {};
 
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Dashboard de Despesas inicializado');
             carregarDespesas();
@@ -623,10 +626,14 @@
             console.log('🎛️ Filtros inicializados');
         }
 
+        // ============================================
+        // CARREGAR DESPESAS DO FIREBASE
+        // ============================================
         async function carregarDespesas() {
             try {
-                console.log('📊 Carregando despesas...');
+                console.log('📊 Carregando despesas do Firestore...');
                 const snapshot = await db.collection('despesas').orderBy('createdAt', 'desc').get();
+                
                 despesas = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -637,6 +644,7 @@
                         valor: data.valor || 0
                     });
                 });
+                
                 console.log(`✅ ${despesas.length} despesas carregadas`);
                 atualizarDashboard();
                 atualizarFiltros();
@@ -646,6 +654,9 @@
             }
         }
 
+        // ============================================
+        // ATUALIZAR DASHBOARD
+        // ============================================
         function atualizarDashboard() {
             atualizarEstatisticas();
             atualizarTabela();
@@ -690,10 +701,10 @@
                     <td>
                         <div class="action-buttons">
                             <button class="edit-btn" onclick="editarDespesa('${despesa.id}')" title="Editar">
-                                <i class="fas fa-edit"></i> Editar
+                                <i class="fas fa-edit"></i>
                             </button>
                             <button class="delete-btn" onclick="excluirDespesa('${despesa.id}')" title="Excluir">
-                                <i class="fas fa-trash"></i> Excluir
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
@@ -713,7 +724,8 @@
             const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
             const currentYear = new Date().getFullYear();
             const dadosMensais = {};
-            meses.forEach((mes, index) => { dadosMensais[mes] = 0; });
+            meses.forEach((mes) => { dadosMensais[mes] = 0; });
+            
             dados.forEach(despesa => {
                 const data = new Date(despesa.data);
                 if (data.getFullYear() === currentYear) {
@@ -721,8 +733,10 @@
                     dadosMensais[mes] += despesa.valor || 0;
                 }
             });
+            
             const ctx = document.getElementById('chartEvolucao').getContext('2d');
             if (charts.evolucao) charts.evolucao.destroy();
+            
             charts.evolucao = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -740,21 +754,20 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        }
-                    }
+                    plugins: { legend: { display: true, position: 'top' } }
                 }
             });
         }
 
         function atualizarGraficoTipos(dados) {
             const tiposData = {};
-            dados.forEach(d => { if (d.tipo) tiposData[d.tipo] = (tiposData[d.tipo] || 0) + (d.valor || 0); });
+            dados.forEach(d => { 
+                if (d.tipo) tiposData[d.tipo] = (tiposData[d.tipo] || 0) + (d.valor || 0); 
+            });
+            
             const ctx = document.getElementById('chartTipos').getContext('2d');
             if (charts.tipos) charts.tipos.destroy();
+            
             charts.tipos = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -767,21 +780,24 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
 
         function atualizarGraficoProjetos(dados) {
             const projetosData = {};
-            dados.forEach(d => { if (d.projeto) projetosData[d.projeto] = (projetosData[d.projeto] || 0) + (d.valor || 0); });
-            const projetosOrdenados = Object.entries(projetosData).sort(([,a], [,b]) => b - a).slice(0, 6);
+            dados.forEach(d => { 
+                if (d.projeto) projetosData[d.projeto] = (projetosData[d.projeto] || 0) + (d.valor || 0); 
+            });
+            
+            const projetosOrdenados = Object.entries(projetosData)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6);
+            
             const ctx = document.getElementById('chartProjetos').getContext('2d');
             if (charts.projetos) charts.projetos.destroy();
+            
             charts.projetos = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -795,21 +811,24 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
         function atualizarGraficoFuncionarios(dados) {
             const funcionariosData = {};
-            dados.forEach(d => { if (d.funcionario) funcionariosData[d.funcionario] = (funcionariosData[d.funcionario] || 0) + (d.valor || 0); });
-            const funcionariosOrdenados = Object.entries(funcionariosData).sort(([,a], [,b]) => b - a).slice(0, 6);
+            dados.forEach(d => { 
+                if (d.funcionario) funcionariosData[d.funcionario] = (funcionariosData[d.funcionario] || 0) + (d.valor || 0); 
+            });
+            
+            const funcionariosOrdenados = Object.entries(funcionariosData)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6);
+            
             const ctx = document.getElementById('chartFuncionarios').getContext('2d');
             if (charts.funcionarios) charts.funcionarios.destroy();
+            
             charts.funcionarios = new Chart(ctx, {
                 type: 'polarArea',
                 data: {
@@ -822,11 +841,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
@@ -835,27 +850,43 @@
             const projetos = [...new Set(despesas.map(d => d.projeto).filter(Boolean))];
             const funcionarios = [...new Set(despesas.map(d => d.funcionario).filter(Boolean))];
             const tipos = [...new Set(despesas.map(d => d.tipo).filter(Boolean))];
+            
             const selectProjeto = document.getElementById('filterProjeto');
             const selectFuncionario = document.getElementById('filterFuncionario');
             const selectTipo = document.getElementById('filterTipo');
+            
             selectProjeto.innerHTML = '<option value="">Todos os projetos</option>';
-            projetos.forEach(projeto => { selectProjeto.innerHTML += `<option value="${projeto}">${projeto}</option>`; });
+            projetos.forEach(projeto => { 
+                selectProjeto.innerHTML += `<option value="${projeto}">${projeto}</option>`; 
+            });
+            
             selectFuncionario.innerHTML = '<option value="">Todos os funcionários</option>';
-            funcionarios.forEach(funcionario => { selectFuncionario.innerHTML += `<option value="${funcionario}">${funcionario}</option>`; });
+            funcionarios.forEach(funcionario => { 
+                selectFuncionario.innerHTML += `<option value="${funcionario}">${funcionario}</option>`; 
+            });
+            
             selectTipo.innerHTML = '<option value="">Todos os tipos</option>';
-            tipos.forEach(tipo => { selectTipo.innerHTML += `<option value="${tipo}">${tipo}</option>`; });
+            tipos.forEach(tipo => { 
+                selectTipo.innerHTML += `<option value="${tipo}">${tipo}</option>`; 
+            });
         }
 
+        // ============================================
+        // FILTROS
+        // ============================================
         function aplicarFiltros() {
             const projeto = document.getElementById('filterProjeto').value;
             const funcionario = document.getElementById('filterFuncionario').value;
             const tipo = document.getElementById('filterTipo').value;
+            
             filteredDespesas = despesas.filter(despesa => {
                 if (projeto && despesa.projeto !== projeto) return false;
                 if (funcionario && despesa.funcionario !== funcionario) return false;
                 if (tipo && despesa.tipo !== tipo) return false;
                 return true;
             });
+            
+            console.log(`🔍 Filtros aplicados: ${filteredDespesas.length} despesas encontradas`);
             atualizarDashboard();
         }
 
@@ -864,16 +895,28 @@
             document.getElementById('filterFuncionario').value = '';
             document.getElementById('filterTipo').value = '';
             filteredDespesas = [];
+            console.log('🔄 Filtros limpos');
             atualizarDashboard();
         }
 
+        // ============================================
+        // NAVEGAÇÃO ENTRE VIEWS
+        // ============================================
         function showView(view) {
+            // Atualizar botões ativos
             document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+            
+            // Mostrar/ocultar views
             document.getElementById('dashboardView').style.display = view === 'dashboard' ? 'block' : 'none';
             document.getElementById('listaView').classList.toggle('active', view === 'lista');
+            
+            console.log(`📄 View alterada para: ${view}`);
         }
 
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
         function formatarData(dataString) {
             if (!dataString) return '-';
             const data = new Date(dataString);
@@ -881,26 +924,44 @@
         }
 
         function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
+            return new Intl.NumberFormat('pt-BR', { 
+                style: 'currency', 
+                currency: 'BRL' 
+            }).format(valor || 0);
         }
 
         function mostrarErro(mensagem) {
             alert('Erro: ' + mensagem);
         }
 
+        // ============================================
+        // AÇÕES (Editar/Excluir)
+        // ============================================
         function editarDespesa(id) {
             alert('Editar despesa ' + id + ' - Funcionalidade em desenvolvimento');
+            // TODO: Implementar modal de edição
         }
 
         function excluirDespesa(id) {
             if (confirm('Tem certeza que deseja excluir esta despesa?')) {
-                alert('Excluir despesa ' + id + ' - Funcionalidade em desenvolvimento');
+                db.collection('despesas').doc(id).delete()
+                    .then(() => {
+                        console.log('✅ Despesa excluída:', id);
+                        alert('Despesa excluída com sucesso!');
+                        carregarDespesas();
+                    })
+                    .catch(error => {
+                        console.error('❌ Erro ao excluir despesa:', error);
+                        alert('Erro ao excluir despesa: ' + error.message);
+                    });
             }
         }
 
+        // ============================================
+        // EXPORTAR PARA EXCEL (CSV)
+        // ============================================
         function exportarExcel() {
             const exportBtn = document.getElementById('exportBtn');
-            const exportText = document.getElementById('exportText');
             const originalHTML = exportBtn.innerHTML;
             
             try {
@@ -917,7 +978,7 @@
                     return;
                 }
         
-                // Criar cabeçalho do CSV
+                // Criar cabeçalho do CSV (separado por ponto-e-vírgula para Excel BR)
                 let csvContent = "DATA;PROJETO;FUNCIONÁRIO;TIPO;DESCRIÇÃO;VALOR;STATUS;COMPROVANTE\n";
                 
                 // Adicionar dados formatados
@@ -927,8 +988,8 @@
                         despesa.projeto || '',
                         despesa.funcionario || '',
                         despesa.tipo || '',
-                        (despesa.descricao || '').replace(/;/g, ','),
-                        (despesa.valor || 0).toString().replace('.', ','),
+                        (despesa.descricao || '').replace(/;/g, ','), // Remove ponto-e-vírgula
+                        (despesa.valor || 0).toString().replace('.', ','), // Formato BR
                         despesa.status || 'pendente',
                         despesa.comprovanteUrl ? 'Sim' : 'Não'
                     ].join(';');
@@ -936,6 +997,7 @@
                     csvContent += linha + '\n';
                 });
         
+                // Criar Blob e fazer download
                 const blob = new Blob([csvContent], { 
                     type: 'data:text/csv;charset=utf-8;' 
                 });
