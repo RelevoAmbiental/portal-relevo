@@ -1,24 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <base target="_top">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Registro de Despesas - Relevo Consultoria</title>
+  <title>Registro de Despesas | Relevo Consultoria</title>
   
-  <!-- PWA -->
+  <!-- PWA Meta Tags -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#26C04C">
   
+  <!-- Fontes e Ícones -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Firebase v9 COMPAT (igual ao dashboard) -->
+  <!-- Firebase SDK v9 COMPAT -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
   
   <style>
+    /* ============================================
+       RESET E VARIÁVEIS
+       ============================================ */
     * {
       margin: 0;
       padding: 0;
@@ -35,6 +41,9 @@
       --light-color: #f8f9fa;
       --text-color: #444;
       --gray-light: #e9ecef;
+      --white: #ffffff;
+      --success: #4CAF50;
+      --error: #f44336;
     }
     
     body {
@@ -52,19 +61,31 @@
       padding: 0 15px;
     }
     
-    /* Header */
+    /* ============================================
+       HEADER
+       ============================================ */
     .app-header {
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       color: white;
       padding: 20px 0;
       text-align: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .app-header img {
+      height: 50px;
+      margin-bottom: 10px;
+      filter: brightness(0) invert(1);
     }
     
     .app-header h1 {
       font-size: 1.8rem;
       font-weight: 700;
       margin-bottom: 8px;
+      color: white;
     }
     
     .app-header p {
@@ -72,17 +93,14 @@
       opacity: 0.9;
     }
     
-    .app-header img {
-      height: 50px;
-      margin-bottom: 10px;
-    }
-    
-    /* Formulário */
+    /* ============================================
+       FORMULÁRIO
+       ============================================ */
     .form-container {
-      background: white;
+      background: var(--white);
       margin: 15px auto 20px;
-      padding: 20px 15px;
-      border-radius: 10px;
+      padding: 25px 20px;
+      border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       width: 100%;
     }
@@ -97,17 +115,23 @@
       margin-bottom: 8px;
       font-weight: 600;
       color: var(--accent-dark);
-      font-size: 1rem;
+      font-size: 0.95rem;
+    }
+
+    label .required {
+      color: var(--error);
+      margin-left: 4px;
     }
     
     input, select, textarea {
       width: 100%;
-      padding: 16px;
+      padding: 14px 16px;
       border: 2px solid var(--gray-light);
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 16px; /* Previne zoom no iOS */
       transition: all 0.3s ease;
-      background: white;
+      background: var(--white);
+      font-family: 'Montserrat', sans-serif;
     }
     
     /* Selects funcionais em mobile */
@@ -115,6 +139,7 @@
       -webkit-appearance: menulist;
       -moz-appearance: menulist;
       appearance: menulist;
+      cursor: pointer;
     }
     
     input:focus, select:focus, textarea:focus {
@@ -122,110 +147,200 @@
       outline: none;
       box-shadow: 0 0 0 3px rgba(38, 192, 76, 0.1);
     }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    small.helper-text {
+      display: block;
+      color: #666;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      font-style: italic;
+    }
     
-    /* Botões */
+    /* ============================================
+       BOTÕES
+       ============================================ */
     .btn {
       display: inline-block;
-      padding: 18px 25px;
+      padding: 16px 24px;
       border-radius: 10px;
       text-decoration: none;
       font-weight: 600;
       transition: all 0.3s ease;
       cursor: pointer;
       border: none;
-      font-size: 17px;
+      font-size: 1rem;
       text-align: center;
-      min-height: 56px;
-      line-height: 1.2;
+      min-height: 54px;
+      line-height: 1.4;
       width: 100%;
+      font-family: 'Montserrat', sans-serif;
     }
     
     .btn-primary {
       background-color: var(--primary-color);
       color: white;
       border: 2px solid var(--primary-color);
+      box-shadow: 0 4px 12px rgba(38, 192, 76, 0.3);
     }
     
-    .btn-primary:active {
+    .btn-primary:hover:not(:disabled) {
       background-color: var(--primary-dark);
-      transform: translateY(1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(38, 192, 76, 0.4);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none !important;
     }
     
     .camera-btn {
-      background: var(--primary-color);
-      color: white;
+      background: var(--white);
+      color: var(--primary-color);
       border: 2px solid var(--primary-color);
       width: 100%;
       margin: 8px 0;
-      padding: 16px;
-      font-size: 16px;
+      padding: 14px;
+      font-size: 0.95rem;
       border-radius: 10px;
-      min-height: 54px;
+      min-height: 52px;
     }
     
-    .camera-btn:active {
-      background: var(--primary-dark);
+    .camera-btn:hover:not(:disabled) {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .camera-btn:active:not(:disabled) {
       transform: translateY(1px);
     }
+
+    .camera-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
     
-    /* Preview */
+    /* ============================================
+       PREVIEW DE COMPROVANTE
+       ============================================ */
     #comprovantePreview {
-      margin-top: 10px;
+      margin-top: 15px;
     }
     
     .preview-image, .preview-file {
       text-align: center;
-      padding: 10px;
-      border: 2px dashed #ddd;
-      border-radius: 5px;
+      padding: 15px;
+      border: 2px dashed var(--gray-light);
+      border-radius: 8px;
+      background: var(--light-color);
     }
     
     .preview-image img {
-      max-width: 200px;
-      max-height: 200px;
-      border-radius: 5px;
+      max-width: 100%;
+      max-height: 250px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
+    .preview-file {
+      padding: 20px;
+    }
+
     .preview-file i {
       font-size: 48px;
-      color: #666;
+      color: var(--primary-color);
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 10px;
+    }
+
+    .preview-image small,
+    .preview-file small {
+      color: #666;
+      font-size: 0.85rem;
     }
     
-    /* Notificações */
+    /* ============================================
+       NOTIFICAÇÕES
+       ============================================ */
     .notification {
       position: fixed;
       top: 20px;
       right: 20px;
-      padding: 15px 20px;
-      border-radius: 5px;
+      padding: 16px 20px;
+      border-radius: 8px;
       color: white;
       z-index: 1000;
       min-width: 300px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
     
     .notification.success {
-      background: #4CAF50;
+      background: var(--success);
     }
     
     .notification.error {
-      background: #f44336;
+      background: var(--error);
+    }
+
+    .notification button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .notification button:hover {
+      opacity: 1;
     }
     
     @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from { 
+        transform: translateX(120%); 
+        opacity: 0; 
+      }
+      to { 
+        transform: translateX(0); 
+        opacity: 1; 
+      }
     }
     
-    /* Footer */
+    /* ============================================
+       FOOTER
+       ============================================ */
     .app-footer {
       background-color: var(--primary-dark);
       color: white;
       padding: 30px 0 15px;
-      margin-top: 30px;
+      margin-top: 40px;
       width: 100%;
     }
     
@@ -236,6 +351,12 @@
     .footer-logo {
       max-width: 150px;
       margin-bottom: 15px;
+      filter: brightness(0) invert(1);
+    }
+
+    .footer-content p {
+      margin: 10px 0;
+      opacity: 0.9;
     }
     
     .footer-links {
@@ -246,39 +367,32 @@
     
     .footer-links li {
       display: inline-block;
-      margin: 0 10px;
+      margin: 0 15px;
     }
     
     .footer-links a {
-      color: #aaa;
+      color: rgba(255,255,255,0.7);
       text-decoration: none;
-      font-size: 14px;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: white;
     }
     
     .footer-bottom {
       text-align: center;
       padding-top: 15px;
       border-top: 1px solid rgba(255,255,255,0.1);
-      color: #aaa;
-      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
       margin-top: 15px;
     }
     
-    /* Grupo de botões */
-    .camera-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    
-    /* Loading */
-    .btn:disabled {
-      background: #cccccc;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    
+    /* ============================================
+       LOADING
+       ============================================ */
     .fa-spin {
       animation: fa-spin 1s infinite linear;
     }
@@ -288,18 +402,35 @@
       100% { transform: rotate(360deg); }
     }
     
-    /* Mobile */
-    @media (max-width: 360px) {
+    /* ============================================
+       RESPONSIVIDADE
+       ============================================ */
+    @media (max-width: 480px) {
       .container {
         padding: 0 10px;
       }
       
       .form-container {
-        padding: 15px 10px;
+        padding: 20px 15px;
+        margin: 10px auto 15px;
       }
       
       .app-header h1 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
+      }
+
+      .app-header p {
+        font-size: 0.9rem;
+      }
+
+      .notification {
+        left: 10px;
+        right: 10px;
+        min-width: auto;
+      }
+
+      .preview-image img {
+        max-height: 200px;
       }
     }
     
@@ -310,7 +441,7 @@
       }
       
       .form-container {
-        padding: 30px 25px;
+        padding: 35px 30px;
       }
       
       .camera-buttons {
@@ -318,18 +449,24 @@
       }
       
       .camera-btn {
-        width: calc(50% - 4px);
-        margin: 0 2px;
+        width: calc(50% - 5px);
+        margin: 0;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        max-width: 700px;
       }
     }
   </style>
 </head>
 <body>
- 
   <!-- Header -->
   <header class="app-header">
     <div class="container">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_horizontal.png" alt="Logo Relevo Ambiental">
+      <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_horizontal.png" 
+           alt="Logo Relevo Consultoria Ambiental">
       <h1>Registro de Despesas</h1>
       <p>Controle de gastos de campo - Relevo Consultoria Ambiental</p>
     </div>
@@ -338,47 +475,85 @@
   <!-- Formulário -->
   <div class="container">
     <div class="form-container">
-      <form id="formDespesa">
+      <form id="formDespesa" autocomplete="on">
+        <!-- Projeto -->
         <div class="form-group">
-          <label for="projeto">Projeto:</label>
+          <label for="projeto">
+            Projeto<span class="required">*</span>
+          </label>
           <select id="projeto" name="projeto" required>
             <option value="">Selecione o projeto...</option>
           </select>
         </div>
         
+        <!-- Funcionário -->
         <div class="form-group">
-          <label for="funcionario">Nome do Funcionário:</label>
+          <label for="funcionario">
+            Nome do Funcionário<span class="required">*</span>
+          </label>
           <select id="funcionario" name="funcionario" required>
             <option value="">Selecione o funcionário...</option>
           </select>
         </div>
         
+        <!-- Data -->
         <div class="form-group">
-          <label for="data">Data da Despesa:</label>
+          <label for="data">
+            Data da Despesa<span class="required">*</span>
+          </label>
           <input type="date" id="data" name="data" required>
         </div>
         
+        <!-- Tipo -->
         <div class="form-group">
-          <label for="tipo">Tipo de Despesa:</label>
+          <label for="tipo">
+            Tipo de Despesa<span class="required">*</span>
+          </label>
           <select id="tipo" name="tipo" required>
             <option value="">Selecione o tipo...</option>
           </select>
         </div>
         
+        <!-- Descrição -->
         <div class="form-group">
-          <label for="descricao">Descrição da Despesa:</label>
-          <textarea id="descricao" name="descricao" rows="2" placeholder="Descreva detalhadamente esta despesa (opcional)"></textarea>
+          <label for="descricao">Descrição da Despesa</label>
+          <textarea 
+            id="descricao" 
+            name="descricao" 
+            rows="3" 
+            placeholder="Descreva detalhes sobre esta despesa (opcional)"></textarea>
+          <small class="helper-text">Adicione informações relevantes sobre a despesa</small>
         </div>
         
+        <!-- Valor -->
         <div class="form-group">
-          <label for="valor">Valor (R$):</label>
-          <input type="text" id="valor" name="valor" placeholder="R$ 0,00" required>
+          <label for="valor">
+            Valor (R$)<span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="valor" 
+            name="valor" 
+            placeholder="R$ 0,00" 
+            required
+            autocomplete="off">
         </div>
         
+        <!-- Comprovante -->
         <div class="form-group">
-          <label for="comprovante">Comprovante (Foto):</label>
-          <input type="file" id="comprovante" name="comprovante" accept="image/*,application/pdf" capture="environment" style="display: none;">
-          <small style="color: #666; display: block; margin-top: 5px; margin-bottom: 10px;">* Capture a foto do comprovante diretamente pela câmera</small>
+          <label for="comprovante">Comprovante (Foto ou PDF)</label>
+          <input 
+            type="file" 
+            id="comprovante" 
+            name="comprovante" 
+            accept="image/*,application/pdf" 
+            capture="environment" 
+            style="display: none;">
+          
+          <small class="helper-text">
+            <i class="fas fa-info-circle"></i> 
+            Tire uma foto do comprovante ou selecione um arquivo existente
+          </small>
           
           <div id="comprovantePreview"></div>
           
@@ -386,12 +561,13 @@
             <button type="button" class="btn camera-btn" onclick="capturePhoto()">
               <i class="fas fa-camera"></i> Tirar Foto
             </button>
-            <button type="button" class="btn camera-btn" onclick="document.getElementById('comprovante').click()">
+            <button type="button" class="btn camera-btn" onclick="selectFile()">
               <i class="fas fa-folder-open"></i> Escolher Arquivo
             </button>
           </div>
         </div>
         
+        <!-- Botão Submit -->
         <button type="submit" id="submitBtn" class="btn btn-primary">
           <i class="fas fa-save"></i> Registrar Despesa
         </button>
@@ -403,40 +579,65 @@
   <footer class="app-footer">
     <div class="container">
       <div class="footer-content">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/refs/heads/main/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" class="footer-logo">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/icons/main/Logo_atualizada_horizontal.png" 
+             alt="Relevo Consultoria Ambiental" 
+             class="footer-logo">
         <p>Expertise em Espeleologia e Licenciamento</p>
         
         <ul class="footer-links">
-          <li><a href="https://www.relevo.eco.br" target="_blank">Site Oficial</a></li>
+          <li><a href="https://www.relevo.eco.br" target="_blank" rel="noopener noreferrer">Site Oficial</a></li>
           <li><a href="mailto:contato@relevo.eco.br">Contato</a></li>
-          <li><a href="https://wa.me/5561981523078" target="_blank">WhatsApp</a></li>
+          <li><a href="https://wa.me/5561981523078" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
         </ul>
         
         <div class="footer-bottom">
-          <p>&copy; 2024 Relevo Consultoria Ambiental. Todos os direitos reservados.</p>
+          <p>&copy; 2025 Relevo Consultoria Ambiental. Todos os direitos reservados.</p>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts Firebase -->
   <script src="firebase-config.js"></script>
   <script src="app.js"></script>
   
   <script>
-    // Limpar Service Workers antigos
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-                registration.unregister();
-            }
-        });
+    // ============================================
+    // FUNÇÕES GLOBAIS PARA CAPTURA DE ARQUIVO
+    // ============================================
+    function capturePhoto() {
+      const input = document.getElementById('comprovante');
+      input.setAttribute('capture', 'environment');
+      input.click();
     }
 
-    // Função global para captura de foto
-    function capturePhoto() {
-        document.getElementById('comprovante').click();
+    function selectFile() {
+      const input = document.getElementById('comprovante');
+      input.removeAttribute('capture');
+      input.click();
     }
+
+    // ============================================
+    // LIMPAR SERVICE WORKERS ANTIGOS
+    // ============================================
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('🧹 Service Worker removido');
+        }
+      });
+    }
+
+    // ============================================
+    // MELHORIAS DE UX
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ Formulário de Despesas carregado');
+      
+      // Prevenir zoom em dispositivos iOS
+      document.addEventListener('touchstart', function() {}, { passive: true });
+    });
   </script>
 </body>
 </html>
