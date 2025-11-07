@@ -473,216 +473,35 @@
           <span class="btn btn-primary">Acessar SST</span>
         </a>
 
-        <!-- Controle de Despesas (Planilha) -->
-        <a href="https://docs.google.com/spreadsheets/d/1RaLjZ0bY_RNI6qW91ktmqMgKoz68DOLfBdvrzd1exQI/edit?usp=sharing" 
+        <!-- Controle de Propostas -->
+        <a href="https://docs.google.com/spreadsheets/d/10LJopYBh7cSrD_e0gr1iMw_BcVzrcAdreXfTRzvWPps/edit?usp=sharing" 
            target="_blank" 
            rel="noopener noreferrer"
            class="access-card">
           <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" 
-               alt="Ícone Despesas">
-          <h3>Controle de Despesas</h3>
-          <p>Planilha geral de custos e despesas da empresa</p>
+               alt="Ícone Propostas">
+          <h3>Controle de Propostas</h3>
+          <p>Planilha para registro, acompanhamento e gestão das propostas comerciais da empresa</p>
           <span class="btn btn-primary">Ver Planilha</span>
         </a>
       </div>
 
-      <!-- Card Dashboard de Despesas -->
-      <div class="dashboard-card">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" 
-             alt="Ícone Dashboard Despesas">
-        <h3>📊 Gestão de Despesas</h3>
-        <p>Painel completo para visualizar, analisar e gerenciar todas as despesas registradas</p>
-        <a class="btn btn-orange" href="gestao-despesas.html">
-          <i class="fas fa-chart-pie"></i> Abrir Painel de Despesas
-        </a>
-      </div>
-
-      <!-- Card Destaque - Cadastrar Despesa -->
-      <div class="despesas-destaque">
-        <h3>
-          <i class="fas fa-receipt"></i>
-          Precisa registrar uma nova despesa?
-        </h3>
-        <p>Acesse o formulário para cadastrar despesas de campo, viagens e outras atividades</p>
-        <a class="btn btn-primary" href="despesas">
-          <i class="fas fa-plus-circle"></i> Cadastrar Nova Despesa
-        </a>
-      </div>
-    </section>
-
-    <!-- SEÇÃO: DASHBOARD CLICKUP -->
-    <section class="section">
-      <h2 class="section-title">Dashboard de Indicadores</h2>
-      <div class="clickup-container">
-        <iframe 
-          class="clickup-embed" 
-          src="https://sharing.clickup.com/90132343455/b/h/2ky4wumz-293/48959d213ba4ffb" 
-          onload="console.log('✅ Dashboard carregado')"
-          onerror="document.querySelector('.error-msg').style.display='block'">
-        </iframe>
-        <div class="error-msg">
-          ⚠️ Dashboard indisponível no momento. Tente novamente mais tarde ou verifique sua conexão.
+      <!-- Grid com Gestão de Despesas e Gestão de Orçamentos -->
+      <div class="access-grid">
+        <!-- Card Gestão de Despesas -->
+        <div class="dashboard-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" 
+               alt="Ícone Dashboard Despesas">
+          <h3>📊 Gestão de Despesas</h3>
+          <p>Painel completo para visualizar, analisar e gerenciar todas as despesas registradas</p>
+          <a class="btn btn-orange" href="gestao-despesas.html">
+            <i class="fas fa-chart-pie"></i> Abrir Painel de Despesas
+          </a>
         </div>
-      </div>
-    </section>
 
-    <!-- SEÇÃO: NOTIFICAÇÕES -->
-    <section class="section">
-      <h2 class="section-title">Notificações Recentes</h2>
-      <ul class="notifications-list">
-        <li>
-          <i class="fas fa-check-circle" style="color: var(--verde-primario);"></i>
-          <span>Sistema atualizado com sucesso - 15/01/2025</span>
-        </li>
-        <li>
-          <i class="fas fa-file-alt" style="color: var(--verde-primario);"></i>
-          <span>Novo relatório mensal disponível para download</span>
-        </li>
-        <li>
-          <i class="fas fa-users" style="color: var(--verde-primario);"></i>
-          <span>Reunião de equipe agendada para sexta-feira</span>
-        </li>
-        <li>
-          <i class="fas fa-tools" style="color: var(--laranja);"></i>
-          <span>Manutenção programada para o próximo sábado</span>
-        </li>
-      </ul>
-    </section>
-
-    <!-- SEÇÃO: MODIFICAÇÕES NO DRIVE -->
-    <section class="section">
-      <h2 class="section-title">Últimas Modificações no Drive</h2>
-      <div class="modifications-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Usuário</th>
-              <th>Arquivo</th>
-              <th>Descrição</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>15/01/2025</td>
-              <td>Administrador</td>
-              <td>Relatório Mensal.pdf</td>
-              <td>Atualização de dados do trimestre</td>
-            </tr>
-            <tr>
-              <td>14/01/2025</td>
-              <td>Maria Santos</td>
-              <td>Planilha de Despesas.xlsx</td>
-              <td>Adição de novas despesas de campo</td>
-            </tr>
-            <tr>
-              <td>13/01/2025</td>
-              <td>João Silva</td>
-              <td>Projeto_JGP_Relatorio.pdf</td>
-              <td>Revisão técnica finalizada</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
-  </footer>
-
-  <script>
-    // ============================================
-    // CONFIGURAÇÃO DO FIREBASE
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
-      authDomain: "portal-relevo.firebaseapp.com",
-      projectId: "portal-relevo",
-      storageBucket: "portal-relevo.firebasestorage.app",
-      messagingSenderId: "182759626683",
-      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
-    };
-
-    // Inicializar Firebase
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-      console.log('✅ Firebase Portal inicializado');
-    }
-
-    const auth = firebase.auth();
-
-    // ============================================
-    // VERIFICAR AUTENTICAÇÃO
-    // ============================================
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        console.log('❌ Usuário não autenticado - Redirecionando...');
-        window.location.href = 'index.html';
-      } else {
-        console.log('✅ Usuário autenticado:', user.email);
-      }
-    });
-
-    // ============================================
-    // FUNÇÃO DE LOGOUT
-    // ============================================
-    function logout() {
-      if (confirm('Deseja realmente sair do sistema?')) {
-        auth.signOut()
-          .then(() => {
-            console.log('✅ Logout realizado com sucesso');
-            window.location.href = 'index.html';
-          })
-          .catch((error) => {
-            console.error('❌ Erro ao fazer logout:', error);
-            alert('Erro ao fazer logout. Tente novamente.');
-          });
-      }
-    }
-
-    // ============================================
-    // MENU MOBILE
-    // ============================================
-    function toggleMobileMenu() {
-      const navLinks = document.getElementById('navLinks');
-      navLinks.classList.toggle('mobile-open');
-    }
-
-    // Fechar menu ao clicar em um link (mobile)
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        const navLinks = document.getElementById('navLinks');
-        navLinks.classList.remove('mobile-open');
-      });
-    });
-
-    // Fechar menu ao clicar fora (mobile)
-    document.addEventListener('click', (e) => {
-      const navLinks = document.getElementById('navLinks');
-      const menuToggle = document.querySelector('.menu-toggle');
-      
-      if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-        navLinks.classList.remove('mobile-open');
-      }
-    });
-
-    // ============================================
-    // MELHORIAS DE UX
-    // ============================================
-    
-    // Prevenir zoom em dispositivos iOS
-    document.addEventListener('touchstart', function() {}, { passive: true });
-
-    // Log quando página carrega
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('📊 Portal de Gestão carregado com sucesso');
-    });
-  </script>
-</body>
-</html>
-
-
-
-
-
+        <!-- Novo Card Gestão de Orçamentos -->
+        <div class="dashboard-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/orcamento.png" 
+               alt="Ícone Orçamentos">
+          <h3>💼 Gestão de Orçamentos</h3>
+          <p>Centralize, acompanhe
