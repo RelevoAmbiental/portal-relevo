@@ -8,7 +8,7 @@ class DespesasApp {
         // Configurações da aplicação
         this.CONFIG = {
             projetos: ['BR-135/BA', 'Panra Diamantina', 'Habilis-GO'],
-            funcionarios: ['Gleisson', 'Júlio', 'Samuel', 'Tiago', 'Yuri'],
+            funcionarios: ['Gleisson', 'Júlio', 'Samuel', 'Tiago', 'Yuri', 'João', 'Danilo', 'Roberto', 'Daniel'],
             tiposDespesa: [
                 'Água',
                 'Almoço / Jantar',
@@ -496,3 +496,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.despesasApp = new DespesasApp();
     console.log('✅ App de Despesas inicializado globalmente');
 });
+
