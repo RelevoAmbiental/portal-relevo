@@ -24,19 +24,30 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-  /* ============================================
-     ESTILO PERSONALIZADO - DASHBOARD FLORESTA ÚMIDA
+   /* ============================================
+     ESTILO AJUSTADO - DASHBOARD FLORESTA ÚMIDA
      Relevo Consultoria Ambiental - 2025
      ============================================ */
   
-  /* Fundo principal com logo em marca d’água */
+  /* Fundo com logo ampliado */
   body {
     background: linear-gradient(135deg, rgba(25, 45, 30, 0.9) 0%, rgba(40, 70, 50, 0.95) 100%),
                 url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png") no-repeat center center fixed;
-    background-size: 300px;
+    background-size: 800px;
     background-blend-mode: overlay;
     color: var(--texto-escuro);
     font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Conteúdo centralizado e espaçado */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    width: 100%;
   }
   
   /* Header translúcido */
@@ -45,6 +56,16 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding: 25px 0;
+  }
+  
+  .header-dashboard-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
   }
   
   .header-dashboard-content h1 {
@@ -75,27 +96,69 @@
     color: #fff;
   }
   
-  /* Cards e gráficos com efeito vidro */
-  .dashboard-card, .stat-card, .filters-section, .table-section {
+  /* Grid de estatísticas e gráficos */
+  .stats-grid, .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+    justify-items: center;
+  }
+  
+  /* Cards */
+  .dashboard-card, .stat-card, .filters-section {
     background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(15px);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     color: #f8fdf8;
+    width: 100%;
+    transition: transform 0.3s ease;
   }
   
-  /* Textos e títulos */
+  .dashboard-card:hover, .stat-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  /* Títulos e textos */
   h3, .stat-value {
     color: #eaf8e6;
   }
   
-  .stat-card h3 {
-    color: #b5e3b8;
-    letter-spacing: 0.5px;
+  /* Filtros */
+  .filters-section {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
   }
   
-  /* Gráficos (Chart.js) */
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .filter-group label {
+    color: #d4f0d5;
+    font-weight: 600;
+  }
+  
+  .filter-group select {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .filter-group select option {
+    color: #222;
+  }
+  
+  /* Gráficos */
   canvas {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
@@ -103,47 +166,46 @@
     box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.25);
   }
   
-  /* Tabela */
+  /* Tabela de despesas */
   .table-section {
+    background: white;
+    color: #222;
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+    margin-top: 50px;
     overflow: hidden;
   }
   
   .table-header {
-    background: rgba(38, 192, 76, 0.2);
-    color: #e7fbe6;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--verde-primario);
+    color: white;
+    padding: 15px 30px;
   }
   
   th {
-    background: rgba(255, 255, 255, 0.1);
-    color: #d5f2d8;
+    background: var(--verde-escuro);
+    color: #fff;
   }
   
   td {
-    color: #f4fff3;
-    background: rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: #fff;
+    color: #333;
+    border-bottom: 1px solid #eee;
   }
   
   tbody tr:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: #f7f7f7;
   }
   
   /* Status */
-  .status-badge {
-    font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(6px);
-  }
-  
   .status-pendente {
-    background: rgba(235, 136, 7, 0.2);
-    color: #ffe0b5;
+    background: #fff3cd;
+    color: #856404;
   }
   
   .status-pago {
-    background: rgba(38, 192, 76, 0.25);
-    color: #bff5c5;
+    background: #d1edff;
+    color: #0c5460;
   }
   
   /* Rodapé */
@@ -153,24 +215,18 @@
     color: #e9f9e8;
     font-weight: 500;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Transições sutis */
-  .dashboard-card:hover, .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    padding: 25px 20px;
+    margin-top: 40px;
   }
   
   /* Responsividade */
   @media (max-width: 768px) {
-    body {
-      background-size: 180px;
-    }
-    .dashboard-card, .stat-card {
-      padding: 20px;
-    }
+    body { background-size: 400px; }
+    .filters-grid { grid-template-columns: 1fr; }
   }
   </style>
+  
 </head>
 <body>
   <header class="header-dashboard">
