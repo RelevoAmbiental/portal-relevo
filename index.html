@@ -188,6 +188,56 @@
       to { transform: rotate(360deg); }
     }
 
+    /* Estilos para a seção de aplicações */
+    .apps-container {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #2EAD60;
+    }
+
+    .apps-title {
+      margin: 0 0 1rem 0;
+      color: #2E3E31;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .apps-grid {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .app-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #2EAD60;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.3s;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .app-link:hover {
+      background: #3CC373;
+      text-decoration: none;
+      color: white;
+    }
+
+    .apps-note {
+      margin: 0.5rem 0 0 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
     /* RESPONSIVIDADE */
     @media (max-width: 480px) {
       .login-box {
@@ -205,6 +255,14 @@
 
       .form-input {
         padding: 0.8rem 1rem;
+      }
+
+      .apps-grid {
+        flex-direction: column;
+      }
+
+      .app-link {
+        justify-content: center;
       }
     }
 
@@ -260,6 +318,8 @@
         <div id="error-message" class="message error-message"></div>
         <div id="success-message" class="message success-message"></div>
       </form>
+
+      <!-- Container para aplicações será inserido aqui via JavaScript -->
 
       <div class="login-footer">
         Sistema interno - Acesso restrito aos colaboradores<br>
@@ -342,6 +402,49 @@
     }
 
     // ============================================
+    // GERAR LINKS PARA APLICAÇÕES EXTERNAS
+    // ============================================
+
+    function gerarLinksAplicacoes(user) {
+      console.log('🔗 Gerando links para aplicações...');
+      
+      // Gerar token customizado para outras aplicações
+      user.getIdToken().then((token) => {
+        console.log('🎫 Token gerado para aplicações externas');
+        
+        // URL da aplicação de orçamentos
+        const urlOrcamentos = `https://orcamento.relevo.eco.br/?token=${encodeURIComponent(token)}`;
+        
+        // Criar interface para acessar outras aplicações
+        criarInterfaceAplicacoes(urlOrcamentos);
+      }).catch((error) => {
+        console.error('❌ Erro ao gerar token:', error);
+      });
+    }
+
+    function criarInterfaceAplicacoes(urlOrcamentos) {
+      // Criar container para links de aplicações
+      const appsContainer = document.createElement('div');
+      appsContainer.className = 'apps-container';
+      appsContainer.innerHTML = `
+        <h3 class="apps-title">📊 Aplicações da Empresa</h3>
+        <div class="apps-grid">
+          <a href="${urlOrcamentos}" target="_blank" class="app-link">
+            💰 Sistema de Orçamentos
+          </a>
+          <!-- Adicione mais aplicações aqui no futuro -->
+        </div>
+        <p class="apps-note">Clique para acessar o sistema de orçamentos em nova aba</p>
+      `;
+      
+      // Inserir após o formulário de login
+      const form = document.getElementById('login-form');
+      if (form) {
+        form.parentNode.insertBefore(appsContainer, form.nextSibling);
+      }
+    }
+
+    // ============================================
     // LÓGICA DE LOGIN
     // ============================================
     form.addEventListener("submit", async function(e) {
@@ -375,17 +478,20 @@
 
         if (userDoc.exists) {
           const userData = userDoc.data();
-          const tipo = userData.tipo || 'colaboradores'; // Tipo padrão
+          const tipo = userData.tipo || 'colaboradores';
           const nome = userData.nome || username;
 
           console.log('✅ Dados do usuário carregados:', userData);
           
           showSuccess(`✅ Bem-vindo, ${nome}!`);
           
-          // Redirecionar após 1 segundo
+          // ⬇️ NOVO: Gerar links para aplicações externas
+          gerarLinksAplicacoes(user);
+          
+          // Redirecionar após 3 segundos (dar tempo para ver os links)
           setTimeout(() => {
             window.location.href = tipo + ".html";
-          }, 1000);
+          }, 3000);
           
         } else {
           throw new Error("Dados do usuário não encontrados no sistema");
@@ -457,5 +563,3 @@
   </script>
 </body>
 </html>
-
-
