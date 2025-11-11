@@ -209,23 +209,25 @@
     padding: 18px;
     box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.25);
   }
-      /* Grade dos gráficos - 2 por linha */
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* dois gráficos por linha */
-    gap: 35px;
-    margin-top: 30px;
-    justify-items: stretch;
-    align-items: stretch;
-  }
-  
-  /* Responsivo: 1 gráfico por linha em telas pequenas */
-  @media (max-width: 1024px) {
+    /* Grade dos gráficos - 2 por linha, centralizados e responsivos */
     .dashboard-grid {
-      grid-template-columns: 1fr;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 35px;
+      margin: 40px auto;
+      justify-content: center;
+      align-items: stretch;
+      max-width: 1200px; /* evita que os gráficos ultrapassem a tela */
+      width: 100%;
+      box-sizing: border-box;
     }
-  }
-  
+    
+    /* Responsivo: 1 gráfico por linha em telas menores */
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   /* ============================================
      TABELA DE DESPESAS
      ============================================ */
