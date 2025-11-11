@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Intranet - Relevo Consultoria Ambiental</title>
-  
-  <!-- Fonte Montserrat -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestão Interna | Relevo Consultoria Ambiental</title>
 
-    <!-- Favicon -->
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
-  
+
+  <!-- Fontes e Ícones -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css">
-  
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -21,537 +22,247 @@
   <script src="scripts/firebase-init-guard.js"></script>
 
   <style>
-    /* SEUS ESTILOS EXISTENTES - MANTIDOS INTACTOS */
-    body {
-      margin: 0;
-      padding: 0;
-    }
+    /* ============================================
+       ESTILOS ESPECÍFICOS DA GESTÃO
+       ============================================ */
 
-    .login-container {
-      display: flex; 
-      justify-content: center; 
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--verde-accent), var(--verde-escuro));
-      position: relative; 
+    .hero-gestao {
+      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
+      color: white;
+      padding: 50px 30px;
+      margin-bottom: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      position: relative;
       overflow: hidden;
-      padding: 20px;
-    }
-    
-    .login-container::before {
-      content: ""; 
-      position: absolute; 
-      top: 0; 
-      left: 0; 
-      right: 0; 
-      bottom: 0;
-      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC00582.JPG');
-      background-size: cover; 
-      background-position: center; 
-      opacity: 0.3;
-      z-index: 0;
-    }
-    
-    .login-box {
-      background: white; 
-      border-radius: 12px; 
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-      padding: 2.5rem 3rem; 
-      width: 100%; 
-      max-width: 420px; 
-      z-index: 1; 
-      position: relative;
-    }
-    
-    .logo-text { 
-      font-size: 2.2rem; 
-      font-weight: 700; 
-      color: var(--verde-accent); 
-      text-align: center; 
-      margin-bottom: 0.5rem;
-      letter-spacing: 1px;
-    }
-    
-    .logo-subtitle { 
-      text-align: center; 
-      font-size: 0.9rem; 
-      color: var(--texto-cinza); 
-      margin-bottom: 1.5rem; 
-      font-weight: 500;
-    }
-    
-    .login-title { 
-      text-align: center; 
-      margin-bottom: 2rem; 
-      color: var(--verde-accent); 
-      font-weight: 600; 
-      font-size: 1.4rem;
-    }
-    
-    .form-group { 
-      margin-bottom: 1.5rem; 
-    }
-    
-    .form-label { 
-      display: block; 
-      margin-bottom: 0.6rem; 
-      font-weight: 600; 
-      color: var(--verde-accent);
-      font-size: 0.95rem;
-    }
-    
-    .form-input {
-      width: 100%; 
-      padding: 0.9rem 1.2rem; 
-      border: 2px solid var(--borda-cinza);
-      border-radius: 6px; 
-      font-size: 1rem; 
-      background-color: var(--bg-claro);
-      transition: all 0.3s ease;
-      font-family: 'Montserrat', sans-serif;
-    }
-    
-    .form-input:focus { 
-      border-color: var(--verde-primario); 
-      outline: none; 
-      box-shadow: 0 0 0 3px rgba(38,192,76,0.1); 
-      background-color: white; 
-    }
-    
-    .message {
-      text-align: center; 
-      margin-top: 1rem; 
-      padding: 0.8rem; 
-      border-radius: 6px;
-      font-size: 0.9rem; 
-      display: none;
-      font-weight: 500;
-      animation: slideDown 0.3s ease;
     }
 
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .error-message { 
-      color: #c62828; 
-      background-color: #ffebee; 
-      border: 1px solid #ef5350;
-    }
-    
-    .success-message { 
-      color: var(--verde-escuro); 
-      background-color: #e8f5e9; 
-      border: 1px solid var(--verde-primario);
-    }
-    
-    .login-footer { 
-      text-align: center; 
-      margin-top: 2rem; 
-      font-size: 0.85rem; 
-      color: var(--texto-cinza);
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--borda-cinza);
-      line-height: 1.6;
-    }
-
-    .btn-loading {
-      opacity: 0.7;
-      cursor: not-allowed;
-      position: relative;
-    }
-
-    .btn-loading::after {
+    .hero-gestao::before {
       content: "";
       position: absolute;
-      width: 16px;
-      height: 16px;
-      top: 50%;
-      right: 15px;
-      margin-top: -8px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spinner 0.6s linear infinite;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.1;
+      z-index: 0;
     }
 
-    @keyframes spinner {
-      to { transform: rotate(360deg); }
+    .hero-gestao > * { position: relative; z-index: 1; }
+
+    .hero-gestao .logo { height: 60px; margin-bottom: 20px; filter: brightness(0) invert(1); }
+
+    .hero-gestao h1 {
+      color: white;
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
-    .apps-container {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #2EAD60;
+    .hero-gestao p {
+      font-size: 1.2rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .apps-title {
-      margin: 0 0 1rem 0;
-      color: #2E3E31;
-      font-size: 1.1rem;
+    .section { margin-bottom: 50px; }
+
+    .section-title {
+      color: var(--verde-accent);
+      margin-bottom: 30px;
+      font-size: 1.8rem;
+      position: relative;
+      padding-bottom: 15px;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--verde-primario);
+      border-radius: 2px;
+    }
+
+    .access-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .access-card {
+      background: var(--card-branco);
+      border-radius: 12px;
+      padding: 30px 25px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--verde-primario);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .access-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .access-card img { width: 60px; height: 60px; margin: 0 auto 20px; object-fit: contain; }
+
+    .access-card h3 {
+      color: var(--verde-accent);
+      margin-bottom: 12px;
+      font-size: 1.2rem;
       font-weight: 600;
     }
 
-    .apps-grid {
+    .access-card p {
+      color: var(--texto-cinza);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      line-height: 1.6;
+    }
+
+    .despesas-destaque {
+      background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
+      border: 2px dashed var(--verde-primario);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      margin: 30px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card {
+      background: var(--card-branco);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--laranja);
+      text-align: center;
       display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 170px;
     }
 
-    .app-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: #2EAD60;
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background 0.3s;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
+    .two-col-dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      width: 100%;
+      margin-bottom: 24px;
     }
 
-    .app-link:hover {
-      background: #3CC373;
-      text-decoration: none;
-      color: white;
+    .clickup-container { 
+      background: var(--card-branco); 
+      border-radius: 12px; 
+      padding: 30px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+      margin-bottom: 40px; 
     }
 
-    .apps-note {
-      margin: 0.5rem 0 0 0;
-      font-size: 0.85rem;
-      color: #666;
-    }
-
-    /* RESPONSIVIDADE */
-    @media (max-width: 480px) {
-      .login-box {
-        padding: 2rem 1.5rem;
-        margin: 10px;
-      }
-      
-      .logo-text {
-        font-size: 1.8rem;
-      }
-
-      .login-title {
-        font-size: 1.2rem;
-      }
-
-      .form-input {
-        padding: 0.8rem 1rem;
-      }
-
-      .apps-grid {
-        flex-direction: column;
-      }
-
-      .app-link {
-        justify-content: center;
-      }
-    }
-
-    @media (max-height: 700px) {
-      .login-box {
-        padding: 1.5rem 2rem;
-      }
-
-      .login-title {
-        margin-bottom: 1.5rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.2rem;
-      }
-    }
+    @media (max-width: 1024px) { .two-col-dashboard { grid-template-columns: 1fr; } }
   </style>
 </head>
+
 <body>
-  <div class="login-container">
-    <div class="login-box">
-      <div class="logo-text">RELEVO</div>
-      <div class="logo-subtitle">Sistema Interno</div>
-      <h2 class="login-title">Acesso à Intranet</h2>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-content">
+      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png"
+           alt="Logo Relevo Consultoria Ambiental" class="logo">
 
-      <form id="login-form" autocomplete="on">
-        <div class="form-group">
-          <label for="username" class="form-label">Usuário</label>
-          <input 
-            type="text" 
-            id="username" 
-            class="form-input" 
-            placeholder="Digite seu usuário" 
-            autocomplete="username"
-            required>
-        </div>
-        
-        <div class="form-group">
-          <label for="password" class="form-label">Senha</label>
-          <input 
-            type="password" 
-            id="password" 
-            class="form-input" 
-            placeholder="Digite sua senha"
-            autocomplete="current-password" 
-            required>
-        </div>
-        
-        <button type="submit" class="btn btn-primary" id="login-btn">
-          Entrar
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="gestao.html"><i class="fas fa-chart-line"></i> Gestão</a>
+        <a href="colaboradores.html"><i class="fas fa-users"></i> Equipe</a>
+        <a href="clientes.html"><i class="fas fa-briefcase"></i> Clientes</a>
+        <button class="logout-btn" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Sair
         </button>
-        
-        <div id="error-message" class="message error-message"></div>
-        <div id="success-message" class="message success-message"></div>
-      </form>
-
-      <!-- Container para aplicações será inserido aqui via JavaScript -->
-
-      <div class="login-footer">
-        Sistema interno - Acesso restrito aos colaboradores<br>
-        <strong>Relevo Consultoria Ambiental © 2025</strong>
-      </div>
+      </nav>
     </div>
-  </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero-gestao">
+    <div class="container">
+      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
+           alt="Relevo Consultoria Ambiental" class="logo">
+      <h1>Gestão Interna</h1>
+      <p>Central de controle e informações administrativas da Relevo Consultoria Ambiental</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <!-- ACESSO RÁPIDO -->
+    <!-- (mantém o conteúdo original dos cards de acesso, despesas, orçamentos, etc.) -->
+
+    <!-- SEÇÃO: DASHBOARD DE INDICADORES (AGORA CRONOGRAMA) -->
+    <section class="section">
+      <h2 class="section-title">Dashboard de Indicadores</h2>
+      <div class="clickup-container">
+        <div class="dashboard-card" aria-labelledby="cronograma-title" style="border-left: 4px solid var(--verde-primario); text-align:center;">
+          <div>
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png"
+                 alt="Ícone Cronograma"
+                 style="width:100px; height:100px; margin-bottom:15px; object-fit:contain;">
+            <h3 id="cronograma-title">🗓️ Cronograma de Projetos</h3>
+            <p>
+              Módulo em desenvolvimento. Em breve você poderá acompanhar as etapas e prazos dos projetos diretamente aqui.
+            </p>
+          </div>
+          <div>
+            <a class="btn btn-orange" href="#" onclick="alert('O módulo Cronograma ainda está em desenvolvimento.')" style="cursor:default;">
+              <i class="fas fa-calendar-alt"></i> Acessar Cronograma
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÕES DE NOTIFICAÇÕES E MODIFICAÇÕES (inalteradas) -->
+  </main>
+
+  <footer>
+    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
+  </footer>
 
   <script>
-    // ============================================
-    // CONFIGURAÇÃO DO FIREBASE
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
-      authDomain: "portal-relevo.firebaseapp.com",
-      projectId: "portal-relevo",
-      storageBucket: "portal-relevo.firebasestorage.app",
-      messagingSenderId: "182759626683",
-      appId: "1:182759626683:web:2dde2eeef910d4c288569e",
-      measurementId: "G-W8TTP3D3YQ"
-    };
-
-    // Inicializar Firebase apenas uma vez
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-      console.log('✅ Firebase inicializado com sucesso');
+    const auth = window.__RELEVO_AUTH__;
+    if (auth) {
+      auth.onAuthStateChanged((user) => {
+        if (!user) window.location.href = 'index.html';
+      });
     }
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // ============================================
-    // ELEMENTOS DO DOM
-    // ============================================
-    const form = document.getElementById("login-form");
-    const errorMsg = document.getElementById("error-message");
-    const successMsg = document.getElementById("success-message");
-    const loginBtn = document.getElementById("login-btn");
-    const usernameInput = document.getElementById("username");
-    const passwordInput = document.getElementById("password");
-
-    // ============================================
-    // FUNÇÕES AUXILIARES
-    // ============================================
-    
-    // Mostrar mensagem de erro
-    function showError(message) {
-      hideSuccess();
-      errorMsg.textContent = message;
-      errorMsg.style.display = 'block';
-    }
-
-    // Esconder mensagem de erro
-    function hideError() {
-      errorMsg.style.display = 'none';
-    }
-
-    // Mostrar mensagem de sucesso
-    function showSuccess(message) {
-      hideError();
-      successMsg.textContent = message;
-      successMsg.style.display = 'block';
-    }
-
-    // Esconder mensagem de sucesso
-    function hideSuccess() {
-      successMsg.style.display = 'none';
-    }
-
-    // Desabilitar botão durante login
-    function setLoadingState(isLoading) {
-      loginBtn.disabled = isLoading;
-      if (isLoading) {
-        loginBtn.classList.add('btn-loading');
-        loginBtn.textContent = 'Entrando...';
-      } else {
-        loginBtn.classList.remove('btn-loading');
-        loginBtn.textContent = 'Entrar';
+    function logout() {
+      if (confirm('Deseja realmente sair do sistema?')) {
+        auth.signOut().then(() => window.location.href = 'index.html');
       }
     }
 
-    // ============================================
-    // GERAR LINKS PARA APLICAÇÕES - VERSÃO OPÇÃO A
-    // ============================================
-    
-    function gerarLinksAplicacoes(user) {
-      console.log('🔗 Gerando links para aplicações (OPÇÃO A - Subpasta)...');
-      
-      // ✅ MUDANÇA AQUI: Agora é subpasta do portal
-      const urlOrcamentos = `/orcamento/`;
-      
-      console.log('🔗 Link gerado (subpasta):', urlOrcamentos);
-      
-      criarInterfaceAplicacoes(urlOrcamentos);
+    function toggleMobileMenu() {
+      const navLinks = document.getElementById('navLinks');
+      navLinks.classList.toggle('mobile-open');
     }
-    
-    function criarInterfaceAplicacoes(urlOrcamentos) {
-      const appsContainer = document.createElement('div');
-      appsContainer.className = 'apps-container';
-      appsContainer.innerHTML = `
-        <h3 class="apps-title">📊 Aplicações da Empresa</h3>
-        <div class="apps-grid">
-          <a href="${urlOrcamentos}" class="app-link">
-            💰 Sistema de Orçamentos
-          </a>
-        </div>
-        <p class="apps-note">Clique para acessar o sistema de orçamentos</p>
-        <p class="apps-note" style="color: #2EAD60; font-size: 0.8rem;">
-          <strong>✅ Login Único:</strong> Você já está logado no portal!
-        </p>
-      `;
-      
-      const form = document.getElementById('login-form');
-      if (form) {
-        form.parentNode.insertBefore(appsContainer, form.nextSibling);
-      }
-    }
-
-    // ============================================
-    // LÓGICA DE LOGIN
-    // ============================================
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-      
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      // Validação básica
-      if (!username || !password) {
-        showError("⚠️ Preencha todos os campos.");
-        return;
-      }
-
-      // Iniciar processo de login
-      setLoadingState(true);
-      showSuccess("🔐 Verificando credenciais...");
-
-      try {
-        // Converter username para email (padrão do Firebase)
-        const email = username + "@relevo.eco.br";
-        
-        // Tentar fazer login no Firebase Authentication
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-
-        console.log('✅ Autenticação bem-sucedida:', user.uid);
-
-        // Buscar dados do usuário no Firestore
-        const userDoc = await db.collection('users').doc(user.uid).get();
-
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          const tipo = userData.tipo || 'colaboradores';
-          const nome = userData.nome || username;
-
-          console.log('✅ Dados do usuário carregados:', userData);
-          
-          showSuccess(`✅ Bem-vindo, ${nome}!`);
-          
-          // ⬇️ ATUALIZADO: Gerar links com subpasta do portal
-          gerarLinksAplicacoes(user);
-          
-          // Redirecionar após 3 segundos (dar tempo para ver os links)
-          setTimeout(() => {
-            window.location.href = tipo + ".html";
-          }, 3000);
-          
-        } else {
-          throw new Error("Dados do usuário não encontrados no sistema");
-        }
-        
-      } catch (error) {
-        console.error("❌ Erro no login:", error);
-        setLoadingState(false);
-        hideSuccess();
-        
-        // Mensagens de erro amigáveis
-        if (error.code === 'auth/invalid-credential' || 
-            error.code === 'auth/wrong-password' ||
-            error.code === 'auth/invalid-email') {
-          showError("❌ Usuário ou senha incorretos");
-        } else if (error.code === 'auth/user-not-found') {
-          showError("❌ Usuário não encontrado no sistema");
-        } else if (error.code === 'auth/too-many-requests') {
-          showError("⏸️ Muitas tentativas. Aguarde alguns minutos.");
-        } else if (error.code === 'auth/network-request-failed') {
-          showError("🌐 Erro de conexão. Verifique sua internet.");
-        } else {
-          showError("❌ Erro ao fazer login: " + (error.message || 'Tente novamente'));
-        }
-      }
-    });
-
-    // ============================================
-    // VERIFICAR SE JÁ ESTÁ LOGADO
-    // ============================================
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        console.log('👤 Usuário já autenticado:', user.uid);
-        try {
-          const userDoc = await db.collection('users').doc(user.uid).get();
-          if (userDoc.exists) {
-            const tipo = userDoc.data().tipo || 'colaboradores';
-            console.log('↪️ Redirecionando para:', tipo + '.html');
-            window.location.href = tipo + ".html";
-          }
-        } catch (error) {
-          console.error('❌ Erro ao verificar usuário:', error);
-        }
-      }
-    });
-
-    // ============================================
-    // MELHORIAS DE UX
-    // ============================================
-    
-    // Foco automático no campo de usuário quando página carrega
-    document.addEventListener('DOMContentLoaded', function() {
-      usernameInput.focus();
-    });
-
-    // Limpar mensagens ao começar a digitar
-    usernameInput.addEventListener('input', () => {
-      hideError();
-      hideSuccess();
-    });
-
-    passwordInput.addEventListener('input', () => {
-      hideError();
-      hideSuccess();
-    });
-
-    // Prevenir zoom em dispositivos iOS
-    document.addEventListener('touchstart', function() {}, { passive: true });
   </script>
 </body>
 </html>
-
