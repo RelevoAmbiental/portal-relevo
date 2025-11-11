@@ -49,3 +49,24 @@
     console.error("❌ Erro ao iniciar Firebase (Guard):", error);
   }
 })();
+
+// ============================================================
+// 🔄 Monitoramento Global da Autenticação
+// ============================================================
+
+// Só executa se o Firebase Auth estiver disponível
+if (typeof window !== "undefined" && firebase?.auth) {
+  const auth = firebase.auth();
+
+  auth.onAuthStateChanged((u) => {
+    // Expõe o usuário autenticado globalmente (para os outros apps usarem)
+    window.relevoUser = u || null;
+
+    if (u) {
+      console.log("✅ Usuário autenticado detectado:", u.email || u.uid);
+      console.log("✅ Persistência local ativa");
+    } else {
+      console.log("🔒 Nenhum usuário autenticado");
+    }
+  });
+}
