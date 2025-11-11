@@ -25,94 +25,241 @@
 
   <style>
   /* ============================================
-     AJUSTES FINAIS - LAYOUT ALINHADO E HARMONIOSO
+     DASHBOARD FLORESTA ÚMIDA - VERSÃO FINAL AJUSTADA
+     Relevo Consultoria Ambiental - 2025
      ============================================ */
   
-  /* === 4 Cards de Estatísticas === */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 25px;
-    justify-content: center;
-    align-items: stretch;
-    margin: 30px auto;
+  /* Fundo com logo translúcido */
+  body {
+    background: linear-gradient(135deg, rgba(25, 45, 30, 0.92) 0%, rgba(40, 70, 50, 0.97) 100%),
+                url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png") no-repeat center center fixed;
+    background-size: 1000px;
+    background-blend-mode: overlay;
+    color: var(--texto-escuro);
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Container principal */
+  .container {
     max-width: 1400px;
-  }
-  
-  .stat-card {
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(15px);
-    border-radius: 14px;
-    padding: 30px 25px;
-    text-align: center;
-    color: #eaf8e6;
-    font-weight: 600;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  }
-  
-  .stat-card h3 {
-    font-size: 1rem;
-    margin-bottom: 10px;
-    color: #c9f3cc;
-  }
-  
-  .stat-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #ffffff;
-  }
-  
-  /* === Centralização dos blocos Dashboard e Lista === */
-  .dashboard-grid, 
-  .table-section {
-    max-width: 1300px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
+    padding: 50px 40px;
     width: 100%;
   }
   
-  .dashboard-card {
-    margin: 0 auto;
-    max-width: 1200px;
+  /* ============================================
+     CABEÇALHO
+     ============================================ */
+  .header-dashboard {
+    background: linear-gradient(135deg, #26C04C 0%, #2E7D32 100%);
+    color: white;
+    padding: 25px 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    width: 100%;
   }
   
-  /* === Filtros Ajustados e Centralizados === */
+  .header-dashboard-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .header-dashboard-content .logo {
+    height: 45px;
+    justify-self: start;
+  }
+  
+  .header-dashboard-content h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+  
+  .header-dashboard-content .nav-buttons {
+    justify-self: end;
+  }
+  
+  /* ============================================
+     BOTÕES
+     ============================================ */
+  .view-btn, .btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #f5f5f5;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    font-weight: 600;
+  }
+  
+  .view-btn.active, .btn-primary {
+    background: linear-gradient(145deg, #26C04C, #2E7D32);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
+  }
+  
+  .view-btn:hover:not(.active),
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+  
+  /* ============================================
+     GRIDS E LAYOUT DE CONTEÚDO
+     ============================================ */
+  
+  /* 4 cards na mesma linha */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    margin-bottom: 45px;
+    justify-items: stretch;
+  }
+  
+  /* Espaçamento e centralização geral */
+  .dashboard-grid,
+  .table-section,
   .filters-section {
-    margin: 40px auto;
     max-width: 1300px;
+    margin: 0 auto 50px auto;
+    width: 100%;
+  }
+  
+  /* ============================================
+     CARDS E ELEMENTOS DE CONTEÚDO
+     ============================================ */
+  .dashboard-card,
+  .stat-card,
+  .filters-section {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    color: #f8fdf8;
+    width: 100%;
+    padding: 45px 40px; /* aumentei o padding interno */
+    margin: 15px 10px;  /* aumentei o espaçamento externo */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .dashboard-card:hover,
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  }
+  
+  h3, .stat-value {
+    color: #eaf8e6;
+  }
+  
+  /* ============================================
+     FILTROS
+     ============================================ */
+  .filters-section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    justify-content: center;
   }
   
   .filters-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 25px;
-    align-items: center;
-  }
-  
-  .filter-group select {
-    width: 100%;
-    padding: 16px 20px;
-    font-size: 1rem;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    transition: all 0.3s ease;
-  }
-  
-  .filter-group select:hover {
-    background: rgba(255, 255, 255, 0.25);
   }
   
   .filter-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #e2f5e5;
+    color: #d4f0d5;
     font-weight: 600;
   }
   
-  /* === Responsividade === */
+  .filter-group select {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'Montserrat', sans-serif;
+    width: 100%;
+    font-size: 1rem;
+  }
+  
+  .filter-group select option {
+    color: #222;
+  }
+  
+  /* ============================================
+     GRÁFICOS
+     ============================================ */
+  canvas {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* ============================================
+     TABELA DE DESPESAS
+     ============================================ */
+  .table-section {
+    background: white;
+    color: #222;
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+  
+  .table-header {
+    background: var(--verde-primario);
+    color: white;
+    padding: 18px 30px;
+  }
+  
+  th {
+    background: var(--verde-escuro);
+    color: #fff;
+  }
+  
+  td {
+    background: #fff;
+    color: #333;
+    border-bottom: 1px solid #eee;
+  }
+  
+  tbody tr:hover {
+    background: #f7f7f7;
+  }
+  
+  /* ============================================
+     RODAPÉ
+     ============================================ */
+  footer {
+    background: linear-gradient(135deg, #26C04C 0%, #2E7D32 100%);
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    width: 100%;
+    margin-top: 60px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* ============================================
+     RESPONSIVIDADE
+     ============================================ */
   @media (max-width: 1024px) {
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -122,16 +269,22 @@
     }
   }
   
-  @media (max-width: 600px) {
-    .stats-grid {
+  @media (max-width: 768px) {
+    body { background-size: 400px; }
+    .header-dashboard-content {
       grid-template-columns: 1fr;
+      text-align: center;
+      gap: 10px;
     }
-    .filters-grid {
-      grid-template-columns: 1fr;
+    .dashboard-card,
+    .stat-card,
+    .filters-section {
+      padding: 25px 20px;
+      margin: 10px;
     }
   }
   </style>
-  
+
 </head>
 <body>
   <header class="header-dashboard">
