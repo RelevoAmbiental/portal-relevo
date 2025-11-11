@@ -19,33 +19,246 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <!-- Guard unificado (já adicionado por você nas páginas controladas) -->
   <script src="scripts/firebase-init-guard.js"></script>
 
   <style>
-    /* Mantém todos os estilos originais */
-    /* Só ajustei o bloco .clickup-container para servir de placeholder genérico */
-    .clickup-container {
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 40px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    /* ============================================
+       ESTILOS ESPECÍFICOS DA GESTÃO
+       ============================================ */
+
+    /* Hero com Background */
+    .hero-gestao {
+      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
+      color: white;
+      padding: 50px 30px;
       margin-bottom: 40px;
+      border-radius: 20px;
       text-align: center;
-      color: var(--texto-cinza);
-      font-size: 1.05rem;
-      font-weight: 500;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 250px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
     }
 
-    .clickup-container i {
-      font-size: 2.5rem;
-      color: var(--verde-primario);
-      margin-bottom: 15px;
+    .hero-gestao::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.1;
+      z-index: 0;
     }
+
+    .hero-gestao > * { position: relative; z-index: 1; }
+
+    .hero-gestao .logo { height: 60px; margin-bottom: 20px; filter: brightness(0) invert(1); }
+
+    .hero-gestao h1 {
+      color: white;
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hero-gestao p {
+      font-size: 1.2rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Seções */
+    .section { margin-bottom: 50px; }
+
+    .section-title {
+      color: var(--verde-accent);
+      margin-bottom: 30px;
+      font-size: 1.8rem;
+      position: relative;
+      padding-bottom: 15px;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--verde-primario);
+      border-radius: 2px;
+    }
+
+    /* Grid de Cards de Acesso */
+    .access-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .access-card {
+      background: var(--card-branco);
+      border-radius: 12px;
+      padding: 30px 25px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--verde-primario);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .access-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .access-card img { width: 60px; height: 60px; margin: 0 auto 20px; object-fit: contain; }
+
+    .access-card h3 {
+      color: var(--verde-accent);
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .access-card p {
+      color: var(--texto-cinza);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      line-height: 1.6;
+    }
+
+    .access-card .btn { margin-top: auto; }
+
+    /* Card Destaque - Despesas */
+    .despesas-destaque {
+      background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
+      border: 2px dashed var(--verde-primario);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      margin: 30px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .despesas-destaque h3 {
+      color: var(--verde-accent);
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .despesas-destaque p { color: var(--texto-cinza); margin-bottom: 20px; font-size: 0.95rem; }
+
+    .despesas-destaque .btn-primary {
+      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
+      border-radius: 50px;
+      padding: 14px 30px;
+      font-size: 1.05rem;
+      box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
+    }
+
+    /* Card para Gestão (dashboard) */
+    .dashboard-card {
+      background: var(--card-branco);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--laranja);
+      text-align: center;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 170px;
+    }
+
+    .dashboard-card img { width: 130px; height: 70px; margin: 0 auto 15px; }
+
+    .dashboard-card h3 { color: var(--verde-accent); margin-bottom: 10px; font-size: 1.2rem; }
+
+    .dashboard-card p { color: var(--texto-cinza); margin-bottom: 20px; font-size: 0.95rem; }
+
+    /* Container (antes ClickUp) */
+    .clickup-container { 
+      background: var(--card-branco); 
+      border-radius: 12px; 
+      padding: 30px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+      margin-bottom: 40px; 
+    }
+
+    /* Two-column dashboard row */
+    .two-col-dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    /* Inline forms (notificações/modificações) */
+    .inline-controls { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .inline-controls input[type="text"], .inline-controls input[type="date"] {
+      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--borda-cinza); font-size: 0.95rem;
+    }
+    .inline-controls button { padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro)); color: white; font-weight: 600; }
+    .inline-controls .btn-secondary { background: transparent; border: 1px solid var(--borda-cinza); color: var(--texto-cinza); }
+
+    .notifications-list { list-style: none; padding: 0; margin: 0; }
+    .notifications-list li {
+      background: var(--card-branco); margin-bottom: 12px; padding: 12px 16px; border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 0.95rem; border-left: 4px solid var(--verde-primario);
+      display: flex; align-items: center; gap: 12px; justify-content: space-between;
+    }
+    .notifications-meta { display: flex; gap: 8px; align-items: center; color: var(--texto-cinza); font-size: 0.9rem; }
+
+    .modifications-container table { width: 100%; border-collapse: collapse; }
+    .modifications-container th, .modifications-container td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 0.95rem; }
+    .mod-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* Menu Mobile */
+    .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 8px; }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 1024px) { .two-col-dashboard { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .hero-gestao { padding: 40px 20px; border-radius: 15px; }
+      .hero-gestao h1 { font-size: 2rem; }
+      .hero-gestao p { font-size: 1.1rem; }
+      .access-grid { grid-template-columns: 1fr; gap: 20px; }
+      .section-title { font-size: 1.5rem; }
+      .menu-toggle { display: block; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--verde-escuro); padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+      .nav-links.mobile-open { display: flex; }
+      .nav-links a { padding: 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      .nav-links a:last-child { border-bottom: none; }
+      .despesas-destaque { padding: 20px 15px; }
+    }
+    @media (max-width: 480px) {
+      .hero-gestao { padding: 30px 15px; }
+      .hero-gestao h1 { font-size: 1.8rem; }
+      .hero-gestao p { font-size: 1rem; }
+      .access-card { padding: 20px 15px; }
+      .access-card img { width: 50px; height: 50px; }
+    }
+    @media (min-width: 1200px) { .access-grid { grid-template-columns: repeat(4, 1fr); } }
   </style>
 </head>
 
@@ -84,31 +297,168 @@
   </section>
 
   <main class="container">
-    <!-- Seções anteriores mantidas (Acesso Rápido, Despesas, Orçamentos, etc.) -->
-    <!-- ... tudo igual ao código original até a seção do ClickUp ... -->
-
-    <!-- SEÇÃO: CRONOGRAMA (substitui ClickUp) -->
+    <!-- SEÇÃO: ACESSO RÁPIDO -->
     <section class="section">
-      <h2 class="section-title">Cronograma de Projetos</h2>
-      <div class="clickup-container">
-        <i class="fas fa-calendar-alt"></i>
-        <p>🚧 Módulo “Cronograma” em desenvolvimento.<br>
-        Aqui ficará o painel de acompanhamento das atividades e prazos dos projetos.</p>
+      <h2 class="section-title">Acesso Rápido</h2>
+
+      <div class="access-grid">
+        <!-- Drive da Empresa -->
+        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link"
+           target="_blank" rel="noopener noreferrer" class="access-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/arquivos.png" alt="Ícone Drive da empresa">
+          <h3>Drive da Empresa</h3>
+          <p>Acesso completo aos documentos corporativos e recursos compartilhados</p>
+          <span class="btn btn-primary">Acessar Drive</span>
+        </a>
+
+        <!-- Relatórios de Clientes -->
+        <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL?usp=drive_link"
+           target="_blank" rel="noopener noreferrer" class="access-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png" alt="Ícone Relatórios">
+          <h3>Relatórios de Clientes</h3>
+          <p>Documentação técnica e relatórios entregues aos clientes</p>
+          <span class="btn btn-primary">Visualizar Relatórios</span>
+        </a>
+
+        <!-- SST e Segurança -->
+        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link"
+           target="_blank" rel="noopener noreferrer" class="access-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/SegurancaJuridica.png" alt="Ícone SST">
+          <h3>SST e Segurança</h3>
+          <p>Procedimentos de saúde e segurança no trabalho</p>
+          <span class="btn btn-primary">Acessar SST</span>
+        </a>
+
+        <!-- Controle de Propostas -->
+        <a href="https://docs.google.com/spreadsheets/d/10LJopYBh7cSrD_e0gr1iMw_BcVzrcAdreXfTRzvWPps/edit?usp=sharing"
+           target="_blank" rel="noopener noreferrer" class="access-card">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt="Ícone Propostas">
+          <h3>Controle de Propostas</h3>
+          <p>Planilha para registro, acompanhamento e gestão das propostas comerciais da empresa</p>
+          <span class="btn btn-primary">Ver Planilha</span>
+        </a>
+      </div>
+
+      <!-- Linha com dois cards: Gestão de Despesas e Gestão de Orçamentos -->
+      <div class="two-col-dashboard" role="region" aria-label="Gestão de Despesas e Orçamentos">
+        <!-- Card Gestão de Despesas -->
+        <div class="dashboard-card" aria-labelledby="gestao-despesas-title">
+          <div>
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt="Ícone Dashboard Despesas">
+            <h3 id="gestao-despesas-title">📊 Gestão de Despesas</h3>
+            <p>Painel completo para visualizar, analisar e gerenciar todas as despesas registradas</p>
+          </div>
+          <div>
+            <a class="btn btn-orange" href="gestao-despesas.html">
+              <i class="fas fa-chart-pie"></i> Abrir Painel de Despesas
+            </a>
+          </div>
+        </div>
+
+        <!-- Card Gestão de Orçamentos -->
+        <div class="dashboard-card" aria-labelledby="gestao-orcamentos-title">
+          <div>
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/orcamento.png" alt="Ícone Orçamentos">
+            <h3 id="gestao-orcamentos-title">💼 Gestão de Orçamentos</h3>
+            <p>Centralize, acompanhe e valide seus orçamentos com agilidade e controle</p>
+          </div>
+          <div>
+            <a class="btn btn-orange" href="https://portal.relevo.eco.br/orcamento/" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-file-invoice-dollar"></i> Acessar Portal de Orçamentos
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Destaque - Cadastrar Despesa -->
+      <div class="despesas-destaque">
+        <h3><i class="fas fa-receipt"></i> Precisa registrar uma nova despesa?</h3>
+        <p>Acesse o formulário para cadastrar despesas de campo, viagens e outras atividades</p>
+        <a class="btn btn-primary" href="despesas">
+          <i class="fas fa-plus-circle"></i> Cadastrar Nova Despesa
+        </a>
       </div>
     </section>
 
-    <!-- As seções seguintes (Notificações e Modificações) permanecem idênticas -->
+    <!-- SEÇÃO: DASHBOARD DE INDICADORES (apenas troca do conteúdo interno) -->
+    <section class="section">
+      <h2 class="section-title">Dashboard de Indicadores</h2>
+      <div class="clickup-container">
+        <!-- >>> AQUI era o iframe do ClickUp. Substituído pelo card do Cronograma. <<< -->
+        <div class="dashboard-card" aria-labelledby="cronograma-title" style="border-left: 4px solid var(--verde-primario); text-align:center;">
+          <div>
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png"
+                 alt="Ícone Cronograma"
+                 style="width:100px; height:100px; margin-bottom:15px; object-fit:contain;">
+            <h3 id="cronograma-title">🗓️ Cronograma de Projetos</h3>
+            <p>Módulo em desenvolvimento. Em breve você poderá acompanhar as etapas e prazos dos projetos diretamente aqui.</p>
+          </div>
+          <div>
+            <a class="btn btn-orange" href="#" onclick="alert('O módulo Cronograma ainda está em desenvolvimento.')" style="cursor:default;">
+              <i class="fas fa-calendar-alt"></i> Acessar Cronograma
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO: NOTIFICAÇÕES -->
+    <section class="section" id="notifications-section">
+      <h2 class="section-title">Notificações Recentes</h2>
+
+      <div class="inline-controls" aria-hidden="false">
+        <input id="notif-text" type="text" placeholder="Digite uma notificação rápida (ex: Relatório enviado)" />
+        <input id="notif-date" type="date" />
+        <button id="btn-add-notif">Adicionar</button>
+        <button id="btn-clear-notifs" class="btn-secondary">Limpar tudo</button>
+      </div>
+
+      <ul class="notifications-list" id="notifications-list" aria-live="polite">
+        <!-- Itens gerados por JS -->
+      </ul>
+    </section>
+
+    <!-- SEÇÃO: MODIFICAÇÕES -->
+    <section class="section" id="modifications-section">
+      <h2 class="section-title">Últimas Modificações no Drive</h2>
+
+      <div class="inline-controls">
+        <input id="mod-user" type="text" placeholder="Usuário (ex: Maria Santos)" />
+        <input id="mod-file" type="text" placeholder="Arquivo (ex: Planilha.xlsx)" />
+        <input id="mod-desc" type="text" placeholder="Descrição breve" />
+        <button id="btn-add-mod">Adicionar</button>
+        <button id="btn-clear-mods" class="btn-secondary">Limpar tudo</button>
+      </div>
+
+      <div class="modifications-container">
+        <table aria-describedby="modifications-section">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Usuário</th>
+              <th>Arquivo</th>
+              <th>Descrição</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="modifications-tbody">
+            <!-- Linhas geradas por JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <footer>
     © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
   </footer>
 
-  <!-- Scripts de autenticação e comportamento permanecem inalterados -->
-  <!-- (mantém logout, auth check, notificações e modificações via localStorage) -->
   <script>
-    const auth = window.__RELEVO_AUTH__;
-    if (auth) {
+    // ============================
+    // AUTENTICAÇÃO
+    // ============================
+    const auth = window.__RELEVO_AUTH__ || firebase.auth();
+    if (auth && auth.onAuthStateChanged) {
       auth.onAuthStateChanged((user) => {
         if (!user) {
           console.log('❌ Usuário não autenticado - Redirecionando...');
@@ -120,6 +470,7 @@
     }
 
     function logout() {
+      if (!auth) return;
       if (confirm('Deseja realmente sair do sistema?')) {
         auth.signOut()
           .then(() => {
@@ -133,10 +484,18 @@
       }
     }
 
+    // MENU MOBILE
     function toggleMobileMenu() {
       const navLinks = document.getElementById('navLinks');
       navLinks.classList.toggle('mobile-open');
     }
+
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        const navLinks = document.getElementById('navLinks');
+        navLinks.classList.remove('mobile-open');
+      });
+    });
 
     document.addEventListener('click', (e) => {
       const navLinks = document.getElementById('navLinks');
@@ -144,6 +503,256 @@
       if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
         navLinks.classList.remove('mobile-open');
       }
+    });
+
+    // ============================
+    // NOTIFICAÇÕES E MODIFICAÇÕES
+    // (localStorage simples)
+    // ============================
+    const NOTIF_KEY = 'relevo_notifications_v1';
+    const MODS_KEY = 'relevo_modifications_v1';
+
+    function defaultNotifications() {
+      return [
+        { text: 'Sistema atualizado com sucesso', date: '2025-01-15' },
+        { text: 'Novo relatório mensal disponível', date: '2025-01-10' },
+      ];
+    }
+
+    function defaultModifications() {
+      return [
+        { date: '2025-01-15', user: 'Administrador', file: 'Relatório Mensal.pdf', desc: 'Atualização de dados do trimestre' },
+        { date: '2025-01-14', user: 'Maria Santos', file: 'Planilha de Despesas.xlsx', desc: 'Adição de novas despesas de campo' }
+      ];
+    }
+
+    function formatDateForDisplay(isoDate) {
+      if (!isoDate) return '';
+      const parts = isoDate.split('-');
+      if (parts.length !== 3) return isoDate;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    // NOTIFICATIONS
+    function loadNotifications() {
+      const raw = localStorage.getItem(NOTIF_KEY);
+      if (!raw) {
+        const def = defaultNotifications();
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(def));
+        return def;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error('Erro parse notifications', e);
+        const def = defaultNotifications();
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(def));
+        return def;
+      }
+    }
+
+    function saveNotifications(arr) {
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(arr));
+    }
+
+    function renderNotifications() {
+      const list = document.getElementById('notifications-list');
+      list.innerHTML = '';
+      const items = loadNotifications();
+      if (!items.length) {
+        const li = document.createElement('li');
+        li.textContent = 'Nenhuma notificação registrada.';
+        list.appendChild(li);
+        return;
+      }
+      items.slice().reverse().forEach((it, idx) => {
+        const li = document.createElement('li');
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.flexDirection = 'column';
+        left.style.gap = '6px';
+
+        const text = document.createElement('div');
+        text.textContent = it.text;
+        text.style.fontWeight = '600';
+
+        const meta = document.createElement('div');
+        meta.className = 'notifications-meta';
+        meta.textContent = formatDateForDisplay(it.date || new Date().toISOString().slice(0,10));
+
+        left.appendChild(text);
+        left.appendChild(meta);
+
+        const actions = document.createElement('div');
+        const btnDel = document.createElement('button');
+        btnDel.innerHTML = '<i class="fas fa-trash"></i>';
+        btnDel.title = 'Remover';
+        btnDel.style.border = 'none';
+        btnDel.style.background = 'transparent';
+        btnDel.style.cursor = 'pointer';
+        btnDel.onclick = () => { removeNotification(items.length - 1 - idx); };
+
+        actions.appendChild(btnDel);
+        li.appendChild(left);
+        li.appendChild(actions);
+        list.appendChild(li);
+      });
+    }
+
+    function addNotification(text, date) {
+      if (!text || !text.trim()) return;
+      const items = loadNotifications();
+      items.push({ text: text.trim(), date: date || new Date().toISOString().slice(0,10) });
+      saveNotifications(items);
+      renderNotifications();
+      document.getElementById('notif-text').value = '';
+      document.getElementById('notif-date').value = '';
+    }
+
+    function removeNotification(index) {
+      const items = loadNotifications();
+      if (index < 0 || index >= items.length) return;
+      items.splice(index, 1);
+      saveNotifications(items);
+      renderNotifications();
+    }
+
+    function clearNotifications() {
+      if (!confirm('Deseja limpar todas as notificações?')) return;
+      localStorage.removeItem(NOTIF_KEY);
+      renderNotifications();
+    }
+
+    // MODIFICATIONS
+    function loadModifications() {
+      const raw = localStorage.getItem(MODS_KEY);
+      if (!raw) {
+        const def = defaultModifications();
+        localStorage.setItem(MODS_KEY, JSON.stringify(def));
+        return def;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error('Erro parse modifications', e);
+        const def = defaultModifications();
+        localStorage.setItem(MODS_KEY, JSON.stringify(def));
+        return def;
+      }
+    }
+
+    function saveModifications(arr) {
+      localStorage.setItem(MODS_KEY, JSON.stringify(arr));
+    }
+
+    function renderModifications() {
+      const tbody = document.getElementById('modifications-tbody');
+      tbody.innerHTML = '';
+      const items = loadModifications();
+      if (!items.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.textContent = 'Nenhuma modificação registrada.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      items.slice().reverse().forEach((it, idx) => {
+        const tr = document.createElement('tr');
+
+        const tdDate = document.createElement('td');
+        tdDate.textContent = formatDateForDisplay(it.date || new Date().toISOString().slice(0,10));
+        const tdUser = document.createElement('td');
+        tdUser.textContent = it.user || '';
+        const tdFile = document.createElement('td');
+        tdFile.textContent = it.file || '';
+        const tdDesc = document.createElement('td');
+        tdDesc.textContent = it.desc || '';
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'mod-actions';
+        const btnDel = document.createElement('button');
+        btnDel.innerHTML = '<i class="fas fa-trash"></i>';
+        btnDel.title = 'Remover';
+        btnDel.style.border = 'none';
+        btnDel.style.background = 'transparent';
+        btnDel.style.cursor = 'pointer';
+        btnDel.onclick = () => { removeModification(items.length - 1 - idx); };
+        tdActions.appendChild(btnDel);
+
+        tr.appendChild(tdDate);
+        tr.appendChild(tdUser);
+        tr.appendChild(tdFile);
+        tr.appendChild(tdDesc);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addModification(user, file, desc) {
+      if (!user && !file && !desc) return;
+      const items = loadModifications();
+      const date = new Date().toISOString().slice(0,10);
+      items.push({ date, user: (user || '').trim(), file: (file || '').trim(), desc: (desc || '').trim() });
+      saveModifications(items);
+      renderModifications();
+      document.getElementById('mod-user').value = '';
+      document.getElementById('mod-file').value = '';
+      document.getElementById('mod-desc').value = '';
+    }
+
+    function removeModification(index) {
+      const items = loadModifications();
+      if (index < 0 || index >= items.length) return;
+      items.splice(index, 1);
+      saveModifications(items);
+      renderModifications();
+    }
+
+    function clearModifications() {
+      if (!confirm('Deseja limpar todas as modificações no Drive?')) return;
+      localStorage.removeItem(MODS_KEY);
+      renderModifications();
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // inicializa listas
+      renderNotifications();
+      renderModifications();
+
+      // notification controls
+      document.getElementById('btn-add-notif').addEventListener('click', () => {
+        const text = document.getElementById('notif-text').value;
+        const date = document.getElementById('notif-date').value;
+        addNotification(text, date);
+      });
+      document.getElementById('btn-clear-notifs').addEventListener('click', clearNotifications);
+
+      // modifications controls
+      document.getElementById('btn-add-mod').addEventListener('click', () => {
+        const user = document.getElementById('mod-user').value || '';
+        const file = document.getElementById('mod-file').value || '';
+        const desc = document.getElementById('mod-desc').value || '';
+        addModification(user, file, desc);
+      });
+      document.getElementById('btn-clear-mods').addEventListener('click', clearModifications);
+
+      // small UX: press Enter on inputs to add
+      ['notif-text','mod-file','mod-user','mod-desc'].forEach(id => {
+        const el = document.getElementById(id);
+        el && el.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (id === 'notif-text') document.getElementById('btn-add-notif').click();
+            else document.getElementById('btn-add-mod').click();
+          }
+        });
+      });
+
+      console.log('📊 Portal de Gestão carregado com sucesso');
     });
   </script>
 </body>
