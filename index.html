@@ -453,31 +453,36 @@
     // ============================================
     
     function gerarLinksAplicacoes(user) {
-      console.log('🔗 Gerando links para aplicações...');
+      console.log('🔗 Gerando links para aplicações (autenticação compartilhada)...');
       
-      // ✅ ADICIONAR DEBUG
-      debugTokenGeneration(user);
+      // ✅ AGORA SEM TOKEN - autenticação compartilhada
+      const urlOrcamentos = `https://orcamento.relevo.eco.br`;
       
-      // Gerar token para a aplicação de orçamentos
-      user.getIdToken().then((token) => {
-        console.log('🎫 Token gerado:', token ? `SIM (${token.length} chars)` : 'NÃO');
-        
-        // URL COM token como parâmetro
-        const urlOrcamentos = `https://orcamento.relevo.eco.br/?authToken=${encodeURIComponent(token)}`;
-        
-        console.log('🔗 Link final gerado:', urlOrcamentos);
-        
-        // ✅ VERIFICAÇÃO EXTRA
-        const urlTest = new URL(urlOrcamentos);
-        const tokenVerificado = urlTest.searchParams.get('authToken');
-        console.log('🔍 Verificação final - Token no link:', tokenVerificado ? `SIM (${tokenVerificado.length} chars)` : 'NÃO');
-        
-        // Criar interface para acessar outras aplicações
-        criarInterfaceAplicacoes(urlOrcamentos);
-        
-      }).catch((error) => {
-        console.error('❌ Erro ao gerar token:', error);
-      });
+      console.log('🔗 Link gerado (sem token):', urlOrcamentos);
+      
+      criarInterfaceAplicacoes(urlOrcamentos);
+    }
+    
+    function criarInterfaceAplicacoes(urlOrcamentos) {
+      const appsContainer = document.createElement('div');
+      appsContainer.className = 'apps-container';
+      appsContainer.innerHTML = `
+        <h3 class="apps-title">📊 Aplicações da Empresa</h3>
+        <div class="apps-grid">
+          <a href="${urlOrcamentos}" target="_blank" class="app-link">
+            💰 Sistema de Orçamentos
+          </a>
+        </div>
+        <p class="apps-note">Clique para acessar o sistema de orçamentos</p>
+        <p class="apps-note" style="color: #2EAD60; font-size: 0.8rem;">
+          <strong>✅ Autenticação Compartilhada:</strong> Você já está logado!
+        </p>
+      `;
+      
+      const form = document.getElementById('login-form');
+      if (form) {
+        form.parentNode.insertBefore(appsContainer, form.nextSibling);
+      }
     }
     
     function criarInterfaceAplicacoes(urlOrcamentos) {
@@ -645,5 +650,6 @@
   </script>
 </body>
 </html>
+
 
 
