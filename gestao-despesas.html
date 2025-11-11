@@ -24,8 +24,198 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* Mantém todos os estilos existentes — layout, filtros e gráficos */
-    /* (Você já tinha a versão completa e funcional, então os estilos foram mantidos idênticos) */
+  /* ============================================
+     ESTILO ESPECÍFICO - GESTÃO DE DESPESAS (Ambiental)
+     Compatível com o global.css
+     ============================================ */
+  
+  body {
+    background: var(--bg-claro);
+    background-image: radial-gradient(circle at 80% 10%, rgba(38,192,76,0.05), transparent 50%),
+                      radial-gradient(circle at 10% 90%, rgba(107,85,57,0.05), transparent 60%);
+  }
+  
+  /* Cabeçalho */
+  .header-dashboard {
+    background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-accent) 100%);
+    color: white;
+    padding: 30px 0;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .header-dashboard h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+  
+  /* Navegação entre views */
+  .view-navigation {
+    display: flex;
+    gap: 10px;
+    margin: 25px 0;
+    background: var(--card-branco);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .view-btn {
+    flex: 1;
+    padding: 14px 22px;
+    border: 2px solid var(--borda-cinza);
+    background: var(--card-branco);
+    color: var(--texto-escuro);
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all var(--transition-normal);
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .view-btn.active {
+    background: var(--verde-primario);
+    color: white;
+    border-color: var(--verde-primario);
+    box-shadow: 0 4px 12px rgba(38,192,76,0.3);
+  }
+  
+  .view-btn:hover:not(.active) {
+    border-color: var(--verde-primario);
+    color: var(--verde-primario);
+  }
+  
+  /* Cards de estatísticas */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+  }
+  
+  .stat-card {
+    background: var(--card-branco);
+    border-left: 6px solid var(--verde-primario);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.3s ease;
+  }
+  .stat-card:hover { transform: translateY(-4px); }
+  
+  .stat-card h3 {
+    font-size: 0.95rem;
+    color: var(--verde-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--verde-escuro);
+  }
+  
+  /* Seção de filtros */
+  .filters-section {
+    background: var(--card-branco);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 30px;
+    border-left: 4px solid var(--verde-primario);
+    background-image: linear-gradient(to right bottom, rgba(38,192,76,0.03), rgba(107,85,57,0.03));
+  }
+  .filters-section h3 {
+    color: var(--verde-accent);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  
+  /* Inputs de filtro */
+  .filter-group label {
+    color: var(--verde-accent);
+    font-weight: 600;
+  }
+  .filter-group select {
+    border: 2px solid var(--borda-cinza);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--card-branco);
+  }
+  .filter-group select:focus {
+    border-color: var(--verde-primario);
+    box-shadow: 0 0 0 3px rgba(38,192,76,0.1);
+  }
+  
+  /* Cards de gráficos */
+  .dashboard-card {
+    background: var(--card-branco);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--verde-primario);
+    transition: transform 0.3s ease;
+  }
+  .dashboard-card:hover { transform: translateY(-3px); }
+  
+  .dashboard-card h3 {
+    color: var(--verde-accent);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Tabela de despesas */
+  .table-section {
+    background: var(--card-branco);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-top: 30px;
+  }
+  .table-header {
+    background: var(--verde-claro);
+    border-bottom: 2px solid var(--borda-cinza);
+    padding: 20px 30px;
+  }
+  .table-header h3 {
+    color: var(--verde-accent);
+    margin: 0;
+  }
+  
+  /* Status */
+  .status-badge {
+    border-radius: 20px;
+    font-weight: 600;
+    padding: 6px 12px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  .status-pendente {
+    background: #fff8e8;
+    color: #856404;
+    border: 1px solid #ffe3b3;
+  }
+  .status-pago {
+    background: #e8f5e9;
+    color: #0c5a34;
+    border: 1px solid #a5d6a7;
+  }
+  
+  /* Rodapé */
+  footer {
+    background: var(--verde-accent);
+    color: white;
+    text-align: center;
+    padding: 25px 15px;
+    margin-top: 40px;
+    font-size: 0.9rem;
+    border-top: 3px solid var(--verde-primario);
+  }
+
   </style>
 </head>
 <body>
