@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gestão Interna | Relevo Consultoria Ambiental</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Relevo | Acesso Restrito</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
 
   <!-- Fontes e Ícones -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,251 +19,161 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="scripts/firebase-init-guard.js"></script>
 
   <style>
-    /* ============================================
-       ESTILOS ESPECÍFICOS DA GESTÃO
-       ============================================ */
-
-    .hero-gestao {
-      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
-      color: white;
-      padding: 50px 30px;
-      margin-bottom: 40px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-gestao::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
-      background-size: cover;
-      background-position: center;
-      opacity: 0.1;
-      z-index: 0;
-    }
-
-    .hero-gestao > * { position: relative; z-index: 1; }
-
-    .hero-gestao .logo { height: 60px; margin-bottom: 20px; filter: brightness(0) invert(1); }
-
-    .hero-gestao h1 {
-      color: white;
-      font-size: 2.5rem;
-      margin-bottom: 15px;
-      font-weight: 700;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .hero-gestao p {
-      font-size: 1.2rem;
-      opacity: 0.95;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .section { margin-bottom: 50px; }
-
-    .section-title {
-      color: var(--verde-accent);
-      margin-bottom: 30px;
-      font-size: 1.8rem;
-      position: relative;
-      padding-bottom: 15px;
-    }
-
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 60px;
-      height: 4px;
-      background: var(--verde-primario);
-      border-radius: 2px;
-    }
-
-    .access-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      margin-bottom: 40px;
-    }
-
-    .access-card {
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 30px 25px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      border-left: 4px solid var(--verde-primario);
-      text-decoration: none;
-      color: inherit;
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, rgba(0, 100, 50, 0.9), rgba(20, 70, 40, 0.95)),
+                  url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG') center/cover no-repeat;
+      color: #fff;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      height: 100%;
+      align-items: center;
+      justify-content: center;
     }
 
-    .access-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-
-    .access-card img { width: 60px; height: 60px; margin: 0 auto 20px; object-fit: contain; }
-
-    .access-card h3 {
-      color: var(--verde-accent);
-      margin-bottom: 12px;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    .access-card p {
-      color: var(--texto-cinza);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-      flex-grow: 1;
-      line-height: 1.6;
-    }
-
-    .despesas-destaque {
-      background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
-      border: 2px dashed var(--verde-primario);
-      border-radius: 12px;
-      padding: 30px;
-      text-align: center;
-      margin: 30px 0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-
-    .dashboard-card {
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      border-left: 4px solid var(--laranja);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 170px;
-    }
-
-    .two-col-dashboard {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
+    .login-container {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px 35px;
       width: 100%;
-      margin-bottom: 24px;
+      max-width: 420px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      text-align: center;
     }
 
-    .clickup-container { 
-      background: var(--card-branco); 
-      border-radius: 12px; 
-      padding: 30px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
-      margin-bottom: 40px; 
+    .login-container img {
+      height: 70px;
+      margin-bottom: 25px;
+      filter: brightness(0) invert(1);
     }
 
-    @media (max-width: 1024px) { .two-col-dashboard { grid-template-columns: 1fr; } }
+    .login-container h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .login-container p {
+      font-size: 0.95rem;
+      color: #e0e0e0;
+      margin-bottom: 30px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.9);
+      font-size: 0.95rem;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .login-container button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .error-msg, .success-msg {
+      display: none;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .error-msg { background: rgba(255,0,0,0.15); color: #ffd2d2; }
+    .success-msg { background: rgba(0,255,100,0.15); color: #b5ffcb; }
+
+    footer {
+      position: absolute;
+      bottom: 15px;
+      width: 100%;
+      text-align: center;
+      color: #d0d0d0;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 480px) {
+      .login-container { padding: 30px 25px; }
+      .login-container h1 { font-size: 1.5rem; }
+    }
   </style>
 </head>
 
 <body>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-content">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png"
-           alt="Logo Relevo Consultoria Ambiental" class="logo">
+  <div class="login-container">
+    <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
+         alt="Logo Relevo">
 
-      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
-        <i class="fas fa-bars"></i>
-      </button>
+    <h1>Portal Relevo</h1>
+    <p>Acesso restrito a colaboradores e clientes</p>
 
-      <nav class="nav-links" id="navLinks">
-        <a href="gestao.html"><i class="fas fa-chart-line"></i> Gestão</a>
-        <a href="colaboradores.html"><i class="fas fa-users"></i> Equipe</a>
-        <a href="clientes.html"><i class="fas fa-briefcase"></i> Clientes</a>
-        <button class="logout-btn" onclick="logout()">
-          <i class="fas fa-sign-out-alt"></i> Sair
-        </button>
-      </nav>
-    </div>
-  </header>
+    <div id="msg-success" class="success-msg">✅ Login realizado com sucesso! Redirecionando...</div>
+    <div id="msg-error" class="error-msg"></div>
 
-  <!-- HERO -->
-  <section class="hero-gestao">
-    <div class="container">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
-           alt="Relevo Consultoria Ambiental" class="logo">
-      <h1>Gestão Interna</h1>
-      <p>Central de controle e informações administrativas da Relevo Consultoria Ambiental</p>
-    </div>
-  </section>
-
-  <main class="container">
-    <!-- ACESSO RÁPIDO -->
-    <!-- (mantém o conteúdo original dos cards de acesso, despesas, orçamentos, etc.) -->
-
-    <!-- SEÇÃO: DASHBOARD DE INDICADORES (AGORA CRONOGRAMA) -->
-    <section class="section">
-      <h2 class="section-title">Dashboard de Indicadores</h2>
-      <div class="clickup-container">
-        <div class="dashboard-card" aria-labelledby="cronograma-title" style="border-left: 4px solid var(--verde-primario); text-align:center;">
-          <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png"
-                 alt="Ícone Cronograma"
-                 style="width:100px; height:100px; margin-bottom:15px; object-fit:contain;">
-            <h3 id="cronograma-title">🗓️ Cronograma de Projetos</h3>
-            <p>
-              Módulo em desenvolvimento. Em breve você poderá acompanhar as etapas e prazos dos projetos diretamente aqui.
-            </p>
-          </div>
-          <div>
-            <a class="btn btn-orange" href="#" onclick="alert('O módulo Cronograma ainda está em desenvolvimento.')" style="cursor:default;">
-              <i class="fas fa-calendar-alt"></i> Acessar Cronograma
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SEÇÕES DE NOTIFICAÇÕES E MODIFICAÇÕES (inalteradas) -->
-  </main>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="E-mail corporativo" required>
+      <input type="password" id="password" placeholder="Senha" required>
+      <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+    </form>
+  </div>
 
   <footer>
     © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
   </footer>
 
   <script>
-    const auth = window.__RELEVO_AUTH__;
-    if (auth) {
-      auth.onAuthStateChanged((user) => {
-        if (!user) window.location.href = 'index.html';
-      });
-    }
+    // Acesso ao app do guard unificado
+    const auth = window.__RELEVO_AUTH__ || firebase.auth();
 
-    function logout() {
-      if (confirm('Deseja realmente sair do sistema?')) {
-        auth.signOut().then(() => window.location.href = 'index.html');
+    // Redireciona se já estiver logado
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        console.log('✅ Usuário já logado:', user.email);
+        window.location.href = 'gestao.html';
       }
-    }
+    });
 
-    function toggleMobileMenu() {
-      const navLinks = document.getElementById('navLinks');
-      navLinks.classList.toggle('mobile-open');
-    }
+    // Login manual
+    const form = document.getElementById('login-form');
+    const msgError = document.getElementById('msg-error');
+    const msgSuccess = document.getElementById('msg-success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msgError.style.display = 'none';
+      msgSuccess.style.display = 'none';
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        msgSuccess.style.display = 'block';
+        setTimeout(() => window.location.href = 'gestao.html', 800);
+      } catch (err) {
+        console.error('❌ Erro de login:', err);
+        msgError.textContent = 'E-mail ou senha inválidos. Verifique suas credenciais.';
+        msgError.style.display = 'block';
+      }
+    });
   </script>
 </body>
 </html>
