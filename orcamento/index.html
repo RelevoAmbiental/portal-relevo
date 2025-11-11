@@ -3,45 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 🔐 Content Security Policy para Firebase -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self' https://firestore.googleapis.com https://*.firebaseio.com https://www.googleapis.com;
+      script-src 'self' 'unsafe-eval' https://www.gstatic.com/ https://apis.google.com/ https://www.googleapis.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      connect-src 'self' https://firestore.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com;
+      img-src 'self' data: https:;
+    ">
+    
     <title>Sistema de Orçamentos - Relevo</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 40px; 
-            background: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-    </style>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <script type="module" crossorigin src="/orcamento/assets/index-976532c2.js"></script>
+  <link rel="stylesheet" href="/orcamento/assets/index-be086e8e.css">
 </head>
 <body>
-    <div class="container">
-        <h1>💰 Sistema de Orçamentos</h1>
-        <p>Esta é uma versão de teste da integração.</p>
-        <p><strong>Status:</strong> ✅ Integração com portal funcionando</p>
-        <button onclick="testarAuth()">Testar Autenticação</button>
-        <div id="auth-status"></div>
-    </div>
-
-    <script>
-        function testarAuth() {
-            const status = document.getElementById('auth-status');
-            status.innerHTML = '<p>🔍 Verificando autenticação...</p>';
-            
-            // Simular verificação de auth
-            setTimeout(() => {
-                status.innerHTML = `
-                    <p style="color: green;">✅ Login único funcionando!</p>
-                    <p>Usuário já está autenticado via portal.</p>
-                `;
-            }, 1000);
-        }
-        
-        console.log('✅ Sistema de Orçamentos carregado como subpasta do portal');
-    </script>
+    <div id="root"></div>
+    
+    <!-- ✅ CORREÇÃO: Usar .jsx (igual ao seu arquivo) -->
+    
 </body>
 </html>

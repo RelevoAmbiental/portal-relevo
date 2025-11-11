@@ -1,0 +1,9 @@
+{
+  "name": "Sistema de Orçamentos - Relevo Consultoria",
+  "short_name": "Orçamentos Relevo",
+  "description": "Sistema profissional de orçamentos para projetos ambientais",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2E7D32",
+  "background_color": "#ffffff"
+}
