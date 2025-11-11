@@ -422,23 +422,29 @@
     }
 
     // ============================================
-    // GERAR LINKS PARA APLICAÇÕES EXTERNAS
+    // GERAR LINKS PARA APLICAÇÕES EXTERNAS - VERSÃO CORRIGIDA
     // ============================================
-
+    
     function gerarLinksAplicacoes(user) {
       console.log('🔗 Gerando links para aplicações...');
       
-      // ✅ Compartilhar estado de login
-      compartilharEstadoLogin(user);
-      
-      // Link sem token na URL (agora usamos localStorage)
-      const urlOrcamentos = `https://orcamento.relevo.eco.br`;
-      
-      console.log('🔗 Link gerado:', urlOrcamentos);
-      
-      criarInterfaceAplicacoes(urlOrcamentos);
+      // Gerar token para a aplicação de orçamentos
+      user.getIdToken().then((token) => {
+        console.log('🎫 Token gerado:', token ? `SIM (${token.length} chars)` : 'NÃO');
+        
+        // ✅ CORREÇÃO: URL COM token como parâmetro
+        const urlOrcamentos = `https://orcamento.relevo.eco.br/?authToken=${encodeURIComponent(token)}`;
+        
+        console.log('🔗 Link gerado com token:', urlOrcamentos);
+        
+        // Criar interface para acessar outras aplicações
+        criarInterfaceAplicacoes(urlOrcamentos);
+        
+      }).catch((error) => {
+        console.error('❌ Erro ao gerar token:', error);
+      });
     }
-
+    
     function criarInterfaceAplicacoes(urlOrcamentos) {
       // Criar container para links de aplicações
       const appsContainer = document.createElement('div');
@@ -446,13 +452,13 @@
       appsContainer.innerHTML = `
         <h3 class="apps-title">📊 Aplicações da Empresa</h3>
         <div class="apps-grid">
-          <a href="${urlOrcamentos}" target="_blank" class="app-link">
+          <a href="${urlOrcamentos}" target="_blank" class="app-link" id="link-orcamentos">
             💰 Sistema de Orçamentos
           </a>
         </div>
-        <p class="apps-note">Clique para acessar o sistema de orçamentos</p>
+        <p class="apps-note">Clique para acessar o sistema de orçamentos em nova aba</p>
         <p class="apps-note" style="color: #2EAD60; font-size: 0.8rem;">
-          <strong>✅ Login automático:</strong> Sua sessão será compartilhada
+          <strong>✅ Login automático:</strong> Sua sessão será compartilhada via token seguro
         </p>
       `;
       
@@ -463,6 +469,20 @@
       if (form) {
         form.parentNode.insertBefore(appsContainer, form.nextSibling);
       }
+      
+      // Debug: verificar token no link quando clicado
+      document.getElementById('link-orcamentos').addEventListener('click', function(e) {
+        const url = this.href;
+        const urlObj = new URL(url);
+        const token = urlObj.searchParams.get('authToken');
+        console.log('🔗 Clique no link - Token presente:', token ? `SIM (${token.length} chars)` : 'NÃO');
+        
+        if (!token) {
+          console.error('❌ ERRO: Token não encontrado no link!');
+          alert('Erro: Token não está sendo incluído no link. Verifique o console.');
+          e.preventDefault();
+        }
+      });
     }
 
     // ============================================
@@ -584,3 +604,4 @@
   </script>
 </body>
 </html>
+
