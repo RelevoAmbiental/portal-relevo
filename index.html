@@ -238,6 +238,32 @@
       color: #666;
     }
 
+    /* Debug info styles */
+    .debug-info {
+      margin-top: 10px;
+      padding: 8px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+      border: 1px solid #ddd;
+    }
+
+    .debug-button {
+      margin-left: 10px;
+      font-size: 10px;
+      padding: 2px 6px;
+      background: #666;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .debug-button:hover {
+      background: #555;
+    }
+
     /* RESPONSIVIDADE */
     @media (max-width: 480px) {
       .login-box {
@@ -402,7 +428,7 @@
     }
 
     // ============================================
-    // GERAR LINKS PARA APLICAÇÕES EXTERNAS
+    // GERAR LINKS PARA APLICAÇÕES EXTERNAS - VERSÃO CORRIGIDA
     // ============================================
 
     function gerarLinksAplicacoes(user) {
@@ -410,13 +436,20 @@
       
       // Gerar token customizado para outras aplicações
       user.getIdToken().then((token) => {
-        console.log('🎫 Token gerado para aplicações externas');
+        console.log('🎫 Token gerado para aplicações externas:', token ? `SIM (${token.length} chars)` : 'NÃO');
         
-        // URL da aplicação de orçamentos
+        // ⚠️ CORREÇÃO: URL da aplicação de orçamentos COM token
         const urlOrcamentos = `https://orcamento.relevo.eco.br/?token=${encodeURIComponent(token)}`;
+        
+        console.log('🔗 Link gerado:', urlOrcamentos);
         
         // Criar interface para acessar outras aplicações
         criarInterfaceAplicacoes(urlOrcamentos);
+        
+        // ⬇️ DEBUG: Mostrar token no console para verificação
+        console.log('🔍 DEBUG - Token completo:', token);
+        console.log('🔍 DEBUG - Primeiros 50 chars:', token.substring(0, 50) + '...');
+        
       }).catch((error) => {
         console.error('❌ Erro ao gerar token:', error);
       });
@@ -429,20 +462,72 @@
       appsContainer.innerHTML = `
         <h3 class="apps-title">📊 Aplicações da Empresa</h3>
         <div class="apps-grid">
-          <a href="${urlOrcamentos}" target="_blank" class="app-link">
+          <a href="${urlOrcamentos}" target="_blank" class="app-link" id="link-orcamentos">
             💰 Sistema de Orçamentos
           </a>
           <!-- Adicione mais aplicações aqui no futuro -->
         </div>
         <p class="apps-note">Clique para acessar o sistema de orçamentos em nova aba</p>
+        <div class="debug-info">
+          <strong>Debug:</strong> <span id="debug-url">${urlOrcamentos.substring(0, 80)}...</span>
+          <button class="debug-button" onclick="mostrarUrlCompleta()">Ver URL completa</button>
+        </div>
       `;
+      
+      // Mostrar debug info no console
+      console.log('🔗 Link de orçamentos criado:', urlOrcamentos);
+      
+      // Verificar se o token está presente na URL
+      const urlObj = new URL(urlOrcamentos);
+      const tokenParam = urlObj.searchParams.get('token');
+      console.log('🔍 Token na URL gerada:', tokenParam ? `SIM (${tokenParam.length} chars)` : 'NÃO');
       
       // Inserir após o formulário de login
       const form = document.getElementById('login-form');
       if (form) {
         form.parentNode.insertBefore(appsContainer, form.nextSibling);
       }
+      
+      // Mostrar info de debug se Ctrl pressionado
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey) {
+          document.querySelector('.debug-info').style.display = 'block';
+        }
+      });
     }
+
+    // Função auxiliar para debug
+    function mostrarUrlCompleta() {
+      const link = document.getElementById('link-orcamentos');
+      alert('URL completa:\n' + link.href);
+    }
+
+    // ============================================
+    // DEBUG TEMPORÁRIO - Monitorar cliques no link
+    // ============================================
+
+    console.log('🔍 DEBUG PORTAL - Verificando se o token está sendo gerado...');
+
+    // Monitorar cliques no link de orçamentos
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('#link-orcamentos')) {
+        const link = e.target.closest('#link-orcamentos');
+        console.log('🔗 Clique no link de orçamentos detectado');
+        console.log('📋 URL do link:', link.href);
+        
+        const urlObj = new URL(link.href);
+        const token = urlObj.searchParams.get('token');
+        console.log('🎫 Token no link clicado:', token ? `SIM (${token.length} caracteres)` : 'NÃO');
+        
+        if (!token) {
+          console.error('❌ ERRO CRÍTICO: Token não encontrado no link!');
+          alert('ERRO: Token não está sendo incluído no link. Verifique o console.');
+          e.preventDefault();
+        } else {
+          console.log('✅ Token válido encontrado, redirecionando...');
+        }
+      }
+    });
 
     // ============================================
     // LÓGICA DE LOGIN
@@ -485,7 +570,7 @@
           
           showSuccess(`✅ Bem-vindo, ${nome}!`);
           
-          // ⬇️ NOVO: Gerar links para aplicações externas
+          // ⬇️ CORREÇÃO APLICADA: Gerar links para aplicações externas
           gerarLinksAplicacoes(user);
           
           // Redirecionar após 3 segundos (dar tempo para ver os links)
