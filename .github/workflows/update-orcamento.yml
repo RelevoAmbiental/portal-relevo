@@ -1,0 +1,45 @@
+name: Atualizar Orçamento no Portal
+
+on:
+  workflow_dispatch:  # ✅ Roda manualmente
+
+jobs:
+  update-orcamento:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout código do portal
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 📥 Download artifact do orçamento
+      uses: actions/download-artifact@v4
+      with:
+        name: orcamento-build
+        run-id: ${{ github.event.inputs.run_id }}
+        repository: 'RelevoAmbiental/orcamento-relevo'
+        path: temp-orcamento
+        
+    - name: 🔓 Descompactar artifact
+      run: |
+        cd temp-orcamento
+        unzip -o orcamento-build.zip -d ../temp-unzipped/
+        
+    - name: 📁 Copiar para pasta do portal
+      run: |
+        # Remove versão anterior se existir
+        rm -rf orcamento/
+        # Cria pasta e copia arquivos buildados
+        mkdir -p orcamento
+        cp -r temp-unzipped/* orcamento/
+        echo "✅ Arquivos copiados para pasta orcamento/"
+        ls -la orcamento/
+        
+    - name: 💾 Commit e Push direto
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add orcamento/
+        git commit -m "🔄 Atualização automática do Sistema de Orçamentos"
+        git push
