@@ -1,20 +1,21 @@
 // ============================================
-// FIREBASE INIT GUARD - Relevo Consultoria Ambiental
+// 🔥 FIREBASE INIT GUARD - Relevo Consultoria Ambiental
 // ============================================
-// Uso: incluir este script após os imports do Firebase SDK (compat)
-// e antes de qualquer chamada de auth, firestore ou storage.
 //
 // Objetivo:
 // - Evitar múltiplas inicializações (initializeApp duplicado)
 // - Garantir persistência local (auth.setPersistence(...))
-// - Compartilhar o mesmo login entre todos os módulos do portal
+// - Compartilhar o mesmo login entre todos os módulos do portal (orcamento, despesas, cronograma)
+// - Disponibilizar acesso global seguro via window.__RELEVO_APP__ e window.relevoUser
+//
+// Uso: incluir este script após os imports do Firebase SDK (compat)
+// e antes de qualquer chamada de auth, firestore ou storage.
 //
 // ================================================================
 
 /* global firebase */
 
 (function () {
-  // Configuração unificada do Portal Relevo
   const firebaseConfig = {
     apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
     authDomain: "portal-relevo.firebaseapp.com",
@@ -25,8 +26,10 @@
   };
 
   try {
-    // Evita re-inicialização
-    if (firebase.apps && firebase.apps.length) {
+    // ===============================
+    // 🚀 Inicialização única
+    // ===============================
+    if (firebase.apps && firebase.apps.length > 0) {
       window.__RELEVO_APP__ = firebase.app();
       console.log("ℹ️ Firebase já estava inicializado");
     } else {
@@ -34,39 +37,62 @@
       console.log("✅ Firebase inicializado (Portal Relevo)");
     }
 
-    // Auth compartilhado entre os módulos
+    // ===============================
+    // 🔐 Autenticação unificada
+    // ===============================
     if (firebase.auth) {
       const auth = firebase.auth();
+      window.__RELEVO_AUTH__ = auth;
 
-      // Persistência local — mantém login ao trocar de app
+      // Persistência local (mantém login entre abas e apps)
       auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(() => console.log("✅ Persistência local ativa"))
         .catch(err => console.warn("⚠️ Falha ao definir persistência:", err));
-
-      window.__RELEVO_AUTH__ = auth;
+    } else {
+      console.warn("⚠️ Firebase Auth não disponível ainda");
     }
+
   } catch (error) {
     console.error("❌ Erro ao iniciar Firebase (Guard):", error);
   }
 })();
 
 // ============================================================
-// 🔄 Monitoramento Global da Autenticação
+// 🔄 Monitoramento Global de Autenticação
+// ============================================================
+//
+// Esse trecho mantém o usuário autenticado disponível globalmente,
+// para ser reutilizado por subaplicações (orcamento, cronograma etc.)
+// sem precisar refazer o login.
+//
 // ============================================================
 
-// Só executa se o Firebase Auth estiver disponível
 if (typeof window !== "undefined" && firebase?.auth) {
   const auth = firebase.auth();
 
+  // Define usuário global assim que detectado
   auth.onAuthStateChanged((u) => {
-    // Expõe o usuário autenticado globalmente (para os outros apps usarem)
     window.relevoUser = u || null;
 
     if (u) {
       console.log("✅ Usuário autenticado detectado:", u.email || u.uid);
-      console.log("✅ Persistência local ativa");
+      // Evita duplicidade de logs em apps filhos
+      if (!window.__RELEVO_USER_LOGGED__) {
+        window.__RELEVO_USER_LOGGED__ = true;
+        console.log("🔁 Sessão compartilhada com subaplicações");
+      }
     } else {
       console.log("🔒 Nenhum usuário autenticado");
+      window.__RELEVO_USER_LOGGED__ = false;
     }
   });
+
+  // Se o usuário já estava logado antes do onAuthStateChanged ativar
+  const current = auth.currentUser;
+  if (current && !window.relevoUser) {
+    window.relevoUser = current;
+    console.log("⚡ Sessão restaurada:", current.email || current.uid);
+  }
+} else {
+  console.warn("⚠️ Firebase Auth ainda não disponível para monitoramento global.");
 }
