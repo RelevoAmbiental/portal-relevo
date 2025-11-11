@@ -1,4 +1,3 @@
-Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a substituição por mim;
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -21,7 +20,7 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
   <style>
-    /* ESTILOS ESPECÍFICOS DO LOGIN */
+    /* SEUS ESTILOS EXISTENTES - MANTIDOS INTACTOS */
     body {
       margin: 0;
       padding: 0;
@@ -38,7 +37,6 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
       padding: 20px;
     }
     
-    /* Imagem de fundo do login */
     .login-container::before {
       content: ""; 
       position: absolute; 
@@ -119,7 +117,6 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
       background-color: white; 
     }
     
-    /* Mensagens de erro/sucesso */
     .message {
       text-align: center; 
       margin-top: 1rem; 
@@ -164,7 +161,6 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
       line-height: 1.6;
     }
 
-    /* Botão de loading */
     .btn-loading {
       opacity: 0.7;
       cursor: not-allowed;
@@ -189,7 +185,6 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
       to { transform: rotate(360deg); }
     }
 
-    /* Estilos para a seção de aplicações */
     .apps-container {
       margin-top: 2rem;
       padding: 1.5rem;
@@ -237,32 +232,6 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
       margin: 0.5rem 0 0 0;
       font-size: 0.85rem;
       color: #666;
-    }
-
-    /* Debug info styles */
-    .debug-info {
-      margin-top: 10px;
-      padding: 8px;
-      background: #f5f5f5;
-      border-radius: 4px;
-      font-size: 12px;
-      display: none;
-      border: 1px solid #ddd;
-    }
-
-    .debug-button {
-      margin-left: 10px;
-      font-size: 10px;
-      padding: 2px 6px;
-      background: #666;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
-    .debug-button:hover {
-      background: #555;
     }
 
     /* RESPONSIVIDADE */
@@ -429,31 +398,45 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
     }
 
     // ============================================
-    // GERAR LINKS PARA APLICAÇÕES EXTERNAS - VERSÃO CORRIGIDA
+    // COMPARTILHAR ESTADO DE LOGIN ENTRE APPS
+    // ============================================
+
+    function compartilharEstadoLogin(user) {
+      console.log('🔄 Compartilhando estado de login entre aplicações...');
+      
+      // Gerar token para compartilhar entre apps
+      user.getIdToken().then((token) => {
+        // Salvar no localStorage para outras aplicações
+        localStorage.setItem('portal-auth-token', token);
+        localStorage.setItem('portal-auth-user', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          timestamp: Date.now()
+        }));
+        
+        console.log('✅ Estado de login salvo no localStorage');
+        
+      }).catch((error) => {
+        console.error('❌ Erro ao compartilhar estado de login:', error);
+      });
+    }
+
+    // ============================================
+    // GERAR LINKS PARA APLICAÇÕES EXTERNAS
     // ============================================
 
     function gerarLinksAplicacoes(user) {
       console.log('🔗 Gerando links para aplicações...');
       
-      // Gerar token customizado para outras aplicações
-      user.getIdToken().then((token) => {
-        console.log('🎫 Token gerado para aplicações externas:', token ? `SIM (${token.length} chars)` : 'NÃO');
-        
-        // ⚠️ CORREÇÃO: URL da aplicação de orçamentos COM token
-        const urlOrcamentos = `https://orcamento.relevo.eco.br/?token=${encodeURIComponent(token)}`;
-        
-        console.log('🔗 Link gerado:', urlOrcamentos);
-        
-        // Criar interface para acessar outras aplicações
-        criarInterfaceAplicacoes(urlOrcamentos);
-        
-        // ⬇️ DEBUG: Mostrar token no console para verificação
-        console.log('🔍 DEBUG - Token completo:', token);
-        console.log('🔍 DEBUG - Primeiros 50 chars:', token.substring(0, 50) + '...');
-        
-      }).catch((error) => {
-        console.error('❌ Erro ao gerar token:', error);
-      });
+      // ✅ Compartilhar estado de login
+      compartilharEstadoLogin(user);
+      
+      // Link sem token na URL (agora usamos localStorage)
+      const urlOrcamentos = `https://orcamento.relevo.eco.br`;
+      
+      console.log('🔗 Link gerado:', urlOrcamentos);
+      
+      criarInterfaceAplicacoes(urlOrcamentos);
     }
 
     function criarInterfaceAplicacoes(urlOrcamentos) {
@@ -463,72 +446,24 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
       appsContainer.innerHTML = `
         <h3 class="apps-title">📊 Aplicações da Empresa</h3>
         <div class="apps-grid">
-          <a href="${urlOrcamentos}" target="_blank" class="app-link" id="link-orcamentos">
+          <a href="${urlOrcamentos}" target="_blank" class="app-link">
             💰 Sistema de Orçamentos
           </a>
-          <!-- Adicione mais aplicações aqui no futuro -->
         </div>
-        <p class="apps-note">Clique para acessar o sistema de orçamentos em nova aba</p>
-        <div class="debug-info">
-          <strong>Debug:</strong> <span id="debug-url">${urlOrcamentos.substring(0, 80)}...</span>
-          <button class="debug-button" onclick="mostrarUrlCompleta()">Ver URL completa</button>
-        </div>
+        <p class="apps-note">Clique para acessar o sistema de orçamentos</p>
+        <p class="apps-note" style="color: #2EAD60; font-size: 0.8rem;">
+          <strong>✅ Login automático:</strong> Sua sessão será compartilhada
+        </p>
       `;
       
-      // Mostrar debug info no console
-      console.log('🔗 Link de orçamentos criado:', urlOrcamentos);
-      
-      // Verificar se o token está presente na URL
-      const urlObj = new URL(urlOrcamentos);
-      const tokenParam = urlObj.searchParams.get('token');
-      console.log('🔍 Token na URL gerada:', tokenParam ? `SIM (${tokenParam.length} chars)` : 'NÃO');
+      console.log('✅ Interface de aplicações criada');
       
       // Inserir após o formulário de login
       const form = document.getElementById('login-form');
       if (form) {
         form.parentNode.insertBefore(appsContainer, form.nextSibling);
       }
-      
-      // Mostrar info de debug se Ctrl pressionado
-      document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey) {
-          document.querySelector('.debug-info').style.display = 'block';
-        }
-      });
     }
-
-    // Função auxiliar para debug
-    function mostrarUrlCompleta() {
-      const link = document.getElementById('link-orcamentos');
-      alert('URL completa:\n' + link.href);
-    }
-
-    // ============================================
-    // DEBUG TEMPORÁRIO - Monitorar cliques no link
-    // ============================================
-
-    console.log('🔍 DEBUG PORTAL - Verificando se o token está sendo gerado...');
-
-    // Monitorar cliques no link de orçamentos
-    document.addEventListener('click', function(e) {
-      if (e.target.closest('#link-orcamentos')) {
-        const link = e.target.closest('#link-orcamentos');
-        console.log('🔗 Clique no link de orçamentos detectado');
-        console.log('📋 URL do link:', link.href);
-        
-        const urlObj = new URL(link.href);
-        const token = urlObj.searchParams.get('token');
-        console.log('🎫 Token no link clicado:', token ? `SIM (${token.length} caracteres)` : 'NÃO');
-        
-        if (!token) {
-          console.error('❌ ERRO CRÍTICO: Token não encontrado no link!');
-          alert('ERRO: Token não está sendo incluído no link. Verifique o console.');
-          e.preventDefault();
-        } else {
-          console.log('✅ Token válido encontrado, redirecionando...');
-        }
-      }
-    });
 
     // ============================================
     // LÓGICA DE LOGIN
@@ -571,7 +506,7 @@ Deep, o código do portal (passo 4) está complexo e eu me perco sempre, faça a
           
           showSuccess(`✅ Bem-vindo, ${nome}!`);
           
-          // ⬇️ CORREÇÃO APLICADA: Gerar links para aplicações externas
+          // ⬇️ ATUALIZADO: Gerar links com compartilhamento de sessão
           gerarLinksAplicacoes(user);
           
           // Redirecionar após 3 segundos (dar tempo para ver os links)
