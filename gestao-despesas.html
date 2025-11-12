@@ -55,25 +55,26 @@
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
     box-sizing: border-box;
+    z-index: 0; /* base do conteúdo */
   }
   
-  /* Camada com degradê mais intenso e transição mais curta */
+  /* Camada com degradê mais intenso e transição curta */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     background: 
       linear-gradient(135deg,
-        rgba(35, 85, 50, 1) 0%,          /* verde bem escuro no topo */
-        rgba(100, 180, 90, 1) 45%,       /* verde médio logo na metade */
-        rgba(190, 240, 140, 1) 100%      /* verde-limão suave no fim */
+        rgba(30, 80, 45, 1) 0%,          /* verde escuro no topo */
+        rgba(100, 180, 90, 1) 45%,       /* verde médio na transição */
+        rgba(190, 240, 140, 1) 100%      /* verde-limão na base */
       );
     background-size: cover;
-    z-index: 0;
+    z-index: -2; /* sempre atrás de tudo */
     pointer-events: none;
   }
   
-  /* Camada da logo — translúcida, mas mais visível sobre o degradê */
+  /* Camada da logo — translúcida e posicionada atrás do conteúdo */
   body::after {
     content: "";
     position: fixed;
@@ -81,23 +82,11 @@
     background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
       no-repeat center center;
     background-size: 900px;
-    opacity: 0.20; /* mais visível (antes era 0.12) */
-    mix-blend-mode: overlay; /* mantém integração suave com o degradê */
+    opacity: 0.18; /* logo bem visível, mas não dominante */
+    mix-blend-mode: overlay;
     pointer-events: none;
-    z-index: 1; /* sobre o degradê, atrás do conteúdo */
-    
-    /* Tornamos só a logo mais pálida */
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
-        no-repeat center center;
-      background-size: 900px;
-      opacity: 0.12; /* deixa só a logo suave */
-      pointer-events: none;
-      z-index: 0;
-    }
+    z-index: -1; /* logo acima do degradê, mas atrás do conteúdo */
+  }
     
   /* Fazer com que todo conteúdo fique acima do fundo */
   .container,
