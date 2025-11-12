@@ -41,13 +41,13 @@
     min-height: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* evita scrollbar horizontal indesejável */
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
   }
   
-  /* Corpo principal — mantém transparente para exibir o fundo fixo */
+  /* Corpo principal — transparente, degradê controlado no ::before */
   body {
     position: relative;
     background: transparent;
@@ -57,23 +57,23 @@
     box-sizing: border-box;
   }
   
-  /* Camada fixa com degradê (visível) + logo translúcida */
+  /* Camada com degradê mais intenso e transição mais curta */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background:
-      linear-gradient(135deg, rgba(60, 120, 70, 1) 0%, rgba(190, 240, 140, 1) 100%), /* degradê forte e visível */
-      url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
-        no-repeat center center;
-    background-size: cover, 900px;
-    background-blend-mode: overlay; /* mistura leve, sem apagar o degradê */
-    opacity: 1; /* degradê 100% visível */
-    pointer-events: none;
+    background: 
+      linear-gradient(135deg,
+        rgba(35, 85, 50, 1) 0%,          /* verde bem escuro no topo */
+        rgba(100, 180, 90, 1) 45%,       /* verde médio logo na metade */
+        rgba(190, 240, 140, 1) 100%      /* verde-limão suave no fim */
+      );
+    background-size: cover;
     z-index: 0;
+    pointer-events: none;
   }
   
-  /* Tornamos só a logo mais pálida */
+  /* Camada da logo — translúcida, mas mais visível sobre o degradê */
   body::after {
     content: "";
     position: fixed;
@@ -81,11 +81,23 @@
     background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
       no-repeat center center;
     background-size: 900px;
-    opacity: 0.12; /* deixa só a logo suave */
+    opacity: 0.20; /* mais visível (antes era 0.12) */
+    mix-blend-mode: overlay; /* mantém integração suave com o degradê */
     pointer-events: none;
-    z-index: 0;
-  }
-
+    z-index: 1; /* sobre o degradê, atrás do conteúdo */
+    
+    /* Tornamos só a logo mais pálida */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
+        no-repeat center center;
+      background-size: 900px;
+      opacity: 0.12; /* deixa só a logo suave */
+      pointer-events: none;
+      z-index: 0;
+    }
     
   /* Fazer com que todo conteúdo fique acima do fundo */
   .container,
