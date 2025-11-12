@@ -9,13 +9,13 @@
 class DespesasApp {
   constructor() {
     this.CONFIG = {
-      projetos: ['BR-135/BA', 'Parna Diamantina', 'Habilis-GO'],
-      funcionarios: ['Gleisson', 'Júlio', 'Samuel', 'Tiago', 'Yuri', 'João', 'Danilo', 'Roberto', 'Daniel'],
+      projetos: ['BR-135/BA', 'EOL Ibitiara/Assurua'],
+      funcionarios: ['Gleisson', 'Sandro', 'Emílio', 'Yuri', 'João', 'Danilo', 'Roberto', 'Daniel', 'Tiago', 'Samuel'],
       tiposDespesa: [
         'Água', 'Almoço / Jantar', 'Aluguel de Carro', 'Café da Manhã',
         'Combustível', 'Correios', 'EPI', 'Ferramentas', 'Hospedagem / Hotel',
         'Lanche / Refeição Leve', 'Lavagem do Veículo', 'Manutenção de Equipamento',
-        'Material de Escritório', 'Passagens', 'Pedágio', 'Táxi / Uber / Aplicativos', 'Outros'
+        'Material de Escritório', 'Passagens', 'Pedágio', 'Táxi / Uber / Aplicativos', 'Exames', 'Outros'
       ],
       maxFileSize: 10 * 1024 * 1024,
       acceptedFileTypes: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
@@ -264,3 +264,4 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
+
