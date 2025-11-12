@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portal Relevo | Acesso Restrito</title>
 
   <!-- Favicon -->
@@ -14,14 +14,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- CSS Global -->
-  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/global.css" />
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- Guard unificado (já está no projeto) -->
+  <!-- Guard Firebase (sem type="module") -->
   <script src="scripts/firebase-init-guard.js"></script>
 
   <style>
@@ -86,7 +86,7 @@
       padding: 12px;
       border: none;
       border-radius: 8px;
-      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
+      background: linear-gradient(135deg, #006433, #144628);
       color: white;
       font-weight: 600;
       font-size: 1rem;
@@ -112,22 +112,8 @@
     .error-msg { background: rgba(255,0,0,0.15); color: #ffd2d2; }
     .success-msg { background: rgba(0,255,100,0.15); color: #b5ffcb; }
 
-    .btn-loading { opacity: 0.7; cursor: not-allowed; position: relative; }
-    .btn-loading::after {
-      content: "";
-      position: absolute; width: 16px; height: 16px; top: 50%; right: 15px; margin-top: -8px;
-      border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white;
-      animation: spinner 0.6s linear infinite;
-    }
-    @keyframes spinner { to { transform: rotate(360deg); } }
-
     footer {
       position: absolute; bottom: 15px; width: 100%; text-align: center; color: #d0d0d0; font-size: 0.85rem;
-    }
-
-    @media (max-width: 480px) {
-      .login-container { padding: 30px 25px; margin: 10px; }
-      .login-container h1 { font-size: 1.5rem; }
     }
   </style>
 </head>
@@ -145,11 +131,11 @@
     <form id="login-form" autocomplete="on">
       <div class="form-group">
         <label for="username" class="form-label">Usuário</label>
-        <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username" required>
+        <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username" required />
       </div>
       <div class="form-group">
         <label for="password" class="form-label">Senha</label>
-        <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+        <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required />
       </div>
       <button type="submit" id="login-btn"><i class="fas fa-sign-in-alt"></i> Entrar</button>
     </form>
@@ -160,81 +146,66 @@
   </footer>
 
   <script>
-    // Usa o app/auth do guard (sem reinicializar Firebase)
+    console.log("🚀 Iniciando Portal Relevo...");
+    console.log("🔍 Firebase carregado?", typeof firebase);
+
     const auth = (window.__RELEVO_AUTH__) ? window.__RELEVO_AUTH__ : firebase.auth();
     const db = firebase.firestore();
 
-    // Se já estiver logado, manda pra gestão
-    if (auth && auth.onAuthStateChanged) {
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          console.log('✅ Usuário já logado:', user.email || user.uid);
-          window.location.href = 'gestao.html';
-        }
-      });
-    }
-
-    // Helpers UI
-    const form = document.getElementById('login-form');
-    const msgError = document.getElementById('msg-error');
-    const msgSuccess = document.getElementById('msg-success');
-    const btn = document.getElementById('login-btn');
-
-    function setLoading(v) {
-      if (v) { btn.classList.add('btn-loading'); btn.disabled = true; }
-      else { btn.classList.remove('btn-loading'); btn.disabled = false; }
-    }
-    function showError(t) { msgError.textContent = t; msgError.style.display = 'block'; msgSuccess.style.display = 'none'; }
-    function showSuccess(t) { msgSuccess.textContent = t; msgSuccess.style.display = 'block'; msgError.style.display = 'none'; }
-
-    // Login com USERNAME + SENHA (username => username@relevo.eco.br)
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = (document.getElementById('username').value || '').trim();
-      const password = (document.getElementById('password').value || '').trim();
-      if (!username || !password) { showError('⚠️ Preencha usuário e senha.'); return; }
-
-      const email = `${username}@relevo.eco.br`; // mapeamento para Auth
-      setLoading(true); showSuccess('🔐 Verificando credenciais…');
-
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-
-        // (Opcional) checar perfil no Firestore se você usa /users/{uid}
-        // try {
-        //   const user = auth.currentUser;
-        //   const doc = await db.collection('users').doc(user.uid).get();
-        //   console.log('Perfil Firestore:', doc.exists ? doc.data() : 'sem perfil');
-        // } catch (e) { console.warn('Perfil não encontrado/ignorado:', e); }
-
-        showSuccess('✅ Login efetuado!');
-        setTimeout(() => window.location.href = 'gestao.html', 700);
-      } catch (err) {
-        console.error('❌ Erro de login:', err);
-        setLoading(false);
-        msgSuccess.style.display = 'none';
-
-        const code = err && err.code ? err.code : '';
-        if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/invalid-email') {
-          showError('❌ Usuário ou senha incorretos.');
-        } else if (code === 'auth/user-not-found') {
-          showError('❌ Usuário não encontrado.');
-        } else if (code === 'auth/too-many-requests') {
-          showError('⏸️ Muitas tentativas. Aguarde alguns minutos.');
-        } else if (code === 'auth/network-request-failed') {
-          showError('🌐 Erro de conexão. Verifique sua internet.');
-        } else {
-          showError('❌ Erro ao fazer login. Tente novamente.');
-        }
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("✅ Usuário logado:", user.email);
+        window.location.href = "gestao.html";
       }
     });
 
-    // UX: foco inicial e limpar mensagens ao digitar
-    document.addEventListener('DOMContentLoaded', () => {
-      const u = document.getElementById('username');
-      const p = document.getElementById('password');
-      u && u.focus();
-      [u, p].forEach(el => el && el.addEventListener('input', () => { msgError.style.display = 'none'; msgSuccess.style.display = 'none'; }));
+    const form = document.getElementById("login-form");
+    const msgError = document.getElementById("msg-error");
+    const msgSuccess = document.getElementById("msg-success");
+    const btn = document.getElementById("login-btn");
+
+    function showError(t) {
+      msgError.textContent = t;
+      msgError.style.display = "block";
+      msgSuccess.style.display = "none";
+    }
+
+    function showSuccess(t) {
+      msgSuccess.textContent = t;
+      msgSuccess.style.display = "block";
+      msgError.style.display = "none";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!username || !password) {
+        showError("⚠️ Preencha usuário e senha.");
+        return;
+      }
+
+      const email = `${username}@relevo.eco.br`;
+      showSuccess("🔐 Verificando credenciais...");
+
+      try {
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        console.log("✅ Login bem-sucedido:", cred.user.email);
+        showSuccess("✅ Login efetuado com sucesso!");
+        setTimeout(() => (window.location.href = "gestao.html"), 800);
+      } catch (err) {
+        console.error("❌ Erro de login:", err);
+        const code = err?.code || "";
+
+        if (code.includes("user-not-found") || code.includes("invalid-login-credentials")) {
+          showError("❌ Usuário não encontrado ou senha incorreta.");
+        } else if (code.includes("too-many-requests")) {
+          showError("⏸️ Muitas tentativas. Aguarde alguns minutos.");
+        } else {
+          showError("⚠️ Erro ao fazer login. Tente novamente.");
+        }
+      }
     });
   </script>
 </body>
