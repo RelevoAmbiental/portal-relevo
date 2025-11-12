@@ -63,8 +63,13 @@
   .filter-group label{color:#d4f0d5;font-weight:600}
   .filter-group select{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:16px;font-family:'Montserrat',sans-serif;width:100%;font-size:1rem}
   .filter-group select option{color:#222}
+
+  /* canvas base */
   canvas{background:rgba(255,255,255,.05);border-radius:14px;padding:18px;box-shadow:inset 0 0 12px rgba(0,0,0,.25)}
+
+  /* grade dos gráficos (2 por linha, responsivo) */
   .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:35px;margin:40px auto;justify-content:center;align-items:stretch;max-width:1200px;width:100%}
+
   .table-section{background:#fff;color:#222;border-radius:12px;box-shadow:0 4px 25px rgba(0,0,0,.15);overflow:hidden}
   .table-header{background:var(--verde-primario);color:#fff;padding:18px 30px;display:flex;justify-content:space-between;align-items:center}
   th{background:var(--verde-escuro);color:#fff}
@@ -78,28 +83,10 @@
     .dashboard-card,.stat-card,.filters-section{padding:25px 20px;margin:10px}
   }
 
-    /* ======== CORREÇÃO DO TAMANHO DOS GRÁFICOS ======== */
-    .dashboard-card {
-      position: relative;
-      height: auto;
-      min-height: 380px; /* impede que o canvas colapse ou estique demais */
-    }
-    
-    .dashboard-card .chart-container {
-      position: relative;
-      width: 100%;
-      height: 320px; /* altura fixa e equilibrada */
-      max-height: 380px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .dashboard-card canvas {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain;
-    }
+  /* ======== CONTROLE DE ALTURA DOS GRÁFICOS (sem alterar seu tema) ======== */
+  .dashboard-card{position:relative; height:auto; min-height:380px}
+  .chart-container{position:relative; width:100%; height:320px; max-height:380px; display:flex; justify-content:center; align-items:center}
+  .chart-container canvas{width:100% !important; height:100% !important; display:block}
   </style>
 </head>
 
@@ -149,10 +136,22 @@
 
     <!-- Dashboard -->
     <div class="dashboard-grid">
-      <div class="dashboard-card"><h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3><canvas id="chartEvolucao"></canvas></div>
-      <div class="dashboard-card"><h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3><canvas id="chartTipos"></canvas></div>
-      <div class="dashboard-card"><h3><i class="fas fa-chart-bar"></i> Top Projetos</h3><canvas id="chartProjetos"></canvas></div>
-      <div class="dashboard-card"><h3><i class="fas fa-users"></i> Gastos por Funcionário</h3><canvas id="chartFuncionarios"></canvas></div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3>
+        <div class="chart-container"><canvas id="chartEvolucao"></canvas></div>
+      </div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3>
+        <div class="chart-container"><canvas id="chartTipos"></canvas></div>
+      </div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-chart-bar"></i> Top Projetos</h3>
+        <div class="chart-container"><canvas id="chartProjetos"></canvas></div>
+      </div>
+      <div class="dashboard-card">
+        <h3><i class="fas fa-users"></i> Gastos por Funcionário</h3>
+        <div class="chart-container"><canvas id="chartFuncionarios"></canvas></div>
+      </div>
     </div>
 
     <!-- Lista -->
@@ -182,7 +181,7 @@
 
   <!-- ===================================================== -->
   <script>
-    // Defaults Chart.js (texto preto + datalabels no topo)
+    // Chart.js defaults (texto preto + datalabels no topo)
     Chart.register(ChartDataLabels);
     Chart.defaults.color = "#000";
     Chart.defaults.font.family = "Montserrat";
@@ -203,7 +202,7 @@
       inicializarFiltros();
     });
 
-    // --------- Util: paleta dinâmica que escala bem -----------
+    // Paleta dinâmica
     function getPalette(n){
       const base = [
         "#26C04C","#2E7D32","#EB8807","#6B5539","#4E296B",
@@ -216,7 +215,7 @@
       return out;
     }
 
-    // -------------- Carregar & preparar dados -----------------
+    // Carregar dados
     async function carregarDespesas() {
       const snap = await dbDespesas.collection('despesas').orderBy('createdAt','desc').get();
       despesas = snap.docs.map(doc => ({
@@ -239,7 +238,6 @@
       const total = dados.reduce((s,d)=>s+(d.valor||0),0);
       const media = dados.length ? total/dados.length : 0;
 
-      // Mês atual
       const agora = new Date();
       const mes = agora.getMonth(), ano = agora.getFullYear();
       const despesasMes = dados.filter(d=>{
@@ -278,7 +276,7 @@
             <button class="btn btn-primary" title="Aprovar" onclick="aprovarDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
               <i class="fas fa-check" style="color:#111"></i>
             </button>
-            <button class="btn btn-secondary" title="Editar" onclick="editarDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
+            <button class="btn btn-secondary" title="Editar" onclick="editarDespesa('${d.id}')" style="background:#fff;border:1px solid #e55e5">
               <i class="fas fa-edit" style="color:#111"></i>
             </button>
             <button class="btn btn-secondary" title="Excluir" onclick="excluirDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
@@ -312,7 +310,7 @@
       }
     }
 
-    // -------------- Gráficos -------------------
+    // Gráficos
     function atualizarGraficos() {
       graficoEvolucao();
       graficoTipos();
@@ -379,7 +377,7 @@
           plugins:{
             legend:{ display:false },
             datalabels:{ display:true },
-            tooltip:{ callbacks:{ title:(items)=> items[0]?.label || 'Projeto' } }
+            tooltip:{ callbacks:{ title:(items)=> (items && items[0] && items[0].label) ? items[0].label : 'Projeto' } }
           },
           responsive:true, maintainAspectRatio:false,
           scales:{ x:{ ticks:{ color:'#000'}}, y:{ ticks:{ color:'#000'} } }
@@ -406,7 +404,7 @@
       });
     }
 
-    // -------------- Filtros ---------------------
+    // Filtros
     function inicializarFiltros(){
       const projetos = [...new Set(despesas.map(d=>d.projeto).filter(Boolean))];
       const funcs =    [...new Set(despesas.map(d=>d.funcionario).filter(Boolean))];
@@ -437,7 +435,7 @@
       atualizarDashboard();
     }
 
-    // -------------- Exportar CSV ----------------
+    // Exportar CSV
     function exportarExcel(){
       const dados = filteredDespesas.length ? filteredDespesas : despesas;
       if(!dados.length){ alert('Sem dados para exportar.'); return; }
@@ -445,11 +443,9 @@
       const projetoSelecionado = document.getElementById('filterProjeto')?.value || '';
       const titulo = projetoSelecionado ? `Projeto: ${projetoSelecionado}` : 'Projeto: Todos';
 
-      // Cabeçalho
       const header = ['DATA','PROJETO','FUNCIONÁRIO','TIPO','DESCRIÇÃO','VALOR','STATUS','COMPROVANTE'];
       let csv = titulo + '\n' + header.join(';') + '\n';
 
-      // Linhas
       dados.forEach(d=>{
         const linha = [
           formatarData(d.data),
@@ -457,26 +453,23 @@
           (d.funcionario||''),
           (d.tipo||''),
           (d.descricao||'').replace(/;/g, ','),
-          String(d.valor||0).replace('.',','), // número em PT-BR
+          String(d.valor||0).replace('.',','), // PT-BR
           (d.status||'pendente'),
           d.comprovanteUrl ? d.comprovanteUrl : ''
         ].join(';');
         csv += linha + '\n';
       });
 
-      // Download (com BOM p/ Excel)
       const blob = new Blob(["\uFEFF"+csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `despesas_relevo_${projetoSelecionado || 'todos'}_${new Date().toISOString().slice(0,10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    // -------------- Utils -----------------------
+    // Utils
     function formatarData(d){ if(!d) return '-'; const dt=new Date(d); return isNaN(dt)?'-':dt.toLocaleDateString('pt-BR'); }
     function formatarMoeda(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
   </script>
