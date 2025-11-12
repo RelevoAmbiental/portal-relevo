@@ -44,10 +44,10 @@
     scroll-behavior: smooth;
   }
   
-  /* Corpo principal — sem display:flex para não travar a rolagem */
+  /* Corpo principal — degradê mais claro no estilo verde folha → verde limão */
   body {
     position: relative;
-     background: linear-gradient(135deg, rgba(35, 70, 45, 0.88) 0%, rgba(55, 95, 65, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(120, 190, 130, 0.9) 0%, rgba(190, 240, 140, 0.9) 100%);
     color: var(--texto-escuro);
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
@@ -66,7 +66,7 @@
     pointer-events: none;
     z-index: 0;              /* atrás do conteúdo, mas sem criar problemas de empilhamento */
   }
-  
+    
   /* Fazer com que todo conteúdo fique acima do fundo */
   .container,
   .header-dashboard,
