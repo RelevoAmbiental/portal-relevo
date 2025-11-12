@@ -247,36 +247,8 @@
       margin: 10px;
     }
   }
-    /* ============================================
-   AJUSTES DOS BOTÕES DE AÇÃO NA LISTA DE DESPESAS
-   ============================================ */
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .action-buttons button {
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding: 8px;
-    transition: transform 0.2s ease, color 0.2s ease;
-  }
-  
-  /* Ícones pretos */
-  .action-buttons i {
-    color: #222; /* preto grafite para melhor contraste */
-    font-size: 1.1rem;
-  }
-  
-  /* Hover com leve destaque */
-  .action-buttons button:hover i {
-    color: #26C04C; /* verde Relevo */
-    transform: scale(1.2);
-  }
   </style>
+  
 </head>
 
 <body>
@@ -474,6 +446,25 @@
 
     function formatarData(d){return d?new Date(d).toLocaleDateString('pt-BR'):'-';}
     function formatarMoeda(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);}
+  </script>
+  <script>
+    // 🔧 Corrige os botões da lista de despesas para fundo branco
+    document.addEventListener("DOMContentLoaded", () => {
+      // Função para forçar cor escura nos ícones após o carregamento
+      const corrigirCoresBotoes = () => {
+        document.querySelectorAll("#tbodyDespesas .action-buttons button i").forEach(icon => {
+          icon.style.color = "#111"; // preto
+        });
+      };
+  
+      // Executa correção inicial
+      corrigirCoresBotoes();
+  
+      // Observa mudanças dinâmicas na tabela (quando as despesas são renderizadas)
+      const observer = new MutationObserver(() => corrigirCoresBotoes());
+      const tabela = document.getElementById("tbodyDespesas");
+      if (tabela) observer.observe(tabela, { childList: true, subtree: true });
+    });
   </script>
 </body>
 </html>
