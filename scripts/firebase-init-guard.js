@@ -1,18 +1,19 @@
-// scripts/firebase-init-guard.js - versão compat, sem export
+// scripts/firebase-init-guard.js - versão compat para PORTAL Relevo
 
 // Verifica se o Firebase já está inicializado
 if (!window.firebase || !firebase.apps.length) {
   const firebaseConfig = {
-    apiKey: "AIzaSyCM4w5r60HHXLDS8tayldew0OfWXU3ZIJk",
-    authDomain: "revelo-orcamentos.firebaseapp.com",
-    projectId: "revelo-orcamentos",
-    storageBucket: "revelo-orcamentos.firebasestorage.app",
-    messagingSenderId: "256492526393",
-    appId: "1:256492526393:web:81ff8efdd3c3accb9226e8"
+    apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+    authDomain: "portal-relevo.firebaseapp.com",
+    projectId: "portal-relevo",
+    storageBucket: "portal-relevo.firebasestorage.app",
+    messagingSenderId: "182759626683",
+    appId: "1:182759626683:web:2dde2eeef910d4c288569e",
+    measurementId: "G-W8TTP3D3YQ"
   };
 
   firebase.initializeApp(firebaseConfig);
-  console.log("✅ Firebase compat inicializado pelo guard");
+  console.log("✅ Firebase compat inicializado pelo guard (portal-relevo)");
 }
 
 // Cria aliases globais para o app e serviços
