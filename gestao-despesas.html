@@ -39,10 +39,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-x: hidden; /* 🔹 mantém horizontal bloqueado, mas permite rolagem vertical */
   }
   
-  /* Camada da imagem de fundo, mais pálida e suave */
+  /* Camada da imagem de fundo */
   body::before {
     content: "";
     position: fixed;
@@ -50,9 +51,9 @@
     background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
       no-repeat center center;
     background-size: 900px;
-    opacity: 0.15; /* controla a intensidade da figura — 0.1 a 0.3 é ideal */
+    opacity: 0.15;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1; /* 🔹 coloca atrás de tudo, sem precisar bloquear o scroll */
   }
   
   /* Todo o conteúdo acima da imagem */
