@@ -247,6 +247,35 @@
       margin: 10px;
     }
   }
+    /* ============================================
+   AJUSTES DOS BOTÕES DE AÇÃO NA LISTA DE DESPESAS
+   ============================================ */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .action-buttons button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  /* Ícones pretos */
+  .action-buttons i {
+    color: #222; /* preto grafite para melhor contraste */
+    font-size: 1.1rem;
+  }
+  
+  /* Hover com leve destaque */
+  .action-buttons button:hover i {
+    color: #26C04C; /* verde Relevo */
+    transform: scale(1.2);
+  }
   </style>
 </head>
 
