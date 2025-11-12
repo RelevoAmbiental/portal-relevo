@@ -1,141 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Orçamentos - Relevo</title>
-
-  <!-- Ícone -->
-  <link rel="icon" type="image/png"
-        href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png" />
-
-  <!-- 🔐 Política de segurança atualizada para liberar securetoken -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self' https://*.firebaseapp.com https://firestore.googleapis.com https://*.firebaseio.com https://www.googleapis.com;
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.googleapis.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://securetoken.googleapis.com https://firestore.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com;
-    img-src 'self' data: https:;
-  " />
-
-  <!-- ✅ Firebase SDK compat (usa o mesmo do portal) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-
-  <!-- ✅ Usa a inicialização já existente do portal -->
-  <script src="../scripts/firebase-init-guard.js"></script>
-
-  <!-- 🔄 Espelho do usuário autenticado -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      if (window.firebase && firebase.auth) {
-        window.relevoUser = firebase.auth().currentUser || null;
-        firebase.auth().onAuthStateChanged(u => {
-          window.relevoUser = u || null;
-          console.log("🔗 Orçamento conectado ao usuário do portal:", u ? u.email : "nenhum");
-        });
-      } else {
-        console.warn("⚠️ Firebase não detectado no orçamento. Verifique o guard.");
-      }
-    });
-  </script>
-
-  <!-- 🧠 App React (build do Vite) -->
-  <script type="module" crossorigin src="/orcamento/assets/index-f3424957.js"></script>
-  <link rel="stylesheet" href="/orcamento/assets/index-be086e8e.css" />
-
-  <!-- 🌿 Floresta Úmida: fontes + tema Relevo -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="./relevo-theme.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 🔐 Content Security Policy para Firebase -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self' https://firestore.googleapis.com https://*.firebaseio.com https://www.googleapis.com;
+      script-src 'self' 'unsafe-eval' https://www.gstatic.com/ https://apis.google.com/ https://www.googleapis.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      connect-src 'self' https://firestore.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com;
+      img-src 'self' data: https:;
+    ">
+    
+    <title>Sistema de Orçamentos - Relevo</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <script type="module" crossorigin src="/orcamento/assets/index-48bef905.js"></script>
+  <link rel="stylesheet" href="/orcamento/assets/index-be086e8e.css">
 </head>
-
 <body>
-  <!-- 🔹 Estrutura visual padrão Relevo 2025 -->
-  <div id="root">
-    <header class="relevo-header">
-      <div class="relevo-container">
-        <h1 class="relevo-title">Gestão de Orçamentos</h1>
-      </div>
-    </header>
-
-    <main class="relevo-container">
-      <!-- KPIs -->
-      <section class="relevo-kpis">
-        <div class="relevo-card relevo-kpi">
-          <div class="label">Orçamentos Ativos</div>
-          <div class="value" id="kpiAtivos">--</div>
-        </div>
-        <div class="relevo-card relevo-kpi">
-          <div class="label">Em Aprovação</div>
-          <div class="value" id="kpiAprovacao">--</div>
-        </div>
-        <div class="relevo-card relevo-kpi">
-          <div class="label">Aprovados</div>
-          <div class="value" id="kpiAprovados">--</div>
-        </div>
-        <div class="relevo-card relevo-kpi">
-          <div class="label">Valor Total (R$)</div>
-          <div class="value" id="kpiValor">--</div>
-        </div>
-      </section>
-
-      <!-- Filtros -->
-      <section class="relevo-card">
-        <div class="relevo-filtros">
-          <input
-            id="filtroBusca"
-            type="search"
-            placeholder="Buscar por cliente / proposta"
-          />
-          <select id="filtroStatus">
-            <option value="">Status</option>
-            <option value="rascunho">Rascunho</option>
-            <option value="em_aprovacao">Em aprovação</option>
-            <option value="aprovado">Aprovado</option>
-          </select>
-          <select id="filtroPeriodo">
-            <option value="">Período</option>
-            <option value="30">Últimos 30 dias</option>
-            <option value="90">Últimos 90 dias</option>
-            <option value="365">Últimos 12 meses</option>
-          </select>
-        </div>
-
-        <!-- Tabela -->
-        <div class="relevo-table-wrap">
-          <table class="relevo-table" id="tabelaOrcamentos">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Cliente</th>
-                <th>Título</th>
-                <th>Status</th>
-                <th>Valor (R$)</th>
-                <th>Atualizado em</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- preenchido via Firestore -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <footer class="relevo-footer">
-      <div class="relevo-container">
-        Relevo Consultoria Ambiental — Intranet
-      </div>
-    </footer>
-  </div>
-
-  <!-- ✅ Scripts mantidos intactos -->
+    <div id="root"></div>
+    
+    <!-- ✅ CORREÇÃO: Usar .jsx (igual ao seu arquivo) -->
+    
 </body>
 </html>
