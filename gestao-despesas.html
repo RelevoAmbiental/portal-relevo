@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gestão de Despesas | Relevo Consultoria</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png"
-        href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png"/>
 
   <!-- CSS Global -->
-  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/global.css"/>
 
   <!-- Ícones -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="scripts/firebase-init-guard.js"></script>
@@ -27,246 +25,79 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
   <!-- ======================================================
-       ESTILO FLORESTA ÚMIDA (SEM ALTERAÇÕES)
+       ESTILO FLORESTA ÚMIDA (mantido)
        ====================================================== -->
   <style>
   /* ============================================
      DASHBOARD FLORESTA ÚMIDA - VERSÃO FINAL AJUSTADA
-     Relevo Consultoria Ambiental - 2025
      ============================================ */
-
-  body {
-    background: linear-gradient(135deg, rgba(25,45,30,0.92) 0%, rgba(40,70,50,0.97) 100%),
+  body{
+    background: linear-gradient(135deg,rgba(25,45,30,0.92) 0%,rgba(40,70,50,0.97) 100%),
       url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
       no-repeat center center fixed;
     background-size: 1000px;
     background-blend-mode: overlay;
     color: var(--texto-escuro);
     font-family: 'Montserrat', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .container{max-width:1400px;margin:0 auto;padding:50px 40px;width:100%}
+  .header-dashboard{background:linear-gradient(135deg,#26C04C 0%,#2E7D32 100%);color:#fff;padding:25px 40px;box-shadow:0 4px 20px rgba(0,0,0,.25);width:100%}
+  .header-dashboard-content{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px}
+  .header-dashboard-content .logo{height:45px;justify-self:start}
+  .header-dashboard-content h1{text-align:center;font-size:2rem;font-weight:700;color:#fff;margin:0}
+  .header-dashboard-content .nav-buttons{justify-self:end}
+  .view-btn,.btn{background:rgba(255,255,255,.15);color:#f5f5f5;border:1px solid rgba(255,255,255,.25);border-radius:10px;transition:.3s;backdrop-filter:blur(10px);padding:12px 24px;font-weight:600}
+  .view-btn.active,.btn-primary{background:linear-gradient(145deg,#26C04C,#2E7D32);color:#fff;border:none;box-shadow:0 4px 15px rgba(38,192,76,.3)}
+  .view-btn:hover:not(.active),.btn-secondary:hover{background:rgba(255,255,255,.25);color:#fff}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-bottom:45px}
+  .dashboard-grid,.table-section,.filters-section{max-width:1300px;margin:0 auto 50px auto;width:100%}
+  .dashboard-card,.stat-card,.filters-section{
+    background:rgba(255,255,255,.12);backdrop-filter:blur(15px);border-radius:16px;border:1px solid rgba(255,255,255,.15);
+    box-shadow:0 8px 24px rgba(0,0,0,.25);color:#f8fdf8;width:100%;padding:45px 40px;margin:15px 10px;transition:.3s
+  }
+  .dashboard-card:hover,.stat-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+  h3,.stat-value{color:#eaf8e6}
+  .filters-section{display:flex;flex-direction:column;gap:30px;justify-content:center}
+  .filters-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
+  .filter-group label{color:#d4f0d5;font-weight:600}
+  .filter-group select{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:16px;font-family:'Montserrat',sans-serif;width:100%;font-size:1rem}
+  .filter-group select option{color:#222}
+  canvas{background:rgba(255,255,255,.05);border-radius:14px;padding:18px;box-shadow:inset 0 0 12px rgba(0,0,0,.25)}
+  .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:35px;margin:40px auto;justify-content:center;align-items:stretch;max-width:1200px;width:100%}
+  .table-section{background:#fff;color:#222;border-radius:12px;box-shadow:0 4px 25px rgba(0,0,0,.15);overflow:hidden}
+  .table-header{background:var(--verde-primario);color:#fff;padding:18px 30px;display:flex;justify-content:space-between;align-items:center}
+  th{background:var(--verde-escuro);color:#fff}
+  td{background:#fff;color:#333;border-bottom:1px solid #eee}
+  tbody tr:hover{background:#f7f7f7}
+  footer{background:linear-gradient(135deg,#26C04C 0%,#2E7D32 100%);color:#fff;text-align:center;padding:30px 20px;font-weight:500;font-size:.95rem;width:100%;margin-top:60px;box-shadow:0 -4px 20px rgba(0,0,0,.25)}
+  @media (max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}.filters-grid{grid-template-columns:1fr}}
+  @media (max-width:768px){
+    body{background-size:400px}
+    .header-dashboard-content{grid-template-columns:1fr;text-align:center;gap:10px}
+    .dashboard-card,.stat-card,.filters-section{padding:25px 20px;margin:10px}
   }
 
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 50px 40px;
-    width: 100%;
-  }
-
-  .header-dashboard {
-    background: linear-gradient(135deg, #26C04C 0%, #2E7D32 100%);
-    color: white;
-    padding: 25px 40px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-    width: 100%;
-  }
-
-  .header-dashboard-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .header-dashboard-content .logo {
-    height: 45px;
-    justify-self: start;
-  }
-
-  .header-dashboard-content h1 {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 700;
-    color: white;
-    margin: 0;
-  }
-
-  .header-dashboard-content .nav-buttons {
-    justify-self: end;
-  }
-
-  .view-btn, .btn {
-    background: rgba(255,255,255,0.15);
-    color: #f5f5f5;
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    padding: 12px 24px;
-    font-weight: 600;
-  }
-
-  .view-btn.active, .btn-primary {
-    background: linear-gradient(145deg, #26C04C, #2E7D32);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 15px rgba(38,192,76,0.3);
-  }
-
-  .view-btn:hover:not(.active),
-  .btn-secondary:hover {
-    background: rgba(255,255,255,0.25);
-    color: #fff;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-    margin-bottom: 45px;
-  }
-
-  .dashboard-grid,
-  .table-section,
-  .filters-section {
-    max-width: 1300px;
-    margin: 0 auto 50px auto;
-    width: 100%;
-  }
-
-  .dashboard-card,
-  .stat-card,
-  .filters-section {
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(15px);
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    color: #f8fdf8;
-    width: 100%;
-    padding: 45px 40px;
-    margin: 15px 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .dashboard-card:hover,
-  .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
-  }
-
-  h3, .stat-value { color: #eaf8e6; }
-
-  .filters-section {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    justify-content: center;
-  }
-
-  .filters-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-  }
-
-  .filter-group label {
-    color: #d4f0d5;
-    font-weight: 600;
-  }
-
-  .filter-group select {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 10px;
-    padding: 16px;
-    font-family: 'Montserrat', sans-serif;
-    width: 100%;
-    font-size: 1rem;
-  }
-
-  .filter-group select option { color: #222; }
-
-  canvas {
-    background: rgba(255,255,255,0.05);
-    border-radius: 14px;
-    padding: 18px;
-    box-shadow: inset 0 0 12px rgba(0,0,0,0.25);
-  }
-
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-    gap: 35px;
-    margin: 40px auto;
-    justify-content: center;
-    align-items: stretch;
-    max-width: 1200px;
-    width: 100%;
-  }
-
-  .table-section {
-    background: white;
-    color: #222;
-    border-radius: 12px;
-    box-shadow: 0 4px 25px rgba(0,0,0,0.15);
-    overflow: hidden;
-  }
-
-  .table-header {
-    background: var(--verde-primario);
-    color: white;
-    padding: 18px 30px;
-  }
-
-  th { background: var(--verde-escuro); color: #fff; }
-  td { background: #fff; color: #333; border-bottom: 1px solid #eee; }
-  tbody tr:hover { background: #f7f7f7; }
-
-  footer {
-    background: linear-gradient(135deg, #26C04C 0%, #2E7D32 100%);
-    color: white;
-    text-align: center;
-    padding: 30px 20px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    width: 100%;
-    margin-top: 60px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
-  }
-
-  @media (max-width: 1024px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .filters-grid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 768px) {
-    body { background-size: 400px; }
-    .header-dashboard-content {
-      grid-template-columns: 1fr;
-      text-align: center;
-      gap: 10px;
-    }
-    .dashboard-card, .stat-card, .filters-section {
-      padding: 25px 20px;
-      margin: 10px;
-    }
-  }
+  /* ===== FIX ESCOPO LISTA: ícones pretos sobre fundo branco ===== */
+  #listaView td button{background:#fff !important;border:1px solid #e5e5e5 !important}
+  #listaView td button i{color:#111 !important;filter:none !important;opacity:1 !important;mix-blend-mode:normal !important}
   </style>
-  
 </head>
 
 <body>
   <header class="header-dashboard">
     <div class="header-dashboard-content">
       <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
-           alt="Relevo Consultoria Ambiental" class="logo">
+           alt="Relevo Consultoria Ambiental" class="logo"/>
       <h1>Gestão de Despesas</h1>
       <div class="nav-buttons">
-        <a href="gestao.html" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Voltar à Gestão
-        </a>
+        <a href="gestao.html" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Voltar à Gestão</a>
       </div>
     </div>
   </header>
 
   <div class="container">
-    <!-- Estatísticas -->
+    <!-- KPIs -->
     <div class="stats-grid">
       <div class="stat-card"><h3>Total Gasto</h3><div class="stat-value" id="totalGasto">R$ 0,00</div></div>
       <div class="stat-card"><h3>Despesas Este Mês</h3><div class="stat-value" id="despesasMes">0</div></div>
@@ -306,18 +137,22 @@
     </div>
 
     <!-- Lista -->
-    <section class="table-section">
+    <section class="table-section" id="listaView">
       <div class="table-header">
         <h3>Lista de Despesas</h3>
         <button class="btn btn-primary" onclick="exportarExcel()" id="exportBtn">
-          <i class="fas fa-file-excel"></i> Exportar Excel
+          <i class="fas fa-file-excel"></i> Exportar CSV
         </button>
       </div>
       <div class="table-container">
         <table id="tabelaDespesas">
-          <thead><tr><th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
           <tbody id="tbodyDespesas">
-            <tr><td colspan="7" class="loading"><div class="loading-spinner"></div><p>Carregando despesas...</p></td></tr>
+            <tr><td colspan="8" class="loading"><div class="loading-spinner"></div><p>Carregando despesas...</p></td></tr>
           </tbody>
         </table>
       </div>
@@ -328,6 +163,7 @@
 
   <!-- ===================================================== -->
   <script>
+    // Defaults Chart.js (texto preto + datalabels no topo)
     Chart.register(ChartDataLabels);
     Chart.defaults.color = "#000";
     Chart.defaults.font.family = "Montserrat";
@@ -336,7 +172,7 @@
       font: { weight: "600" },
       anchor: "end",
       align: "top",
-      formatter: (v) => "R$ " + v.toLocaleString("pt-BR"),
+      formatter: (v) => (typeof v === "number" ? "R$ " + v.toLocaleString("pt-BR") : "")
     };
 
     let despesas = [];
@@ -345,11 +181,31 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarDespesas();
+      inicializarFiltros();
     });
 
+    // --------- Util: paleta dinâmica que escala bem -----------
+    function getPalette(n){
+      const base = [
+        "#26C04C","#2E7D32","#EB8807","#6B5539","#4E296B",
+        "#1B5E20","#00796B","#1565C0","#8E24AA","#F4511E",
+        "#2D4132","#3949AB","#00897B","#5E35B1","#6D4C41",
+        "#43A047","#00ACC1","#7CB342","#8D6E63","#546E7A"
+      ];
+      const out = [];
+      for(let i=0;i<n;i++){ out.push(base[i % base.length]); }
+      return out;
+    }
+
+    // -------------- Carregar & preparar dados -----------------
     async function carregarDespesas() {
-      const snapshot = await dbDespesas.collection('despesas').orderBy('createdAt','desc').get();
-      despesas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const snap = await dbDespesas.collection('despesas').orderBy('createdAt','desc').get();
+      despesas = snap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        data: doc.data().data || '',
+        valor: Number(doc.data().valor || 0)
+      }));
       atualizarDashboard();
     }
 
@@ -362,33 +218,59 @@
     function atualizarEstatisticas() {
       const dados = filteredDespesas.length ? filteredDespesas : despesas;
       const total = dados.reduce((s,d)=>s+(d.valor||0),0);
-      const media = dados.length?total/dados.length:0;
+      const media = dados.length ? total/dados.length : 0;
+
+      // Mês atual
+      const agora = new Date();
+      const mes = agora.getMonth(), ano = agora.getFullYear();
+      const despesasMes = dados.filter(d=>{
+        const dt = d.data ? new Date(d.data) : null;
+        return dt && dt.getMonth()===mes && dt.getFullYear()===ano;
+      }).length;
+
+      const pagas = dados.filter(d=> (d.status||'')==='pago').length;
+      const eficiencia = dados.length ? (pagas/dados.length)*100 : 0;
+
       document.getElementById("totalGasto").textContent = formatarMoeda(total);
       document.getElementById("ticketMedio").textContent = formatarMoeda(media);
+      document.getElementById("despesasMes").textContent = despesasMes;
+      document.getElementById("eficiencia").textContent = eficiencia.toFixed(1)+"%";
     }
 
     function atualizarTabela() {
       const tbody = document.getElementById('tbodyDespesas');
       const dados = filteredDespesas.length ? filteredDespesas : despesas;
+
+      if (!dados.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--texto-cinza);padding:40px;">Nenhuma despesa encontrada</td></tr>';
+        return;
+      }
+
       tbody.innerHTML = dados.map(d=>`
         <tr>
           <td>${formatarData(d.data)}</td>
           <td>${d.projeto||'-'}</td>
           <td>${d.funcionario||'-'}</td>
           <td>${d.tipo||'-'}</td>
+          <td>${(d.descricao||'').replace(/;/g, ',')}</td>
           <td><strong>${formatarMoeda(d.valor)}</strong></td>
           <td>${d.status||'pendente'}</td>
           <td>
-            <button class="btn btn-primary" onclick="aprovarDespesa('${d.id}')"><i class="fas fa-check"></i></button>
-            <button class="btn btn-secondary" onclick="editarDespesa('${d.id}')"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-secondary" onclick="excluirDespesa('${d.id}')"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-primary" title="Aprovar" onclick="aprovarDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
+              <i class="fas fa-check" style="color:#111"></i>
+            </button>
+            <button class="btn btn-secondary" title="Editar" onclick="editarDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
+              <i class="fas fa-edit" style="color:#111"></i>
+            </button>
+            <button class="btn btn-secondary" title="Excluir" onclick="excluirDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
+              <i class="fas fa-trash" style="color:#111"></i>
+            </button>
           </td>
         </tr>`).join('');
     }
 
     async function aprovarDespesa(id){
       await dbDespesas.collection('despesas').doc(id).update({status:'pago'});
-      alert('Despesa aprovada!');
       carregarDespesas();
     }
     async function excluirDespesa(id){
@@ -398,73 +280,186 @@
       }
     }
     async function editarDespesa(id){
-      const novoValor = prompt('Novo valor da despesa:');
-      if(novoValor){
-        await dbDespesas.collection('despesas').doc(id).update({valor:parseFloat(novoValor)});
-        carregarDespesas();
+      const doc = await dbDespesas.collection('despesas').doc(id).get();
+      if(!doc.exists) return alert('Despesa não encontrada');
+      const atual = Number(doc.data().valor||0);
+      const entrada = prompt('Novo valor da despesa (ex: 123,45):', atual.toString().replace('.', ','));
+      if(entrada!==null){
+        const num = parseFloat(entrada.replace('.','').replace(',','.'));
+        if(!isNaN(num)){
+          await dbDespesas.collection('despesas').doc(id).update({valor:num, updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
+          carregarDespesas();
+        }
       }
     }
 
+    // -------------- Gráficos -------------------
     function atualizarGraficos() {
-      atualizarGraficoEvolucao();
-      atualizarGraficoTipos();
-      atualizarGraficoProjetos();
-      atualizarGraficoFuncionarios();
+      graficoEvolucao();
+      graficoTipos();
+      graficoProjetos();
+      graficoFuncionarios();
     }
 
-    function atualizarGraficoEvolucao() {
-      const ctx=document.getElementById("chartEvolucao").getContext("2d");
-      const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-      const dataMensal=meses.map(()=>0);
-      despesas.forEach(d=>{const dt=new Date(d.data);dataMensal[dt.getMonth()]+=(d.valor||0)});
+    function graficoEvolucao() {
+      const ctx = document.getElementById("chartEvolucao").getContext("2d");
+      const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      const dataMensal = meses.map(()=>0);
+      despesas.forEach(d=>{
+        const dt = d.data ? new Date(d.data) : null;
+        if(dt){ dataMensal[dt.getMonth()] += (d.valor||0); }
+      });
       if(charts.evolucao) charts.evolucao.destroy();
-      charts.evolucao=new Chart(ctx,{type:'line',data:{labels:meses,datasets:[{label:'Gastos Mensais',data:dataMensal,borderColor:'#2E7D32',backgroundColor:'rgba(38,192,76,0.2)',fill:true,tension:0.4}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
+      charts.evolucao = new Chart(ctx,{
+        type:'line',
+        data:{ labels:meses, datasets:[{
+          label:'Gastos Mensais (R$)',
+          data:dataMensal,
+          borderColor:'#2E7D32',
+          backgroundColor:'rgba(38,192,76,0.2)',
+          fill:true, tension:0.4, borderWidth:3, pointRadius:3
+        }]},
+        options:{
+          plugins:{ legend:{ display:true }, datalabels:{ display:true } },
+          responsive:true, maintainAspectRatio:false
+        }
+      });
     }
 
-    function atualizarGraficoTipos(){
-      const tipos={}; despesas.forEach(d=>{if(d.tipo) tipos[d.tipo]=(tipos[d.tipo]||0)+d.valor});
-      const ctx=document.getElementById('chartTipos').getContext('2d');
+    function graficoTipos(){
+      const acc = {};
+      despesas.forEach(d=>{ if(d.tipo){ acc[d.tipo]=(acc[d.tipo]||0)+(d.valor||0); }});
+      const labels = Object.keys(acc);
+      const data = Object.values(acc);
+      const colors = getPalette(labels.length);
+      const ctx = document.getElementById('chartTipos').getContext('2d');
       if(charts.tipos) charts.tipos.destroy();
-      charts.tipos=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(tipos),datasets:[{data:Object.values(tipos),backgroundColor:['#26C04C','#EB8807','#2E7D32','#396B45','#6B5539']}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
+      charts.tipos = new Chart(ctx,{
+        type:'doughnut',
+        data:{ labels, datasets:[{ label:'Valor por Tipo (R$)', data, backgroundColor: colors }]},
+        options:{
+          plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true } },
+          responsive:true, maintainAspectRatio:false
+        }
+      });
     }
 
-    function atualizarGraficoProjetos(){
-      const proj={}; despesas.forEach(d=>{if(d.projeto) proj[d.projeto]=(proj[d.projeto]||0)+d.valor});
-      const top=Object.entries(proj).sort(([,a],[,b])=>b-a).slice(0,6);
-      const ctx=document.getElementById('chartProjetos').getContext('2d');
+    function graficoProjetos(){
+      const acc = {};
+      despesas.forEach(d=>{ if(d.projeto){ acc[d.projeto]=(acc[d.projeto]||0)+(d.valor||0); }});
+      const top = Object.entries(acc).sort(([,a],[,b])=>b-a).slice(0,6);
+      const labels = top.map(t=>t[0]);
+      const data = top.map(t=>t[1]);
+      const colors = getPalette(labels.length);
+      const ctx = document.getElementById('chartProjetos').getContext('2d');
       if(charts.projetos) charts.projetos.destroy();
-      charts.projetos=new Chart(ctx,{type:'bar',data:{labels:top.map(t=>t[0]),datasets:[{data:top.map(t=>t[1]),backgroundColor:'#26C04C'}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
+      charts.projetos = new Chart(ctx,{
+        type:'bar',
+        data:{ labels, datasets:[{ label:'Valor (R$)', data, backgroundColor: colors, borderColor: '#000', borderWidth: 1 }]},
+        options:{
+          plugins:{
+            legend:{ display:false },
+            datalabels:{ display:true },
+            tooltip:{ callbacks:{ title:(items)=> items[0]?.label || 'Projeto' } }
+          },
+          responsive:true, maintainAspectRatio:false,
+          scales:{ x:{ ticks:{ color:'#000'}}, y:{ ticks:{ color:'#000'} } }
+        }
+      });
     }
 
-    function atualizarGraficoFuncionarios(){
-      const func={}; despesas.forEach(d=>{if(d.funcionario) func[d.funcionario]=(func[d.funcionario]||0)+d.valor});
-      const top=Object.entries(func).sort(([,a],[,b])=>b-a).slice(0,6);
-      const ctx=document.getElementById('chartFuncionarios').getContext('2d');
+    function graficoFuncionarios(){
+      const acc = {};
+      despesas.forEach(d=>{ if(d.funcionario){ acc[d.funcionario]=(acc[d.funcionario]||0)+(d.valor||0); }});
+      const top = Object.entries(acc).sort(([,a],[,b])=>b-a).slice(0,6);
+      const labels = top.map(t=>t[0]);
+      const data = top.map(t=>t[1]);
+      const colors = getPalette(labels.length);
+      const ctx = document.getElementById('chartFuncionarios').getContext('2d');
       if(charts.funcionarios) charts.funcionarios.destroy();
-      charts.funcionarios=new Chart(ctx,{type:'polarArea',data:{labels:top.map(t=>t[0]),datasets:[{data:top.map(t=>t[1]),backgroundColor:['#26C04C','#EB8807','#2E7D32','#396B45','#6B5539']}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
+      charts.funcionarios = new Chart(ctx,{
+        type:'polarArea',
+        data:{ labels, datasets:[{ label:'Valor (R$)', data, backgroundColor: colors }]},
+        options:{
+          plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true } },
+          responsive:true, maintainAspectRatio:false
+        }
+      });
     }
 
-    function formatarData(d){return d?new Date(d).toLocaleDateString('pt-BR'):'-';}
-    function formatarMoeda(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);}
-  </script>
-  <script>
-    // 🔧 Corrige os botões da lista de despesas para fundo branco
-    document.addEventListener("DOMContentLoaded", () => {
-      // Função para forçar cor escura nos ícones após o carregamento
-      const corrigirCoresBotoes = () => {
-        document.querySelectorAll("#tbodyDespesas .action-buttons button i").forEach(icon => {
-          icon.style.color = "#111"; // preto
-        });
-      };
-  
-      // Executa correção inicial
-      corrigirCoresBotoes();
-  
-      // Observa mudanças dinâmicas na tabela (quando as despesas são renderizadas)
-      const observer = new MutationObserver(() => corrigirCoresBotoes());
-      const tabela = document.getElementById("tbodyDespesas");
-      if (tabela) observer.observe(tabela, { childList: true, subtree: true });
-    });
+    // -------------- Filtros ---------------------
+    function inicializarFiltros(){
+      const projetos = [...new Set(despesas.map(d=>d.projeto).filter(Boolean))];
+      const funcs =    [...new Set(despesas.map(d=>d.funcionario).filter(Boolean))];
+      const tipos =    [...new Set(despesas.map(d=>d.tipo).filter(Boolean))];
+      preencherSelect('filterProjeto', projetos);
+      preencherSelect('filterFuncionario', funcs);
+      preencherSelect('filterTipo', tipos);
+    }
+    function preencherSelect(id, lista){
+      const s = document.getElementById(id);
+      s.innerHTML = '<option value="">Todos</option>';
+      lista.forEach(v=> s.innerHTML += `<option value="${v}">${v}</option>`);
+    }
+    function aplicarFiltros(){
+      const p = document.getElementById('filterProjeto').value;
+      const f = document.getElementById('filterFuncionario').value;
+      const t = document.getElementById('filterTipo').value;
+      filteredDespesas = despesas.filter(d =>
+        (!p || d.projeto===p) && (!f || d.funcionario===f) && (!t || d.tipo===t)
+      );
+      atualizarDashboard();
+    }
+    function limparFiltros(){
+      document.getElementById('filterProjeto').value='';
+      document.getElementById('filterFuncionario').value='';
+      document.getElementById('filterTipo').value='';
+      filteredDespesas = [];
+      atualizarDashboard();
+    }
+
+    // -------------- Exportar CSV ----------------
+    function exportarExcel(){
+      const dados = filteredDespesas.length ? filteredDespesas : despesas;
+      if(!dados.length){ alert('Sem dados para exportar.'); return; }
+
+      const projetoSelecionado = document.getElementById('filterProjeto')?.value || '';
+      const titulo = projetoSelecionado ? `Projeto: ${projetoSelecionado}` : 'Projeto: Todos';
+
+      // Cabeçalho
+      const header = ['DATA','PROJETO','FUNCIONÁRIO','TIPO','DESCRIÇÃO','VALOR','STATUS','COMPROVANTE'];
+      let csv = titulo + '\n' + header.join(';') + '\n';
+
+      // Linhas
+      dados.forEach(d=>{
+        const linha = [
+          formatarData(d.data),
+          (d.projeto||''),
+          (d.funcionario||''),
+          (d.tipo||''),
+          (d.descricao||'').replace(/;/g, ','),
+          String(d.valor||0).replace('.',','), // número em PT-BR
+          (d.status||'pendente'),
+          d.comprovanteUrl ? d.comprovanteUrl : ''
+        ].join(';');
+        csv += linha + '\n';
+      });
+
+      // Download (com BOM p/ Excel)
+      const blob = new Blob(["\uFEFF"+csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `despesas_relevo_${projetoSelecionado || 'todos'}_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // -------------- Utils -----------------------
+    function formatarData(d){ if(!d) return '-'; const dt=new Date(d); return isNaN(dt)?'-':dt.toLocaleDateString('pt-BR'); }
+    function formatarMoeda(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
   </script>
 </body>
 </html>
