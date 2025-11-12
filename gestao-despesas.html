@@ -78,16 +78,28 @@
     .dashboard-card,.stat-card,.filters-section{padding:25px 20px;margin:10px}
   }
 
-  /* ===== FIX ESCOPO LISTA: ícones pretos sobre fundo branco ===== */
-  #listaView td button{background:#fff !important;border:1px solid #e5e5e5 !important}
-  #listaView td button i{color:#111 !important;filter:none !important;opacity:1 !important;mix-blend-mode:normal !important}
-    /* Altura fixa e proporcional dos gráficos */
-  .dashboard-card canvas {
-    width: 100% !important;
-    height: 320px !important; /* ajuste conforme gosto (250–400px é bom) */
-    max-height: 400px;
-    display: block;
-  }
+    /* ======== CORREÇÃO DO TAMANHO DOS GRÁFICOS ======== */
+    .dashboard-card {
+      position: relative;
+      height: auto;
+      min-height: 380px; /* impede que o canvas colapse ou estique demais */
+    }
+    
+    .dashboard-card .chart-container {
+      position: relative;
+      width: 100%;
+      height: 320px; /* altura fixa e equilibrada */
+      max-height: 380px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .dashboard-card canvas {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain;
+    }
   </style>
 </head>
 
