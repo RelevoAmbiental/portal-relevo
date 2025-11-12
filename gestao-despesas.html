@@ -6,13 +6,15 @@
   <title>Gestão de Despesas | Relevo Consultoria</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
 
   <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css">
 
   <!-- Ícones -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -20,19 +22,23 @@
   <script src="scripts/firebase-init-guard.js"></script>
   <script src="scripts/firebase-despesas-reader.js"></script>
 
-  <!-- Chart.js -->
+  <!-- Chart.js + Datalabels -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
+  <!-- ======================================================
+       ESTILO FLORESTA ÚMIDA (SEM ALTERAÇÕES)
+       ====================================================== -->
   <style>
   /* ============================================
      DASHBOARD FLORESTA ÚMIDA - VERSÃO FINAL AJUSTADA
      Relevo Consultoria Ambiental - 2025
      ============================================ */
-  
-  /* Fundo com logo translúcido */
+
   body {
-    background: linear-gradient(135deg, rgba(25, 45, 30, 0.92) 0%, rgba(40, 70, 50, 0.97) 100%),
-                url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png") no-repeat center center fixed;
+    background: linear-gradient(135deg, rgba(25,45,30,0.92) 0%, rgba(40,70,50,0.97) 100%),
+      url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
+      no-repeat center center fixed;
     background-size: 1000px;
     background-blend-mode: overlay;
     color: var(--texto-escuro);
@@ -41,26 +47,22 @@
     flex-direction: column;
     align-items: center;
   }
-  
-  /* Container principal */
+
   .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 50px 40px;
     width: 100%;
   }
-  
-  /* ============================================
-     CABEÇALHO
-     ============================================ */
+
   .header-dashboard {
     background: linear-gradient(135deg, #26C04C 0%, #2E7D32 100%);
     color: white;
     padding: 25px 40px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     width: 100%;
   }
-  
+
   .header-dashboard-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -69,12 +71,12 @@
     align-items: center;
     gap: 20px;
   }
-  
+
   .header-dashboard-content .logo {
     height: 45px;
     justify-self: start;
   }
-  
+
   .header-dashboard-content h1 {
     text-align: center;
     font-size: 2rem;
@@ -82,52 +84,42 @@
     color: white;
     margin: 0;
   }
-  
+
   .header-dashboard-content .nav-buttons {
     justify-self: end;
   }
-  
-  /* ============================================
-     BOTÕES
-     ============================================ */
+
   .view-btn, .btn {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255,255,255,0.15);
     color: #f5f5f5;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255,255,255,0.25);
     border-radius: 10px;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     padding: 12px 24px;
     font-weight: 600;
   }
-  
+
   .view-btn.active, .btn-primary {
     background: linear-gradient(145deg, #26C04C, #2E7D32);
     color: white;
     border: none;
-    box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
+    box-shadow: 0 4px 15px rgba(38,192,76,0.3);
   }
-  
+
   .view-btn:hover:not(.active),
   .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255,255,255,0.25);
     color: #fff;
   }
-  
-  /* ============================================
-     GRIDS E LAYOUT DE CONTEÚDO
-     ============================================ */
-  
-  /* 4 cards na mesma linha */
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 30px;
     margin-bottom: 45px;
-    justify-items: stretch;
   }
-  
-  /* Espaçamento e centralização geral */
+
   .dashboard-grid,
   .table-section,
   .filters-section {
@@ -135,134 +127,97 @@
     margin: 0 auto 50px auto;
     width: 100%;
   }
-  
-  /* ============================================
-     CARDS E ELEMENTOS DE CONTEÚDO
-     ============================================ */
+
   .dashboard-card,
   .stat-card,
   .filters-section {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255,255,255,0.12);
     backdrop-filter: blur(15px);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     color: #f8fdf8;
     width: 100%;
-    padding: 45px 40px; /* aumentei o padding interno */
-    margin: 15px 10px;  /* aumentei o espaçamento externo */
+    padding: 45px 40px;
+    margin: 15px 10px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  
+
   .dashboard-card:hover,
   .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
   }
-  
-  h3, .stat-value {
-    color: #eaf8e6;
-  }
-  
-  /* ============================================
-     FILTROS
-     ============================================ */
+
+  h3, .stat-value { color: #eaf8e6; }
+
   .filters-section {
     display: flex;
     flex-direction: column;
     gap: 30px;
     justify-content: center;
   }
-  
+
   .filters-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 25px;
   }
-  
+
   .filter-group label {
     color: #d4f0d5;
     font-weight: 600;
   }
-  
+
   .filter-group select {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255,255,255,0.15);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255,255,255,0.3);
     border-radius: 10px;
     padding: 16px;
     font-family: 'Montserrat', sans-serif;
     width: 100%;
     font-size: 1rem;
   }
-  
-  .filter-group select option {
-    color: #222;
-  }
-  
-  /* ============================================
-     GRÁFICOS
-     ============================================ */
+
+  .filter-group select option { color: #222; }
+
   canvas {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255,255,255,0.05);
     border-radius: 14px;
     padding: 18px;
-    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.25);
   }
-    /* Grade dos gráficos - 2 por linha, centralizados e responsivos */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-      gap: 35px;
-      margin: 40px auto;
-      justify-content: center;
-      align-items: stretch;
-      max-width: 1200px; /* evita que os gráficos ultrapassem a tela */
-      width: 100%;
-      box-sizing: border-box;
-    }
-    
-    /* Responsivo: 1 gráfico por linha em telas menores */
-    @media (max-width: 1024px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  /* ============================================
-     TABELA DE DESPESAS
-     ============================================ */
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 35px;
+    margin: 40px auto;
+    justify-content: center;
+    align-items: stretch;
+    max-width: 1200px;
+    width: 100%;
+  }
+
   .table-section {
     background: white;
     color: #222;
     border-radius: 12px;
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 25px rgba(0,0,0,0.15);
     overflow: hidden;
   }
-  
+
   .table-header {
     background: var(--verde-primario);
     color: white;
     padding: 18px 30px;
   }
-  
-  th {
-    background: var(--verde-escuro);
-    color: #fff;
-  }
-  
-  td {
-    background: #fff;
-    color: #333;
-    border-bottom: 1px solid #eee;
-  }
-  
-  tbody tr:hover {
-    background: #f7f7f7;
-  }
-  
-  /* ============================================
-     RODAPÉ
-     ============================================ */
+
+  th { background: var(--verde-escuro); color: #fff; }
+  td { background: #fff; color: #333; border-bottom: 1px solid #eee; }
+  tbody tr:hover { background: #f7f7f7; }
+
   footer {
     background: linear-gradient(135deg, #26C04C 0%, #2E7D32 100%);
     color: white;
@@ -272,21 +227,14 @@
     font-size: 0.95rem;
     width: 100%;
     margin-top: 60px;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
   }
-  
-  /* ============================================
-     RESPONSIVIDADE
-     ============================================ */
+
   @media (max-width: 1024px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .filters-grid {
-      grid-template-columns: 1fr;
-    }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .filters-grid { grid-template-columns: 1fr; }
   }
-  
+
   @media (max-width: 768px) {
     body { background-size: 400px; }
     .header-dashboard-content {
@@ -294,22 +242,19 @@
       text-align: center;
       gap: 10px;
     }
-    .dashboard-card,
-    .stat-card,
-    .filters-section {
+    .dashboard-card, .stat-card, .filters-section {
       padding: 25px 20px;
       margin: 10px;
     }
   }
   </style>
-
 </head>
+
 <body>
   <header class="header-dashboard">
     <div class="header-dashboard-content">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png" 
-           alt="Relevo Consultoria Ambiental" 
-           class="logo">
+      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
+           alt="Relevo Consultoria Ambiental" class="logo">
       <h1>Gestão de Despesas</h1>
       <div class="nav-buttons">
         <a href="gestao.html" class="btn btn-primary">
@@ -320,34 +265,12 @@
   </header>
 
   <div class="container">
-    <!-- Navegação -->
-    <div class="view-navigation">
-      <button class="view-btn active" onclick="showView('dashboard')">
-        <i class="fas fa-chart-line"></i> Dashboard
-      </button>
-      <button class="view-btn" onclick="showView('lista')">
-        <i class="fas fa-list"></i> Lista de Despesas
-      </button>
-    </div>
-
     <!-- Estatísticas -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <h3>Total Gasto</h3>
-        <div class="stat-value" id="totalGasto">R$ 0,00</div>
-      </div>
-      <div class="stat-card">
-        <h3>Despesas Este Mês</h3>
-        <div class="stat-value" id="despesasMes">0</div>
-      </div>
-      <div class="stat-card">
-        <h3>Ticket Médio</h3>
-        <div class="stat-value" id="ticketMedio">R$ 0,00</div>
-      </div>
-      <div class="stat-card">
-        <h3>Taxa de Aprovação</h3>
-        <div class="stat-value" id="eficiencia">0%</div>
-      </div>
+      <div class="stat-card"><h3>Total Gasto</h3><div class="stat-value" id="totalGasto">R$ 0,00</div></div>
+      <div class="stat-card"><h3>Despesas Este Mês</h3><div class="stat-value" id="despesasMes">0</div></div>
+      <div class="stat-card"><h3>Ticket Médio</h3><div class="stat-value" id="ticketMedio">R$ 0,00</div></div>
+      <div class="stat-card"><h3>Taxa de Aprovação</h3><div class="stat-value" id="eficiencia">0%</div></div>
     </div>
 
     <!-- Filtros -->
@@ -374,31 +297,15 @@
     </section>
 
     <!-- Dashboard -->
-    <div id="dashboardView">
-      <div class="dashboard-grid">
-        <div class="dashboard-card">
-          <h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3>
-          <div class="chart-container"><canvas id="chartEvolucao"></canvas></div>
-        </div>
-        <div class="dashboard-card">
-          <h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3>
-          <div class="chart-container"><canvas id="chartTipos"></canvas></div>
-        </div>
-      </div>
-      <div class="dashboard-grid">
-        <div class="dashboard-card">
-          <h3><i class="fas fa-chart-bar"></i> Top Projetos</h3>
-          <div class="chart-container"><canvas id="chartProjetos"></canvas></div>
-        </div>
-        <div class="dashboard-card">
-          <h3><i class="fas fa-users"></i> Gastos por Funcionário</h3>
-          <div class="chart-container"><canvas id="chartFuncionarios"></canvas></div>
-        </div>
-      </div>
+    <div class="dashboard-grid">
+      <div class="dashboard-card"><h3><i class="fas fa-chart-line"></i> Evolução Mensal</h3><canvas id="chartEvolucao"></canvas></div>
+      <div class="dashboard-card"><h3><i class="fas fa-chart-pie"></i> Distribuição por Tipo</h3><canvas id="chartTipos"></canvas></div>
+      <div class="dashboard-card"><h3><i class="fas fa-chart-bar"></i> Top Projetos</h3><canvas id="chartProjetos"></canvas></div>
+      <div class="dashboard-card"><h3><i class="fas fa-users"></i> Gastos por Funcionário</h3><canvas id="chartFuncionarios"></canvas></div>
     </div>
 
     <!-- Lista -->
-    <section id="listaView" class="table-section">
+    <section class="table-section">
       <div class="table-header">
         <h3>Lista de Despesas</h3>
         <button class="btn btn-primary" onclick="exportarExcel()" id="exportBtn">
@@ -407,17 +314,9 @@
       </div>
       <div class="table-container">
         <table id="tabelaDespesas">
-          <thead>
-            <tr>
-              <th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Ações</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
           <tbody id="tbodyDespesas">
-            <tr>
-              <td colspan="7" class="loading">
-                <div class="loading-spinner"></div><p>Carregando despesas...</p>
-              </td>
-            </tr>
+            <tr><td colspan="7" class="loading"><div class="loading-spinner"></div><p>Carregando despesas...</p></td></tr>
           </tbody>
         </table>
       </div>
@@ -426,39 +325,31 @@
 
   <footer>© 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.</footer>
 
-  <!-- =====================================================
-       JAVASCRIPT PRINCIPAL DO DASHBOARD
-       ===================================================== -->
+  <!-- ===================================================== -->
   <script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.color = "#000";
+    Chart.defaults.font.family = "Montserrat";
+    Chart.defaults.plugins.datalabels = {
+      color: "#000",
+      font: { weight: "600" },
+      anchor: "end",
+      align: "top",
+      formatter: (v) => "R$ " + v.toLocaleString("pt-BR"),
+    };
+
     let despesas = [];
     let filteredDespesas = [];
     let charts = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
-      console.log('🚀 Dashboard de Despesas inicializado');
       await carregarDespesas();
-      inicializarFiltros();
     });
 
     async function carregarDespesas() {
-      try {
-        console.log('📊 Carregando despesas do Firestore...');
-        const snapshot = await dbDespesas.collection('despesas').orderBy('createdAt', 'desc').get();
-
-        despesas = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          data: doc.data().data || '',
-          valor: doc.data().valor || 0
-        }));
-
-        console.log(`✅ ${despesas.length} despesas carregadas`);
-        atualizarDashboard();
-        atualizarFiltros();
-      } catch (error) {
-        console.error('❌ Erro ao carregar despesas:', error);
-        alert('Erro ao carregar despesas: ' + error.message);
-      }
+      const snapshot = await dbDespesas.collection('despesas').orderBy('createdAt','desc').get();
+      despesas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      atualizarDashboard();
     }
 
     function atualizarDashboard() {
@@ -469,47 +360,50 @@
 
     function atualizarEstatisticas() {
       const dados = filteredDespesas.length ? filteredDespesas : despesas;
-      const total = dados.reduce((sum, d) => sum + (d.valor || 0), 0);
-      const ticketMedio = dados.length ? total / dados.length : 0;
-      const despesasPagas = dados.filter(d => d.status === 'pago').length;
-      const eficiencia = dados.length ? (despesasPagas / dados.length) * 100 : 0;
-      const mesAtual = new Date().getMonth();
-      const despesasMes = dados.filter(d => new Date(d.data).getMonth() === mesAtual).length;
-
-      document.getElementById('totalGasto').textContent = formatarMoeda(total);
-      document.getElementById('despesasMes').textContent = despesasMes;
-      document.getElementById('ticketMedio').textContent = formatarMoeda(ticketMedio);
-      document.getElementById('eficiencia').textContent = eficiencia.toFixed(1) + '%';
+      const total = dados.reduce((s,d)=>s+(d.valor||0),0);
+      const media = dados.length?total/dados.length:0;
+      document.getElementById("totalGasto").textContent = formatarMoeda(total);
+      document.getElementById("ticketMedio").textContent = formatarMoeda(media);
     }
 
     function atualizarTabela() {
       const tbody = document.getElementById('tbodyDespesas');
       const dados = filteredDespesas.length ? filteredDespesas : despesas;
-
-      if (!dados.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--texto-cinza);padding:40px;">Nenhuma despesa encontrada</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = dados.map(d => `
+      tbody.innerHTML = dados.map(d=>`
         <tr>
           <td>${formatarData(d.data)}</td>
-          <td>${d.projeto || '-'}</td>
-          <td>${d.funcionario || '-'}</td>
-          <td>${d.tipo || '-'}</td>
+          <td>${d.projeto||'-'}</td>
+          <td>${d.funcionario||'-'}</td>
+          <td>${d.tipo||'-'}</td>
           <td><strong>${formatarMoeda(d.valor)}</strong></td>
-          <td><span class="status-badge status-${d.status || 'pendente'}">${d.status || 'pendente'}</span></td>
+          <td>${d.status||'pendente'}</td>
           <td>
-            <div class="action-buttons">
-              <button class="edit-btn" onclick="editarDespesa('${d.id}')"><i class="fas fa-edit"></i></button>
-              <button class="delete-btn" onclick="excluirDespesa('${d.id}')"><i class="fas fa-trash"></i></button>
-            </div>
+            <button class="btn btn-primary" onclick="aprovarDespesa('${d.id}')"><i class="fas fa-check"></i></button>
+            <button class="btn btn-secondary" onclick="editarDespesa('${d.id}')"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-secondary" onclick="excluirDespesa('${d.id}')"><i class="fas fa-trash"></i></button>
           </td>
-        </tr>
-      `).join('');
+        </tr>`).join('');
     }
 
-    // ==== Gráficos ====
+    async function aprovarDespesa(id){
+      await dbDespesas.collection('despesas').doc(id).update({status:'pago'});
+      alert('Despesa aprovada!');
+      carregarDespesas();
+    }
+    async function excluirDespesa(id){
+      if(confirm('Deseja excluir esta despesa?')){
+        await dbDespesas.collection('despesas').doc(id).delete();
+        carregarDespesas();
+      }
+    }
+    async function editarDespesa(id){
+      const novoValor = prompt('Novo valor da despesa:');
+      if(novoValor){
+        await dbDespesas.collection('despesas').doc(id).update({valor:parseFloat(novoValor)});
+        carregarDespesas();
+      }
+    }
+
     function atualizarGraficos() {
       atualizarGraficoEvolucao();
       atualizarGraficoTipos();
@@ -518,88 +412,39 @@
     }
 
     function atualizarGraficoEvolucao() {
-      const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-      const ano = new Date().getFullYear();
-      const dadosMensais = meses.map(() => 0);
-
-      despesas.forEach(d => {
-        const dt = new Date(d.data);
-        if (dt.getFullYear() === ano) dadosMensais[dt.getMonth()] += d.valor || 0;
-      });
-
-      const ctx = document.getElementById('chartEvolucao').getContext('2d');
-      if (charts.evolucao) charts.evolucao.destroy();
-      charts.evolucao = new Chart(ctx, {
-        type: 'line',
-        data: { labels: meses, datasets: [{ label:'Gastos Mensais (R$)', data:dadosMensais, borderColor:'#26C04C', backgroundColor:'rgba(38,192,76,0.1)', tension:0.4, fill:true }] },
-        options: { responsive:true, maintainAspectRatio:false }
-      });
+      const ctx=document.getElementById("chartEvolucao").getContext("2d");
+      const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      const dataMensal=meses.map(()=>0);
+      despesas.forEach(d=>{const dt=new Date(d.data);dataMensal[dt.getMonth()]+=(d.valor||0)});
+      if(charts.evolucao) charts.evolucao.destroy();
+      charts.evolucao=new Chart(ctx,{type:'line',data:{labels:meses,datasets:[{label:'Gastos Mensais',data:dataMensal,borderColor:'#2E7D32',backgroundColor:'rgba(38,192,76,0.2)',fill:true,tension:0.4}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
     }
 
-    function atualizarGraficoTipos() {
-      const tipos = {};
-      despesas.forEach(d => { if (d.tipo) tipos[d.tipo] = (tipos[d.tipo] || 0) + d.valor; });
-      const ctx = document.getElementById('chartTipos').getContext('2d');
-      if (charts.tipos) charts.tipos.destroy();
-      charts.tipos = new Chart(ctx, { type:'doughnut', data:{ labels:Object.keys(tipos), datasets:[{ data:Object.values(tipos), backgroundColor:['#26C04C','#EB8807','#2E7D32','#396B45','#2D4132','#6B5539'] }] }, options:{responsive:true,maintainAspectRatio:false} });
+    function atualizarGraficoTipos(){
+      const tipos={}; despesas.forEach(d=>{if(d.tipo) tipos[d.tipo]=(tipos[d.tipo]||0)+d.valor});
+      const ctx=document.getElementById('chartTipos').getContext('2d');
+      if(charts.tipos) charts.tipos.destroy();
+      charts.tipos=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(tipos),datasets:[{data:Object.values(tipos),backgroundColor:['#26C04C','#EB8807','#2E7D32','#396B45','#6B5539']}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
     }
 
-    function atualizarGraficoProjetos() {
-      const projetos = {};
-      despesas.forEach(d => { if (d.projeto) projetos[d.projeto] = (projetos[d.projeto] || 0) + d.valor; });
-      const top = Object.entries(projetos).sort(([,a],[,b])=>b-a).slice(0,6);
-      const ctx = document.getElementById('chartProjetos').getContext('2d');
-      if (charts.projetos) charts.projetos.destroy();
-      charts.projetos = new Chart(ctx, { type:'bar', data:{ labels:top.map(t=>t[0]), datasets:[{ data:top.map(t=>t[1]), backgroundColor:'#26C04C' }] }, options:{responsive:true,maintainAspectRatio:false} });
+    function atualizarGraficoProjetos(){
+      const proj={}; despesas.forEach(d=>{if(d.projeto) proj[d.projeto]=(proj[d.projeto]||0)+d.valor});
+      const top=Object.entries(proj).sort(([,a],[,b])=>b-a).slice(0,6);
+      const ctx=document.getElementById('chartProjetos').getContext('2d');
+      if(charts.projetos) charts.projetos.destroy();
+      charts.projetos=new Chart(ctx,{type:'bar',data:{labels:top.map(t=>t[0]),datasets:[{data:top.map(t=>t[1]),backgroundColor:'#26C04C'}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
     }
 
-    function atualizarGraficoFuncionarios() {
-      const funcionarios = {};
-      despesas.forEach(d => { if (d.funcionario) funcionarios[d.funcionario] = (funcionarios[d.funcionario] || 0) + d.valor; });
-      const top = Object.entries(funcionarios).sort(([,a],[,b])=>b-a).slice(0,6);
-      const ctx = document.getElementById('chartFuncionarios').getContext('2d');
-      if (charts.funcionarios) charts.funcionarios.destroy();
-      charts.funcionarios = new Chart(ctx, { type:'polarArea', data:{ labels:top.map(t=>t[0]), datasets:[{ data:top.map(t=>t[1]), backgroundColor:['#26C04C','#EB8807','#2E7D32','#396B45','#2D4132','#6B5539'] }] }, options:{responsive:true,maintainAspectRatio:false} });
+    function atualizarGraficoFuncionarios(){
+      const func={}; despesas.forEach(d=>{if(d.funcionario) func[d.funcionario]=(func[d.funcionario]||0)+d.valor});
+      const top=Object.entries(func).sort(([,a],[,b])=>b-a).slice(0,6);
+      const ctx=document.getElementById('chartFuncionarios').getContext('2d');
+      if(charts.funcionarios) charts.funcionarios.destroy();
+      charts.funcionarios=new Chart(ctx,{type:'polarArea',data:{labels:top.map(t=>t[0]),datasets:[{data:top.map(t=>t[1]),backgroundColor:['#26C04C','#EB8807','#2E7D32','#396B45','#6B5539']}]},options:{plugins:{datalabels:{display:true}},responsive:true}});
     }
 
-    // ==== Filtros ====
-    function inicializarFiltros() { console.log('🎛️ Filtros inicializados'); }
-
-    function aplicarFiltros() {
-      const projeto = document.getElementById('filterProjeto').value;
-      const funcionario = document.getElementById('filterFuncionario').value;
-      const tipo = document.getElementById('filterTipo').value;
-      filteredDespesas = despesas.filter(d => (!projeto || d.projeto===projeto) && (!funcionario || d.funcionario===funcionario) && (!tipo || d.tipo===tipo));
-      atualizarDashboard();
-    }
-
-    function limparFiltros() {
-      document.getElementById('filterProjeto').value = '';
-      document.getElementById('filterFuncionario').value = '';
-      document.getElementById('filterTipo').value = '';
-      filteredDespesas = [];
-      atualizarDashboard();
-    }
-
-    function atualizarFiltros() {
-      const projetos = [...new Set(despesas.map(d=>d.projeto).filter(Boolean))];
-      const funcs = [...new Set(despesas.map(d=>d.funcionario).filter(Boolean))];
-      const tipos = [...new Set(despesas.map(d=>d.tipo).filter(Boolean))];
-      preencherSelect('filterProjeto', projetos);
-      preencherSelect('filterFuncionario', funcs);
-      preencherSelect('filterTipo', tipos);
-    }
-
-    function preencherSelect(id, lista) {
-      const s = document.getElementById(id);
-      s.innerHTML = '<option value="">Todos</option>';
-      lista.forEach(v=>s.innerHTML += `<option value="${v}">${v}</option>`);
-    }
-
-    // ==== Utilitários ====
-    function formatarData(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '-'; }
-    function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
-    function showView(view){document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');document.getElementById('dashboardView').style.display=view==='dashboard'?'block':'none';document.getElementById('listaView').classList.toggle('active',view==='lista');}
+    function formatarData(d){return d?new Date(d).toLocaleDateString('pt-BR'):'-';}
+    function formatarMoeda(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);}
   </script>
 </body>
 </html>
