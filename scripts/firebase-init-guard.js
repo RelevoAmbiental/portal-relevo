@@ -96,3 +96,4 @@ if (typeof window !== "undefined" && firebase?.auth) {
 } else {
   console.warn("⚠️ Firebase Auth ainda não disponível para monitoramento global.");
 }
+export { firebaseConfig };
