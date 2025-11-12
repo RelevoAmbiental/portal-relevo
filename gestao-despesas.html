@@ -44,27 +44,30 @@
     scroll-behavior: smooth;
   }
   
-  /* Corpo principal — degradê ajustado (verde folha escuro → verde-limão suave) */
+  /* Corpo principal — fundo neutro, degradê controlado na camada fixa */
   body {
     position: relative;
-    background: linear-gradient(135deg, rgba(80, 150, 90, 0.9) 0%, rgba(190, 240, 140, 0.9) 100%);
+    background: rgba(255,255,255,0); /* transparente para deixar ver o ::before */
     color: var(--texto-escuro);
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
     box-sizing: border-box;
   }
   
-  /* Camada da imagem de fundo, mais pálida e sempre atrás do conteúdo */
+  /* Camada fixa com degradê + logo da empresa */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
-      no-repeat center center;
-    background-size: 900px;
-    opacity: 0.12;           /* intensidade da figura — ajuste entre 0.08 e 0.2 se quiser */
+    background: 
+      linear-gradient(135deg, rgba(60, 120, 70, 0.95) 0%, rgba(190, 240, 140, 0.95) 100%),
+      url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
+        no-repeat center center;
+    background-size: cover, 900px; /* o degradê cobre tudo, a logo tem tamanho fixo */
+    background-blend-mode: overlay;
+    opacity: 0.12;           /* intensidade da figura e do degradê */
     pointer-events: none;
-    z-index: 0;              /* atrás do conteúdo, mas sem criar problemas de empilhamento */
+    z-index: 0;
   }
     
   /* Fazer com que todo conteúdo fique acima do fundo */
