@@ -33,6 +33,9 @@
      ============================================ */
   
   /* Base do documento — garante que a página possa rolar normalmente */
+  /* ============================================
+   ESTILO BASE - DEGRADÊ VISÍVEL E LOGO SUAVE
+   ============================================ */
   html, body {
     height: auto;
     min-height: 100%;
@@ -44,31 +47,45 @@
     scroll-behavior: smooth;
   }
   
-  /* Corpo principal — fundo neutro, degradê controlado na camada fixa */
+  /* Corpo principal — mantém transparente para exibir o fundo fixo */
   body {
     position: relative;
-    background: rgba(255,255,255,0); /* transparente para deixar ver o ::before */
+    background: transparent;
     color: var(--texto-escuro);
     font-family: 'Montserrat', sans-serif;
     min-height: 100vh;
     box-sizing: border-box;
   }
   
-  /* Camada fixa com degradê + logo da empresa */
+  /* Camada fixa com degradê (visível) + logo translúcida */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: 
-      linear-gradient(135deg, rgba(60, 120, 70, 0.95) 0%, rgba(190, 240, 140, 0.95) 100%),
+    background:
+      linear-gradient(135deg, rgba(60, 120, 70, 1) 0%, rgba(190, 240, 140, 1) 100%), /* degradê forte e visível */
       url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
         no-repeat center center;
-    background-size: cover, 900px; /* o degradê cobre tudo, a logo tem tamanho fixo */
-    background-blend-mode: overlay;
-    opacity: 0.12;           /* intensidade da figura e do degradê */
+    background-size: cover, 900px;
+    background-blend-mode: overlay; /* mistura leve, sem apagar o degradê */
+    opacity: 1; /* degradê 100% visível */
     pointer-events: none;
     z-index: 0;
   }
+  
+  /* Tornamos só a logo mais pálida */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
+      no-repeat center center;
+    background-size: 900px;
+    opacity: 0.12; /* deixa só a logo suave */
+    pointer-events: none;
+    z-index: 0;
+  }
+
     
   /* Fazer com que todo conteúdo fique acima do fundo */
   .container,
