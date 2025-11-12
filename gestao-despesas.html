@@ -29,21 +29,32 @@
        ====================================================== -->
   <style>
   /* ============================================
-     DASHBOARD FLORESTA ÚMIDA - VERSÃO COM FUNDO AJUSTADO
+     DASHBOARD FLORESTA ÚMIDA - CSS COMPLETO (AJUSTADO)
      ============================================ */
+  
+  /* Base do documento — garante que a página possa rolar normalmente */
+  html, body {
+    height: auto;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* evita scrollbar horizontal indesejável */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  
+  /* Corpo principal — sem display:flex para não travar a rolagem */
   body {
     position: relative;
     background: linear-gradient(135deg, rgba(35, 70, 45, 0.88) 0%, rgba(55, 95, 65, 0.95) 100%);
     color: var(--texto-escuro);
     font-family: 'Montserrat', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     min-height: 100vh;
-    overflow-x: hidden; /* 🔹 mantém horizontal bloqueado, mas permite rolagem vertical */
+    box-sizing: border-box;
   }
   
-  /* Camada da imagem de fundo */
+  /* Camada da imagem de fundo, mais pálida e sempre atrás do conteúdo */
   body::before {
     content: "";
     position: fixed;
@@ -51,12 +62,12 @@
     background: url("https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_semNome.png")
       no-repeat center center;
     background-size: 900px;
-    opacity: 0.15;
+    opacity: 0.12;           /* intensidade da figura — ajuste entre 0.08 e 0.2 se quiser */
     pointer-events: none;
-    z-index: -1; /* 🔹 coloca atrás de tudo, sem precisar bloquear o scroll */
+    z-index: 0;              /* atrás do conteúdo, mas sem criar problemas de empilhamento */
   }
   
-  /* Todo o conteúdo acima da imagem */
+  /* Fazer com que todo conteúdo fique acima do fundo */
   .container,
   .header-dashboard,
   .dashboard-card,
@@ -68,7 +79,7 @@
   }
   
   /* ============================================
-     RESTANTE DO ESTILO ORIGINAL (INALTERADO)
+     RESTANTE DO ESTILO (mantido com pequenas melhorias)
      ============================================ */
   
   .container {
@@ -76,6 +87,7 @@
     margin: 0 auto;
     padding: 50px 40px;
     width: 100%;
+    box-sizing: border-box;
   }
   
   .header-dashboard {
@@ -84,6 +96,7 @@
     padding: 25px 40px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, .25);
     width: 100%;
+    box-sizing: border-box;
   }
   
   .header-dashboard-content {
@@ -140,12 +153,14 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 30px;
     margin-bottom: 45px;
+    align-items: stretch;
   }
   
   .dashboard-grid, .table-section, .filters-section {
     max-width: 1300px;
     margin: 0 auto 50px auto;
     width: 100%;
+    box-sizing: border-box;
   }
   
   .dashboard-card, .stat-card, .filters-section {
@@ -159,6 +174,7 @@
     padding: 45px 40px;
     margin: 15px 10px;
     transition: .3s;
+    box-sizing: border-box;
   }
   
   .dashboard-card:hover, .stat-card:hover {
@@ -197,6 +213,7 @@
     font-family: 'Montserrat', sans-serif;
     width: 100%;
     font-size: 1rem;
+    box-sizing: border-box;
   }
   
   .filter-group select option {
@@ -208,6 +225,7 @@
     border-radius: 14px;
     padding: 18px;
     box-shadow: inset 0 0 12px rgba(0, 0, 0, .25);
+    box-sizing: border-box;
   }
   
   .dashboard-grid {
@@ -263,8 +281,10 @@
     width: 100%;
     margin-top: 60px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, .25);
+    box-sizing: border-box;
   }
   
+  /* Responsividade */
   @media (max-width:1024px) {
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -309,8 +329,8 @@
     height: 100% !important;
     display: block;
   }
-
   </style>
+  
 </head>
 
 <body>
