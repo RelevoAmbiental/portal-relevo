@@ -206,11 +206,83 @@
     const auth = window.__RELEVO_AUTH__ || firebase.auth();
     const db = window.__RELEVO_DB__ || firebase.firestore();
 
-    // Se já estiver logado, redireciona
-    auth.onAuthStateChanged((user) => {
+    // Função para verificar se precisa alterar senha
+    const checkPasswordChangeRequired = async (user) => {
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        
+        if (!userDoc.exists) {
+          // Primeiro acesso - criar documento marcando que precisa trocar senha
+          await db.collection('users').doc(user.uid).set({
+            username: user.email.split('@')[0],
+            email: user.email,
+            requiresPasswordChange: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          return true;
+        }
+        
+        const userData = userDoc.data();
+        return userData.requiresPasswordChange === true;
+        
+      } catch (error) {
+        console.error("Erro ao verificar usuário:", error);
+        return false;
+      }
+    };
+
+    // Função para obter a URL de redirecionamento baseada no tipo de usuário
+    const getRedirectUrl = (userData) => {
+      const tipo = userData.tipo || 'colaborador';
+      const projeto = userData.projeto || '';
+      
+      console.log(`📊 Tipo: ${tipo}, Projeto: ${projeto}`);
+      
+      switch(tipo) {
+        case 'gestao':
+          return 'https://portal.relevo.eco.br/gestao.html';
+        
+        case 'cliente':
+          // Para clientes, redireciona para clientes.html e passa o projeto como parâmetro
+          const projetoUrl = projeto ? `?projeto=${encodeURIComponent(projeto)}` : '';
+          return `https://portal.relevo.eco.br/clientes.html${projetoUrl}`;
+        
+        case 'colaborador':
+        default:
+          return 'https://portal.relevo.eco.br/colaboradores.html';
+      }
+    };
+
+    // Se já estiver logado, redireciona conforme o tipo
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
         console.log("✅ Usuário já logado:", user.email);
-        window.location.href = "gestao.html";
+        
+        try {
+          // Verificar se precisa trocar senha
+          const requiresPasswordChange = await checkPasswordChangeRequired(user);
+          
+          if (requiresPasswordChange) {
+            window.location.href = "change-password.html";
+            return;
+          }
+          
+          // Buscar dados do usuário para redirecionamento
+          const userDoc = await db.collection('users').doc(user.uid).get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            const redirectUrl = getRedirectUrl(userData);
+            console.log("↪️ Redirecionando para:", redirectUrl);
+            window.location.href = redirectUrl;
+          } else {
+            // Fallback se não encontrar dados
+            window.location.href = "https://portal.relevo.eco.br/colaboradores.html";
+          }
+        } catch (error) {
+          console.error("❌ Erro ao verificar usuário:", error);
+          window.location.href = "https://portal.relevo.eco.br/colaboradores.html";
+        }
       }
     });
 
@@ -259,9 +331,31 @@
       try {
         setLoading(true);
         showSuccess("🔐 Verificando credenciais…");
-        await auth.signInWithEmailAndPassword(email, password);
+        
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Verificar se precisa alterar senha
+        const requiresPasswordChange = await checkPasswordChangeRequired(user);
+        
+        if (requiresPasswordChange) {
+          showSuccess("✅ Primeiro acesso! Redirecionando para alteração de senha…");
+          setTimeout(() => (window.location.href = "change-password.html"), 1000);
+          return;
+        }
+        
+        // Buscar dados do usuário para redirecionamento
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        let redirectUrl = "https://portal.relevo.eco.br/colaboradores.html"; // fallback
+        
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          redirectUrl = getRedirectUrl(userData);
+        }
+        
         showSuccess("✅ Login efetuado! Redirecionando…");
-        setTimeout(() => (window.location.href = "gestao.html"), 1000);
+        setTimeout(() => (window.location.href = redirectUrl), 1000);
+        
       } catch (err) {
         console.error("❌ Erro de login:", err);
         setLoading(false);
