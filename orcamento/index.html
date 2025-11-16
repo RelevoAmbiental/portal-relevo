@@ -5,47 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- 🔐 Content Security Policy para Firebase -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-    
-        script-src 
-            'self' 
-            'unsafe-eval'
-            https://www.gstatic.com 
-            https://www.googleapis.com 
-            https://apis.google.com;
-    
-        connect-src 
-            'self'
-            https://firestore.googleapis.com
-            https://firebase.googleapis.com
-            https://identitytoolkit.googleapis.com
-            https://securetoken.googleapis.com
-            https://www.googleapis.com
-            https://apis.google.com
-            https://*.firebaseio.com
-            wss://*.firebaseio.com;
-    
-        style-src 
-            'self' 
-            'unsafe-inline' 
-            https://fonts.googleapis.com;
-    
-        font-src 
-            'self' 
-            https://fonts.gstatic.com;
-    
-        img-src 
-            'self' 
-            data: 
-            https://firebasestorage.googleapis.com
-            https://lh3.googleusercontent.com;
-    
-        frame-src 
-            https://www.gstatic.com;
-    
-        object-src 'none';
-    ">
+<meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+
+    script-src 
+        'self' 
+        'unsafe-eval'
+        https://www.gstatic.com
+        https://www.googleapis.com
+        https://apis.google.com;
+
+    connect-src 
+        'self'
+        https://firestore.googleapis.com
+        https://firebase.googleapis.com
+        https://securetoken.googleapis.com
+        https://identitytoolkit.googleapis.com
+        https://apis.google.com
+        https://www.googleapis.com
+        https://*.firebaseio.com
+        wss://*.firebaseio.com;
+
+    style-src 
+        'self' 
+        'unsafe-inline' 
+        https://fonts.googleapis.com;
+
+    font-src 
+        'self' 
+        https://fonts.gstatic.com;
+
+    img-src 
+        'self' 
+        data:
+        https://firebasestorage.googleapis.com
+        https://lh3.googleusercontent.com
+        https://raw.githubusercontent.com;
+
+    frame-src https://www.gstatic.com;
+
+    object-src 'none';
+">
+
     
     <title>Sistema de Orçamentos - Relevo</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
