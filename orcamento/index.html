@@ -6,12 +6,45 @@
     
     <!-- 🔐 Content Security Policy para Firebase -->
     <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self' https://firestore.googleapis.com https://*.firebaseio.com https://www.googleapis.com;
-      script-src 'self' 'unsafe-eval' https://www.gstatic.com/ https://apis.google.com/ https://www.googleapis.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com;
-      connect-src 'self' https://firestore.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com;
-      img-src 'self' data: https:;
+        default-src 'self';
+    
+        script-src 
+            'self' 
+            'unsafe-eval'
+            https://www.gstatic.com 
+            https://www.googleapis.com 
+            https://apis.google.com;
+    
+        connect-src 
+            'self'
+            https://firestore.googleapis.com
+            https://firebase.googleapis.com
+            https://identitytoolkit.googleapis.com
+            https://securetoken.googleapis.com
+            https://www.googleapis.com
+            https://apis.google.com
+            https://*.firebaseio.com
+            wss://*.firebaseio.com;
+    
+        style-src 
+            'self' 
+            'unsafe-inline' 
+            https://fonts.googleapis.com;
+    
+        font-src 
+            'self' 
+            https://fonts.gstatic.com;
+    
+        img-src 
+            'self' 
+            data: 
+            https://firebasestorage.googleapis.com
+            https://lh3.googleusercontent.com;
+    
+        frame-src 
+            https://www.gstatic.com;
+    
+        object-src 'none';
     ">
     
     <title>Sistema de Orçamentos - Relevo</title>
