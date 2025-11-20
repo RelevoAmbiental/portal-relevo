@@ -1,4 +1,3 @@
-===== INICIO app.js =====
 // =======================================
 // INVENTÁRIO RELEVO – LÓGICA PRINCIPAL
 // Patrimônio + Movimentação + Operacional
