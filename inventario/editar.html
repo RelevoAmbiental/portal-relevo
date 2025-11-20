@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editar Inventário | Relevo Consultoria</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+
+  <!-- Fonte e ícones -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- CSS do módulo -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+
+  <!-- Guard unificado do portal -->
+  <script src="../scripts/firebase-init-guard.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER / TÍTULO -->
+    <header class="inventario-header">
+      <div>
+        <h1>Editar Inventário de Equipamentos</h1>
+        <p>Gestão avançada dos itens já cadastrados no inventário</p>
+      </div>
+      <div class="inventario-header-actions">
+        <a href="../gestao.html" class="btn btn-link">
+          <i class="fas fa-arrow-left"></i> Voltar para Gestão
+        </a>
+        <a href="./index.html" class="btn btn-link">
+          <i class="fas fa-clipboard-list"></i> Ver Inventário (Cadastro)
+        </a>
+      </div>
+    </header>
+
+    <!-- CARD DE FILTROS E LISTA -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Lista de Equipamentos</h2>
+        <p>Filtre, edite ou remova itens já cadastrados no inventário</p>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filters-card">
+        <div class="filters-grid">
+          <div class="form-group">
+            <label for="filtro-categoria-edit">Filtrar por categoria</label>
+            <select id="filtro-categoria-edit">
+              <option value="">Todas</option>
+              <option value="EPI e Segurança">EPI e Segurança</option>
+              <option value="Iluminação">Iluminação</option>
+              <option value="Espeleologia">Espeleologia</option>
+              <option value="Progressão Vertical">Progressão Vertical</option>
+              <option value="Topografia e Medição">Topografia e Medição</option>
+              <option value="Registro e Documentação">Registro e Documentação</option>
+              <option value="Coleta e Amostragem Ambiental">Coleta e Amostragem Ambiental</option>
+              <option value="Acessórios e Logística">Acessórios e Logística</option>
+              <option value="Comunicação">Comunicação</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filtro-status-edit">Filtrar por status</label>
+            <select id="filtro-status-edit">
+              <option value="">Todos</option>
+              <option value="disponivel">Disponível</option>
+              <option value="emprestado">Emprestado</option>
+              <option value="manutencao">Em manutenção</option>
+              <option value="perdido">Perdido</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filtro-codigo-edit">Filtrar por código</label>
+            <input id="filtro-codigo-edit" type="text" placeholder="Ex: EPI-001, ILU-010..." />
+          </div>
+
+          <div class="form-group">
+            <label for="filtro-nome-edit">Buscar por nome</label>
+            <input id="filtro-nome-edit" type="text" placeholder="Ex: Macacão, Lanterna..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th>Foto</th>
+              <th>Criado em</th>
+              <th class="th-acoes">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-equipamentos-edit">
+            <!-- Linhas geradas via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="status-wrapper">
+        <span id="status-lista-edicao" class="status-mensagem"></span>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL DE EDIÇÃO -->
+  <div id="modal-edicao" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Editar Equipamento</h2>
+        <button type="button" class="modal-close-btn" id="btn-fechar-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="form-edicao">
+        <input type="hidden" id="edit-id" />
+
+        <div class="form-grid">
+          <!-- Código interno (somente leitura) -->
+          <div class="form-group">
+            <label for="edit-codigoInterno">Código interno</label>
+            <input id="edit-codigoInterno" type="text" readonly />
+          </div>
+
+          <!-- Categoria -->
+          <div class="form-group">
+            <label for="edit-categoria">Categoria</label>
+            <select id="edit-categoria" required>
+              <option value="">Selecione...</option>
+              <option value="EPI e Segurança">EPI e Segurança</option>
+              <option value="Iluminação">Iluminação</option>
+              <option value="Espeleologia">Espeleologia</option>
+              <option value="Progressão Vertical">Progressão Vertical</option>
+              <option value="Topografia e Medição">Topografia e Medição</option>
+              <option value="Registro e Documentação">Registro e Documentação</option>
+              <option value="Coleta e Amostragem Ambiental">Coleta e Amostragem Ambiental</option>
+              <option value="Acessórios e Logística">Acessórios e Logística</option>
+              <option value="Comunicação">Comunicação</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <!-- Categoria Outro -->
+          <div class="form-group" id="edit-grupo-categoria-outro" style="display:none;">
+            <label for="edit-categoriaOutro">Outra categoria</label>
+            <input id="edit-categoriaOutro" type="text" placeholder="Descreva a categoria" />
+          </div>
+
+          <!-- Nome -->
+          <div class="form-group">
+            <label for="edit-nome">Nome do equipamento</label>
+            <input id="edit-nome" type="text" required />
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="edit-status">Status</label>
+            <select id="edit-status" required>
+              <option value="disponivel">Disponível</option>
+              <option value="emprestado">Emprestado</option>
+              <option value="manutencao">Em manutenção</option>
+              <option value="perdido">Perdido</option>
+            </select>
+          </div>
+
+          <!-- Quantidade total -->
+          <div class="form-group">
+            <label for="edit-quantidadeTotal">Quantidade total</label>
+            <input id="edit-quantidadeTotal" type="number" min="0" step="1" placeholder="0" />
+          </div>
+
+          <!-- Observações -->
+          <div class="form-group form-group-full">
+            <label for="edit-observacoes">Observações</label>
+            <textarea id="edit-observacoes" placeholder="Informações complementares sobre este item."></textarea>
+          </div>
+
+          <!-- Descrição -->
+          <div class="form-group form-group-full">
+            <label for="edit-descricao">Descrição</label>
+            <textarea id="edit-descricao" placeholder="Detalhes do equipamento, tamanho, marca, uso previsto etc."></textarea>
+          </div>
+
+          <!-- Foto -->
+          <div class="form-group form-group-full">
+            <label for="edit-foto">Foto (substituir existente)</label>
+            <input id="edit-foto" type="file" accept="image/*" capture="environment" />
+            <small>Se você enviar uma nova foto, ela substituirá a atual.</small>
+            <div id="edit-foto-preview-wrapper" class="foto-preview-wrapper">
+              <img id="edit-foto-preview" class="equip-img-thumb" alt="Foto atual do equipamento" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <span id="status-edicao" class="status-mensagem"></span>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-danger" id="btn-excluir-item">
+              <i class="fas fa-trash"></i> Excluir item
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-cancelar-edicao">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="btn-salvar-edicao">
+              <i class="fas fa-save"></i> Salvar alterações
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LÓGICA DE EDIÇÃO -->
+  <script src="editar.js"></script>
+</body>
+</html>
