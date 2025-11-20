@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Colaboradores | Relevo Consultoria Ambiental</title>
 
-      <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
-    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png"
+          href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- CSS Global -->
     <link rel="stylesheet" href="styles/global.css">
 
@@ -24,9 +25,8 @@
     <style>
         /* ============================================
            ESTILOS ESPECÍFICOS DOS COLABORADORES
-           ============================================ */
-        
-        /* Hero com Background */
+        ============================================ */
+
         .hero-colaboradores {
             background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
             color: white;
@@ -42,10 +42,7 @@
         .hero-colaboradores::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
             background-size: cover;
             background-position: center;
@@ -65,21 +62,19 @@
         }
 
         .hero-colaboradores h1 {
-            color: white;
             font-size: 2.5rem;
-            margin-bottom: 15px;
             font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
         }
 
         .hero-colaboradores p {
             font-size: 1.2rem;
-            opacity: 0.95;
+            opacity: 0.9;
             max-width: 600px;
-            margin: 0 auto 20px;
+            margin: 0 auto;
         }
 
-        /* Info do Usuário */
+        /* USER INFO */
         .user-info {
             background: rgba(255,255,255,0.2);
             padding: 12px 25px;
@@ -92,11 +87,7 @@
             font-weight: 500;
         }
 
-        .user-info i {
-            font-size: 1.1rem;
-        }
-
-        /* Grid de Cards de Recursos */
+        /* GRID DE CARDS */
         .resources-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -123,241 +114,127 @@
             box-shadow: 0 12px 30px rgba(0,0,0,0.15);
         }
 
-        .resource-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: var(--verde-primario);
-            display: block;
-        }
-
         .resource-card h3 {
             color: var(--verde-accent);
             font-size: 1.4rem;
             margin-bottom: 15px;
-            font-weight: 600;
         }
 
         .resource-card p {
             color: var(--texto-escuro);
-            margin-bottom: 12px;
             line-height: 1.6;
+            margin-bottom: 12px;
             flex-grow: 1;
         }
 
         .resource-card small {
             color: var(--texto-cinza);
             font-size: 0.9rem;
-            margin-top: auto;
             font-style: italic;
         }
 
-        /* Card Destaque para Despesas */
+        /* Ícone como imagem */
+        .resource-icon-img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* CARD DESTAQUE */
         .card-destaque {
-            background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
+            background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
             color: white;
             border-left: 5px solid var(--laranja);
-            text-align: center;
             padding: 40px 30px;
+            text-align: center;
             grid-column: 1 / -1;
         }
 
-        .card-destaque h3 {
-            color: white;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
-
-        .card-destaque p {
-            color: rgba(255,255,255,0.95);
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-        }
-
-        .card-destaque small {
-            color: rgba(255,255,255,0.85);
-            font-size: 1rem;
-        }
-
-        .card-destaque .resource-icon {
-            color: white;
-            font-size: 3rem;
-        }
-
-        .card-destaque:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(38, 192, 76, 0.3);
-        }
-
-        /* Botão Logout Especial */
-        .logout-btn-large {
-            background: var(--laranja);
-            color: white;
-            border: none;
-            padding: 16px 35px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: block;
-            margin: 40px auto 0;
-            width: 100%;
-            max-width: 280px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(235, 136, 7, 0.3);
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .logout-btn-large:hover {
-            background: #d97a06;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(235, 136, 7, 0.4);
-        }
-
-        .logout-btn-large i {
-            margin-right: 10px;
+        /* 3 colunas no desktop */
+        @media (min-width: 1200px) {
+            .resources-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         /* RESPONSIVIDADE */
         @media (max-width: 768px) {
-            .hero-colaboradores {
-                padding: 40px 20px;
-                margin-bottom: 30px;
-                border-radius: 15px;
-            }
-            
-            .hero-colaboradores h1 {
-                font-size: 2rem;
-            }
-            
-            .hero-colaboradores p {
-                font-size: 1.1rem;
-            }
-            
-            .resources-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .card-destaque {
-                grid-column: 1;
-                padding: 30px 20px;
-            }
-            
-            .resource-card {
-                padding: 25px 20px;
-            }
-            
-            .resource-card h3 {
-                font-size: 1.3rem;
-            }
-            
-            .logout-btn-large {
-                max-width: 100%;
-                margin: 30px auto 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-colaboradores {
-                padding: 30px 15px;
-            }
-            
-            .hero-colaboradores h1 {
-                font-size: 1.8rem;
-            }
-            
-            .hero-colaboradores p {
-                font-size: 1rem;
-            }
-            
-            .user-info {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-            
-            .card-destaque h3 {
-                font-size: 1.5rem;
-            }
-            
-            .card-destaque p {
-                font-size: 1.1rem;
-            }
-
-            .resource-icon {
-                font-size: 2rem;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .resources-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .card-destaque {
-                grid-column: 1 / -1;
-            }
+            .hero-colaboradores h1 { font-size: 2rem; }
+            .hero-colaboradores p { font-size: 1.1rem; }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <!-- Hero com Informações do Usuário -->
+
+        <!-- HERO -->
         <div class="hero-colaboradores">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png" 
-                 alt="Relevo Consultoria Ambiental" 
-                 class="logo">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
+                 class="logo"
+                 alt="Relevo Consultoria Ambiental">
             <h1>Portal do Colaborador</h1>
             <p>Recursos e ferramentas para a equipe Relevo</p>
+
             <div class="user-info">
-                <i class="fas fa-user"></i> 
+                <i class="fas fa-user"></i>
                 <span id="userName">Carregando...</span>
             </div>
         </div>
 
-        <!-- Grid de Recursos -->
+        <!-- GRID DE CARDS -->
         <div class="resources-grid">
-            <!-- Card 1: Drive da Empresa -->
-            <a href="https://drive.google.com/drive/folders/1n5EMobE9yk3alPeDzwbAebKHVzSEJbxt?usp=sharing" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="resource-card">
+
+            <!-- CARD 1 -->
+            <a href="https://drive.google.com/drive/folders/1n5EMobE9yk3alPeDzwbAebKHVzSEJbxt?usp=sharing"
+               class="resource-card"
+               target="_blank">
                 <span class="resource-icon">📁</span>
                 <h3>Drive da Empresa</h3>
-                <p>Acesso completo a documentos, relatórios técnicos, modelos e recursos compartilhados da empresa</p>
-                <small>Documentação corporativa e projetos em andamento</small>
+                <p>Acesso completo a documentos, modelos e relatórios técnicos.</p>
+                <small>Central de Arquivos Institucionais</small>
             </a>
 
-            <!-- Card 2: SST e Segurança -->
-            <a href="https://drive.google.com/drive/folders/1DiOVVLNRlfNagmYzn6h4B_-8BGEX7ubj?usp=sharing" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="resource-card">
+            <!-- CARD 2 -->
+            <a href="https://drive.google.com/drive/folders/1DiOVVLNRlfNagmYzn6h4B_-8BGEX7ubj?usp=sharing"
+               class="resource-card"
+               target="_blank">
                 <span class="resource-icon">🛡️</span>
                 <h3>SST e Segurança</h3>
-                <p>Procedimentos de segurança, documentos SST, normas e protocolos de trabalho em campo</p>
-                <small>Saúde e segurança no trabalho - Normas atualizadas</small>
+                <p>Procedimentos, normas internas e protocolos de segurança em campo.</p>
+                <small>Saúde e Segurança do Trabalho</small>
             </a>
 
-            <!-- Card Destaque: Registro de Despesas -->
+            <!-- CARD 3 — INVENTÁRIO -->
+            <a href="inventario/"
+               class="resource-card">
+                <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Inventario_equipos.png"
+                     class="resource-icon-img"
+                     alt="Ícone Inventário">
+                <h3>Inventário de Equipamentos</h3>
+                <p>Consulte disponibilidade, registre movimentações e acesse a lista de EPIs e equipamentos.</p>
+                <small>Equipamentos & EPIs — Controle Interno</small>
+            </a>
+
+            <!-- CARD DESTAQUE -->
             <a href="despesas" class="resource-card card-destaque">
-                <span class="resource-icon">💳</span>
+                <span class="resource-icon" style="font-size:3rem;color:white;">💳</span>
                 <h3>Registro de Despesas</h3>
-                <p>Sistema completo para registro de despesas de campo, viagens e atividades externas</p>
-                <small>Disponível para instalação no celular - Clique para abrir</small>
+                <p>Registre despesas de campo, viagens e demais atividades.</p>
+                <small>Clique para abrir — disponível também como PWA</small>
             </a>
         </div>
 
-        <!-- Botão Logout -->
+        <!-- LOGOUT -->
         <button class="logout-btn-large" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> Sair do Portal
         </button>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURAÇÃO DO FIREBASE
-        // ============================================
+        /* FIREBASE CONFIG */
         const firebaseConfig = {
             apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
             authDomain: "portal-relevo.firebaseapp.com",
@@ -367,108 +244,28 @@
             appId: "1:182759626683:web:2dde2eeef910d4c288569e"
         };
 
-        // Inicializar Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase Portal inicializado');
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ============================================
-        // VERIFICAR AUTENTICAÇÃO E CARREGAR DADOS
-        // ============================================
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log('✅ Usuário autenticado:', user.uid);
-                carregarDadosUsuario(user.uid);
-            } else {
-                console.log('❌ Usuário não autenticado - Redirecionando...');
-                window.location.href = 'index.html';
-            }
+        auth.onAuthStateChanged(user => {
+            if (!user) return window.location.href = 'index.html';
+            carregarDadosUsuario(user.uid);
         });
 
-        // ============================================
-        // CARREGAR DADOS DO USUÁRIO
-        // ============================================
         async function carregarDadosUsuario(uid) {
-            try {
-                const userDoc = await db.collection('users').doc(uid).get();
-                
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    const nomeExibicao = userData.nome || userData.username || 'Colaborador';
-                    
-                    document.getElementById('userName').textContent = nomeExibicao;
-                    console.log('✅ Dados do usuário carregados:', nomeExibicao);
-                } else {
-                    console.warn('⚠️ Documento do usuário não encontrado');
-                    document.getElementById('userName').textContent = 'Colaborador';
-                }
-            } catch (error) {
-                console.error('❌ Erro ao buscar dados do usuário:', error);
-                document.getElementById('userName').textContent = 'Colaborador';
-            }
+            const snap = await db.collection('users').doc(uid).get();
+            document.getElementById('userName').textContent =
+                snap.exists ? (snap.data().nome || 'Colaborador') : 'Colaborador';
         }
 
-        // ============================================
-        // FUNÇÃO DE LOGOUT
-        // ============================================
         function logout() {
             if (confirm('Deseja realmente sair do sistema?')) {
-                auth.signOut()
-                    .then(() => {
-                        console.log('✅ Logout realizado com sucesso');
-                        window.location.href = 'index.html';
-                    })
-                    .catch((error) => {
-                        console.error('❌ Erro ao fazer logout:', error);
-                        alert('Erro ao fazer logout. Tente novamente.');
-                    });
+                auth.signOut().then(() => window.location.href = 'index.html');
             }
         }
-
-        // ============================================
-        // MELHORIAS DE UX
-        // ============================================
-        
-        // Prevenir zoom em inputs no iOS
-        document.addEventListener('touchstart', function() {}, { passive: true });
-        
-        // Adicionar animação suave aos cards
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Portal do Colaborador carregado');
-            
-            // Animar entrada dos cards
-            const cards = document.querySelectorAll('.resource-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        card.style.transition = 'all 0.5s ease';
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 10);
-                }, index * 100);
-            });
-        });
-
-        // Adicionar feedback visual aos cliques
-        document.querySelectorAll('.resource-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                this.style.transform = 'scale(0.98)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 100);
-            });
-        });
     </script>
+
 </body>
 </html>
-
-
-
-
-
