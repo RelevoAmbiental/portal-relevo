@@ -1,7 +1,7 @@
+===== INICIO styles.css =====
 /* =====================================
    INVENTÁRIO – Visual Premium Relevo
    ===================================== */
-
 
 :root {
   --verde-primario: #2ecc71;
@@ -53,7 +53,7 @@ body {
   color: #555;
 }
 
-/* BOTÃO LINK */
+/* BOTÕES GENÉRICOS */
 
 .btn {
   padding: 10px 18px;
@@ -79,8 +79,6 @@ body {
   background: #f0f0f0;
 }
 
-/* BOTÕES PRINCIPAIS */
-
 .btn-primary {
   background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
   color: white;
@@ -90,6 +88,52 @@ body {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(46, 204, 113, 0.45);
+}
+
+/* TABS */
+
+.tabs {
+  display: inline-flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.tab-button {
+  border-radius: 999px;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: transparent;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+}
+
+.tab-button i {
+  font-size: 0.9rem;
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
+  color: white;
+  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
+}
+
+/* TAB CONTENT */
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }
 
 /* CARDS GENÉRICOS */
@@ -145,7 +189,7 @@ body {
   color: var(--verde-accent);
 }
 
-/* FORMULÁRIO */
+/* FORMULÁRIOS */
 
 .form-grid {
   display: grid;
@@ -216,6 +260,11 @@ small {
   color: #666;
 }
 
+.hint-line {
+  font-size: 0.8rem;
+  color: #777;
+}
+
 /* FILTROS */
 
 .filters-card {
@@ -232,7 +281,7 @@ small {
   gap: 12px;
 }
 
-/* TABELA */
+/* TABELAS */
 
 .table-container {
   overflow-x: auto;
@@ -321,6 +370,17 @@ td {
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tabs {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    flex: 1 1 30%;
+    justify-content: center;
   }
 }
 
