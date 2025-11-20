@@ -1,3 +1,59 @@
+
+Manus, estou te enviando um arquivo zip que você está autorizado a descompactar e analisar todos os arquivos.
+Nessa aplicação tem um modulo de despesas, que carrega uma pequena aplicação web para registro de gastos dos meus funcionários.
+Nessa aplicação o campo valor, como no print, não está preenchendo e aparecendo a virgula, não tem aquele preenchimento padrão de dinheiro. Quando eu coloco 250, em vez dele registrar R$ 250,00 ele registra R$ 2,50 e não está me permitindo colocar a virgula manualmente.
+Onde e como eu corrijo isso, qual parte do script e em qual documento eu faço essa alteração?
+portal-relevo-main.zip
+Arquivar · 20.78 MB
+Lite
+Entendido. Vou descompactar o arquivo portal-relevo-main.zip, analisar o código da aplicação de despesas e identificar o local e a forma correta de corrigir o problema de formatação do campo "Valor (R$)" para que ele aceite a vírgula e registre o valor corretamente (por exemplo, R$ 250,00 em vez de R$ 2,50).
+Vou começar descompactando o arquivo.
+Ao descompactar o arquivo, vou examinar a estrutura do código para localizar onde o valor do campo de despesas é tratado, buscando ajustar a formatação para aceitar vírgulas e valor correto.
+
+Identifiquei a estrutura do projeto, incluindo o arquivo app.js na pasta despesas. O próximo passo é localizar o código que trata o campo de despesas para ajustar a formatação de valores.
+
+Corrigi as funções de formatação para aceitar vírgula, ponto e permitir entrada de valores monetários corretos, garantindo registro em formato brasileiro (R$ 250,00).
+
+Corrigi as funções de formatação para aceitar vírgula e ponto, garantindo que valores monetários sejam registrados corretamente no formato brasileiro (ex: R$ 250,00). O próximo passo é analisar a estrutura da aplicação.
+
+Lite
+O problema de formatação do campo Valor (R$) foi identificado e corrigido no arquivo JavaScript principal da aplicação.
+A causa do problema era a lógica de formatação e tratamento de entrada do campo, que estava:
+Impedindo a digitação da vírgula (permitirApenasNumeros só permitia dígitos).
+Tratando o valor como centavos (a função formatarValor dividia o valor por 100, transformando 250 em 2.50).
+A correção foi implementada no arquivo /home/ubuntu/portal-relevo/portal-relevo-main/despesas/app.js através das seguintes alterações:
+1. Alterações na Lógica de Entrada e Formatação (app.js)
+Função
+Alteração
+Objetivo
+permitirApenasNumeros(input)
+Modificada para permitir a vírgula (,) além dos dígitos e garantir que apenas uma vírgula seja digitada.
+Permite a entrada de valores decimais no padrão brasileiro.
+formatarValor(input)
+Substituída por uma lógica que utiliza o método toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}).
+Formata o valor corretamente para o padrão monetário brasileiro (ex: 250,00 se torna R$ 250,00), eliminando a divisão por 100 que causava o erro de centavos.
+removerFormatacao(input)
+Nova função adicionada, chamada no evento focus do campo.
+Remove a formatação "R$ " e substitui o ponto por vírgula ao clicar no campo, facilitando a edição do valor pelo usuário.
+parseValor(valorString)
+Modificada para remover pontos (separadores de milhar) e substituir a vírgula (separador decimal) por ponto antes de converter para float.
+Garante que o valor seja salvo no banco de dados (Firebase) como um número decimal correto, independentemente da formatação de exibição.
+2. Onde e Como Aplicar a Correção
+O arquivo modificado é:
+Arquivo: /home/ubuntu/portal-relevo/portal-relevo-main/despesas/app.js
+Você deve substituir o seu arquivo app.js original pelo arquivo anexado a esta mensagem.
+Com essa alteração, ao digitar 250 e sair do campo, ele será formatado como R$ 250,00. Se você digitar 250,50, ele será formatado como R$ 250,50.
+O arquivo app.js corrigido está anexado para sua conveniência. Se precisar de mais alguma ajuda ou tiver outras dúvidas, estou à disposição.
+app.js
+Código · 10.88 KB
+
+Ver todos os arquivos nesta tarefa
+Tarefa concluída
+Como foi este resultado?
+Sugestões de acompanhamento
+Enviar mensagem para Manus
+
+app.js
 // ============================================
 // APP DE DESPESAS - VERSÃO CORRIGIDA E INTEGRADA
 // Relevo Consultoria Ambiental - 2025
@@ -57,6 +113,7 @@ class DespesasApp {
     const valorInput = document.getElementById('valor');
     valorInput.addEventListener('blur', (e) => this.formatarValor(e.target));
     valorInput.addEventListener('input', (e) => this.permitirApenasNumeros(e.target));
+    valorInput.addEventListener('focus', (e) => this.removerFormatacao(e.target));
   }
 
   // ============================================
@@ -85,19 +142,49 @@ class DespesasApp {
   }
 
   permitirApenasNumeros(input) {
-    input.value = input.value.replace(/\D/g, '');
+    // Permite apenas dígitos e a vírgula (,)
+    input.value = input.value.replace(/[^0-9,]/g, '');
+    // Garante que haja apenas uma vírgula
+    const parts = input.value.split(',');
+    if (parts.length > 2) {
+      input.value = parts[0] + ',' + parts.slice(1).join('');
+    }
+  }
+
+  removerFormatacao(input) {
+    // Remove "R$ " e substitui a vírgula por ponto para facilitar a entrada
+    input.value = input.value.replace('R$ ', '').replace('.', ',');
   }
 
   formatarValor(input) {
-    let valor = input.value.replace(/\D/g, '');
-    if (!valor) { input.value = ''; return; }
-    valor = (parseInt(valor) / 100).toFixed(2);
-    input.value = 'R$ ' + valor.replace('.', ',');
+    let valor = input.value.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
+    
+    // Se o valor for vazio ou apenas um ponto/vírgula, limpa e sai
+    if (!valor || valor === '.') {
+      input.value = '';
+      return;
+    }
+
+    // Converte para número. Se não for um número válido, limpa e sai.
+    const num = parseFloat(valor);
+    if (isNaN(num)) {
+      input.value = '';
+      return;
+    }
+
+    // Formata o número para o padrão monetário brasileiro (R$ X.XXX,XX)
+    input.value = num.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   parseValor(valorString) {
     if (!valorString) return 0;
-    let valor = valorString.replace('R$', '').replace(/\s/g, '').replace(',', '.');
+    // Remove "R$", espaços, e substitui a vírgula (separador decimal BR) por ponto (separador decimal JS)
+    let valor = valorString.replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
     const num = parseFloat(valor);
     return isNaN(num) ? 0 : num;
   }
