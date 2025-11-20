@@ -5,191 +5,202 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventário de Equipamentos | Relevo Consultoria</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png"
-        href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png" />
-
-  <!-- Fontes e Ícones -->
+  <!-- Fonte e ícones -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- CSS Global do Portal -->
-  <link rel="stylesheet" href="../styles/global.css" />
-  <!-- CSS específico (se quiser ajustar) -->
+  <!-- CSS do módulo -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase SDK compat -->
+  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
-
-  <!-- Guard e sessão -->
-  <script src="../scripts/firebase-init-guard.js"></script>
-  <script src="../scripts/expose-session.js"></script>
 </head>
-<body class="portal-body">
-  <header class="portal-header">
-    <h1>Inventário de Equipamentos</h1>
-    <p>Cadastro, controle e movimentação de equipamentos da Relevo</p>
-  </header>
-
-  <main class="portal-main">
-    <section class="dashboard-section">
-      <!-- Filtros e ações -->
-      <div class="dashboard-card">
-        <h2>Filtros e Pesquisa</h2>
-        <div class="filters-row">
-          <input id="filtro-nome" type="text" placeholder="Buscar por nome ou código..." />
-          <select id="filtro-status">
-            <option value="">Status (todos)</option>
-            <option value="disponivel">Disponível</option>
-            <option value="emprestado">Emprestado</option>
-            <option value="manutencao">Em manutenção</option>
-            <option value="perdido">Perdido</option>
-          </select>
-          <input id="filtro-local" type="text" placeholder="Filtrar por localização" />
-          <button id="btn-aplicar-filtros" class="btn btn-green">
-            <i class="fas fa-filter"></i> Aplicar
-          </button>
-        </div>
-        <div class="actions-row">
-          <button id="btn-novo-item" class="btn btn-orange">
-            <i class="fas fa-plus"></i> Novo Equipamento
-          </button>
-        </div>
-        <small id="inventario-role-hint"></small>
+<body>
+  <div class="container">
+    <!-- HEADER / TÍTULO -->
+    <header class="inventario-header">
+      <div>
+        <h1>Inventário de Equipamentos</h1>
+        <p>Controle de EPIs, equipamentos e materiais operacionais da Relevo</p>
       </div>
+      <a href="../gestao.html" class="btn btn-link">
+        <i class="fas fa-arrow-left"></i> Voltar para Gestão
+      </a>
+    </header>
 
-      <!-- Lista de equipamentos -->
-      <div class="dashboard-card">
-        <h2>Lista de Equipamentos</h2>
-        <div class="table-wrapper">
-          <table class="portal-table">
-            <thead>
-              <tr>
-                <th>Foto</th>
-                <th>Nome</th>
-                <th>Código</th>
-                <th>Categoria</th>
-                <th>Status</th>
-                <th>Localização</th>
-                <th>Responsável</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabela-inventario">
-              <!-- Preenchido via JS -->
-            </tbody>
-          </table>
-        </div>
+    <!-- DASHBOARD DE ESTATÍSTICAS -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <h3>Total</h3>
+        <p id="stat-total">0</p>
       </div>
-
-      <!-- Formulário de cadastro/edição -->
-      <div class="dashboard-card" id="card-form" style="display:none;">
-        <h2 id="form-title">Novo Equipamento</h2>
-        <form id="form-inventario">
-          <div class="form-grid">
-            <label>
-              Nome do equipamento
-              <input type="text" id="nome" required />
-            </label>
-            <label>
-              Código interno
-              <input type="text" id="codigo" />
-            </label>
-            <label>
-              Categoria
-              <input type="text" id="categoria" placeholder="Espeleologia, Biologia, EPI, etc." />
-            </label>
-            <label>
-              Status
-              <select id="status">
-                <option value="disponivel">Disponível</option>
-                <option value="emprestado">Emprestado</option>
-                <option value="manutencao">Em manutenção</option>
-                <option value="perdido">Perdido</option>
-              </select>
-            </label>
-            <label>
-              Localização
-              <input type="text" id="localizacao" />
-            </label>
-            <label>
-              Responsável atual
-              <input type="text" id="responsavelAtual" />
-            </label>
-            <label>
-              Valor estimado (R$)
-              <input type="number" id="valorEstimado" step="0.01" />
-            </label>
-            <label>
-              Data de aquisição
-              <input type="date" id="dataAquisicao" />
-            </label>
-          </div>
-
-          <label>
-            Descrição
-            <textarea id="descricao" rows="3"></textarea>
-          </label>
-
-          <label>
-            Foto do equipamento
-            <input type="file" id="foto" accept="image/*" />
-          </label>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-green">
-              <i class="fas fa-save"></i> Salvar
-            </button>
-            <button type="button" id="btn-cancelar-form" class="btn btn-secondary">
-              Cancelar
-            </button>
-          </div>
-        </form>
+      <div class="stat-card">
+        <h3>Disponíveis</h3>
+        <p id="stat-disponiveis">0</p>
       </div>
-
-      <!-- Formulário de movimentação -->
-      <div class="dashboard-card" id="card-mov" style="display:none;">
-        <h2>Movimentar Equipamento</h2>
-        <form id="form-movimentacao">
-          <input type="hidden" id="mov-item-id" />
-          <label>
-            Tipo de movimentação
-            <select id="mov-tipo" required>
-              <option value="retirada">Retirada</option>
-              <option value="devolucao">Devolução</option>
-              <option value="manutencao">Envio para manutenção</option>
-              <option value="outro">Outro</option>
-            </select>
-          </label>
-          <label>
-            Responsável / Usuário
-            <input type="text" id="mov-responsavel" required />
-          </label>
-          <label>
-            Nova localização
-            <input type="text" id="mov-nova-local" required />
-          </label>
-          <label>
-            Observações
-            <textarea id="mov-observacoes" rows="3"></textarea>
-          </label>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-green">
-              <i class="fas fa-exchange-alt"></i> Registrar Movimentação
-            </button>
-            <button type="button" id="btn-cancelar-mov" class="btn btn-secondary">
-              Cancelar
-            </button>
-          </div>
-        </form>
+      <div class="stat-card">
+        <h3>Emprestados</h3>
+        <p id="stat-emprestados">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Em Manutenção</h3>
+        <p id="stat-manutencao">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Perdidos</h3>
+        <p id="stat-perdidos">0</p>
       </div>
     </section>
-  </main>
 
-  <script type="module" src="app.js"></script>
+    <!-- CARD DE CADASTRO -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Cadastrar Equipamento</h2>
+        <p>Preencha os dados abaixo para registrar um novo item no inventário</p>
+      </div>
+
+      <form id="form-cadastro">
+        <div class="form-grid">
+          <!-- Nome -->
+          <div class="form-group">
+            <label for="nome">Nome do equipamento</label>
+            <input id="nome" type="text" placeholder="Ex: Macacão Cordura G, Lanterna principal" required />
+          </div>
+
+          <!-- Categoria -->
+          <div class="form-group">
+            <label for="categoria">Categoria</label>
+            <select id="categoria" required>
+              <option value="">Selecione...</option>
+              <option value="EPI e Segurança">EPI e Segurança</option>
+              <option value="Iluminação">Iluminação</option>
+              <option value="Espeleologia">Espeleologia</option>
+              <option value="Progressão Vertical">Progressão Vertical</option>
+              <option value="Topografia e Medição">Topografia e Medição</option>
+              <option value="Registro e Documentação">Registro e Documentação</option>
+              <option value="Coleta e Amostragem Ambiental">Coleta e Amostragem Ambiental</option>
+              <option value="Acessórios e Logística">Acessórios e Logística</option>
+              <option value="Comunicação">Comunicação</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <!-- Categoria Outro -->
+          <div class="form-group" id="grupo-categoria-outro" style="display:none;">
+            <label for="categoriaOutro">Outra categoria</label>
+            <input id="categoriaOutro" type="text" placeholder="Descreva a categoria" />
+          </div>
+
+          <!-- Código interno (auto) -->
+          <div class="form-group">
+            <label for="codigoInterno">Código interno</label>
+            <input id="codigoInterno" type="text" readonly placeholder="Será gerado automaticamente" />
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" required>
+              <option value="disponivel">Disponível</option>
+              <option value="emprestado">Emprestado</option>
+              <option value="manutencao">Em manutenção</option>
+              <option value="perdido">Perdido</option>
+            </select>
+          </div>
+
+          <!-- Foto -->
+          <div class="form-group">
+            <label for="foto">Foto (upload ou câmera)</label>
+            <input id="foto" type="file" accept="image/*" capture="environment" />
+            <small>Você pode tirar a foto na hora pelo celular ou enviar uma já existente.</small>
+          </div>
+
+          <!-- Descrição -->
+          <div class="form-group form-group-full">
+            <label for="descricao">Descrição / Observações</label>
+            <textarea id="descricao" placeholder="Detalhes do equipamento, tamanho, marca, uso previsto etc."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btn-salvar">
+            <i class="fas fa-save"></i> Salvar Equipamento
+          </button>
+          <span id="status-mensagem" class="status-mensagem"></span>
+        </div>
+      </form>
+    </section>
+
+    <!-- LISTA + FILTROS -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Lista de Equipamentos</h2>
+        <p>Consulte os itens cadastrados e aplique filtros por categoria, status e código.</p>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filters-card">
+        <div class="filters-grid">
+          <div class="form-group">
+            <label for="filtro-categoria">Filtrar por categoria</label>
+            <select id="filtro-categoria">
+              <option value="">Todas</option>
+              <option value="EPI e Segurança">EPI e Segurança</option>
+              <option value="Iluminação">Iluminação</option>
+              <option value="Espeleologia">Espeleologia</option>
+              <option value="Progressão Vertical">Progressão Vertical</option>
+              <option value="Topografia e Medição">Topografia e Medição</option>
+              <option value="Registro e Documentação">Registro e Documentação</option>
+              <option value="Coleta e Amostragem Ambiental">Coleta e Amostragem Ambiental</option>
+              <option value="Acessórios e Logística">Acessórios e Logística</option>
+              <option value="Comunicação">Comunicação</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filtro-status">Filtrar por status</label>
+            <select id="filtro-status">
+              <option value="">Todos</option>
+              <option value="disponivel">Disponível</option>
+              <option value="emprestado">Emprestado</option>
+              <option value="manutencao">Em manutenção</option>
+              <option value="perdido">Perdido</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filtro-codigo">Filtrar por código</label>
+            <input id="filtro-codigo" type="text" placeholder="Ex: EPI-001, ILU-010..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th>Foto</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-equipamentos">
+            <!-- linhas geradas via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- LÓGICA DO INVENTÁRIO -->
+  <script src="app.js"></script>
 </body>
 </html>
