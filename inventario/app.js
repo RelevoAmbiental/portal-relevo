@@ -12,12 +12,16 @@ const firebaseConfig = {
   appId: "1:182759626683:web:2dde2eeef910d4c288569e"
 };
 
-// Inicializa app se ainda não houver
+// Inicializa app se ainda não houver (fallback caso o guard não tenha rodado)
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
+  console.log("✅ Firebase inicializado pelo app.js (inventário)");
 }
 
-const db = firebase.firestore();
+// Usa instâncias globais do portal, se existirem
+const app = window.__RELEVO_APP__ || firebase.app();
+const auth = window.__RELEVO_AUTH__ || firebase.auth();
+const db = window.__RELEVO_DB__ || firebase.firestore();
 const storage = firebase.storage();
 
 // Coleção do inventário
@@ -66,6 +70,22 @@ const statDisponiveis = document.getElementById("stat-disponiveis");
 const statEmprestados = document.getElementById("stat-emprestados");
 const statManutencao = document.getElementById("stat-manutencao");
 const statPerdidos = document.getElementById("stat-perdidos");
+
+// -----------------------------
+// Autenticação básica (log / segurança extra)
+// -----------------------------
+
+if (auth && auth.onAuthStateChanged) {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log("✅ Inventário: usuário autenticado:", user.email);
+    } else {
+      console.warn("⚠️ Inventário: usuário não autenticado. Upload para Storage será bloqueado pelas regras.");
+      // Se quiser forçar redirect direto do inventário:
+      // window.location.href = "../index.html";
+    }
+  });
+}
 
 // -----------------------------
 // Helpers
@@ -189,14 +209,15 @@ function renderTabela(lista) {
   lista.forEach((eq) => {
     const tr = document.createElement("tr");
 
+    // Ordem: Código, Categoria, Nome, Status, Foto, Criado em
     const tdCodigo = document.createElement("td");
     tdCodigo.textContent = eq.codigoInterno || "-";
 
-    const tdNome = document.createElement("td");
-    tdNome.textContent = eq.nome || "-";
-
     const tdCategoria = document.createElement("td");
     tdCategoria.textContent = eq.categoria || "-";
+
+    const tdNome = document.createElement("td");
+    tdNome.textContent = eq.nome || "-";
 
     const tdStatus = document.createElement("td");
     const spanStatus = document.createElement("span");
@@ -253,39 +274,41 @@ function renderTabela(lista) {
 // Snapshot em tempo real
 // -----------------------------
 
-db.collection(COLECAO).orderBy("criadoEm", "desc").onSnapshot((snap) => {
-  todosEquipamentos = [];
-  maxSeqPorPrefixo = {};
+db.collection(COLECAO)
+  .orderBy("criadoEm", "desc")
+  .onSnapshot((snap) => {
+    todosEquipamentos = [];
+    maxSeqPorPrefixo = {};
 
-  snap.forEach((doc) => {
-    const data = doc.data();
-    const eq = {
-      id: doc.id,
-      nome: data.nome || "",
-      categoria: data.categoria || "",
-      categoriaBase: data.categoriaBase || data.categoria || "",
-      codigoPrefixo: data.codigoPrefixo || "",
-      codigoSeq: data.codigoSeq || 0,
-      codigoInterno: data.codigoInterno || "",
-      status: data.status || "",
-      fotoURL: data.fotoURL || "",
-      criadoEm: data.criadoEm || null
-    };
+    snap.forEach((doc) => {
+      const data = doc.data();
+      const eq = {
+        id: doc.id,
+        nome: data.nome || "",
+        categoria: data.categoria || "",
+        categoriaBase: data.categoriaBase || data.categoria || "",
+        codigoPrefixo: data.codigoPrefixo || "",
+        codigoSeq: data.codigoSeq || 0,
+        codigoInterno: data.codigoInterno || "",
+        status: data.status || "",
+        fotoURL: data.fotoURL || "",
+        criadoEm: data.criadoEm || null
+      };
 
-    // Atualiza max seq por prefixo
-    if (eq.codigoPrefixo && typeof eq.codigoSeq === "number") {
-      const atual = maxSeqPorPrefixo[eq.codigoPrefixo] || 0;
-      if (eq.codigoSeq > atual) {
-        maxSeqPorPrefixo[eq.codigoPrefixo] = eq.codigoSeq;
+      // Atualiza max seq por prefixo
+      if (eq.codigoPrefixo && typeof eq.codigoSeq === "number") {
+        const atual = maxSeqPorPrefixo[eq.codigoPrefixo] || 0;
+        if (eq.codigoSeq > atual) {
+          maxSeqPorPrefixo[eq.codigoPrefixo] = eq.codigoSeq;
+        }
       }
-    }
 
-    todosEquipamentos.push(eq);
+      todosEquipamentos.push(eq);
+    });
+
+    atualizarStats();
+    aplicarFiltrosERender();
   });
-
-  atualizarStats();
-  aplicarFiltrosERender();
-});
 
 // -----------------------------
 // Eventos UI
@@ -297,7 +320,6 @@ selectCategoria.addEventListener("change", () => {
 });
 
 inputCategoriaOutro.addEventListener("input", () => {
-  // Categoria final só muda o texto, mas o prefixo continua OUT
   if (selectCategoria.value === "Outros") {
     gerarCodigoInterno();
   }
@@ -335,6 +357,15 @@ formCadastro.addEventListener("submit", async (e) => {
   const descricao = inputDescricao.value.trim();
   const arquivo = inputFoto.files[0] || null;
 
+  // Checa sessão ANTES de falar com o Storage (evita 403 silencioso)
+  const userAtual = auth.currentUser;
+  if (!userAtual) {
+    statusMensagem.textContent = "Sessão expirada. Faça login novamente no portal.";
+    console.warn("⚠️ Tentativa de salvar sem usuário autenticado.");
+    setTimeout(() => (statusMensagem.textContent = ""), 4000);
+    return;
+  }
+
   statusMensagem.textContent = "Salvando equipamento...";
   btnSalvar.disabled = true;
 
@@ -361,7 +392,9 @@ formCadastro.addEventListener("submit", async (e) => {
       descricao,
       fotoURL: fotoURL || "",
       criadoEm: agora,
-      atualizadoEm: agora
+      atualizadoEm: agora,
+      criadoPor: userAtual.uid || null,
+      atualizadoPor: userAtual.uid || null
     };
 
     await docRef.set(payload);
