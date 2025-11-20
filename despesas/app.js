@@ -55,9 +55,8 @@ class DespesasApp {
     comprovante.addEventListener('change', (e) => this.previewComprovante(e.target.files[0]));
 
     const valorInput = document.getElementById('valor');
+    valorInput.addEventListener('input', (e) => this.aplicarMascaraMonetaria(e.target));
     valorInput.addEventListener('blur', (e) => this.formatarValor(e.target));
-    valorInput.addEventListener('input', (e) => this.permitirApenasNumeros(e.target));
-    valorInput.addEventListener('focus', (e) => this.removerFormatacao(e.target));
   }
 
   // ============================================
@@ -85,38 +84,52 @@ class DespesasApp {
     if (dataInput) dataInput.valueAsDate = new Date();
   }
 
-  permitirApenasNumeros(input) {
-    // Permite apenas dígitos e a vírgula (,)
-    input.value = input.value.replace(/[^0-9,]/g, '');
-    // Garante que haja apenas uma vírgula
-    const parts = input.value.split(',');
-    if (parts.length > 2) {
-      input.value = parts[0] + ',' + parts.slice(1).join('');
+  aplicarMascaraMonetaria(input) {
+    let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    
+    if (valor.length === 0) {
+      input.value = '';
+      return;
     }
-  }
 
-  removerFormatacao(input) {
-    // Remove "R$ " e substitui a vírgula por ponto para facilitar a entrada
-    input.value = input.value.replace('R$ ', '').replace('.', ',');
+    // Trata o valor como centavos
+    let num = parseInt(valor);
+    
+    // Se o valor for zero, limpa
+    if (num === 0) {
+      input.value = '';
+      return;
+    }
+
+    // Converte para string com 2 casas decimais (ex: 250 -> 2.50)
+    let valorFormatado = (num / 100).toFixed(2);
+
+    // Formata para o padrão monetário brasileiro (R$ X.XXX,XX)
+    // toLocaleString é mais robusto para lidar com separadores de milhar e decimal
+    input.value = parseFloat(valorFormatado).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   formatarValor(input) {
+    // A formatação principal agora é feita em tempo real pela aplicarMascaraMonetaria.
+    // Esta função de blur serve apenas para garantir a formatação final caso o input não tenha sido formatado corretamente.
+    // A lógica de formatação em tempo real já garante o formato R$ X.XXX,XX.
+    // Se o campo estiver vazio, não faz nada.
+    if (!input.value) return;
+
     let valor = input.value.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-    
-    // Se o valor for vazio ou apenas um ponto/vírgula, limpa e sai
-    if (!valor || valor === '.') {
-      input.value = '';
-      return;
-    }
-
-    // Converte para número. Se não for um número válido, limpa e sai.
     const num = parseFloat(valor);
-    if (isNaN(num)) {
+
+    if (isNaN(num) || num === 0) {
       input.value = '';
       return;
     }
 
-    // Formata o número para o padrão monetário brasileiro (R$ X.XXX,XX)
+    // Re-aplica a formatação final para garantir o padrão monetário
     input.value = num.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -295,5 +308,3 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
-
-
