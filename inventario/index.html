@@ -15,11 +15,16 @@
   <!-- CSS do módulo -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase SDK (compat) -->
+  <!-- Firebase SDK (compat) - mesma base do portal -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+
+  <!-- Guard unificado do portal (usa o mesmo projeto portal-relevo) -->
   <script src="../scripts/firebase-init-guard.js"></script>
 </head>
 <body>
-  <script src="../scripts/firebase-init-guard.js"></script>
   <div class="container">
     <!-- HEADER / TÍTULO -->
     <header class="inventario-header">
@@ -186,8 +191,8 @@
           <thead>
             <tr>
               <th>Código</th>
-              <th>Nome</th>
               <th>Categoria</th>
+              <th>Nome</th>
               <th>Status</th>
               <th>Foto</th>
               <th>Criado em</th>
