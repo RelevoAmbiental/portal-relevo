@@ -173,26 +173,62 @@
       box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
     }
 
-    /* Card para Gestão (dashboard) */
+    /* Cards padronizados da segunda linha */
     .dashboard-card {
       background: var(--card-branco);
       border-radius: 12px;
       padding: 25px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       border-left: 4px solid var(--laranja);
-      text-align: center;
-      margin: 0;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 170px;
+      text-align: center;
+    
+      /* 🔥 Faz TODOS os cards terem a mesma altura */
+      min-height: 360px;
     }
-
-    .dashboard-card img { width: 130px; height: 70px; margin: 0 auto 15px; object-fit: contain; }
-
-    .dashboard-card h3 { color: var(--verde-accent); margin-bottom: 10px; font-size: 1.2rem; }
-
-    .dashboard-card p { color: var(--texto-cinza); margin-bottom: 20px; font-size: 0.95rem; }
+    
+    /* Imagens fixas e alinhadas */
+    .dashboard-card img {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 15px;
+      object-fit: contain;
+    }
+    
+    /* Títulos alinhados */
+    .dashboard-card h3 {
+      color: var(--verde-accent);
+      margin-bottom: 10px;
+      line-height: 1.2;
+      min-height: 50px; /* 🔥 altura fixa para evitar quebra desigual */
+    }
+    
+    /* Corpo do texto igual em todos */
+    .dashboard-card p {
+      color: var(--texto-cinza);
+      font-size: 0.95rem;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      min-height: 60px; /* 🔥 Igual para todos */
+    }
+    
+    /* Botões padronizados e alinhados */
+    .dashboard-card .btn,
+    .dashboard-card button {
+      width: 100%;
+      margin-top: auto;
+    
+      /* 🔥 TODOS OS BOTÕES MESMO TAMANHO */
+      padding: 14px 0 !important;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      white-space: normal; /* permite quebra de texto */
+      line-height: 1.2;
+      min-height: 48px; /* 🔥 altura mínima igual para todos */
+    }
 
     /* Container (antes ClickUp) */
     .clickup-container { 
@@ -215,7 +251,7 @@
     /* Nova linha de 4 cards (Despesas, Orçamentos, Agenda, Inventário) */
     .four-col-dashboard {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 25px;
       width: 100%;
       margin: 30px 0;
@@ -445,7 +481,7 @@
         <!-- Card Inventário -->
         <div class="dashboard-card" aria-labelledby="inventario-title">
           <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/estoque.png" alt="Ícone Inventário">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Inventario_equipos.png" alt="Ícone Inventário">
             <h3 id="inventario-title">📦 Inventário de Equipamentos</h3>
             <p>Cadastre, acompanhe e controle a movimentação de equipamentos e EPIs da Relevo.</p>
           </div>
@@ -466,7 +502,7 @@
           <!-- Card Indicadores de Tarefas -->
           <div class="dashboard-card" aria-label="Resumo de Tarefas">
             <div>
-              <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/indicadores.png"
+              <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png"
                    alt="Ícone Indicadores"
                    style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
               <h3>Resumo de Tarefas</h3>
@@ -495,7 +531,7 @@
           <!-- Card Agenda da Semana -->
           <div class="dashboard-card" aria-label="Agenda da Semana">
             <div>
-              <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/agenda.png"
+              <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/agenda.png"
                    alt="Ícone Agenda da Semana"
                    style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
               <h3>Agenda da Semana</h3>
@@ -578,3 +614,4 @@
   </script>
 </body>
 </html>
+
