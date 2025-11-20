@@ -114,19 +114,38 @@ class DespesasApp {
     });
   }
 
-  formatarValor(input) {
-    // A formatação principal agora é feita em tempo real pela aplicarMascaraMonetaria.
-    // Esta função de blur serve apenas para garantir a formatação final caso o input não tenha sido formatado corretamente.
-    // A lógica de formatação em tempo real já garante o formato R$ X.XXX,XX.
-    // Se o campo estiver vazio, não faz nada.
-    if (!input.value) return;
 
-    let valor = input.value.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-    const num = parseFloat(valor);
-
-    if (isNaN(num) || num === 0) {
-      input.value = '';
-      return;
+    formatarValor(input) {
+      // Se o campo estiver vazio, não faz nada
+      if (!input.value || input.value.trim() === '') return;
+    
+      let valor = input.value.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
+      const num = parseFloat(valor);
+    
+      // Corrigido: só limpa se for realmente inválido, não quando for zero
+      if (isNaN(num)) {
+        input.value = '';
+        return;
+      }
+    
+      // Se for zero, mantém o valor formatado como R$ 0,00
+      if (num === 0) {
+        input.value = num.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return;
+      }
+    
+      // Re-aplica a formatação final para garantir o padrão monetário
+      input.value = num.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     }
 
     // Re-aplica a formatação final para garantir o padrão monetário
@@ -308,3 +327,4 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
+
