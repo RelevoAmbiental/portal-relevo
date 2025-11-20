@@ -146,15 +146,6 @@ class DespesasApp {
     });
   }
 
-    // Re-aplica a formatação final para garantir o padrão monetário
-    input.value = num.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-
   parseValor(valorString) {
     if (!valorString) return 0;
     // Remove "R$", espaços, e substitui a vírgula (separador decimal BR) por ponto (separador decimal JS)
@@ -325,5 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
+
 
 
