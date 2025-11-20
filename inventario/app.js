@@ -239,8 +239,8 @@ function renderTabela(lista) {
     tdCriado.textContent = formatarData(eq.criadoEm);
 
     tr.appendChild(tdCodigo);
-    tr.appendChild(tdNome);
     tr.appendChild(tdCategoria);
+    tr.appendChild(tdNome);
     tr.appendChild(tdStatus);
     tr.appendChild(tdFoto);
     tr.appendChild(tdCriado);
