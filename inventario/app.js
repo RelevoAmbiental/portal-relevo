@@ -1,357 +1,394 @@
-// inventario/app.js
-/* global firebase */
+// =======================================
+// INVENTÁRIO – LÓGICA PRINCIPAL
+// =======================================
 
-const db = window.__RELEVO_DB__;
+// Configuração Firebase (mesma do portal)
+const firebaseConfig = {
+  apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+  authDomain: "portal-relevo.firebaseapp.com",
+  projectId: "portal-relevo",
+  storageBucket: "portal-relevo.firebasestorage.app",
+  messagingSenderId: "182759626683",
+  appId: "1:182759626683:web:2dde2eeef910d4c288569e"
+};
+
+// Inicializa app se ainda não houver
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
 const storage = firebase.storage();
 
-const tabela = document.getElementById("tabela-inventario");
-const filtroNome = document.getElementById("filtro-nome");
+// Coleção do inventário
+const COLECAO = "inventario";
+
+// Mapeamento de siglas por categoria base
+const SIGLAS = {
+  "EPI e Segurança": "EPI",
+  "Iluminação": "ILU",
+  "Espeleologia": "ESP",
+  "Progressão Vertical": "PRV",
+  "Topografia e Medição": "TOP",
+  "Registro e Documentação": "REG",
+  "Coleta e Amostragem Ambiental": "CAM",
+  "Acessórios e Logística": "LOG",
+  "Comunicação": "COM",
+  "Outros": "OUT"
+};
+
+// Estado em memória
+let todosEquipamentos = [];
+let maxSeqPorPrefixo = {}; // ex: { EPI: 3, ILU: 5, ... }
+
+// Referências DOM
+const formCadastro = document.getElementById("form-cadastro");
+const inputNome = document.getElementById("nome");
+const selectCategoria = document.getElementById("categoria");
+const grupoCategoriaOutro = document.getElementById("grupo-categoria-outro");
+const inputCategoriaOutro = document.getElementById("categoriaOutro");
+const inputCodigoInterno = document.getElementById("codigoInterno");
+const selectStatus = document.getElementById("status");
+const inputFoto = document.getElementById("foto");
+const inputDescricao = document.getElementById("descricao");
+const tbodyEquip = document.getElementById("tbody-equipamentos");
+const statusMensagem = document.getElementById("status-mensagem");
+const btnSalvar = document.getElementById("btn-salvar");
+
+// Filtros
+const filtroCategoria = document.getElementById("filtro-categoria");
 const filtroStatus = document.getElementById("filtro-status");
-const filtroLocal = document.getElementById("filtro-local");
-const btnFiltros = document.getElementById("btn-aplicar-filtros");
-const btnNovoItem = document.getElementById("btn-novo-item");
-const roleHint = document.getElementById("inventario-role-hint");
+const filtroCodigo = document.getElementById("filtro-codigo");
 
-const cardForm = document.getElementById("card-form");
-const formInventario = document.getElementById("form-inventario");
-const formTitle = document.getElementById("form-title");
-const btnCancelarForm = document.getElementById("btn-cancelar-form");
+// Stats
+const statTotal = document.getElementById("stat-total");
+const statDisponiveis = document.getElementById("stat-disponiveis");
+const statEmprestados = document.getElementById("stat-emprestados");
+const statManutencao = document.getElementById("stat-manutencao");
+const statPerdidos = document.getElementById("stat-perdidos");
 
-const cardMov = document.getElementById("card-mov");
-const formMov = document.getElementById("form-movimentacao");
-const movItemId = document.getElementById("mov-item-id");
+// -----------------------------
+// Helpers
+// -----------------------------
 
-let inventarioRaw = [];
-let editandoId = null;
-let userRole = null;
-let userName = null;
-
-// ==================================================
-// Sessão do usuário (role e nome)
-// ==================================================
-function carregarSessao() {
-  try {
-    const raw = localStorage.getItem("relevoSession");
-    if (!raw) return;
-    const sess = JSON.parse(raw);
-    userRole = sess.tipo || null; // gestao / colaborador / cliente
-    userName = sess.email || null;
-
-    if (userRole === "gestao") {
-      roleHint.textContent =
-        "Perfil: Gestão. Você pode cadastrar, movimentar, editar e excluir equipamentos.";
-    } else if (userRole === "colaborador") {
-      roleHint.textContent =
-        "Perfil: Colaborador. Você pode cadastrar novos itens e registrar movimentações.";
-    } else {
-      roleHint.textContent =
-        "Seu perfil não possui permissões completas neste módulo.";
-      btnNovoItem.style.display = "none";
-    }
-  } catch (e) {
-    console.error("Erro ao carregar sessão:", e);
+function mostrarCategoriaOutroSeNecessario() {
+  if (selectCategoria.value === "Outros") {
+    grupoCategoriaOutro.style.display = "block";
+  } else {
+    grupoCategoriaOutro.style.display = "none";
+    inputCategoriaOutro.value = "";
   }
 }
 
-// ==================================================
-// Listagem em tempo real
-// ==================================================
-function iniciarListener() {
-  db.collection("inventario")
-    .orderBy("nome")
-    .onSnapshot((snap) => {
-      inventarioRaw = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-      renderTabela();
-    }, (err) => {
-      console.error("Erro ao carregar inventário:", err);
-    });
-}
-
-// ==================================================
-// Renderização da tabela
-// ==================================================
-function passaFiltros(item) {
-  const termo = filtroNome.value.trim().toLowerCase();
-  const st = filtroStatus.value;
-  const loc = filtroLocal.value.trim().toLowerCase();
-
-  if (termo) {
-    const haystack = (item.nome || "") + " " + (item.codigo || "");
-    if (!haystack.toLowerCase().includes(termo)) return false;
+function getCategoriaFinal() {
+  if (selectCategoria.value === "Outros") {
+    const outro = inputCategoriaOutro.value.trim();
+    return outro || "Outros";
   }
-  if (st && item.status !== st) return false;
-  if (loc && !(item.localizacao || "").toLowerCase().includes(loc)) return false;
-  return true;
+  return selectCategoria.value;
 }
 
-function renderTabela() {
-  tabela.innerHTML = "";
-
-  const filtrados = inventarioRaw.filter(passaFiltros);
-
-  if (!filtrados.length) {
-    tabela.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align:center;">Nenhum equipamento encontrado.</td>
-      </tr>`;
+function gerarCodigoInterno() {
+  const categoriaBase = selectCategoria.value;
+  if (!categoriaBase) {
+    inputCodigoInterno.value = "";
+    delete inputCodigoInterno.dataset.prefix;
+    delete inputCodigoInterno.dataset.seq;
     return;
   }
 
-  filtrados.forEach((item) => {
+  const prefixo = SIGLAS[categoriaBase] || "OUT";
+  const nextSeq = (maxSeqPorPrefixo[prefixo] || 0) + 1;
+  const codigo = `${prefixo}-${String(nextSeq).padStart(3, "0")}`;
+
+  inputCodigoInterno.value = codigo;
+  inputCodigoInterno.dataset.prefix = prefixo;
+  inputCodigoInterno.dataset.seq = String(nextSeq);
+}
+
+function formatarData(timestamp) {
+  if (!timestamp) return "";
+  const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const dia = String(d.getDate()).padStart(2, "0");
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const ano = d.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+}
+
+function atualizarStats() {
+  const total = todosEquipamentos.length;
+  let disponiveis = 0;
+  let emprestados = 0;
+  let manutencao = 0;
+  let perdidos = 0;
+
+  todosEquipamentos.forEach((eq) => {
+    switch (eq.status) {
+      case "disponivel":
+        disponiveis++;
+        break;
+      case "emprestado":
+        emprestados++;
+        break;
+      case "manutencao":
+        manutencao++;
+        break;
+      case "perdido":
+        perdidos++;
+        break;
+      default:
+        break;
+    }
+  });
+
+  statTotal.textContent = total;
+  statDisponiveis.textContent = disponiveis;
+  statEmprestados.textContent = emprestados;
+  statManutencao.textContent = manutencao;
+  statPerdidos.textContent = perdidos;
+}
+
+function aplicarFiltrosERender() {
+  const cat = filtroCategoria.value;
+  const st = filtroStatus.value;
+  const cod = filtroCodigo.value.trim().toLowerCase();
+
+  const filtrados = todosEquipamentos.filter((eq) => {
+    if (cat && eq.categoriaBase === "Outros" && cat === "Outros") {
+      // ok
+    } else if (cat && eq.categoriaBase !== cat && eq.categoria !== cat) {
+      return false;
+    }
+
+    if (st && eq.status !== st) return false;
+
+    if (cod && !(eq.codigoInterno || "").toLowerCase().includes(cod)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  renderTabela(filtrados);
+}
+
+function renderTabela(lista) {
+  tbodyEquip.innerHTML = "";
+
+  if (!lista.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 6;
+    td.textContent = "Nenhum equipamento encontrado.";
+    td.style.textAlign = "center";
+    tr.appendChild(td);
+    tbodyEquip.appendChild(tr);
+    return;
+  }
+
+  lista.forEach((eq) => {
     const tr = document.createElement("tr");
 
-    const fotoTd = document.createElement("td");
-    if (item.fotoURL) {
-      fotoTd.innerHTML = `<img src="${item.fotoURL}" alt="Foto" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">`;
+    const tdCodigo = document.createElement("td");
+    tdCodigo.textContent = eq.codigoInterno || "-";
+
+    const tdNome = document.createElement("td");
+    tdNome.textContent = eq.nome || "-";
+
+    const tdCategoria = document.createElement("td");
+    tdCategoria.textContent = eq.categoria || "-";
+
+    const tdStatus = document.createElement("td");
+    const spanStatus = document.createElement("span");
+    spanStatus.classList.add("status-badge");
+    spanStatus.textContent = eq.status || "-";
+    switch (eq.status) {
+      case "disponivel":
+        spanStatus.classList.add("status-disponivel");
+        spanStatus.textContent = "Disponível";
+        break;
+      case "emprestado":
+        spanStatus.classList.add("status-emprestado");
+        spanStatus.textContent = "Emprestado";
+        break;
+      case "manutencao":
+        spanStatus.classList.add("status-manutencao");
+        spanStatus.textContent = "Manutenção";
+        break;
+      case "perdido":
+        spanStatus.classList.add("status-perdido");
+        spanStatus.textContent = "Perdido";
+        break;
+      default:
+        break;
+    }
+    tdStatus.appendChild(spanStatus);
+
+    const tdFoto = document.createElement("td");
+    if (eq.fotoURL) {
+      const img = document.createElement("img");
+      img.src = eq.fotoURL;
+      img.alt = eq.nome || "Foto do equipamento";
+      img.className = "equip-img-thumb";
+      tdFoto.appendChild(img);
     } else {
-      fotoTd.textContent = "—";
+      tdFoto.textContent = "-";
     }
 
-    const nomeTd = document.createElement("td");
-    nomeTd.textContent = item.nome || "";
+    const tdCriado = document.createElement("td");
+    tdCriado.textContent = formatarData(eq.criadoEm);
 
-    const codTd = document.createElement("td");
-    codTd.textContent = item.codigo || "";
+    tr.appendChild(tdCodigo);
+    tr.appendChild(tdNome);
+    tr.appendChild(tdCategoria);
+    tr.appendChild(tdStatus);
+    tr.appendChild(tdFoto);
+    tr.appendChild(tdCriado);
 
-    const catTd = document.createElement("td");
-    catTd.textContent = item.categoria || "";
-
-    const stTd = document.createElement("td");
-    stTd.textContent = item.status || "";
-
-    const locTd = document.createElement("td");
-    locTd.textContent = item.localizacao || "";
-
-    const respTd = document.createElement("td");
-    respTd.textContent = item.responsavelAtual || "—";
-
-    const acoesTd = document.createElement("td");
-    const btnMov = document.createElement("button");
-    btnMov.className = "btn btn-small";
-    btnMov.innerHTML = '<i class="fas fa-exchange-alt"></i>';
-    btnMov.title = "Registrar movimentação";
-    btnMov.onclick = () => abrirMovimentacao(item.id);
-
-    acoesTd.appendChild(btnMov);
-
-    if (userRole === "gestao") {
-      const btnEdit = document.createElement("button");
-      btnEdit.className = "btn btn-small";
-      btnEdit.innerHTML = '<i class="fas fa-edit"></i>';
-      btnEdit.title = "Editar equipamento";
-      btnEdit.onclick = () => abrirEdicao(item);
-
-      const btnDel = document.createElement("button");
-      btnDel.className = "btn btn-small btn-danger";
-      btnDel.innerHTML = '<i class="fas fa-trash"></i>';
-      btnDel.title = "Excluir equipamento";
-      btnDel.onclick = () => excluirItem(item.id);
-
-      acoesTd.appendChild(btnEdit);
-      acoesTd.appendChild(btnDel);
-    }
-
-    tr.appendChild(fotoTd);
-    tr.appendChild(nomeTd);
-    tr.appendChild(codTd);
-    tr.appendChild(catTd);
-    tr.appendChild(stTd);
-    tr.appendChild(locTd);
-    tr.appendChild(respTd);
-    tr.appendChild(acoesTd);
-
-    tabela.appendChild(tr);
+    tbodyEquip.appendChild(tr);
   });
 }
 
-// ==================================================
-// Formulário de cadastro / edição
-// ==================================================
-function abrirFormNovo() {
-  editandoId = null;
-  formTitle.textContent = "Novo Equipamento";
-  formInventario.reset();
-  cardForm.style.display = "block";
-  cardMov.style.display = "none";
-}
+// -----------------------------
+// Snapshot em tempo real
+// -----------------------------
 
-function abrirEdicao(item) {
-  if (userRole !== "gestao") return;
+db.collection(COLECAO).orderBy("criadoEm", "desc").onSnapshot((snap) => {
+  todosEquipamentos = [];
+  maxSeqPorPrefixo = {};
 
-  editandoId = item.id;
-  formTitle.textContent = "Editar Equipamento";
+  snap.forEach((doc) => {
+    const data = doc.data();
+    const eq = {
+      id: doc.id,
+      nome: data.nome || "",
+      categoria: data.categoria || "",
+      categoriaBase: data.categoriaBase || data.categoria || "",
+      codigoPrefixo: data.codigoPrefixo || "",
+      codigoSeq: data.codigoSeq || 0,
+      codigoInterno: data.codigoInterno || "",
+      status: data.status || "",
+      fotoURL: data.fotoURL || "",
+      criadoEm: data.criadoEm || null
+    };
 
-  document.getElementById("nome").value = item.nome || "";
-  document.getElementById("codigo").value = item.codigo || "";
-  document.getElementById("categoria").value = item.categoria || "";
-  document.getElementById("status").value = item.status || "disponivel";
-  document.getElementById("localizacao").value = item.localizacao || "";
-  document.getElementById("responsavelAtual").value = item.responsavelAtual || "";
-  document.getElementById("valorEstimado").value = item.valorEstimado || "";
-  document.getElementById("dataAquisicao").value = item.dataAquisicao || "";
-  document.getElementById("descricao").value = item.descricao || "";
-
-  cardForm.style.display = "block";
-  cardMov.style.display = "none";
-}
-
-async function salvarItem(e) {
-  e.preventDefault();
-  if (!userRole || (userRole !== "gestao" && userRole !== "colaborador")) return;
-
-  const nome = document.getElementById("nome").value.trim();
-  if (!nome) return alert("Informe o nome do equipamento.");
-
-  const data = {
-    nome,
-    codigo: document.getElementById("codigo").value.trim(),
-    categoria: document.getElementById("categoria").value.trim(),
-    status: document.getElementById("status").value,
-    localizacao: document.getElementById("localizacao").value.trim(),
-    responsavelAtual: document.getElementById("responsavelAtual").value.trim(),
-    valorEstimado: parseFloat(document.getElementById("valorEstimado").value || 0),
-    dataAquisicao: document.getElementById("dataAquisicao").value || null,
-    descricao: document.getElementById("descricao").value.trim(),
-    atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-    atualizadoPor: userName || null,
-  };
-
-  const fileInput = document.getElementById("foto");
-  const file = fileInput.files[0];
-
-  try {
-    if (!editandoId) {
-      // novo
-      data.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
-      data.criadoPor = userName || null;
-      data.historico = [];
-
-      const docRef = await db.collection("inventario").add(data);
-
-      if (file) {
-        const url = await uploadFoto(docRef.id, file);
-        await docRef.update({ fotoURL: url });
+    // Atualiza max seq por prefixo
+    if (eq.codigoPrefixo && typeof eq.codigoSeq === "number") {
+      const atual = maxSeqPorPrefixo[eq.codigoPrefixo] || 0;
+      if (eq.codigoSeq > atual) {
+        maxSeqPorPrefixo[eq.codigoPrefixo] = eq.codigoSeq;
       }
-    } else {
-      // edição
-      const docRef = db.collection("inventario").doc(editandoId);
-
-      if (file) {
-        const url = await uploadFoto(editandoId, file);
-        data.fotoURL = url;
-      }
-
-      await docRef.update(data);
     }
 
-    cardForm.style.display = "none";
-    formInventario.reset();
-    editandoId = null;
+    todosEquipamentos.push(eq);
+  });
+
+  atualizarStats();
+  aplicarFiltrosERender();
+});
+
+// -----------------------------
+// Eventos UI
+// -----------------------------
+
+selectCategoria.addEventListener("change", () => {
+  mostrarCategoriaOutroSeNecessario();
+  gerarCodigoInterno();
+});
+
+inputCategoriaOutro.addEventListener("input", () => {
+  // Categoria final só muda o texto, mas o prefixo continua OUT
+  if (selectCategoria.value === "Outros") {
+    gerarCodigoInterno();
+  }
+});
+
+filtroCategoria.addEventListener("change", aplicarFiltrosERender);
+filtroStatus.addEventListener("change", aplicarFiltrosERender);
+filtroCodigo.addEventListener("input", aplicarFiltrosERender);
+
+// -----------------------------
+// Submit do formulário
+// -----------------------------
+
+formCadastro.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nome = inputNome.value.trim();
+  const categoriaBase = selectCategoria.value;
+  const categoriaFinal = getCategoriaFinal();
+  const status = selectStatus.value;
+
+  if (!nome || !categoriaBase || !status) {
+    statusMensagem.textContent = "Preencha os campos obrigatórios (nome, categoria e status).";
+    return;
+  }
+
+  // Garante que temos um código interno
+  if (!inputCodigoInterno.value) {
+    gerarCodigoInterno();
+  }
+
+  const prefixo = inputCodigoInterno.dataset.prefix || (SIGLAS[categoriaBase] || "OUT");
+  const seq = parseInt(inputCodigoInterno.dataset.seq || "1", 10);
+
+  const descricao = inputDescricao.value.trim();
+  const arquivo = inputFoto.files[0] || null;
+
+  statusMensagem.textContent = "Salvando equipamento...";
+  btnSalvar.disabled = true;
+
+  try {
+    const docRef = db.collection(COLECAO).doc();
+    let fotoURL = "";
+
+    if (arquivo) {
+      const storageRef = storage.ref().child(`inventario/${docRef.id}_${arquivo.name}`);
+      await storageRef.put(arquivo);
+      fotoURL = await storageRef.getDownloadURL();
+    }
+
+    const agora = firebase.firestore.FieldValue.serverTimestamp();
+
+    const payload = {
+      nome,
+      categoria: categoriaFinal,
+      categoriaBase,
+      codigoPrefixo: prefixo,
+      codigoSeq: seq,
+      codigoInterno: inputCodigoInterno.value,
+      status,
+      descricao,
+      fotoURL: fotoURL || "",
+      criadoEm: agora,
+      atualizadoEm: agora
+    };
+
+    await docRef.set(payload);
+
+    // Atualiza contador local
+    if (!maxSeqPorPrefixo[prefixo] || seq > maxSeqPorPrefixo[prefixo]) {
+      maxSeqPorPrefixo[prefixo] = seq;
+    }
+
+    formCadastro.reset();
+    inputCodigoInterno.value = "";
+    delete inputCodigoInterno.dataset.prefix;
+    delete inputCodigoInterno.dataset.seq;
+    grupoCategoriaOutro.style.display = "none";
+    statusMensagem.textContent = "Equipamento cadastrado com sucesso.";
   } catch (err) {
     console.error("Erro ao salvar equipamento:", err);
-    alert("Erro ao salvar. Verifique o console.");
+    statusMensagem.textContent = "Erro ao salvar. Tente novamente.";
+  } finally {
+    btnSalvar.disabled = false;
+    setTimeout(() => {
+      statusMensagem.textContent = "";
+    }, 3000);
   }
-}
-
-function uploadFoto(itemId, file) {
-  const ref = storage.ref().child(`inventario/${itemId}/${file.name}`);
-  return ref.put(file).then((snap) => snap.ref.getDownloadURL());
-}
-
-// ==================================================
-// Exclusão
-// ==================================================
-async function excluirItem(id) {
-  if (userRole !== "gestao") return;
-  if (!confirm("Tem certeza que deseja excluir este equipamento?")) return;
-
-  try {
-    await db.collection("inventario").doc(id).delete();
-  } catch (err) {
-    console.error("Erro ao excluir:", err);
-    alert("Erro ao excluir. Verifique o console.");
-  }
-}
-
-// ==================================================
-// Movimentação
-// ==================================================
-function abrirMovimentacao(id) {
-  if (!userRole || (userRole !== "gestao" && userRole !== "colaborador")) return;
-  movItemId.value = id;
-  formMov.reset();
-  cardMov.style.display = "block";
-  cardForm.style.display = "none";
-}
-
-async function salvarMovimentacao(e) {
-  e.preventDefault();
-  if (!movItemId.value) return;
-
-  const tipo = document.getElementById("mov-tipo").value;
-  const responsavel = document.getElementById("mov-responsavel").value.trim();
-  const novaLocal = document.getElementById("mov-nova-local").value.trim();
-  const obs = document.getElementById("mov-observacoes").value.trim();
-
-  if (!responsavel || !novaLocal) {
-    return alert("Informe responsável e nova localização.");
-  }
-
-  try {
-    const docRef = db.collection("inventario").doc(movItemId.value);
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(docRef);
-      if (!snap.exists) throw new Error("Item não encontrado.");
-
-      const data = snap.data();
-      const historico = data.historico || [];
-
-      historico.push({
-        data: new Date().toISOString().slice(0, 10),
-        tipo,
-        por: userName || "Usuário",
-        para: novaLocal,
-        observacoes: obs,
-      });
-
-      tx.update(docRef, {
-        responsavelAtual: responsavel,
-        localizacao: novaLocal,
-        status: tipo === "devolucao" ? "disponivel" : data.status || "emprestado",
-        historico,
-        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-        atualizadoPor: userName || null,
-      });
-    });
-
-    cardMov.style.display = "none";
-    formMov.reset();
-  } catch (err) {
-    console.error("Erro ao registrar movimentação:", err);
-    alert("Erro ao registrar movimentação. Verifique o console.");
-  }
-}
-
-// ==================================================
-// Eventos de UI
-// ==================================================
-btnFiltros.addEventListener("click", renderTabela);
-btnNovoItem.addEventListener("click", abrirFormNovo);
-btnCancelarForm.addEventListener("click", () => {
-  cardForm.style.display = "none";
-  editandoId = null;
 });
 
-btnCancelarMov.addEventListener("click", () => {
-  cardMov.style.display = "none";
+// Inicializa categoria/outro/código na carga
+document.addEventListener("DOMContentLoaded", () => {
+  mostrarCategoriaOutroSeNecessario();
 });
-
-formInventario.addEventListener("submit", salvarItem);
-formMov.addEventListener("submit", salvarMovimentacao);
-
-// boot
-carregarSessao();
-iniciarListener();
