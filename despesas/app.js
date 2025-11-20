@@ -85,27 +85,24 @@ class DespesasApp {
   }
 
   aplicarMascaraMonetaria(input) {
-    let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    let valor = input.value.replace(/\D/g, '');
     
     if (valor.length === 0) {
       input.value = '';
       return;
     }
-
-    // Trata o valor como centavos
+  
     let num = parseInt(valor);
     
-    // Se o valor for zero, limpa
+    // ✅ CORREÇÃO: Não limpa se for 0, permite que o usuário continue digitando
     if (num === 0) {
-      input.value = '';
+      input.value = '0,00';
       return;
     }
-
-    // Converte para string com 2 casas decimais (ex: 250 -> 2.50)
+  
     let valorFormatado = (num / 100).toFixed(2);
-
-    // Formata para o padrão monetário brasileiro (R$ X.XXX,XX)
-    // toLocaleString é mais robusto para lidar com separadores de milhar e decimal
+    
+    // ✅ Formata como moeda BR
     input.value = parseFloat(valorFormatado).toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -115,38 +112,39 @@ class DespesasApp {
   }
 
 
-    formatarValor(input) {
-      // Se o campo estiver vazio, não faz nada
-      if (!input.value || input.value.trim() === '') return;
-    
-      let valor = input.value.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-      const num = parseFloat(valor);
-    
-      // Corrigido: só limpa se for realmente inválido, não quando for zero
-      if (isNaN(num)) {
-        input.value = '';
-        return;
-      }
-    
-      // Se for zero, mantém o valor formatado como R$ 0,00
-      if (num === 0) {
-        input.value = num.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-        return;
-      }
-    
-      // Re-aplica a formatação final para garantir o padrão monetário
+  formatarValor(input) {
+    // Se o campo estiver vazio, não faz nada
+    if (!input.value || input.value.trim() === '') return;
+  
+    // Remove a formatação atual para análise
+    let valor = input.value.replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(valor);
+  
+    // ✅ CORREÇÃO: Só limpa se for realmente NaN, não se for 0 ou valor válido
+    if (isNaN(num)) {
+      input.value = '';
+      return;
+    }
+  
+    // ✅ Se for 0, formata como R$ 0,00 em vez de limpar
+    if (num === 0) {
       input.value = num.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
+      return;
     }
+  
+    // ✅ Para valores válidos, mantém a formatação BR
+    input.value = num.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
 
     // Re-aplica a formatação final para garantir o padrão monetário
     input.value = num.toLocaleString('pt-BR', {
@@ -327,4 +325,5 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
+
 
