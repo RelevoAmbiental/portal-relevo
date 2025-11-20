@@ -188,7 +188,7 @@
       min-height: 170px;
     }
 
-    .dashboard-card img { width: 130px; height: 70px; margin: 0 auto 15px; }
+    .dashboard-card img { width: 130px; height: 70px; margin: 0 auto 15px; object-fit: contain; }
 
     .dashboard-card h3 { color: var(--verde-accent); margin-bottom: 10px; font-size: 1.2rem; }
 
@@ -203,7 +203,7 @@
       margin-bottom: 40px; 
     }
 
-    /* Two-column dashboard row */
+    /* Two-column dashboard row (para indicadores) */
     .two-col-dashboard {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -212,7 +212,52 @@
       margin-bottom: 24px;
     }
 
-    /* Inline forms (notificações/modificações) */
+    /* Nova linha de 4 cards (Despesas, Orçamentos, Agenda, Inventário) */
+    .four-col-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      width: 100%;
+      margin: 30px 0;
+    }
+
+    .indicators-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+    }
+
+    .indicators-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 0.95rem;
+    }
+
+    .indicators-list li span.label {
+      color: var(--texto-cinza);
+    }
+
+    .indicators-list li span.value {
+      font-weight: 600;
+      color: var(--verde-accent);
+    }
+
+    .mini-calendar-placeholder {
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px dashed var(--borda-cinza);
+      background: #fafafa;
+      font-size: 0.9rem;
+      color: var(--texto-cinza);
+      text-align: left;
+    }
+
+    /* Inline forms (antigo notificações/modificações) – mantidos só se algum outro lugar usar
+       Aqui não são mais utilizados, mas não atrapalham o layout. */
     .inline-controls { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
     .inline-controls input[type="text"], .inline-controls input[type="date"] {
       padding: 8px 10px; border-radius: 8px; border: 1px solid var(--borda-cinza); font-size: 0.95rem;
@@ -221,23 +266,13 @@
       background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro)); color: white; font-weight: 600; }
     .inline-controls .btn-secondary { background: transparent; border: 1px solid var(--borda-cinza); color: var(--texto-cinza); }
 
-    .notifications-list { list-style: none; padding: 0; margin: 0; }
-    .notifications-list li {
-      background: var(--card-branco); margin-bottom: 12px; padding: 12px 16px; border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 0.95rem; border-left: 4px solid var(--verde-primario);
-      display: flex; align-items: center; gap: 12px; justify-content: space-between;
-    }
-    .notifications-meta { display: flex; gap: 8px; align-items: center; color: var(--texto-cinza); font-size: 0.9rem; }
-
-    .modifications-container table { width: 100%; border-collapse: collapse; }
-    .modifications-container th, .modifications-container td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 0.95rem; }
-    .mod-actions { display: flex; gap: 8px; align-items: center; }
-
     /* Menu Mobile */
     .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 8px; }
 
     /* RESPONSIVIDADE */
-    @media (max-width: 1024px) { .two-col-dashboard { grid-template-columns: 1fr; } }
+    @media (max-width: 1024px) { 
+      .two-col-dashboard { grid-template-columns: 1fr; } 
+    }
     @media (max-width: 768px) {
       .hero-gestao { padding: 40px 20px; border-radius: 15px; }
       .hero-gestao h1 { font-size: 2rem; }
@@ -245,9 +280,23 @@
       .access-grid { grid-template-columns: 1fr; gap: 20px; }
       .section-title { font-size: 1.5rem; }
       .menu-toggle { display: block; }
-      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--verde-escuro); padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+      .nav-links { 
+        display: none; 
+        flex-direction: column; 
+        position: absolute; 
+        top: 100%; 
+        left: 0; 
+        right: 0; 
+        background: var(--verde-escuro); 
+        padding: 15px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+      }
       .nav-links.mobile-open { display: flex; }
-      .nav-links a { padding: 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      .nav-links a { 
+        padding: 12px; 
+        text-align: center; 
+        border-bottom: 1px solid rgba(255,255,255,0.1); 
+      }
       .nav-links a:last-child { border-bottom: none; }
       .despesas-destaque { padding: 20px 15px; }
     }
@@ -339,14 +388,23 @@
         </a>
       </div>
 
-      <!-- Linha com dois cards: Gestão de Despesas e Gestão de Orçamentos -->
-      <div class="two-col-dashboard" role="region" aria-label="Gestão de Despesas e Orçamentos">
+      <!-- Card Destaque - Cadastrar Despesa -->
+      <div class="despesas-destaque">
+        <h3><i class="fas fa-receipt"></i> Precisa registrar uma nova despesa?</h3>
+        <p>Acesse o formulário para cadastrar despesas de campo, viagens e outras atividades</p>
+        <a class="btn btn-primary" href="despesas">
+          <i class="fas fa-plus-circle"></i> Cadastrar Nova Despesa
+        </a>
+      </div>
+
+      <!-- Nova linha com quatro cards: Despesas, Orçamentos, Agenda, Inventário -->
+      <div class="four-col-dashboard" role="region" aria-label="Módulos de Gestão">
         <!-- Card Gestão de Despesas -->
         <div class="dashboard-card" aria-labelledby="gestao-despesas-title">
           <div>
             <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt="Ícone Dashboard Despesas">
             <h3 id="gestao-despesas-title">📊 Gestão de Despesas</h3>
-            <p>Painel completo para visualizar, analisar e gerenciar todas as despesas registradas</p>
+            <p>Painel completo para visualizar, analisar e gerenciar todas as despesas registradas.</p>
           </div>
           <div>
             <a class="btn btn-orange" href="gestao-despesas.html">
@@ -360,7 +418,7 @@
           <div>
             <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/orcamento.png" alt="Ícone Orçamentos">
             <h3 id="gestao-orcamentos-title">💼 Gestão de Orçamentos</h3>
-            <p>Centralize, acompanhe e valide seus orçamentos com agilidade e controle</p>
+            <p>Centralize, acompanhe e valide seus orçamentos com agilidade e controle.</p>
           </div>
           <div>
             <a class="btn btn-orange" href="https://portal.relevo.eco.br/orcamento/" target="_blank" rel="noopener noreferrer">
@@ -368,83 +426,91 @@
             </a>
           </div>
         </div>
-      </div>
 
-      <!-- Card Destaque - Cadastrar Despesa -->
-      <div class="despesas-destaque">
-        <h3><i class="fas fa-receipt"></i> Precisa registrar uma nova despesa?</h3>
-        <p>Acesse o formulário para cadastrar despesas de campo, viagens e outras atividades</p>
-        <a class="btn btn-primary" href="despesas">
-          <i class="fas fa-plus-circle"></i> Cadastrar Nova Despesa
-        </a>
-      </div>
-    </section>
-
-    <!-- SEÇÃO: DASHBOARD DE INDICADORES (apenas troca do conteúdo interno) -->
-    <section class="section">
-      <h2 class="section-title">Dashboard de Indicadores</h2>
-      <div class="clickup-container">
-        <!-- >>> AQUI era o iframe do ClickUp. Substituído pelo card do Cronograma. <<< -->
-        <div class="dashboard-card" aria-labelledby="cronograma-title" style="border-left: 4px solid var(--verde-primario); text-align:center;">
+        <!-- Card Agenda (Cronograma) -->
+        <div class="dashboard-card" aria-labelledby="agenda-title">
           <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png"
-                 alt="Ícone Cronograma"
-                 style="width:100px; height:100px; margin-bottom:15px; object-fit:contain;">
-            <h3 id="cronograma-title">🗓️ Cronograma de Projetos</h3>
-            <p>Módulo em desenvolvimento. Em breve você poderá acompanhar as etapas e prazos dos projetos diretamente aqui.</p>
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png" alt="Ícone Agenda / Cronograma">
+            <h3 id="agenda-title">🗓️ Agenda de Projetos</h3>
+            <p>Visualize prazos, entregas e etapas-chave dos projetos em um único painel.</p>
           </div>
           <div>
-            <a class="btn btn-orange" href="#" onclick="alert('O módulo Cronograma ainda está em desenvolvimento.')" style="cursor:default;">
-              <i class="fas fa-calendar-alt"></i> Acessar Cronograma
+            <button class="btn btn-orange" type="button"
+                    onclick="alert('O módulo de Cronograma/Agenda ainda está em desenvolvimento.')">
+              <i class="fas fa-calendar-alt"></i> Abrir Agenda
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Inventário -->
+        <div class="dashboard-card" aria-labelledby="inventario-title">
+          <div>
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/estoque.png" alt="Ícone Inventário">
+            <h3 id="inventario-title">📦 Inventário de Equipamentos</h3>
+            <p>Cadastre, acompanhe e controle a movimentação de equipamentos e EPIs da Relevo.</p>
+          </div>
+          <div>
+            <a class="btn btn-orange" href="inventario/">
+              <i class="fas fa-warehouse"></i> Acessar Inventário
             </a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SEÇÃO: NOTIFICAÇÕES -->
-    <section class="section" id="notifications-section">
-      <h2 class="section-title">Notificações Recentes</h2>
+    <!-- SEÇÃO: DASHBOARD DE INDICADORES -->
+    <section class="section">
+      <h2 class="section-title">Dashboard de Indicadores</h2>
+      <div class="clickup-container">
+        <div class="two-col-dashboard">
+          <!-- Card Indicadores de Tarefas -->
+          <div class="dashboard-card" aria-label="Resumo de Tarefas">
+            <div>
+              <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/indicadores.png"
+                   alt="Ícone Indicadores"
+                   style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
+              <h3>Resumo de Tarefas</h3>
+              <p>Visão consolidada do andamento dos projetos. Em breve, estes dados serão alimentados pelo módulo de Cronograma.</p>
+            </div>
+            <ul class="indicators-list">
+              <li>
+                <span class="label">Tarefas pendentes</span>
+                <span class="value">—</span>
+              </li>
+              <li>
+                <span class="label">Em andamento</span>
+                <span class="value">—</span>
+              </li>
+              <li>
+                <span class="label">Atrasadas</span>
+                <span class="value">—</span>
+              </li>
+              <li>
+                <span class="label">Concluídas</span>
+                <span class="value">—</span>
+              </li>
+            </ul>
+          </div>
 
-      <div class="inline-controls" aria-hidden="false">
-        <input id="notif-text" type="text" placeholder="Digite uma notificação rápida (ex: Relatório enviado)" />
-        <input id="notif-date" type="date" />
-        <button id="btn-add-notif">Adicionar</button>
-        <button id="btn-clear-notifs" class="btn-secondary">Limpar tudo</button>
-      </div>
-
-      <ul class="notifications-list" id="notifications-list" aria-live="polite">
-        <!-- Itens gerados por JS -->
-      </ul>
-    </section>
-
-    <!-- SEÇÃO: MODIFICAÇÕES -->
-    <section class="section" id="modifications-section">
-      <h2 class="section-title">Últimas Modificações no Drive</h2>
-
-      <div class="inline-controls">
-        <input id="mod-user" type="text" placeholder="Usuário (ex: Maria Santos)" />
-        <input id="mod-file" type="text" placeholder="Arquivo (ex: Planilha.xlsx)" />
-        <input id="mod-desc" type="text" placeholder="Descrição breve" />
-        <button id="btn-add-mod">Adicionar</button>
-        <button id="btn-clear-mods" class="btn-secondary">Limpar tudo</button>
-      </div>
-
-      <div class="modifications-container">
-        <table aria-describedby="modifications-section">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Usuário</th>
-              <th>Arquivo</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="modifications-tbody">
-            <!-- Linhas geradas por JS -->
-          </tbody>
-        </table>
+          <!-- Card Agenda da Semana -->
+          <div class="dashboard-card" aria-label="Agenda da Semana">
+            <div>
+              <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/agenda.png"
+                   alt="Ícone Agenda da Semana"
+                   style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
+              <h3>Agenda da Semana</h3>
+              <p>Prévia das principais entregas previstas para os próximos dias. Este painel será integrado ao cronograma.</p>
+            </div>
+            <div class="mini-calendar-placeholder">
+              <p><strong>Hoje:</strong> —</p>
+              <p><strong>Próximas entregas (7 dias):</strong></p>
+              <ul style="margin: 8px 0 0 16px; padding: 0;">
+                <li>—</li>
+              </ul>
+              <small>Em breve, esta área será preenchida automaticamente com os prazos dos projetos.</small>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -505,253 +571,8 @@
       }
     });
 
-    // ============================
-    // NOTIFICAÇÕES E MODIFICAÇÕES
-    // (localStorage simples)
-    // ============================
-    const NOTIF_KEY = 'relevo_notifications_v1';
-    const MODS_KEY = 'relevo_modifications_v1';
-
-    function defaultNotifications() {
-      return [
-        { text: 'Sistema atualizado com sucesso', date: '2025-01-15' },
-        { text: 'Novo relatório mensal disponível', date: '2025-01-10' },
-      ];
-    }
-
-    function defaultModifications() {
-      return [
-        { date: '2025-01-15', user: 'Administrador', file: 'Relatório Mensal.pdf', desc: 'Atualização de dados do trimestre' },
-        { date: '2025-01-14', user: 'Maria Santos', file: 'Planilha de Despesas.xlsx', desc: 'Adição de novas despesas de campo' }
-      ];
-    }
-
-    function formatDateForDisplay(isoDate) {
-      if (!isoDate) return '';
-      const parts = isoDate.split('-');
-      if (parts.length !== 3) return isoDate;
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-
-    // NOTIFICATIONS
-    function loadNotifications() {
-      const raw = localStorage.getItem(NOTIF_KEY);
-      if (!raw) {
-        const def = defaultNotifications();
-        localStorage.setItem(NOTIF_KEY, JSON.stringify(def));
-        return def;
-      }
-      try {
-        return JSON.parse(raw);
-      } catch (e) {
-        console.error('Erro parse notifications', e);
-        const def = defaultNotifications();
-        localStorage.setItem(NOTIF_KEY, JSON.stringify(def));
-        return def;
-      }
-    }
-
-    function saveNotifications(arr) {
-      localStorage.setItem(NOTIF_KEY, JSON.stringify(arr));
-    }
-
-    function renderNotifications() {
-      const list = document.getElementById('notifications-list');
-      list.innerHTML = '';
-      const items = loadNotifications();
-      if (!items.length) {
-        const li = document.createElement('li');
-        li.textContent = 'Nenhuma notificação registrada.';
-        list.appendChild(li);
-        return;
-      }
-      items.slice().reverse().forEach((it, idx) => {
-        const li = document.createElement('li');
-        const left = document.createElement('div');
-        left.style.display = 'flex';
-        left.style.flexDirection = 'column';
-        left.style.gap = '6px';
-
-        const text = document.createElement('div');
-        text.textContent = it.text;
-        text.style.fontWeight = '600';
-
-        const meta = document.createElement('div');
-        meta.className = 'notifications-meta';
-        meta.textContent = formatDateForDisplay(it.date || new Date().toISOString().slice(0,10));
-
-        left.appendChild(text);
-        left.appendChild(meta);
-
-        const actions = document.createElement('div');
-        const btnDel = document.createElement('button');
-        btnDel.innerHTML = '<i class="fas fa-trash"></i>';
-        btnDel.title = 'Remover';
-        btnDel.style.border = 'none';
-        btnDel.style.background = 'transparent';
-        btnDel.style.cursor = 'pointer';
-        btnDel.onclick = () => { removeNotification(items.length - 1 - idx); };
-
-        actions.appendChild(btnDel);
-        li.appendChild(left);
-        li.appendChild(actions);
-        list.appendChild(li);
-      });
-    }
-
-    function addNotification(text, date) {
-      if (!text || !text.trim()) return;
-      const items = loadNotifications();
-      items.push({ text: text.trim(), date: date || new Date().toISOString().slice(0,10) });
-      saveNotifications(items);
-      renderNotifications();
-      document.getElementById('notif-text').value = '';
-      document.getElementById('notif-date').value = '';
-    }
-
-    function removeNotification(index) {
-      const items = loadNotifications();
-      if (index < 0 || index >= items.length) return;
-      items.splice(index, 1);
-      saveNotifications(items);
-      renderNotifications();
-    }
-
-    function clearNotifications() {
-      if (!confirm('Deseja limpar todas as notificações?')) return;
-      localStorage.removeItem(NOTIF_KEY);
-      renderNotifications();
-    }
-
-    // MODIFICATIONS
-    function loadModifications() {
-      const raw = localStorage.getItem(MODS_KEY);
-      if (!raw) {
-        const def = defaultModifications();
-        localStorage.setItem(MODS_KEY, JSON.stringify(def));
-        return def;
-      }
-      try {
-        return JSON.parse(raw);
-      } catch (e) {
-        console.error('Erro parse modifications', e);
-        const def = defaultModifications();
-        localStorage.setItem(MODS_KEY, JSON.stringify(def));
-        return def;
-      }
-    }
-
-    function saveModifications(arr) {
-      localStorage.setItem(MODS_KEY, JSON.stringify(arr));
-    }
-
-    function renderModifications() {
-      const tbody = document.getElementById('modifications-tbody');
-      tbody.innerHTML = '';
-      const items = loadModifications();
-      if (!items.length) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 5;
-        td.textContent = 'Nenhuma modificação registrada.';
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
-      }
-      items.slice().reverse().forEach((it, idx) => {
-        const tr = document.createElement('tr');
-
-        const tdDate = document.createElement('td');
-        tdDate.textContent = formatDateForDisplay(it.date || new Date().toISOString().slice(0,10));
-        const tdUser = document.createElement('td');
-        tdUser.textContent = it.user || '';
-        const tdFile = document.createElement('td');
-        tdFile.textContent = it.file || '';
-        const tdDesc = document.createElement('td');
-        tdDesc.textContent = it.desc || '';
-
-        const tdActions = document.createElement('td');
-        tdActions.className = 'mod-actions';
-        const btnDel = document.createElement('button');
-        btnDel.innerHTML = '<i class="fas fa-trash"></i>';
-        btnDel.title = 'Remover';
-        btnDel.style.border = 'none';
-        btnDel.style.background = 'transparent';
-        btnDel.style.cursor = 'pointer';
-        btnDel.onclick = () => { removeModification(items.length - 1 - idx); };
-        tdActions.appendChild(btnDel);
-
-        tr.appendChild(tdDate);
-        tr.appendChild(tdUser);
-        tr.appendChild(tdFile);
-        tr.appendChild(tdDesc);
-        tr.appendChild(tdActions);
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    function addModification(user, file, desc) {
-      if (!user && !file && !desc) return;
-      const items = loadModifications();
-      const date = new Date().toISOString().slice(0,10);
-      items.push({ date, user: (user || '').trim(), file: (file || '').trim(), desc: (desc || '').trim() });
-      saveModifications(items);
-      renderModifications();
-      document.getElementById('mod-user').value = '';
-      document.getElementById('mod-file').value = '';
-      document.getElementById('mod-desc').value = '';
-    }
-
-    function removeModification(index) {
-      const items = loadModifications();
-      if (index < 0 || index >= items.length) return;
-      items.splice(index, 1);
-      saveModifications(items);
-      renderModifications();
-    }
-
-    function clearModifications() {
-      if (!confirm('Deseja limpar todas as modificações no Drive?')) return;
-      localStorage.removeItem(MODS_KEY);
-      renderModifications();
-    }
-
-    // Event listeners
+    // Apenas log de carregamento (sem teatro de dashboard)
     document.addEventListener('DOMContentLoaded', function() {
-      // inicializa listas
-      renderNotifications();
-      renderModifications();
-
-      // notification controls
-      document.getElementById('btn-add-notif').addEventListener('click', () => {
-        const text = document.getElementById('notif-text').value;
-        const date = document.getElementById('notif-date').value;
-        addNotification(text, date);
-      });
-      document.getElementById('btn-clear-notifs').addEventListener('click', clearNotifications);
-
-      // modifications controls
-      document.getElementById('btn-add-mod').addEventListener('click', () => {
-        const user = document.getElementById('mod-user').value || '';
-        const file = document.getElementById('mod-file').value || '';
-        const desc = document.getElementById('mod-desc').value || '';
-        addModification(user, file, desc);
-      });
-      document.getElementById('btn-clear-mods').addEventListener('click', clearModifications);
-
-      // small UX: press Enter on inputs to add
-      ['notif-text','mod-file','mod-user','mod-desc'].forEach(id => {
-        const el = document.getElementById(id);
-        el && el.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            if (id === 'notif-text') document.getElementById('btn-add-notif').click();
-            else document.getElementById('btn-add-mod').click();
-          }
-        });
-      });
-
       console.log('📊 Portal de Gestão carregado com sucesso');
     });
   </script>
