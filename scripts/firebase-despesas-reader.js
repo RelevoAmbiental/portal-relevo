@@ -20,7 +20,8 @@
       firebase.apps.find(a => a.name === "despesasReader") ||
       firebase.initializeApp(despesasConfig, "despesasReader");
 
-    window.dbDespesas = despesasReaderApp.firestore();
+    window.dbDespesas = despesasReaderApp.firestore();  
+    window.storageDespesas = despesasReaderApp.storage();
 
     // (Opcional) cache offline para o dashboard
     window.dbDespesas.enablePersistence({ synchronizeTabs: true }).catch(() => {});
