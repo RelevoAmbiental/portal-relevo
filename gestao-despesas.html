@@ -16,7 +16,8 @@
 
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
   <script src="scripts/firebase-init-guard.js"></script>
   <script src="scripts/firebase-despesas-reader.js"></script>
 
@@ -430,7 +431,7 @@
         <table id="tabelaDespesas">
           <thead>
             <tr>
-              <th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Status</th><th>Ações</th>
+              <th>Data</th><th>Projeto</th><th>Funcionário</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Status</th><th>Comprovante</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="tbodyDespesas">
@@ -444,298 +445,441 @@
   <footer>© 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.</footer>
 
   <!-- ===================================================== -->
-  <script>
-    // Chart.js defaults (texto preto + datalabels no topo)
-    Chart.register(ChartDataLabels);
-    Chart.defaults.color = "#000";
-    Chart.defaults.font.family = "Montserrat";
-    Chart.defaults.plugins.datalabels = {
-      color: "#000",
-      font: { weight: "600" },
-      anchor: "end",
-      align: "top",
-      formatter: (v) => (typeof v === "number" ? "R$ " + v.toLocaleString("pt-BR") : "")
-    };
 
-    let despesas = [];
-    let filteredDespesas = [];
-    let charts = {};
+<!-- Modal de Visualização de Comprovante -->
+<div id="comprovanteModal" class="modal">
+  <span class="close" onclick="fecharModalComprovante()">&times;</span>
+  <img class="modal-content" id="imgComprovante">
+  <div id="caption"></div>
+</div>
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      await carregarDespesas();
-      inicializarFiltros();
-    });
+<style>
+  /* Estilos do Modal */
+  .modal {
+    display: none; /* Escondido por padrão */
+    position: fixed; /* Fica por cima de tudo */
+    z-index: 1000; /* Z-index alto */
+    padding-top: 60px; /* Posição do conteúdo */
+    left: 0;
+    top: 0;
+    width: 100%; /* Largura total */
+    height: 100%; /* Altura total */
+    overflow: auto; /* Habilita scroll se necessário */
+    background-color: rgb(0,0,0); /* Cor de fundo */
+    background-color: rgba(0,0,0,0.9); /* Preto com opacidade */
+  }
 
-    // Paleta dinâmica
-    function getPalette(n){
-      const base = [
-        "#26C04C","#2E7D32","#EB8807","#6B5539","#4E296B",
-        "#1B5E20","#00796B","#1565C0","#8E24AA","#F4511E",
-        "#2D4132","#3949AB","#00897B","#5E35B1","#6D4C41",
-        "#43A047","#00ACC1","#7CB342","#8D6E63","#546E7A"
-      ];
-      const out = [];
-      for(let i=0;i<n;i++){ out.push(base[i % base.length]); }
-      return out;
+  /* Conteúdo do Modal (Imagem) */
+  .modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    max-height: 90%;
+    object-fit: contain;
+  }
+
+  /* Botão de Fechar */
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Animação */
+  .modal-content, #caption {  
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+  }
+
+  @-webkit-keyframes zoom {
+    from {-webkit-transform:scale(0)} 
+    to {-webkit-transform:scale(1)}
+  }
+
+  @keyframes zoom {
+    from {transform:scale(0)} 
+    to {transform:scale(1)}
+  }
+
+  /* 100% Image Width on Smaller Screens */
+  @media only screen and (max-width: 700px){
+    .modal-content {
+      width: 100%;
     }
+  }
+</style>
 
-    // Carregar dados
-    async function carregarDespesas() {
-      const snap = await dbDespesas.collection('despesas').orderBy('createdAt','desc').get();
-      despesas = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        data: doc.data().data || '',
-        valor: Number(doc.data().valor || 0)
-      }));
-      atualizarDashboard();
+<script>
+  // Funções do Modal
+  function abrirModalComprovante(url) {
+    const modal = document.getElementById("comprovanteModal");
+    const modalImg = document.getElementById("imgComprovante");
+    modal.style.display = "block";
+    modalImg.src = url;
+  }
+
+  function fecharModalComprovante() {
+    document.getElementById("comprovanteModal").style.display = "none";
+  }
+
+  // Fechar modal ao clicar fora
+  window.onclick = function(event) {
+    const modal = document.getElementById("comprovanteModal");
+    if (event.target == modal) {
+      modal.style.display = "none";
     }
+  }
+  
+  // Chart.js defaults (texto preto + datalabels no topo)
+  Chart.register(ChartDataLabels);
+  Chart.defaults.color = "#000";
+  Chart.defaults.font.family = "Montserrat";
+  Chart.defaults.plugins.datalabels = {
+    color: "#000",
+    font: { weight: "600" },
+    anchor: "end",
+    align: "top",
+    formatter: (v) => (typeof v === "number" ? "R$ " + v.toLocaleString("pt-BR") : "")
+  };
 
-    function atualizarDashboard() {
-      atualizarEstatisticas();
-      atualizarTabela();
-      atualizarGraficos();
-    }
+  let despesas = [];
+  let filteredDespesas = [];
+  let charts = {};
 
-    function atualizarEstatisticas() {
-      const dados = filteredDespesas.length ? filteredDespesas : despesas;
-      const total = dados.reduce((s,d)=>s+(d.valor||0),0);
-      const media = dados.length ? total/dados.length : 0;
+  document.addEventListener('DOMContentLoaded', async () => {
+    await carregarDespesas();
+    inicializarFiltros();
+  });
 
-      const agora = new Date();
-      const mes = agora.getMonth(), ano = agora.getFullYear();
-      const despesasMes = dados.filter(d=>{
-        const dt = d.data ? new Date(d.data) : null;
-        return dt && dt.getMonth()===mes && dt.getFullYear()===ano;
-      }).length;
+  // Paleta dinâmica
+  function getPalette(n){
+    const base = [
+      "#26C04C","#2E7D32","#EB8807","#6B5539","#4E296B",
+      "#1B5E20","#00796B","#1565C0","#8E24AA","#F4511E",
+      "#2D4132","#3949AB","#00897B","#5E35B1","#6D4C41",
+      "#43A047","#00ACC1","#7CB342","#8D6E63","#546E7A"
+    ];
+    const out = [];
+    for(let i=0;i<n;i++){ out.push(base[i % base.length]); }
+    return out;
+  }
 
-      const pagas = dados.filter(d=> (d.status||'')==='pago').length;
-      const eficiencia = dados.length ? (pagas/dados.length)*100 : 0;
-
-      document.getElementById("totalGasto").textContent = formatarMoeda(total);
-      document.getElementById("ticketMedio").textContent = formatarMoeda(media);
-      document.getElementById("despesasMes").textContent = despesasMes;
-      document.getElementById("eficiencia").textContent = eficiencia.toFixed(1)+"%";
-    }
-
-    function atualizarTabela() {
-      const tbody = document.getElementById('tbodyDespesas');
-      const dados = filteredDespesas.length ? filteredDespesas : despesas;
-
-      if (!dados.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--texto-cinza);padding:40px;">Nenhuma despesa encontrada</td></tr>';
-        return;
+  // Carregar dados
+  async function carregarDespesas() {
+    const snap = await dbDespesas.collection('despesas').orderBy('createdAt','desc').get();
+    
+    // 1. Mapear dados
+    let despesasRaw = snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      data: doc.data().data || '',
+      valor: Number(doc.data().valor || 0)
+    }));
+    
+    // 2. Pré-carregar URLs dos comprovantes (assíncrono)
+    const promises = despesasRaw.map(async (d) => {
+      // Presume que o campo no Firestore é 'comprovantePath'
+      if (d.comprovantePath) {
+        d.comprovanteUrl = await getComprovanteUrl(d.comprovantePath);
       }
+      return d;
+    });
+    
+    despesas = await Promise.all(promises);
+    
+    atualizarDashboard();
+  }
+  
+  // Função para obter a URL de download do Firebase Storage
+  async function getComprovanteUrl(path) {
+    try {
+      // Usa a instância de storage inicializada em firebase-despesas-reader.js
+      const url = await storageDespesas.ref(path).getDownloadURL();
+      return url;
+    } catch (error) {
+      console.error("Erro ao obter URL do comprovante:", path, error);
+      return null;
+    }
+  }
+  
+  function atualizarDashboard() {
+    atualizarEstatisticas();
+    atualizarTabela();
+    atualizarGraficos();
+  }
 
-      tbody.innerHTML = dados.map(d=>`
-        <tr>
-          <td>${formatarData(d.data)}</td>
-          <td>${d.projeto||'-'}</td>
-          <td>${d.funcionario||'-'}</td>
-          <td>${d.tipo||'-'}</td>
-          <td>${(d.descricao||'').replace(/;/g, ',')}</td>
-          <td><strong>${formatarMoeda(d.valor)}</strong></td>
-          <td>${d.status||'pendente'}</td>
-          <td>
-            <button class="btn btn-primary" title="Aprovar" onclick="aprovarDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
-              <i class="fas fa-check" style="color:#111"></i>
-            </button>
-            <button class="btn btn-secondary" title="Editar" onclick="editarDespesa('${d.id}')" style="background:#fff;border:1px solid #e55e5">
-              <i class="fas fa-edit" style="color:#111"></i>
-            </button>
-            <button class="btn btn-secondary" title="Excluir" onclick="excluirDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
-              <i class="fas fa-trash" style="color:#111"></i>
-            </button>
-          </td>
-        </tr>`).join('');
+  function atualizarEstatisticas() {
+    const dados = filteredDespesas.length ? filteredDespesas : despesas;
+    const total = dados.reduce((s,d)=>s+(d.valor||0),0);
+    const media = dados.length ? total/dados.length : 0;
+
+    const agora = new Date();
+    const mes = agora.getMonth(), ano = agora.getFullYear();
+    const despesasMes = dados.filter(d=>{
+      const dt = d.data ? new Date(d.data) : null;
+      return dt && dt.getMonth()===mes && dt.getFullYear()===ano;
+    }).length;
+
+    const pagas = dados.filter(d=> (d.status||'')==='pago').length;
+    const eficiencia = dados.length ? (pagas/dados.length)*100 : 0;
+
+    document.getElementById("totalGasto").textContent = formatarMoeda(total);
+    document.getElementById("ticketMedio").textContent = formatarMoeda(media);
+    document.getElementById("despesasMes").textContent = despesasMes;
+    document.getElementById("eficiencia").textContent = eficiencia.toFixed(1)+"%";
+  }
+
+  function atualizarTabela() {
+    const tbody = document.getElementById('tbodyDespesas');
+    const dados = filteredDespesas.length ? filteredDespesas : despesas;
+
+    if (!dados.length) {
+      // Colspan ajustado para 9 colunas (8 originais + 1 Comprovante)
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--texto-cinza);padding:40px;">Nenhuma despesa encontrada</td></tr>';
+      return;
     }
 
-    async function aprovarDespesa(id){
-      await dbDespesas.collection('despesas').doc(id).update({status:'pago'});
+    tbody.innerHTML = dados.map(d=>`
+      <tr>
+        <td>${formatarData(d.data)}</td>
+        <td>${d.projeto||'-'}</td>
+        <td>${d.funcionario||'-'}</td>
+        <td>${d.tipo||'-'}</td>
+        <td>${(d.descricao||'').replace(/;/g, ',')}</td>
+        <td><strong>${formatarMoeda(d.valor)}</strong></td>
+        <td>${d.status||'pendente'}</td>
+        <td>${d.comprovanteUrl ? `<img src="${d.comprovanteUrl}" alt="Comprovante" class="comprovante-miniatura" onclick="abrirModalComprovante('${d.comprovanteUrl}')">` : '-'}</td>
+        <td>
+          <button class="btn btn-primary" title="Aprovar" onclick="aprovarDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
+            <i class="fas fa-check" style="color:#111"></i>
+          </button>
+          <button class="btn btn-secondary" title="Editar" onclick="editarDespesa('${d.id}')" style="background:#fff;border:1px solid #e55e5">
+            <i class="fas fa-edit" style="color:#111"></i>
+          </button>
+          <button class="btn btn-secondary" title="Excluir" onclick="excluirDespesa('${d.id}')" style="background:#fff;border:1px solid #e5e5e5">
+            <i class="fas fa-trash" style="color:#111"></i>
+          </button>
+        </td>
+      </tr>`).join('');
+  }
+  
+  // Adicionar estilo para a nova coluna e miniatura
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .comprovante-miniatura {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: transform 0.2s;
+    }
+    .comprovante-miniatura:hover {
+      transform: scale(1.1);
+    }
+  `;
+  document.head.appendChild(style);
+
+  async function aprovarDespesa(id){
+    await dbDespesas.collection('despesas').doc(id).update({status:'pago'});
+    carregarDespesas();
+  }
+  async function excluirDespesa(id){
+    if(confirm('Deseja excluir esta despesa?')){
+      await dbDespesas.collection('despesas').doc(id).delete();
       carregarDespesas();
     }
-    async function excluirDespesa(id){
-      if(confirm('Deseja excluir esta despesa?')){
-        await dbDespesas.collection('despesas').doc(id).delete();
+  }
+  async function editarDespesa(id){
+    const doc = await dbDespesas.collection('despesas').doc(id).get();
+    if(!doc.exists) return alert('Despesa não encontrada');
+    const atual = Number(doc.data().valor||0);
+    const entrada = prompt('Novo valor da despesa (ex: 123,45):', atual.toString().replace('.', ','));
+    if(entrada!==null){
+      const num = parseFloat(entrada.replace('.','').replace(',','.'));
+      if(!isNaN(num)){
+        await dbDespesas.collection('despesas').doc(id).update({valor:num, updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
         carregarDespesas();
       }
     }
-    async function editarDespesa(id){
-      const doc = await dbDespesas.collection('despesas').doc(id).get();
-      if(!doc.exists) return alert('Despesa não encontrada');
-      const atual = Number(doc.data().valor||0);
-      const entrada = prompt('Novo valor da despesa (ex: 123,45):', atual.toString().replace('.', ','));
-      if(entrada!==null){
-        const num = parseFloat(entrada.replace('.','').replace(',','.'));
-        if(!isNaN(num)){
-          await dbDespesas.collection('despesas').doc(id).update({valor:num, updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
-          carregarDespesas();
-        }
+  }
+
+  // Gráficos
+  function atualizarGraficos() {
+    graficoEvolucao();
+    graficoTipos();
+    graficoProjetos();
+    graficoFuncionarios();
+  }
+
+  function graficoEvolucao() {
+    const ctx = document.getElementById("chartEvolucao").getContext("2d");
+    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const dataMensal = meses.map(()=>0);
+    despesas.forEach(d=>{
+      const dt = d.data ? new Date(d.data) : null;
+      if(dt){ dataMensal[dt.getMonth()] += (d.valor||0); }
+    });
+    if(charts.evolucao) charts.evolucao.destroy();
+    charts.evolucao = new Chart(ctx,{
+      type:'line',
+      data:{ labels:meses, datasets:[{
+        label:'Gastos Mensais (R$)',
+        data:dataMensal,
+        borderColor:'#2E7D32',
+        backgroundColor:'rgba(38,192,76,0.2)',
+        fill:true, tension:0.4, borderWidth:3, pointRadius:3
+      }]},
+      options:{
+        plugins:{ legend:{ display:true }, datalabels:{ display:true } },
+        responsive:true, maintainAspectRatio:false
       }
-    }
+    });
+  }
 
-    // Gráficos
-    function atualizarGraficos() {
-      graficoEvolucao();
-      graficoTipos();
-      graficoProjetos();
-      graficoFuncionarios();
-    }
+  function graficoTipos(){
+    const acc = {};
+    despesas.forEach(d=>{ if(d.tipo){ acc[d.tipo]=(acc[d.tipo]||0)+(d.valor||0); }});
+    const labels = Object.keys(acc);
+    const data = Object.values(acc);
+    const colors = getPalette(labels.length);
+    const ctx = document.getElementById('chartTipos').getContext('2d');
+    if(charts.tipos) charts.tipos.destroy();
+    charts.tipos = new Chart(ctx,{
+      type:'doughnut',
+      data:{ labels, datasets:[{ label:'Valor por Tipo (R$)', data, backgroundColor: colors }]},
+      options:{
+        plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true } },
+        responsive:true, maintainAspectRatio:false
+      }
+    });
+  }
 
-    function graficoEvolucao() {
-      const ctx = document.getElementById("chartEvolucao").getContext("2d");
-      const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-      const dataMensal = meses.map(()=>0);
-      despesas.forEach(d=>{
-        const dt = d.data ? new Date(d.data) : null;
-        if(dt){ dataMensal[dt.getMonth()] += (d.valor||0); }
-      });
-      if(charts.evolucao) charts.evolucao.destroy();
-      charts.evolucao = new Chart(ctx,{
-        type:'line',
-        data:{ labels:meses, datasets:[{
-          label:'Gastos Mensais (R$)',
-          data:dataMensal,
-          borderColor:'#2E7D32',
-          backgroundColor:'rgba(38,192,76,0.2)',
-          fill:true, tension:0.4, borderWidth:3, pointRadius:3
-        }]},
-        options:{
-          plugins:{ legend:{ display:true }, datalabels:{ display:true } },
-          responsive:true, maintainAspectRatio:false
-        }
-      });
-    }
+  function graficoProjetos(){
+    const acc = {};
+    despesas.forEach(d=>{ if(d.projeto){ acc[d.projeto]=(acc[d.projeto]||0)+(d.valor||0); }});
+    const top = Object.entries(acc).sort(([,a],[,b])=>b-a).slice(0,6);
+    const labels = top.map(t=>t[0]);
+    const data = top.map(t=>t[1]);
+    const colors = getPalette(labels.length);
+    const ctx = document.getElementById('chartProjetos').getContext('2d');
+    if(charts.projetos) charts.projetos.destroy();
+    charts.projetos = new Chart(ctx,{
+      type:'bar',
+      data:{ labels, datasets:[{ label:'Valor (R$)', data, backgroundColor: colors, borderColor: '#000', borderWidth: 1 }]},
+      options:{
+        plugins:{
+          legend:{ display:false },
+          datalabels:{ display:true },
+          tooltip:{ callbacks:{ title:(items)=> (items && items[0] && items[0].label) ? items[0].label : 'Projeto' } }
+        },
+        responsive:true, maintainAspectRatio:false,
+        scales:{ x:{ ticks:{ color:'#000'}}, y:{ ticks:{ color:'#000'} } }
+      }
+    });
+  }
 
-    function graficoTipos(){
-      const acc = {};
-      despesas.forEach(d=>{ if(d.tipo){ acc[d.tipo]=(acc[d.tipo]||0)+(d.valor||0); }});
-      const labels = Object.keys(acc);
-      const data = Object.values(acc);
-      const colors = getPalette(labels.length);
-      const ctx = document.getElementById('chartTipos').getContext('2d');
-      if(charts.tipos) charts.tipos.destroy();
-      charts.tipos = new Chart(ctx,{
-        type:'doughnut',
-        data:{ labels, datasets:[{ label:'Valor por Tipo (R$)', data, backgroundColor: colors }]},
-        options:{
-          plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true } },
-          responsive:true, maintainAspectRatio:false
-        }
-      });
-    }
+  function graficoFuncionarios(){
+    const acc = {};
+    despesas.forEach(d=>{ if(d.funcionario){ acc[d.funcionario]=(acc[d.funcionario]||0)+(d.valor||0); }});
+    const top = Object.entries(acc).sort(([,a],[,b])=>b-a).slice(0,6);
+    const labels = top.map(t=>t[0]);
+    const data = top.map(t=>t[1]);
+    const colors = getPalette(labels.length);
+    const ctx = document.getElementById('chartFuncionarios').getContext('2d');
+    if(charts.funcionarios) charts.funcionarios.destroy();
+    charts.funcionarios = new Chart(ctx,{
+      type:'polarArea',
+      data:{ labels, datasets:[{ label:'Valor por Funcionário (R$)', data, backgroundColor: colors }]},
+      options:{
+        plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true } },
+        responsive:true, maintainAspectRatio:false
+      }
+    });
+  }
 
-    function graficoProjetos(){
-      const acc = {};
-      despesas.forEach(d=>{ if(d.projeto){ acc[d.projeto]=(acc[d.projeto]||0)+(d.valor||0); }});
-      const top = Object.entries(acc).sort(([,a],[,b])=>b-a).slice(0,6);
-      const labels = top.map(t=>t[0]);
-      const data = top.map(t=>t[1]);
-      const colors = getPalette(labels.length);
-      const ctx = document.getElementById('chartProjetos').getContext('2d');
-      if(charts.projetos) charts.projetos.destroy();
-      charts.projetos = new Chart(ctx,{
-        type:'bar',
-        data:{ labels, datasets:[{ label:'Valor (R$)', data, backgroundColor: colors, borderColor: '#000', borderWidth: 1 }]},
-        options:{
-          plugins:{
-            legend:{ display:false },
-            datalabels:{ display:true },
-            tooltip:{ callbacks:{ title:(items)=> (items && items[0] && items[0].label) ? items[0].label : 'Projeto' } }
-          },
-          responsive:true, maintainAspectRatio:false,
-          scales:{ x:{ ticks:{ color:'#000'}}, y:{ ticks:{ color:'#000'} } }
-        }
-      });
-    }
+  // Filtros
+  function inicializarFiltros(){
+    const projetos = [...new Set(despesas.map(d=>d.projeto).filter(Boolean))];
+    const funcs =    [...new Set(despesas.map(d=>d.funcionario).filter(Boolean))];
+    const tipos =    [...new Set(despesas.map(d=>d.tipo).filter(Boolean))];
+    preencherSelect('filterProjeto', projetos);
+    preencherSelect('filterFuncionario', funcs);
+    preencherSelect('filterTipo', tipos);
+  }
+  function preencherSelect(id, lista){
+    const s = document.getElementById(id);
+    s.innerHTML = '<option value="">Todos</option>';
+    lista.forEach(v=> s.innerHTML += `<option value="${v}">${v}</option>`);
+  }
+  function aplicarFiltros(){
+    const p = document.getElementById('filterProjeto').value;
+    const f = document.getElementById('filterFuncionario').value;
+    const t = document.getElementById('filterTipo').value;
+    filteredDespesas = despesas.filter(d =>
+      (!p || d.projeto===p) && (!f || d.funcionario===f) && (!t || d.tipo===t)
+    );
+    atualizarDashboard();
+  }
+  function limparFiltros(){
+    document.getElementById('filterProjeto').value='';
+    document.getElementById('filterFuncionario').value='';
+    document.getElementById('filterTipo').value='';
+    filteredDespesas = [];
+    atualizarDashboard();
+  }
 
-    function graficoFuncionarios(){
-      const acc = {};
-      despesas.forEach(d=>{ if(d.funcionario){ acc[d.funcionario]=(acc[d.funcionario]||0)+(d.valor||0); }});
-      const top = Object.entries(acc).sort(([,a],[,b])=>b-a).slice(0,6);
-      const labels = top.map(t=>t[0]);
-      const data = top.map(t=>t[1]);
-      const colors = getPalette(labels.length);
-      const ctx = document.getElementById('chartFuncionarios').getContext('2d');
-      if(charts.funcionarios) charts.funcionarios.destroy();
-      charts.funcionarios = new Chart(ctx,{
-        type:'polarArea',
-        data:{ labels, datasets:[{ label:'Valor (R$)', data, backgroundColor: colors }]},
-        options:{
-          plugins:{ legend:{ position:'bottom' }, datalabels:{ display:true } },
-          responsive:true, maintainAspectRatio:false
-        }
-      });
-    }
+  // Exportar CSV
+  function exportarExcel(){
+    const dados = filteredDespesas.length ? filteredDespesas : despesas;
+    if(!dados.length){ alert('Sem dados para exportar.'); return; }
 
-    // Filtros
-    function inicializarFiltros(){
-      const projetos = [...new Set(despesas.map(d=>d.projeto).filter(Boolean))];
-      const funcs =    [...new Set(despesas.map(d=>d.funcionario).filter(Boolean))];
-      const tipos =    [...new Set(despesas.map(d=>d.tipo).filter(Boolean))];
-      preencherSelect('filterProjeto', projetos);
-      preencherSelect('filterFuncionario', funcs);
-      preencherSelect('filterTipo', tipos);
-    }
-    function preencherSelect(id, lista){
-      const s = document.getElementById(id);
-      s.innerHTML = '<option value="">Todos</option>';
-      lista.forEach(v=> s.innerHTML += `<option value="${v}">${v}</option>`);
-    }
-    function aplicarFiltros(){
-      const p = document.getElementById('filterProjeto').value;
-      const f = document.getElementById('filterFuncionario').value;
-      const t = document.getElementById('filterTipo').value;
-      filteredDespesas = despesas.filter(d =>
-        (!p || d.projeto===p) && (!f || d.funcionario===f) && (!t || d.tipo===t)
-      );
-      atualizarDashboard();
-    }
-    function limparFiltros(){
-      document.getElementById('filterProjeto').value='';
-      document.getElementById('filterFuncionario').value='';
-      document.getElementById('filterTipo').value='';
-      filteredDespesas = [];
-      atualizarDashboard();
-    }
+    const projetoSelecionado = document.getElementById('filterProjeto')?.value || '';
+    const titulo = projetoSelecionado ? `Projeto: ${projetoSelecionado}` : 'Projeto: Todos';
 
-    // Exportar CSV
-    function exportarExcel(){
-      const dados = filteredDespesas.length ? filteredDespesas : despesas;
-      if(!dados.length){ alert('Sem dados para exportar.'); return; }
+    const header = ['DATA','PROJETO','FUNCIONÁRIO','TIPO','DESCRIÇÃO','VALOR','STATUS','COMPROVANTE'];
+    let csv = titulo + '\n' + header.join(';') + '\n';
 
-      const projetoSelecionado = document.getElementById('filterProjeto')?.value || '';
-      const titulo = projetoSelecionado ? `Projeto: ${projetoSelecionado}` : 'Projeto: Todos';
+    dados.forEach(d=>{
+      const linha = [
+        formatarData(d.data),
+        (d.projeto||''),
+        (d.funcionario||''),
+        (d.tipo||''),
+        (d.descricao||'').replace(/;/g, ','),
+        String(d.valor||0).replace('.',','), // PT-BR
+        (d.status||'pendente'),
+        d.comprovanteUrl ? d.comprovanteUrl : ''
+      ].join(';');
+      csv += linha + '\n';
+    });
 
-      const header = ['DATA','PROJETO','FUNCIONÁRIO','TIPO','DESCRIÇÃO','VALOR','STATUS','COMPROVANTE'];
-      let csv = titulo + '\n' + header.join(';') + '\n';
+    const blob = new Blob(["\uFEFF"+csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `despesas_relevo_${projetoSelecionado || 'todos'}_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
-      dados.forEach(d=>{
-        const linha = [
-          formatarData(d.data),
-          (d.projeto||''),
-          (d.funcionario||''),
-          (d.tipo||''),
-          (d.descricao||'').replace(/;/g, ','),
-          String(d.valor||0).replace('.',','), // PT-BR
-          (d.status||'pendente'),
-          d.comprovanteUrl ? d.comprovanteUrl : ''
-        ].join(';');
-        csv += linha + '\n';
-      });
-
-      const blob = new Blob(["\uFEFF"+csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `despesas_relevo_${projetoSelecionado || 'todos'}_${new Date().toISOString().slice(0,10)}.csv`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    // Utils
-    function formatarData(d){ if(!d) return '-'; const dt=new Date(d); return isNaN(dt)?'-':dt.toLocaleDateString('pt-BR'); }
-    function formatarMoeda(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
-  </script>
+  // Utils
+  function formatarData(d){ if(!d) return '-'; const dt=new Date(d); return isNaN(dt)?'-':dt.toLocaleDateString('pt-BR'); }
+  function formatarMoeda(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0); }
+</script>
 </body>
 </html>
