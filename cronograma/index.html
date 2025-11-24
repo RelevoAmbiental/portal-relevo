@@ -2,16 +2,25 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Cronograma</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <title>Cronograma | Relevo Consultoria Ambiental</title>
+
+  <!-- Firebase Auth herdado do portal -->
   <script src="/scripts/firebase-init-guard.js"></script>
   <script src="/scripts/expose-session.js"></script>
 
-  <link rel="stylesheet" href="assets/index.css" />
+  <!-- Manifest opcional -->
+  <link rel="manifest" href="./manifest.json" />
+
+  <!-- Estilos do build -->
+  <link rel="stylesheet" href="./assets/index.css" />
 </head>
+
 <body>
   <div id="root"></div>
 
-  <script type="module" src="assets/index.js"></script>
+  <!-- App Cronograma -->
+  <script type="module" src="./assets/index.js"></script>
 </body>
 </html>
