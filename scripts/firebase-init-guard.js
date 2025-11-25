@@ -1,25 +1,29 @@
-// scripts/firebase-init-guard.js - versão compat para PORTAL Relevo
+// ===============================
+//  SAFE FIREBASE INIT GUARD
+// ===============================
 
-// Verifica se o Firebase já está inicializado
-if (!window.firebase || !firebase.apps.length) {
-  const firebaseConfig = {
-    apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+(function () {
+  // Só prossegue se firebase existir
+  if (typeof firebase === "undefined" || !firebase.apps) {
+    console.warn("⚠️ Firebase ainda não carregado — guard ativo.");
+    return;
+  }
+
+  // Evita reinicialização dupla
+  if (window.__RELEVO_FIREBASE__) {
+    console.log("⚡ Firebase já inicializado pelo Portal.");
+    return;
+  }
+
+  // Inicialização segura
+  window.__RELEVO_FIREBASE__ = firebase.initializeApp({
+    apiKey: "AIzaSyBqiHNN-Jschlhl50iTYLDsBsLNaXuCu2E",
     authDomain: "portal-relevo.firebaseapp.com",
     projectId: "portal-relevo",
-    storageBucket: "portal-relevo.firebasestorage.app",
-    messagingSenderId: "182759626683",
-    appId: "1:182759626683:web:2dde2eeef910d4c288569e",
-    measurementId: "G-W8TTP3D3YQ"
-  };
+    storageBucket: "portal-relevo.appspot.com",
+    messagingSenderId: "704785780097",
+    appId: "1:704785780097:web:7acda63c1ab4461f4b0cfe"
+  });
 
-  firebase.initializeApp(firebaseConfig);
-  console.log("✅ Firebase compat inicializado pelo guard (portal-relevo)");
-}
-
-// Cria aliases globais para o app e serviços
-window.__RELEVO_APP__ = firebase.app();
-window.__RELEVO_AUTH__ = firebase.auth();
-if (!auth) {
-  console.error("❌ Firebase do Portal não carregou.");
-}
-window.__RELEVO_DB__ = firebase.firestore();
+  console.log("🔥 Firebase inicializado pelo Guard.");
+})();
