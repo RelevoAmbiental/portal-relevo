@@ -1,12 +1,12 @@
 // ============================================
-//  SAFE FIREBASE INIT GUARD — versão estável
+//  SAFE FIREBASE INIT GUARD — versão unificada
+//  Portal Relevo + Orçamento + Cronograma
 // ============================================
 
 (function () {
-
-  // Aguarda Firebase existir (carregado via CDN no portal)
+  // Garante que o SDK compat já foi carregado
   if (typeof firebase === "undefined") {
-    console.warn("⚠️ Firebase não está disponível ainda — guard ativado.");
+    console.warn("⚠️ Firebase não está disponível ainda — guard ativado depois.");
     return;
   }
 
@@ -17,18 +17,26 @@
   }
 
   try {
-    // Inicialização segura (mesma config usada no portal)
-    window.__RELEVO_FIREBASE__ = firebase.initializeApp({
-      apiKey: "AIzaSyBqiHNN-Jschlhl50iTYLDsBsLNaXuCu2E",
+    // Configuração ÚNICA do projeto portal-relevo
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
       authDomain: "portal-relevo.firebaseapp.com",
       projectId: "portal-relevo",
-      storageBucket: "portal-relevo.appspot.com",
-      messagingSenderId: "704785780097",
-      appId: "1:704785780097:web:7acda63c1ab4461f4b0cfe"
-    });
+      storageBucket: "portal-relevo.firebasestorage.app",
+      messagingSenderId: "182759626683",
+      appId: "1:182759626683:web:2dde2eeef910d4c288569e",
+      measurementId: "G-W8TTP3D3YQ"
+    };
 
-    console.log("🔥 Firebase inicializado com sucesso pelo Guard.");
+    // Inicializa apenas uma vez
+    const app = firebase.initializeApp(firebaseConfig);
 
+    // Expõe a app e serviços principais em namespace próprio
+    window.__RELEVO_FIREBASE__ = app;
+    window.__RELEVO_AUTH__ = app.auth();
+    window.__RELEVO_DB__ = app.firestore();
+
+    console.log("🔥 Firebase inicializado com sucesso pelo Guard (portal-relevo).");
   } catch (err) {
     console.error("❌ Erro ao inicializar Firebase no Guard:", err);
   }
