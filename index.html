@@ -6,11 +6,21 @@
   <title>Portal Relevo | Acesso Restrito</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png" />
+  <link
+    rel="icon"
+    type="image/png"
+    href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png"
+  />
 
   <!-- Fontes e Ícones -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
 
   <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css" />
@@ -20,23 +30,35 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- Guard do Portal (usa o Firebase do portal-relevo) -->
+  <!-- Guard do Portal (usa o mesmo Firebase do ecossistema Relevo) -->
   <script src="scripts/firebase-init-guard.js"></script>
   <script src="scripts/expose-session.js"></script>
 
-
   <style>
+    :root {
+      --relevo-green-primary: #0b633a;
+      --relevo-green-dark: #0a3e27;
+      --relevo-accent-gold: #f4c95d;
+      --relevo-error: #ff4d4f;
+      --relevo-success: #3cb371;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 0;
       font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(135deg, rgba(0, 100, 50, 0.9), rgba(20, 70, 40, 0.95)),
-                  url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG') center/cover no-repeat;
-      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(0, 100, 50, 0.9), rgba(20, 70, 40, 0.95)),
+        url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG') center/cover no-repeat;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: #ffffff;
     }
 
     .login-container {
@@ -53,122 +75,169 @@
     .login-container img {
       height: 70px;
       margin-bottom: 20px;
-      filter: brightness(0) invert(1);
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     }
 
     .login-container h1 {
+      margin: 0 0 10px;
       font-size: 1.8rem;
       font-weight: 600;
-      margin-bottom: 10px;
-      color: #fff;
     }
 
     .login-container p {
+      margin: 0 0 25px;
       font-size: 0.95rem;
-      color: #e0e0e0;
-      margin-bottom: 25px;
+      opacity: 0.9;
     }
 
     .form-group {
       text-align: left;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
     }
+
     .form-label {
       display: block;
-      margin: 0 0 6px;
-      font-weight: 600;
-      color: #e9f5ee;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      font-weight: 500;
+      opacity: 0.95;
     }
 
-    .login-container input {
+    .form-group input {
       width: 100%;
-      padding: 12px 15px;
-      border: none;
+      padding: 10px 12px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.92);
-      font-size: 0.95rem;
-      color: #2a2a2a;
-    }
-
-    .login-container button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--verde-primario, #005e2f), var(--verde-escuro, #01351b));
-      color: white;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      margin-top: 8px;
-    }
-
-    .login-container button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .error-msg, .success-msg {
-      display: none;
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.35);
+      color: #fff;
       font-size: 0.9rem;
-      text-align: left;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
 
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .form-group input:focus {
+      border-color: var(--relevo-accent-gold);
+      box-shadow: 0 0 0 1px rgba(244, 201, 93, 0.7);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .actions-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      font-size: 0.8rem;
+    }
+
+    .actions-row a {
+      color: #f9f9f9;
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
+    .actions-row a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 11px 0;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+
+    .btn-login:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-login.btn-loading {
+      cursor: wait;
+      opacity: 0.9;
+    }
+
+    .btn-login i {
+      font-size: 0.95rem;
+    }
+
+    .helper-text {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-bottom: 15px;
+    }
+
+    .success-msg,
     .error-msg {
-      background: rgba(255, 0, 0, 0.15);
-      color: #ffd2d2;
+      display: none;
+      font-size: 0.82rem;
+      text-align: left;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
     }
 
     .success-msg {
-      background: rgba(0, 255, 100, 0.15);
-      color: #b5ffcb;
+      background: rgba(60, 179, 113, 0.2);
+      border: 1px solid rgba(60, 179, 113, 0.7);
+      color: #d1fae5;
     }
 
-    .btn-loading {
-      opacity: 0.7;
-      cursor: not-allowed;
-      position: relative;
-    }
-    .btn-loading::after {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      top: 50%;
-      right: 15px;
-      margin-top: -8px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spinner 0.6s linear infinite;
-    }
-    @keyframes spinner {
-      to {
-        transform: rotate(360deg);
-      }
+    .error-msg {
+      background: rgba(255, 77, 79, 0.16);
+      border: 1px solid rgba(255, 77, 79, 0.8);
+      color: #fee2e2;
     }
 
     footer {
-      position: absolute;
-      bottom: 15px;
-      width: 100%;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 14px;
       text-align: center;
-      color: #d0d0d0;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
     }
 
     @media (max-width: 480px) {
       .login-container {
-        padding: 30px 25px;
-        margin: 10px;
+        margin: 0 16px;
+        padding: 28px 22px;
       }
+
       .login-container h1 {
         font-size: 1.5rem;
+      }
+
+      body {
+        align-items: flex-start;
+        padding-top: 40px;
+      }
+
+      footer {
+        position: static;
+        margin-top: 20px;
       }
     }
   </style>
@@ -176,8 +245,10 @@
 
 <body>
   <div class="login-container">
-    <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
-         alt="Logo Relevo" />
+    <img
+      src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
+      alt="Logo Relevo"
+    />
     <h1>Portal Relevo</h1>
     <p>Acesso restrito a colaboradores e clientes</p>
 
@@ -187,13 +258,36 @@
     <form id="login-form" autocomplete="on">
       <div class="form-group">
         <label for="username" class="form-label">Usuário</label>
-        <input type="text" id="username" placeholder="Digite seu usuário ou e-mail" autocomplete="username" required />
+        <input
+          type="text"
+          id="username"
+          placeholder="Digite seu usuário ou e-mail"
+          autocomplete="username"
+          required
+        />
       </div>
       <div class="form-group">
         <label for="password" class="form-label">Senha</label>
-        <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required />
+        <input
+          type="password"
+          id="password"
+          placeholder="Digite sua senha"
+          autocomplete="current-password"
+          required
+        />
       </div>
-      <button type="submit" id="login-btn"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+
+      <div class="actions-row">
+        <span class="helper-text">Usuários internos: <strong>usuario@relevo.eco.br</strong></span>
+        <a href="mailto:suporte@relevo.eco.br?subject=Suporte%20Portal%20Relevo">
+          Precisa de ajuda?
+        </a>
+      </div>
+
+      <button type="submit" id="login-btn" class="btn-login">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        Entrar
+      </button>
     </form>
   </div>
 
@@ -202,193 +296,192 @@
   </footer>
 
   <script>
-    console.log("🚀 Iniciando Portal Relevo...");
-    console.log("🔍 Firebase carregado?", typeof firebase);
+    (function () {
+      console.log("🚀 Iniciando Portal Relevo (login)…");
 
-    const auth = window.__RELEVO_AUTH__ || firebase.auth();
-    const db = window.__RELEVO_DB__ || firebase.firestore();
+      // Protege contra cenário em que Firebase ainda não foi carregado
+      function getFirebaseContext() {
+        const app = window.__RELEVO_FIREBASE__ || null;
+        const compat = window.firebase || null;
 
-    // Função para verificar se precisa alterar senha
-    const checkPasswordChangeRequired = async (user) => {
-      try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        
-        if (!userDoc.exists) {
-          // Primeiro acesso - criar documento marcando que precisa trocar senha
-          await db.collection('users').doc(user.uid).set({
-            username: user.email.split('@')[0],
-            email: user.email,
-            requiresPasswordChange: true,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          return true;
+        if (!app && !compat) {
+          console.error("❌ Firebase ainda não está disponível.");
+          return null;
         }
-        
-        const userData = userDoc.data();
-        return userData.requiresPasswordChange === true;
-        
-      } catch (error) {
-        console.error("Erro ao verificar usuário:", error);
-        return false;
-      }
-    };
 
-    // Função para obter a URL de redirecionamento baseada no tipo de usuário
-    const getRedirectUrl = (userData) => {
-      const tipo = userData.tipo || 'colaborador';
-      const projeto = userData.projeto || '';
-      
-      console.log(`📊 Tipo: ${tipo}, Projeto: ${projeto}`);
-      
-      switch(tipo) {
-        case 'gestao':
-          return 'https://portal.relevo.eco.br/gestao.html';
-        
-        case 'cliente':
-          // Para clientes, redireciona para clientes.html e passa o projeto como parâmetro
-          const projetoUrl = projeto ? `?projeto=${encodeURIComponent(projeto)}` : '';
-          return `https://portal.relevo.eco.br/clientes.html${projetoUrl}`;
-        
-        case 'colaborador':
-        default:
-          return 'https://portal.relevo.eco.br/colaboradores.html';
-      }
-    };
+        // Se o Guard já expôs AUTH/DB, usa eles
+        const auth = window.__RELEVO_AUTH__ || (compat && compat.auth());
+        const db = window.__RELEVO_DB__ || (compat && compat.firestore());
 
-    // Se já estiver logado, redireciona conforme o tipo
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        console.log("✅ Usuário já logado:", user.email);
-        
+        if (!auth || !db) {
+          console.error("❌ Auth ou Firestore não disponíveis.");
+          return null;
+        }
+
+        return { auth, db };
+      }
+
+      // Função para obter URL de redirecionamento
+      const getRedirectUrl = (userData) => {
+        const tipo = userData.tipo || "colaborador";
+        const projeto = userData.projeto || "";
+
+        switch (tipo) {
+          case "gestao":
+            return "https://portal.relevo.eco.br/gestao.html";
+          case "cliente":
+            // Se no futuro quiser segmentar por projeto, dá pra ramificar aqui
+            return "https://portal.relevo.eco.br/clientes.html";
+          case "colaborador":
+          default:
+            return "https://portal.relevo.eco.br/colaboradores.html";
+        }
+      };
+
+      // Verificar se precisa alterar senha
+      const checkPasswordChangeRequired = async (db, user) => {
         try {
-          // Verificar se precisa trocar senha
-          const requiresPasswordChange = await checkPasswordChangeRequired(user);
-          
-          if (requiresPasswordChange) {
-            window.location.href = "change-password.html";
-            return;
+          const userRef = db.collection("users").doc(user.uid);
+          const userDoc = await userRef.get();
+
+          if (!userDoc.exists) {
+            await userRef.set({
+              username: user.email.split("@")[0],
+              email: user.email,
+              requiresPasswordChange: true,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            return true;
           }
-          
-          // Buscar dados do usuário para redirecionamento
-          const userDoc = await db.collection('users').doc(user.uid).get();
-          if (userDoc.exists) {
-            const userData = userDoc.data();
-            const redirectUrl = getRedirectUrl(userData);
-            console.log("↪️ Redirecionando para:", redirectUrl);
-            window.location.href = redirectUrl;
-          } else {
-            // Fallback se não encontrar dados
-            window.location.href = "https://portal.relevo.eco.br/colaboradores.html";
-          }
+
+          const data = userDoc.data();
+          return data.requiresPasswordChange === true;
         } catch (error) {
-          console.error("❌ Erro ao verificar usuário:", error);
-          window.location.href = "https://portal.relevo.eco.br/colaboradores.html";
+          console.error("Erro ao verificar necessidade de troca de senha:", error);
+          return false;
         }
-      }
-    });
+      };
 
-    // UI elements
-    const form = document.getElementById("login-form");
-    const msgError = document.getElementById("msg-error");
-    const msgSuccess = document.getElementById("msg-success");
-    const btn = document.getElementById("login-btn");
+      // UI elements
+      const form = document.getElementById("login-form");
+      const msgError = document.getElementById("msg-error");
+      const msgSuccess = document.getElementById("msg-success");
+      const btn = document.getElementById("login-btn");
 
-    const setLoading = (v) => {
-      if (v) {
-        btn.classList.add("btn-loading");
-        btn.disabled = true;
-      } else {
-        btn.classList.remove("btn-loading");
-        btn.disabled = false;
-      }
-    };
+      const setLoading = (v) => {
+        if (!btn) return;
+        if (v) {
+          btn.classList.add("btn-loading");
+          btn.disabled = true;
+        } else {
+          btn.classList.remove("btn-loading");
+          btn.disabled = false;
+        }
+      };
 
-    const showError = (t) => {
-      msgError.textContent = t;
-      msgError.style.display = "block";
-      msgSuccess.style.display = "none";
-    };
+      const showError = (t) => {
+        if (!msgError || !msgSuccess) return;
+        msgError.textContent = t;
+        msgError.style.display = "block";
+        msgSuccess.style.display = "none";
+      };
 
-    const showSuccess = (t) => {
-      msgSuccess.textContent = t;
-      msgSuccess.style.display = "block";
-      msgError.style.display = "none";
-    };
+      const showSuccess = (t) => {
+        if (!msgError || !msgSuccess) return;
+        msgSuccess.textContent = t;
+        msgSuccess.style.display = "block";
+        msgError.style.display = "none";
+      };
 
-    // Login handler
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (!username || !password) {
-        showError("⚠️ Preencha usuário e senha.");
+      if (!form) {
+        console.error("❌ Formulário de login não encontrado.");
         return;
       }
 
-      // permite email completo ou username simples
-      const email = username.includes("@") ? username : `${username}@relevo.eco.br`;
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      try {
-        setLoading(true);
-        showSuccess("🔐 Verificando credenciais…");
-        
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        
-        // Verificar se precisa alterar senha
-        const requiresPasswordChange = await checkPasswordChangeRequired(user);
-        
-        if (requiresPasswordChange) {
-          showSuccess("✅ Primeiro acesso! Redirecionando para alteração de senha…");
-          setTimeout(() => (window.location.href = "change-password.html"), 1000);
+        const ctx = getFirebaseContext();
+        if (!ctx) {
+          showError("❌ Erro interno ao carregar autenticação. Tente novamente em instantes.");
           return;
         }
-        
-        // Buscar dados do usuário para redirecionamento
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        let redirectUrl = "https://portal.relevo.eco.br/colaboradores.html"; // fallback
-        
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          redirectUrl = getRedirectUrl(userData);
-        }
-        
-        showSuccess("✅ Login efetuado! Redirecionando…");
-        setTimeout(() => (window.location.href = redirectUrl), 1000);
-        
-      } catch (err) {
-        console.error("❌ Erro de login:", err);
-        setLoading(false);
-        msgSuccess.style.display = "none";
-        const code = err.code || "";
-        if (code.includes("wrong-password") || code.includes("invalid-credential")) {
-          showError("❌ Usuário ou senha incorretos.");
-        } else if (code.includes("user-not-found")) {
-          showError("❌ Usuário não encontrado.");
-        } else if (code.includes("too-many-requests")) {
-          showError("⏸️ Muitas tentativas. Aguarde alguns minutos.");
-        } else if (code.includes("network-request-failed")) {
-          showError("🌐 Erro de conexão. Verifique sua internet.");
-        } else {
-          showError("❌ Erro ao fazer login. Tente novamente.");
-        }
-      }
-    });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const u = document.getElementById("username");
-      const p = document.getElementById("password");
-      u && u.focus();
-      [u, p].forEach((el) =>
-        el.addEventListener("input", () => {
-          msgError.style.display = "none";
-          msgSuccess.style.display = "none";
-        })
-      );
-    });
+        const { auth, db } = ctx;
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!username || !password) {
+          showError("⚠️ Preencha usuário e senha.");
+          return;
+        }
+
+        // Permite e-mail completo ou apenas o user
+        const email = username.includes("@") ? username : `${username}@relevo.eco.br`;
+
+        try {
+          setLoading(true);
+          showSuccess("🔐 Verificando credenciais…");
+
+          const userCredential = await auth.signInWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+
+          const requiresPasswordChange = await checkPasswordChangeRequired(db, user);
+
+          if (requiresPasswordChange) {
+            showSuccess("✅ Primeiro acesso! Redirecionando para alteração de senha…");
+            setTimeout(() => {
+              window.location.href = "change-password.html";
+            }, 1000);
+            return;
+          }
+
+          const userDoc = await db.collection("users").doc(user.uid).get();
+          let redirectUrl = "https://portal.relevo.eco.br/colaboradores.html";
+
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            redirectUrl = getRedirectUrl(userData);
+          }
+
+          showSuccess("✅ Login efetuado! Redirecionando…");
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 1000);
+        } catch (err) {
+          console.error("❌ Erro de login:", err);
+          setLoading(false);
+          if (msgSuccess) msgSuccess.style.display = "none";
+
+          const code = err.code || "";
+          if (code.includes("wrong-password") || code.includes("invalid-credential")) {
+            showError("❌ Usuário ou senha incorretos.");
+          } else if (code.includes("user-not-found")) {
+            showError("⚠️ Usuário não encontrado.");
+          } else if (code.includes("network-request-failed")) {
+            showError("🌐 Erro de conexão. Verifique sua internet.");
+          } else {
+            showError("❌ Erro ao fazer login. Tente novamente.");
+          }
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const u = document.getElementById("username");
+        const p = document.getElementById("password");
+        if (u) u.focus();
+        [u, p].forEach((el) => {
+          if (!el) return;
+          el.addEventListener("input", () => {
+            if (msgError) msgError.style.display = "none";
+            if (msgSuccess) msgSuccess.style.display = "none";
+          });
+        });
+      });
+    })();
   </script>
 </body>
 </html>
-
