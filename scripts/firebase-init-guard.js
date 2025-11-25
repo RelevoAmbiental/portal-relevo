@@ -19,4 +19,7 @@ if (!window.firebase || !firebase.apps.length) {
 // Cria aliases globais para o app e serviços
 window.__RELEVO_APP__ = firebase.app();
 window.__RELEVO_AUTH__ = firebase.auth();
+if (!auth) {
+  console.error("❌ Firebase do Portal não carregou.");
+}
 window.__RELEVO_DB__ = firebase.firestore();
