@@ -5,23 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cronogramas | Relevo Consultoria</title>
 
-    <!-- Favicon correto respeitando o base "/cronograma/" -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="./favicon.png" />
 
-    <!-- Firebase compat (mesmo do Portal) -->
+    <!-- Firebase compat (igual ao Portal) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-    <!-- Expor sessão do Portal para o Cronograma -->
+    <!-- 🔥 IMPORTANTE: inicializa Firebase ANTES do Cronograma -->
+    <script src="https://portal.relevo.eco.br/scripts/firebase-init-guard.js"></script>
+
+    <!-- Agora sim pode expor a sessão -->
     <script src="https://portal.relevo.eco.br/scripts/expose-session.js"></script>
+
+    <!-- App compilado -->
     <script type="module" crossorigin src="/cronograma/assets/index-CQzhwQst.js"></script>
     <link rel="stylesheet" crossorigin href="/cronograma/assets/index-C7Dj_beS.css">
   </head>
 
   <body>
     <div id="root"></div>
-
-    <!-- Caminho relativo correto dentro do base /cronograma/ -->
   </body>
 </html>
