@@ -5,23 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cronogramas | Relevo Consultoria</title>
 
-    <!-- Favicon correto respeitando o base "/cronograma/" -->
-    <link rel="icon" type="image/png" href="./favicon.png" />
+    <!-- Favicon padrão do Portal -->
+    <link rel="icon" type="image/png"
+          href="/assets/icons/favicon_menos.png" />
 
-    <!-- Firebase compat (mesmo do Portal) -->
+    <!-- ===============================
+         Firebase compat (mesmo do Portal)
+         =============================== -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-    <!-- Expor sessão do Portal para o Cronograma -->
-    <script src="https://portal.relevo.eco.br/scripts/expose-session.js"></script>
-    <script type="module" crossorigin src="/cronograma/assets/index-BfB1PsBl.js"></script>
+    <!-- ===============================
+         Scripts de sessão do Portal
+         =============================== -->
+
+    <!-- Inicializa o Firebase global -->
+    <script src="/scripts/firebase-init-guard.js"></script>
+
+    <!-- Expõe janela global com a sessão (window.relevoSession) -->
+    <script src="/scripts/expose-session.js"></script>
+
+    <!-- ===============================
+         CSS do Vite
+         =============================== -->
     <link rel="stylesheet" crossorigin href="/cronograma/assets/index-C7Dj_beS.css">
   </head>
 
   <body>
     <div id="root"></div>
 
-    <!-- Caminho relativo correto dentro do base /cronograma/ -->
+    <!-- ===============================
+         JS do Vite (bundle do Cronograma)
+         =============================== -->
+    <script type="module" crossorigin src="/cronograma/assets/index-BfB1PsBl.js"></script>
   </body>
 </html>
