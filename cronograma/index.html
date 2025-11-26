@@ -6,8 +6,7 @@
     <title>Cronogramas | Relevo Consultoria</title>
 
     <!-- Favicon padrão do Portal -->
-    <link rel="icon" type="image/png"
-          href="/assets/icons/favicon_menos.png" />
+    <link rel="icon" type="image/png" href="/assets/icons/favicon_menos.png" />
 
     <!-- ===============================
          Firebase compat (mesmo do Portal)
@@ -17,17 +16,15 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
     <!-- ===============================
-         Scripts de sessão do Portal
+         Inicialização global do Portal
          =============================== -->
-
-    <!-- Inicializa o Firebase global -->
     <script src="/scripts/firebase-init-guard.js"></script>
 
-    <!-- Expõe janela global com a sessão (window.relevoSession) -->
+    <!-- EXPOR sessão global do usuário -->
     <script src="/scripts/expose-session.js"></script>
 
     <!-- ===============================
-         CSS do Vite
+         CSS do Cronograma (build Vite)
          =============================== -->
     <link rel="stylesheet" crossorigin href="/cronograma/assets/index-C7Dj_beS.css">
   </head>
@@ -36,7 +33,7 @@
     <div id="root"></div>
 
     <!-- ===============================
-         JS do Vite (bundle do Cronograma)
+         JS do Cronograma (build Vite)
          =============================== -->
     <script type="module" crossorigin src="/cronograma/assets/index-BfB1PsBl.js"></script>
   </body>
