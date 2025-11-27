@@ -1,39 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cronogramas | Relevo Consultoria</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cronogramas | Relevo Consultoria</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="./favicon.png" />
+    <!-- Favicon correto respeitando o base "/cronograma/" -->
+    <link rel="icon" type="image/png" href="./favicon.png" />
 
-  <!-- ================================ -->
-  <!--   Firebase compat (obrigatório)  -->
-  <!-- ================================ -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase compat (mesmo do Portal) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- ============================================== -->
-  <!--   Guard do Portal Relevo (inicializa Firebase)  -->
-  <!-- ============================================== -->
-  <script src="https://portal.relevo.eco.br/scripts/firebase-init-guard.js"></script>
+    <!-- Expor sessão do Portal para o Cronograma -->
+    <script src="https://portal.relevo.eco.br/scripts/expose-session.js"></script>
+    <script type="module" crossorigin src="/cronograma/assets/index-CjoTgZ3l.js"></script>
+    <link rel="stylesheet" crossorigin href="/cronograma/assets/index-C7Dj_beS.css">
+  </head>
 
-  <!-- ========================================================== -->
-  <!--   Exposição da sessão (usa o Guard já inicializado acima)   -->
-  <!-- ========================================================== -->
-  <script src="https://portal.relevo.eco.br/scripts/expose-session.js"></script>
+  <body>
+    <div id="root"></div>
 
-  <!-- ================================ -->
-  <!--   Build do Vite (React app)     -->
-  <!-- ================================ -->
-  <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
-  <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css">
-
-</head>
-
-<body>
-  <div id="root"></div>
-</body>
+    <!-- Caminho relativo correto dentro do base /cronograma/ -->
+  </body>
 </html>
