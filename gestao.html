@@ -21,6 +21,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <!-- Guard unificado (já adicionado por você nas páginas controladas) -->
   <script src="scripts/firebase-init-guard.js"></script>
+  <script src="scripts/expose-session.js"></script>
 
   <style>
     /* ============================================
@@ -171,6 +172,31 @@
       padding: 14px 30px;
       font-size: 1.05rem;
       box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
+    }
+
+    /* Card de download rápido */
+    .download-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: var(--card-branco);
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--verde-primario);
+      flex-wrap: wrap;
+    }
+
+    .download-card h2 {
+      margin: 0 0 6px;
+      color: var(--verde-accent);
+    }
+
+    .download-card p {
+      margin: 0;
+      color: var(--texto-cinza);
+      font-size: 0.95rem;
     }
 
     /* Cards padronizados da segunda linha */
@@ -382,6 +408,18 @@
   </section>
 
   <main class="container">
+    <section class="section" aria-label="Download do arquivo de gestão">
+      <div class="download-card">
+        <div>
+          <h2>Baixar gestao.html</h2>
+          <p>Faça o download direto da versão atualizada do portal de gestão para uso offline ou backup.</p>
+        </div>
+        <a class="btn btn-secondary" href="gestao.html" download>
+          <i class="fas fa-download"></i> Baixar arquivo
+        </a>
+      </div>
+    </section>
+
     <!-- SEÇÃO: ACESSO RÁPIDO -->
     <section class="section">
       <h2 class="section-title">Acesso Rápido</h2>
@@ -508,24 +546,24 @@
                    alt="Ícone Indicadores"
                    style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
               <h3>Resumo de Tarefas</h3>
-              <p>Visão consolidada do andamento dos projetos. Em breve, estes dados serão alimentados pelo módulo de Cronograma.</p>
+              <p>Visão consolidada do andamento dos projetos alimentada pelo módulo de Cronograma.</p>
             </div>
             <ul class="indicators-list">
               <li>
                 <span class="label">Tarefas pendentes</span>
-                <span class="value">—</span>
+                <span class="value" data-indicador="pendentes">Carregando…</span>
               </li>
               <li>
                 <span class="label">Em andamento</span>
-                <span class="value">—</span>
+                <span class="value" data-indicador="andamento">Carregando…</span>
               </li>
               <li>
                 <span class="label">Atrasadas</span>
-                <span class="value">—</span>
+                <span class="value" data-indicador="atrasadas">Carregando…</span>
               </li>
               <li>
                 <span class="label">Concluídas</span>
-                <span class="value">—</span>
+                <span class="value" data-indicador="concluidas">Carregando…</span>
               </li>
             </ul>
           </div>
@@ -537,15 +575,15 @@
                    alt="Ícone Agenda da Semana"
                    style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
               <h3>Agenda da Semana</h3>
-              <p>Prévia das principais entregas previstas para os próximos dias. Este painel será integrado ao cronograma.</p>
+              <p>Prévia das principais entregas previstas para os próximos dias, integrada ao cronograma oficial.</p>
             </div>
             <div class="mini-calendar-placeholder">
-              <p><strong>Hoje:</strong> —</p>
+              <p><strong>Hoje:</strong> <span id="dataHoje">Carregando…</span></p>
               <p><strong>Próximas entregas (7 dias):</strong></p>
-              <ul style="margin: 8px 0 0 16px; padding: 0;">
-                <li>—</li>
+              <ul id="listaEntregas" style="margin: 8px 0 0 16px; padding: 0;">
+                <li>Carregando…</li>
               </ul>
-              <small>Em breve, esta área será preenchida automaticamente com os prazos dos projetos.</small>
+              <small>Agenda sincronizada com o cronograma de projetos.</small>
             </div>
           </div>
         </div>
@@ -615,80 +653,148 @@
     });
   
     
-    /* ==========================================================
-       🔗 INTEGRAÇÃO DO PORTAL COM O CRONOGRAMA (Tarefas + Agenda)
+   /* ==========================================================
+      🔗 INTEGRAÇÃO DO PORTAL COM O CRONOGRAMA (Tarefas + Agenda)
        ========================================================== */
-    
-   async function carregarIndicadoresCronograma() {
-    // Firebase carregou?
-    if (!window.__RELEVO_DB__ || !window.__RELEVO_USER__) {
+
+  async function carregarIndicadoresCronograma() {
+    const db = window.__RELEVO_DB__;
+    const authInstance = window.__RELEVO_AUTH__ || (window.firebase ? firebase.auth() : null);
+
+    if (!db || !authInstance) {
       console.warn("⏳ Aguardando ambiente Relevo iniciar…");
       return;
-     }
-   
-     const db = window.__RELEVO_DB__;
-    const user = window.__RELEVO_USER__;
-  
+    }
+
+    const usuario = await obterUsuarioAutenticado(authInstance);
+
+    if (!usuario) {
+      console.warn("⚠️ Nenhum usuário autenticado para carregar indicadores.");
+      return;
+    }
+
     try {
-      // Busca todas as tasks do usuário
-      const snapshot = await db
-         .collection("tasks")
-         .where("userId", "==", user.uid)
-         .get();
-  
+      const snapshot = await db.collection("tasks").get();
+
       const tarefas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
-       atualizarDashboardTarefas(tarefas);
-       atualizarAgendaSemanal(tarefas);
-   
+
+      atualizarDashboardTarefas(tarefas);
+      atualizarAgendaSemanal(tarefas);
     } catch (err) {
       console.error("❌ Erro carregando tarefas do Cronograma:", err);
+      setIndicadoresErro();
     }
   }
-  
-    /* ==========================================================
-       🧮 1) RESUMO DE TAREFAS
-       ========================================================== */
-   function atualizarDashboardTarefas(tarefas) {
-    const pendentes = tarefas.filter(t => t.status === "pendente").length;
-    const emAndamento = tarefas.filter(t => t.status === "andamento").length;
-     const atrasadas = tarefas.filter(t => t.status === "atrasada").length;
-    const concluidas = tarefas.filter(t => t.status === "concluida").length;
-    
-    document.querySelectorAll(".indicators-list .value")[0].textContent = pendentes;
-    document.querySelectorAll(".indicators-list .value")[1].textContent = emAndamento;
-    document.querySelectorAll(".indicators-list .value")[2].textContent = atrasadas;
-    document.querySelectorAll(".indicators-list .value")[3].textContent = concluidas;
+
+  async function obterUsuarioAutenticado(authInstance) {
+    if (window.__RELEVO_USER__) return window.__RELEVO_USER__;
+    if (authInstance.currentUser) return authInstance.currentUser;
+
+    return new Promise((resolve) => {
+      const unsubscribe = authInstance.onAuthStateChanged((user) => {
+        unsubscribe();
+        resolve(user);
+      }, () => resolve(null));
+    });
   }
   
-    /* ==========================================================
-       📅 2) AGENDA DA SEMANA
+   /* ==========================================================
+      🧮 1) RESUMO DE TAREFAS
        ========================================================== */
+  function normalizarStatus(statusBruto = "") {
+    const status = String(statusBruto).toLowerCase();
+    if (["done", "concluida", "concluída", "concluido", "concluído", "finalizada", "finalizado"].includes(status)) {
+      return "concluidas";
+    }
+    if (["in_progress", "andamento", "andando", "em andamento"].includes(status)) {
+      return "andamento";
+    }
+    if (["late", "atrasada", "atrasado", "em atraso", "atrasadas", "atrasados"].includes(status)) {
+      return "atrasadas";
+    }
+    return "pendentes";
+  }
+
+  function atualizarDashboardTarefas(tarefas) {
+    const mapaIndicadores = {
+      pendentes: 0,
+      andamento: 0,
+      atrasadas: 0,
+      concluidas: 0,
+    };
+
+    tarefas.forEach((tarefa) => {
+      const chave = normalizarStatus(tarefa.status);
+      mapaIndicadores[chave] = (mapaIndicadores[chave] || 0) + 1;
+    });
+
+    Object.entries(mapaIndicadores).forEach(([chave, valor]) => {
+      const alvo = document.querySelector(`[data-indicador="${chave}"]`);
+      if (alvo) alvo.textContent = valor;
+    });
+  }
+  
+   /* ==========================================================
+      📅 2) AGENDA DA SEMANA
+       ========================================================== */
+  function obterDataEntrega(tarefa) {
+    const valor = tarefa.dueDate || tarefa.dataEntrega || tarefa.dataPrevista;
+
+    if (!valor) return null;
+
+    if (valor.toDate) {
+      return valor.toDate();
+    }
+
+    if (typeof valor === "number") {
+      return new Date(valor);
+    }
+
+    if (typeof valor === "string") {
+      const parsed = Date.parse(valor);
+      return Number.isNaN(parsed) ? null : new Date(parsed);
+    }
+
+    return null;
+  }
+
   function atualizarAgendaSemanal(tarefas) {
-     const hoje = new Date();
-     const limite = new Date();
+    const hoje = new Date();
+    document.getElementById("dataHoje").textContent = hoje.toLocaleDateString("pt-BR");
+
+    const limite = new Date();
     limite.setDate(hoje.getDate() + 7);
-   
-     const proximas = tarefas
-       .filter(t => t.dueDate)
-      .filter(t => {
-        const d = new Date(t.dueDate);
-        return d >= hoje && d <= limite;
-      })
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-   
-     const ul = document.querySelector(".mini-calendar-placeholder ul");
+
+    const proximas = tarefas
+      .map(tarefa => ({ ...tarefa, entrega: obterDataEntrega(tarefa) }))
+      .filter(t => t.entrega)
+      .filter(t => t.entrega >= hoje && t.entrega <= limite)
+      .sort((a, b) => a.entrega - b.entrega);
+
+    const ul = document.getElementById("listaEntregas");
     ul.innerHTML = "";
-   
-     if (proximas.length === 0) {
-       ul.innerHTML = "<li>Sem entregas nos próximos 7 dias.</li>";
-       return;
+
+    if (proximas.length === 0) {
+      ul.innerHTML = "<li>Sem entregas nos próximos 7 dias.</li>";
+      return;
     }
-  
-     proximas.forEach(t => {
-       const data = new Date(t.dueDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-       ul.innerHTML += `<li>${data} — ${t.nome || "Tarefa sem nome"}</li>`;
-     });
+
+    proximas.forEach(t => {
+      const data = t.entrega.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+      const tarefaTitulo = t.nome || t.title || t.nomeTarefa || "Tarefa sem nome";
+      ul.innerHTML += `<li>${data} — ${tarefaTitulo}</li>`;
+    });
+  }
+
+  function setIndicadoresErro() {
+    document.querySelectorAll("[data-indicador]").forEach(span => {
+      span.textContent = "Erro ao carregar";
+    });
+
+    const ul = document.getElementById("listaEntregas");
+    if (ul) {
+      ul.innerHTML = "<li>Não foi possível carregar a agenda.</li>";
+    }
   }
   
   /* ==========================================================
@@ -704,7 +810,6 @@
   </script>
 </body>
 </html>
-
 
 
 
