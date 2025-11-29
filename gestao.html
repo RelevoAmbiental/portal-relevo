@@ -174,31 +174,6 @@
       box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
     }
 
-    /* Card de download rápido */
-    .download-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 20px 24px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      border-left: 4px solid var(--verde-primario);
-      flex-wrap: wrap;
-    }
-
-    .download-card h2 {
-      margin: 0 0 6px;
-      color: var(--verde-accent);
-    }
-
-    .download-card p {
-      margin: 0;
-      color: var(--texto-cinza);
-      font-size: 0.95rem;
-    }
-
     /* Cards padronizados da segunda linha */
     .dashboard-card {
       background: var(--card-branco);
@@ -650,28 +625,34 @@
   async function carregarIndicadoresCronograma() {
     const db = window.__RELEVO_DB__;
     const authInstance = window.__RELEVO_AUTH__ || (window.firebase ? firebase.auth() : null);
-
+  
     if (!db || !authInstance) {
       console.warn("⏳ Aguardando ambiente Relevo iniciar…");
       return;
     }
-
+  
     const usuario = await obterUsuarioAutenticado(authInstance);
-
+  
     if (!usuario) {
       console.warn("⚠️ Nenhum usuário autenticado para carregar indicadores.");
       return;
     }
-
+  
     try {
-      const snapshot = await db.collection("tasks").get();
-
+      console.log("📡 Buscando tarefas no Firestore…");
+  
+      // 🔥 PATCH OFICIAL AQUI → troca de tasks → tarefas
+      const snapshot = await db.collection("tarefas").get();
+  
       const tarefas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+  
+      console.log(`📦 ${tarefas.length} tarefas carregadas.`);
+  
       atualizarDashboardTarefas(tarefas);
       atualizarAgendaSemanal(tarefas);
+  
     } catch (err) {
-      console.error("❌ Erro carregando tarefas do Cronograma:", err);
+      console.error("❌ Erro carregando tarefas do módulo Cronograma:", err);
       setIndicadoresErro();
     }
   }
@@ -800,6 +781,7 @@
   </script>
 </body>
 </html>
+
 
 
 
