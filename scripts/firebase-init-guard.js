@@ -1,25 +1,31 @@
-// ============================================
-//  SAFE FIREBASE INIT GUARD — versão unificada
-//  Portal Relevo + Orçamento + Cronograma
-// ============================================
+// =======================================================================
+//  FIREBASE INIT GUARD – Portal Relevo (Compat v9)
+//  Inicializa Firebase UMA ÚNICA VEZ e expõe instâncias globais seguras.
+// =======================================================================
 
 (function () {
-  // Garante que o SDK compat já foi carregado
-  if (typeof firebase === "undefined") {
-    console.warn("⚠️ Firebase não está disponível ainda — guard ativado depois.");
+  // Evita execução fora do browser
+  if (typeof window === "undefined") {
+    console.warn("⚠️ Guard ignorado (não está no browser).");
     return;
   }
 
-  // Evita inicializações duplicadas
+  // Evita re-inicialização duplicada
   if (window.__RELEVO_FIREBASE__) {
-    console.log("⚡ Firebase já inicializado pelo Portal.");
+    console.log("⚡ Firebase já inicializado (Guard).");
+    return;
+  }
+
+  // Exige que o SDK compat já tenha carregado
+  if (typeof firebase === "undefined" || !firebase.initializeApp) {
+    console.error("❌ Firebase compat NÃO carregado antes do Guard.");
     return;
   }
 
   try {
-    // Configuração ÚNICA do projeto portal-relevo
+    // Config único e fixo do Portal
     const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4e100w",
       authDomain: "portal-relevo.firebaseapp.com",
       projectId: "portal-relevo",
       storageBucket: "portal-relevo.firebasestorage.app",
@@ -28,14 +34,20 @@
       measurementId: "G-W8TTP3D3YQ"
     };
 
+    // Inicializa apenas uma vez
     const app = firebase.initializeApp(firebaseConfig);
 
-    // Expõe instâncias globais para o ecossistema Relevo
+    // Firestore e Auth compat
+    const auth = app.auth();
+    const db = app.firestore();
+
+    // Expõe globalmente (para cronograma e outros módulos do portal)
     window.__RELEVO_FIREBASE__ = app;
-    window.__RELEVO_AUTH__ = app.auth();
-    window.__RELEVO_DB__ = app.firestore();
+    window.__RELEVO_AUTH__ = auth;
+    window.__RELEVO_DB__ = db;
 
     console.log("🔥 Firebase inicializado com sucesso pelo Guard (portal-relevo).");
+
   } catch (err) {
     console.error("❌ Erro ao inicializar Firebase no Guard:", err);
   }
