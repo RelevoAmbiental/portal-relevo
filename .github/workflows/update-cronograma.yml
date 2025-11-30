@@ -1,11 +1,11 @@
 name: Atualizar Cronograma no Portal
 
 on:
-  # 🔥 Dispara automaticamente quando o cronogramas-relevo mandar o sinal
+  # 🔥 Disparado automaticamente pelo cronogramas-relevo
   repository_dispatch:
-    types: [atualizar-cronograma]
+    types: [cronograma-atualizado]
 
-  # 🔧 Pode ser rodado manualmente se necessário
+  # 🔧 Também pode ser rodado manualmente
   workflow_dispatch:
 
 permissions:
@@ -16,78 +16,96 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ---------------------------------------------------------
-      # 1) Clonar o repositório do portal
-      # ---------------------------------------------------------
-      - name: Checkout Portal
+      - name: 🧬 Checkout do portal-relevo
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT_TOKEN }}
-          fetch-depth: 0
+          # Usa o mesmo PAT para poder fazer push, se o repo for privado
+          token: ${{ secrets.RELEVO_GH_PAT }}
 
-      # ---------------------------------------------------------
-      # 2) Baixar o build do repositório cronogramas-relevo
-      # ---------------------------------------------------------
-      - name: Baixar build do Cronograma
+      - name: 🧬 Checkout do cronogramas-relevo
+        uses: actions/checkout@v4
+        with:
+          repository: RelevoAmbiental/cronogramas-relevo
+          token: ${{ secrets.RELEVO_GH_PAT }}
+          path: cronogramas-src
+
+      - name: 🔧 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            cronogramas-src/package-lock.json
+            cronogramas-src/package.json
+
+      - name: 📦 Instalar dependências do cronograma
+        working-directory: cronogramas-src
+        run: npm ci
+
+      - name: 🏗️ Build do cronograma (Vite)
+        working-directory: cronogramas-src
+        run: npm run build
+
+      - name: 🧹 Limpar pasta cronograma/ atual
         run: |
-          echo "📥 Baixando build do repositório cronogramas-relevo..."
           rm -rf cronograma
-          mkdir cronograma
+          mkdir -p cronograma/assets
 
-          git clone --depth=1 https://github.com/RelevoAmbiental/cronogramas-relevo temp
-
-          if [ ! -d "temp/dist" ]; then
-            echo "❌ ERRO: pasta dist não existe no cronogramas-relevo!"
-            exit 1
-          fi
-
-          cp -r temp/dist/* cronograma/
-          rm -rf temp
-
-      # ---------------------------------------------------------
-      # 3) Gerar index.html com Guard + Sessão
-      # ---------------------------------------------------------
-      - name: Gerar index.html final
+      - name: 📁 Copiar assets do build para portal/cronograma
         run: |
-          echo "📝 Gerando index.html personalizado..."
+          cp -R cronogramas-src/dist/assets/* cronograma/assets/
+
+      - name: 🔍 Descobrir nomes dos bundles gerados
+        id: assets
+        run: |
+          JS_FILE=$(ls cronogramas-src/dist/assets/*.js | head -n 1 | xargs -n1 basename)
+          CSS_FILE=$(ls cronogramas-src/dist/assets/*.css | head -n 1 | xargs -n1 basename)
+          echo "js_file=$JS_FILE" >> $GITHUB_OUTPUT
+          echo "css_file=$CSS_FILE" >> $GITHUB_OUTPUT
+
+      - name: 📝 Gerar cronograma/index.html
+        run: |
+          JS_FILE="${{ steps.assets.outputs.js_file }}"
+          CSS_FILE="${{ steps.assets.outputs.css_file }}"
+
           cat > cronograma/index.html <<EOF
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cronogramas | Relevo Consultoria Ambiental</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cronogramas | Relevo Consultoria</title>
 
-    <!-- Firebase compat -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDK v9 COMPAT -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-    <!-- Guard + Sessão -->
-    <script src="/scripts/firebase-init-guard.js"></script>
-    <script src="/scripts/expose-session.js"></script>
+  <!-- Guard e sessão compartilhada do Portal -->
+  <script src="/scripts/firebase-init-guard.js"></script>
+  <script src="/scripts/expose-session.js"></script>
 
-    <!-- Build React (Vite) -->
-    <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
-    <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css" />
-  </head>
-
-  <body>
-    <div id="root"></div>
-  </body>
+  <!-- Bundles do Vite (cronograma) -->
+  <script type="module" crossorigin src="/cronograma/assets/$JS_FILE"></script>
+  <link rel="stylesheet" href="/cronograma/assets/$CSS_FILE">
+</head>
+<body>
+  <div id="root"></div>
+</body>
 </html>
 EOF
 
-      # ---------------------------------------------------------
-      # 4) Commit e Push para o portal
-      # ---------------------------------------------------------
-      - name: Commit e push no Portal
+      - name: 💾 Commit e Push das alterações
         run: |
-          echo "💾 Commitando alterações..."
+          git status
+          if git diff --quiet; then
+            echo "✅ Sem mudanças para commitar."
+            exit 0
+          fi
+
           git config --local user.email "bot@relevo.eco.br"
           git config --local user.name "RelevoBot"
 
           git add cronograma/
-          git commit -m "🚀 Atualização automática do Cronograma" || echo "Nenhuma mudança"
-
+          git commit -m "Atualização automática do Cronograma a partir do cronogramas-relevo"
           git push
