@@ -21,7 +21,7 @@
 
   try {
     const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4e100w",
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
       authDomain: "portal-relevo.firebaseapp.com",
       projectId: "portal-relevo",
       storageBucket: "portal-relevo.appspot.com",   // ← CORRIGIDO
