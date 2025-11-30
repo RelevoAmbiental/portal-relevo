@@ -28,10 +28,8 @@
       measurementId: "G-W8TTP3D3YQ"
     };
 
-    // Inicializa apenas uma vez
     const app = firebase.initializeApp(firebaseConfig);
 
-    // Expõe a app e serviços principais em namespace próprio
     window.__RELEVO_FIREBASE__ = app;
     window.__RELEVO_AUTH__ = app.auth();
     window.__RELEVO_DB__ = app.firestore();
