@@ -30,6 +30,7 @@
 
     const app = firebase.initializeApp(firebaseConfig);
 
+    // Expõe instâncias globais para o ecossistema Relevo
     window.__RELEVO_FIREBASE__ = app;
     window.__RELEVO_AUTH__ = app.auth();
     window.__RELEVO_DB__ = app.firestore();
