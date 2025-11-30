@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Cronograma | Relevo Consultoria Ambiental</title>
+
+  <!-- Firebase SDK (compat v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <!-- Scripts globais do Portal (auth + sessão) -->
+  <script src="/scripts/firebase-init-guard.js"></script>
+  <script src="/scripts/expose-session.js"></script>
+
+  <!-- 
+    ⚠️ Placeholders necessários:
+    O workflow do portal vai substituir automaticamente:
+      /cronograma/assets/APP_JS_HASH.js
+      /cronograma/assets/APP_CSS_HASH.css
+  -->
+
+  <script type="module" crossorigin src="/cronograma/assets/APP_JS_HASH.js"></script>
+  <link rel="stylesheet" href="/cronograma/assets/APP_CSS_HASH.css">
+
+  <style>
+    body {
+      margin: 0;
+      background: #f4f4f4;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Onde o app React do cronograma será montado -->
+  <div id="root">
+      <p style="padding: 20px; text-align:center; color:#444">
+        Carregando módulo de Cronograma...
+      </p>
+  </div>
+</body>
+</html>
