@@ -1,111 +1,36 @@
-name: Atualizar Cronograma no Portal
+name: Generate package-lock.json
 
 on:
-  # 🔥 Disparado automaticamente pelo cronogramas-relevo
-  repository_dispatch:
-    types: [cronograma-atualizado]
-
-  # 🔧 Também pode ser rodado manualmente
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-cronograma:
+  generate-lockfile:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧬 Checkout do portal-relevo
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Usa o mesmo PAT para poder fazer push, se o repo for privado
           token: ${{ secrets.RELEVO_GH_PAT }}
 
-      - name: 🧬 Checkout do cronogramas-relevo
-        uses: actions/checkout@v4
-        with:
-          repository: RelevoAmbiental/cronogramas-relevo
-          token: ${{ secrets.RELEVO_GH_PAT }}
-          path: cronogramas-src
-
-      - name: 🔧 Configurar Node.js
+      - name: Setup Node (sem cache forçado)
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: |
-            cronogramas-src/package-lock.json
-            cronogramas-src/package.json
+          node-version: 20
+          cache: 'none'        # 🔥 OBRIGATÓRIO PARA PARAR O ERRO
 
-      - name: 📦 Instalar dependências do cronograma
-        working-directory: cronogramas-src
-        run: npm ci
-
-      - name: 🏗️ Build do cronograma (Vite)
-        working-directory: cronogramas-src
-        run: npm run build
-
-      - name: 🧹 Limpar pasta cronograma/ atual
+      - name: Generate package-lock.json
         run: |
-          rm -rf cronograma
-          mkdir -p cronograma/assets
+          npm install
+          ls -la
 
-      - name: 📁 Copiar assets do build para portal/cronograma
+      - name: Commit lockfile
         run: |
-          cp -R cronogramas-src/dist/assets/* cronograma/assets/
-
-      - name: 🔍 Descobrir nomes dos bundles gerados
-        id: assets
-        run: |
-          JS_FILE=$(ls cronogramas-src/dist/assets/*.js | head -n 1 | xargs -n1 basename)
-          CSS_FILE=$(ls cronogramas-src/dist/assets/*.css | head -n 1 | xargs -n1 basename)
-          echo "js_file=$JS_FILE" >> $GITHUB_OUTPUT
-          echo "css_file=$CSS_FILE" >> $GITHUB_OUTPUT
-
-      - name: 📝 Gerar cronograma/index.html
-        run: |
-          JS_FILE="${{ steps.assets.outputs.js_file }}"
-          CSS_FILE="${{ steps.assets.outputs.css_file }}"
-
-          cat > cronograma/index.html <<EOF
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cronogramas | Relevo Consultoria</title>
-
-  <!-- Firebase SDK v9 COMPAT -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-
-  <!-- Guard e sessão compartilhada do Portal -->
-  <script src="/scripts/firebase-init-guard.js"></script>
-  <script src="/scripts/expose-session.js"></script>
-
-  <!-- Bundles do Vite (cronograma) -->
-  <script type="module" crossorigin src="/cronograma/assets/$JS_FILE"></script>
-  <link rel="stylesheet" href="/cronograma/assets/$CSS_FILE">
-</head>
-<body>
-  <div id="root"></div>
-</body>
-</html>
-EOF
-
-      - name: 💾 Commit e Push das alterações
-        run: |
-          git status
-          if git diff --quiet; then
-            echo "✅ Sem mudanças para commitar."
-            exit 0
-          fi
-
           git config --local user.email "bot@relevo.eco.br"
-          git config --local user.name "RelevoBot"
-
-          git add cronograma/
-          git commit -m "Atualização automática do Cronograma a partir do cronogramas-relevo"
-          git push
+          git config --local user.name "RelevoBot CI"
+          git add package-lock.json
+          git commit -m "Add package-lock.json (generated via CI)" || echo "Nada para commitar"
+          git push || echo "Nada para enviar"
