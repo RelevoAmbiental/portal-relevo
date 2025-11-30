@@ -3,35 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Cronogramas | Relevo Consultoria Ambiental</title>
 
-    <!-- 1) Firebase compat: necessário antes de tudo -->
+    <!-- 1) Firebase compat -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-    <!-- 2) Guard do Portal (inicializa Firebase e expõe __RELEVO_FIREBASE__) -->
+    <!-- 2) Guard do Portal -->
     <script src="/scripts/firebase-init-guard.js"></script>
 
-    <!-- 3) Exposição de sessão global (define window.__RELEVO_USER__) -->
+    <!-- 3) Expor sessão -->
     <script src="/scripts/expose-session.js"></script>
 
-    <!-- 4) IMPORTANTE: aguarda a sessão ser exposta antes de carregar o app -->
+    <!-- 4) Espera a sessão antes de carregar o React -->
     <script>
       window.addEventListener("DOMContentLoaded", function () {
         const check = setInterval(() => {
           if (window.__RELEVO_AUTH__ && window.__RELEVO_USER__) {
             clearInterval(check);
 
-            // Carrega dinamicamente os bundles corretos
+            // 🔥 Usa os arquivos REAIS que estão no repositório
             const script = document.createElement("script");
             script.type = "module";
-            script.src = "/cronograma/assets/index.js";
+            script.src = "/cronograma/assets/index-DsbZaL5u.js";
             document.head.appendChild(script);
 
             const css = document.createElement("link");
             css.rel = "stylesheet";
-            css.href = "/cronograma/assets/index.css";
+            css.href = "/cronograma/assets/index-C7Dj_beS.css";
             document.head.appendChild(css);
 
             console.log("🔥 Cronograma liberado após sessão do Portal.");
