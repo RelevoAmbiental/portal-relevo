@@ -3,18 +3,18 @@ name: Atualizar Cronograma no Portal
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"   # a cada 6 horas (opcional)
+    - cron: "0 */6 * * *"
 
 jobs:
   update-cronograma:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clonar Portal
+      - name: Checar código do Portal
         uses: actions/checkout@v4
         with:
           repository: RelevoAmbiental/portal-relevo
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.PAT_PORTAL }}   # TOKEN DEFINITIVO
 
       - name: Baixar build do Cronograma
         run: |
@@ -29,5 +29,7 @@ jobs:
           git config --global user.name "RelevoBot"
           git config --global user.email "bot@relevo.eco.br"
           git add cronograma
-          git commit -m "Atualização automática do Cronograma"
+          git commit -m "Atualização automática do Cronograma" || echo "Nenhuma mudança."
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_PORTAL }}
