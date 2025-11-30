@@ -3,10 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cronogramas | Relevo Consultoria</title>
-    <script type="module" crossorigin src="/cronograma/assets/index-vR8QHhJ9.js"></script>
-    <link rel="stylesheet" crossorigin href="/cronograma/assets/index-C7Dj_beS.css">
+
+    <title>Cronogramas | Relevo Consultoria Ambiental</title>
+
+    <!-- ============================================================
+         🔥 Firebase compat — NECESSÁRIO antes do Guard do Portal
+         ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+    <!-- ============================================================
+         🔥 Guard do Portal Relevo — expõe window.__RELEVO_AUTH__, app e db
+         ============================================================ -->
+    <script src="/scripts/firebase-init-guard.js"></script>
+
+    <!-- ============================================================
+         🔥 Aplicação React do Cronograma (build Vite)
+         ============================================================ -->
+    <script type="module" crossorigin src="/cronograma/assets/index-ByWIryW8.js"></script>
+    <link rel="stylesheet" crossorigin href="/cronograma/assets/index-C7Dj_beS.css" />
   </head>
+
   <body>
     <div id="root"></div>
   </body>
