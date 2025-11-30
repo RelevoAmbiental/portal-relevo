@@ -1,40 +1,43 @@
-// portal-relevo/scripts/injetar-guard.js
-const fs = require("fs");
-const path = require("path");
+// ============================================
+//  SAFE FIREBASE INIT GUARD — versão unificada
+//  Portal Relevo + Orçamento + Cronograma
+// ============================================
 
-// index.html que foi copiado do dist do cronograma
-const indexPath = path.resolve(__dirname, "..", "cronograma", "index.html");
+(function () {
+  // Garante que o SDK compat já foi carregado
+  if (typeof firebase === "undefined") {
+    console.warn("⚠️ Firebase não está disponível ainda — guard ativado depois.");
+    return;
+  }
 
-if (!fs.existsSync(indexPath)) {
-  console.error("❌ Não encontrei cronograma/index.html. Verifique se o build foi copiado.");
-  process.exit(1);
-}
+  // Evita inicializações duplicadas
+  if (window.__RELEVO_FIREBASE__) {
+    console.log("⚡ Firebase já inicializado pelo Portal.");
+    return;
+  }
 
-let html = fs.readFileSync(indexPath, "utf-8");
+  try {
+    // Configuração ÚNICA do projeto portal-relevo
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+      authDomain: "portal-relevo.firebaseapp.com",
+      projectId: "portal-relevo",
+      storageBucket: "portal-relevo.firebasestorage.app",
+      messagingSenderId: "182759626683",
+      appId: "1:182759626683:web:2dde2eeef910d4c288569e",
+      measurementId: "G-W8TTP3D3YQ"
+    };
 
-// Se já tem o guard, não faz nada
-if (html.includes("firebase-init-guard.js")) {
-  console.log("ℹ️ Guard já está injetado no index.html do Cronograma. Nada a fazer.");
-  process.exit(0);
-}
+    // Inicializa apenas uma vez
+    const app = firebase.initializeApp(firebaseConfig);
 
-const injectBlock = `
-  <!-- Firebase compat do Portal Relevo -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    // Expõe a app e serviços principais em namespace próprio
+    window.__RELEVO_FIREBASE__ = app;
+    window.__RELEVO_AUTH__ = app.auth();
+    window.__RELEVO_DB__ = app.firestore();
 
-  <!-- Guard do Portal Relevo -->
-  <script src="/scripts/firebase-init-guard.js"></script>
-`;
-
-// Insere logo depois da tag <head>
-if (!html.includes("<head>")) {
-  console.error("❌ index.html do Cronograma não tem <head>. Estrutura inesperada.");
-  process.exit(1);
-}
-
-html = html.replace("<head>", `<head>\n${injectBlock}\n`);
-
-fs.writeFileSync(indexPath, html, "utf-8");
-console.log("🔥 Guard e Firebase compat injetados no index.html do Cronograma com sucesso!");
+    console.log("🔥 Firebase inicializado com sucesso pelo Guard (portal-relevo).");
+  } catch (err) {
+    console.error("❌ Erro ao inicializar Firebase no Guard:", err);
+  }
+})();
