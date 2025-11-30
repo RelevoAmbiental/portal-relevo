@@ -1,33 +1,48 @@
-// ============================================
-//   EXPOSE SESSION — seguro e sem colisões
-// ============================================
+// =======================================================================
+//  EXPOSE SESSION — expõe a sessão global de forma segura e sincronizada
+// =======================================================================
 
 (function () {
+  if (typeof window === "undefined") return;
 
-  // Se Firebase ainda não foi inicializado, aborta
-  if (!window.__RELEVO_FIREBASE__) {
-    console.warn("⚠️ Firebase não inicializado ainda — sessão não exposta.");
-    return;
+  function esperarFirebase() {
+    return new Promise((resolve) => {
+      if (window.__RELEVO_AUTH__) return resolve(window.__RELEVO_AUTH__);
+
+      const timer = setInterval(() => {
+        if (window.__RELEVO_AUTH__) {
+          clearInterval(timer);
+          resolve(window.__RELEVO_AUTH__);
+        }
+      }, 50);
+    });
   }
 
-  const auth = window.__RELEVO_FIREBASE__.auth();
+  async function iniciar() {
+    const auth = await esperarFirebase();
 
-  // Guarda o usuário logado globalmente
-  auth.onAuthStateChanged((user) => {
-    if (!user) {
-      console.log("⚠️ Nenhum usuário logado.");
-      window.__RELEVO_USER__ = null;
+    if (!auth) {
+      console.error("❌ expose-session.js: Auth indisponível.");
       return;
     }
 
-    console.log("✅ Usuário exposto globalmente:", user.email);
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        console.log("⚠️ Nenhum usuário logado.");
+        window.__RELEVO_USER__ = null;
+        return;
+      }
 
-    window.__RELEVO_USER__ = {
-      uid: user.uid,
-      email: user.email,
-      provider: user.providerData[0]?.providerId || "unknown",
-      raw: user
-    };
-  });
+      window.__RELEVO_USER__ = {
+        uid: user.uid,
+        email: user.email,
+        provider: user.providerData?.[0]?.providerId ?? "unknown",
+        raw: user
+      };
 
+      console.log("✅ Usuário exposto globalmente:", user.email);
+    });
+  }
+
+  iniciar();
 })();
