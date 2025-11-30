@@ -3,33 +3,53 @@ name: Atualizar Cronograma no Portal
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */6 * * *"   # opcional: a cada 6 horas
 
 jobs:
   update-cronograma:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checar código do Portal
+      - name: Clonar Portal (este repositório)
         uses: actions/checkout@v4
         with:
           repository: RelevoAmbiental/portal-relevo
-          token: ${{ secrets.PAT_PORTAL }}   # TOKEN DEFINITIVO
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Baixar build do Cronograma
         run: |
+          # Limpa pasta antiga do cronograma
           rm -rf cronograma
           mkdir cronograma
+
+          # Clona o repositório do cronograma
           git clone --depth=1 https://github.com/RelevoAmbiental/cronogramas-relevo temp
+
+          # Copia o dist para dentro de ./cronograma
           cp -r temp/dist/* cronograma/
+
+          # Limpa repositório temporário
           rm -rf temp
+
+      - name: Injetar Firebase Guard no index.html do Cronograma
+        run: node scripts/injetar-guard.js
 
       - name: Commit e Push
         run: |
           git config --global user.name "RelevoBot"
           git config --global user.email "bot@relevo.eco.br"
+
           git add cronograma
-          git commit -m "Atualização automática do Cronograma" || echo "Nenhuma mudança."
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança para commitar."
+            exit 0
+          fi
+
+          git commit -m "Atualização automática do Cronograma (build + guard)"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_PORTAL }}
