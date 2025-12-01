@@ -15,6 +15,17 @@
   <script src="/scripts/firebase-init-guard.js"></script>
   <script src="/scripts/expose-session.js"></script>
 
+  <!-- 🔥 Restaura rota de SPA ao retornar do 404.html -->
+  <script>
+    (function restoreSpaRoute() {
+      const path = sessionStorage.getItem("relevo_spa_path");
+      if (path) {
+        sessionStorage.removeItem("relevo_spa_path");
+        history.replaceState(null, "", path);
+      }
+    })();
+  </script>
+
   <!-- Bundles atuais do cronograma (Vite) -->
   <script type="module" crossorigin src="/cronograma/assets/index-DcWu3Df8.js"></script>
   <link rel="stylesheet" href="/cronograma/assets/index-C7Dj_beS.css">
@@ -31,9 +42,9 @@
 <body>
   <!-- Onde o app React do cronograma será montado -->
   <div id="root">
-      <p style="padding: 20px; text-align:center; color:#444">
-        Carregando módulo de Cronograma...
-      </p>
+    <p style="padding: 20px; text-align:center; color:#444">
+      Carregando módulo de Cronograma...
+    </p>
   </div>
 </body>
 </html>
