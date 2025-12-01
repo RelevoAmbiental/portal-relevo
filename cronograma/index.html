@@ -1,59 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Cronograma | Relevo Consultoria Ambiental</title>
+    <title>Cronogramas | Relevo Consultoria</title>
 
-  <!-- Firebase SDK (compat v9) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <!-- 🔥 Firebase SDK compat (necessário para o cronograma) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- Scripts globais do Portal (auth + sessão) -->
-  <script src="/scripts/firebase-init-guard.js"></script>
-  <script src="/scripts/expose-session.js"></script>
+    <!-- 🔥 Scripts centrais do Portal Relevo -->
+    <script src="/scripts/firebase-init-guard.js"></script>
+    <script src="/scripts/expose-session.js"></script>
 
-  <!-- 🔥 Restaura rota de SPA ao retornar do 404.html -->
-  <script>
-    (function restoreSpaRoute() {
-      const path = sessionStorage.getItem("relevo_spa_path");
-      if (path) {
-        sessionStorage.removeItem("relevo_spa_path");
-        history.replaceState(null, "", path);
-      }
-    })();
-  </script>
+    <!-- 🎨 CSS do Vite -->
+    <link rel="stylesheet" href="/cronograma/assets/index-D-U69iqp.css" />
 
-  <!-- Bundles atuais do cronograma (Vite) -->
-  <script type="module" crossorigin src="/cronograma/assets/index-DcWu3Df8.js"></script>
-  <link rel="stylesheet" href="/cronograma/assets/index-C7Dj_beS.css">
+    <!-- 🔥 SPA: restaura rota real após reload -->
+    <script>
+      (function () {
+        const saved = sessionStorage.getItem("relevo_spa_path");
+        if (saved) {
+          sessionStorage.removeItem("relevo_spa_path");
+          history.replaceState(null, "", saved);
+        }
+      })();
+    </script>
+  </head>
 
-  <style>
-    body {
-      margin: 0;
-      background: #f4f4f4;
-      font-family: Arial, sans-serif;
-    }
-  </style>
-</head>
+  <body>
+    <!-- Onde o React monta o app -->
+    <div id="root"></div>
 
-<body>
-  <!-- Onde o app React do cronograma será montado -->
-  <div id="root">
-    <p style="padding: 20px; text-align:center; color:#444">
-      Carregando módulo de Cronograma...
-    </p>
-  </div>
-  <script>
-  (function() {
-    const saved = sessionStorage.getItem("relevo_spa_path");
-    if (saved) {
-      sessionStorage.removeItem("relevo_spa_path");
-      history.replaceState(null, "", saved);
-    }
-  })();
-  </script>
-</body>
+    <!-- 🚀 Bundle do Vite (compilado) -->
+    <script type="module" src="/cronograma/assets/index-D1vbpZkV.js"></script>
+  </body>
 </html>
