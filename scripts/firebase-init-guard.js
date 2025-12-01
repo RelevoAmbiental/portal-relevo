@@ -38,6 +38,14 @@
     window.__RELEVO_FIREBASE__ = app;
     window.__RELEVO_AUTH__ = auth;
     window.__RELEVO_DB__ = db;
+    // Compatibilidade total com o cronograma-relevo
+    window.RelevoFirebase = {
+      app,
+      auth,
+      db,
+      storage: app.storage ? app.storage() : null
+    };
+
 
     console.log("🔥 Firebase inicializado com sucesso pelo Guard (portal-relevo).");
 
