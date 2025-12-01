@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // GitHub Pages SPA redirect
+    // Salva a rota real e redireciona para /cronograma/
+    sessionStorage.setItem("relevo_spa_path", location.pathname + location.search + location.hash);
+    window.location.replace("/cronograma/");
+  </script>
+</head>
+<body></body>
+</html>
