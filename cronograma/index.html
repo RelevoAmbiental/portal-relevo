@@ -46,5 +46,14 @@
       Carregando módulo de Cronograma...
     </p>
   </div>
+  <script>
+  (function() {
+    const saved = sessionStorage.getItem("relevo_spa_path");
+    if (saved) {
+      sessionStorage.removeItem("relevo_spa_path");
+      history.replaceState(null, "", saved);
+    }
+  })();
+  </script>
 </body>
 </html>
