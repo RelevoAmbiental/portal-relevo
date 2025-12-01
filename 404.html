@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <script>
-    // GitHub Pages SPA redirect
-    // Salva a rota real e redireciona para /cronograma/
-    sessionStorage.setItem("relevo_spa_path", location.pathname + location.search + location.hash);
+    // Salva a URL completa acessada
+    sessionStorage.setItem(
+      "relevo_spa_path",
+      location.pathname.replace("/cronograma/", "") + location.search + location.hash
+    );
+
+    // Volta para a raiz do app SPA
     window.location.replace("/cronograma/");
   </script>
 </head>
