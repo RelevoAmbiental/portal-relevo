@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <script>
-    // Salva a URL completa acessada
-    sessionStorage.setItem(
-      "relevo_spa_path",
-      location.pathname.replace("/cronograma/", "") + location.search + location.hash
-    );
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script>
+      // Redireciona qualquer rota desconhecida de volta pro index da SPA
+      sessionStorage.setItem(
+        "relevo_spa_path",
+        location.pathname.replace("/cronograma", "") +
+          location.search +
+          location.hash
+      );
 
-    // Volta para a raiz do app SPA
-    window.location.replace("/cronograma/");
-  </script>
-</head>
-<body></body>
+      window.location.replace("/cronograma/");
+    </script>
+  </head>
+  <body></body>
 </html>
