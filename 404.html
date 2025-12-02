@@ -4,38 +4,41 @@
   <meta charset="UTF-8" />
 
   <script>
-    /* ==========================================================
-       404 UNIVERSAL PARA O PORTAL RELEVO (GH-PAGES)
-       Captura rotas de qualquer submódulo React (SPA)
-       ========================================================== */
+    /* ===================================================================
+       404 UNIVERSAL PARA GH-PAGES (PORTAL + SUBAPPS)
+       Intercepta qualquer rota inválida e restaura no SPA correto
+       =================================================================== */
 
-    const path = location.pathname;
+    const fullPath = location.pathname + location.search + location.hash;
 
-    // Detecta automaticamente qual subSPA deve assumir
-    const spaBases = [
+    // Lista de sub-SPAs do Portal
+    const subApps = [
       "/cronograma/",
       "/despesas/",
       "/orcamento/",
       "/inventario/"
     ];
 
-    // Encontra qual SPA deve assumir a rota
-    const spa = spaBases.find(base => path.startsWith(base));
+    // Identifica qual SPA deve assumir a rota
+    const match = subApps.find(prefix => fullPath.startsWith(prefix));
 
-    if (spa) {
-      // Ex: salva /cronograma/projetos → "/projetos"
-      sessionStorage.setItem(
-        "relevo_spa_path",
-        path.replace(spa, "") + location.search + location.hash
-      );
+    if (match) {
+      // Exemplo:
+      // /cronograma/projetos → depois do prefixo vira "projetos"
+      const relative = fullPath.replace(match, "");
 
-      // Redireciona para o index correto da SPA
-      window.location.replace(spa);
-    } else {
-      // Qualquer outra página usa a home do portal
+      // Guarda para o React restaurar no carregamento
+      sessionStorage.setItem("relevo_spa_path", "/" + relative);
+
+      // Redireciona para o index da SPA correspondente
+      window.location.replace(match);
+    } 
+    else {
+      // Rotas comuns do portal caem no index geral
       window.location.replace("/");
     }
   </script>
+
 </head>
 <body></body>
 </html>
