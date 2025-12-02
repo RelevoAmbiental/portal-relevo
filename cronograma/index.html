@@ -3,38 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Cronogramas | Relevo Consultoria</title>
-
-    <!-- 🔥 Firebase SDK compat (necessário para o cronograma) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-
-    <!-- 🔥 Scripts centrais do Portal Relevo -->
-    <script src="/scripts/firebase-init-guard.js"></script>
-    <script src="/scripts/expose-session.js"></script>
-
-    <!-- 🎨 CSS do Vite -->
-    <link rel="stylesheet" href="/cronograma/assets/index-C7Dj_beS.css" />
-
-    <!-- 🔥 SPA: restaura rota real após reload -->
-    <script>
-      (function () {
-        const saved = sessionStorage.getItem("relevo_spa_path");
-        if (saved) {
-          sessionStorage.removeItem("relevo_spa_path");
-          history.replaceState(null, "", saved);
-        }
-      })();
-    </script>
+    <script type="module" crossorigin src="/cronograma/assets/index-DJ7kJUvM.js"></script>
+    <link rel="stylesheet" crossorigin href="/cronograma/assets/index-D-U69iqp.css">
   </head>
-
   <body>
-    <!-- Onde o React monta o app -->
-    <div id="root"></div>
-
-    <!-- 🚀 Bundle do Vite (compilado) -->
-    <script type="module" src="/cronograma/assets/index-DcWu3Df8.js"></script>
+    <div id="root"></div>
   </body>
 </html>
