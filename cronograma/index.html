@@ -6,27 +6,31 @@
     <title>Cronogramas | Relevo Consultoria</title>
 
     <!-- ============================================================
+         🔥 Firebase compat v9 (para Cronograma)
+         ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+    <!-- ============================================================
+         🔥 Guard + Session Exposure do Portal
+         ============================================================ -->
+    <script src="/scripts/firebase-init-guard.js"></script>
+    <script src="/scripts/expose-session.js"></script>
+
+    <!-- ============================================================
          🔄 RESTAURADOR DE ROTA SPA (Cronograma)
-         Lê o path salvo pelo 404.html e repõe no histórico
          ============================================================ -->
     <script>
       (function restoreRoute() {
         try {
           const saved = sessionStorage.getItem("relevo_spa_path");
           if (!saved) return;
-
-          console.log(
-            "[Cronograma] Restaurando rota após redirecionamento:",
-            saved
-          );
-
-          // Remove após usar, evita reaplicar em page loads futuros
+          console.log("[Cronograma] Restaurando rota:", saved);
           sessionStorage.removeItem("relevo_spa_path");
-
-          // Restaura a rota ANTES de o React Router assumir
           history.replaceState(null, "", saved);
         } catch (err) {
-          console.error("[Cronograma] Falha ao restaurar rota SPA:", err);
+          console.error("[Cronograma] Falha ao restaurar rota:", err);
         }
       })();
     </script>
