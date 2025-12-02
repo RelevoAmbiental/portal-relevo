@@ -1,18 +1,41 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <script>
-      // Redireciona qualquer rota desconhecida de volta pro index da SPA
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+
+  <script>
+    /* ==========================================================
+       404 UNIVERSAL PARA O PORTAL RELEVO (GH-PAGES)
+       Captura rotas de qualquer submódulo React (SPA)
+       ========================================================== */
+
+    const path = location.pathname;
+
+    // Detecta automaticamente qual subSPA deve assumir
+    const spaBases = [
+      "/cronograma/",
+      "/despesas/",
+      "/orcamento/",
+      "/inventario/"
+    ];
+
+    // Encontra qual SPA deve assumir a rota
+    const spa = spaBases.find(base => path.startsWith(base));
+
+    if (spa) {
+      // Ex: salva /cronograma/projetos → "/projetos"
       sessionStorage.setItem(
         "relevo_spa_path",
-        location.pathname.replace("/cronograma", "") +
-          location.search +
-          location.hash
+        path.replace(spa, "") + location.search + location.hash
       );
 
-      window.location.replace("/cronograma/");
-    </script>
-  </head>
-  <body></body>
+      // Redireciona para o index correto da SPA
+      window.location.replace(spa);
+    } else {
+      // Qualquer outra página usa a home do portal
+      window.location.replace("/");
+    }
+  </script>
+</head>
+<body></body>
 </html>
