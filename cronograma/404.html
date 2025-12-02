@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // Salva a rota acessada dentro do app Cronograma
+    sessionStorage.setItem(
+      "relevo_spa_path",
+      location.pathname.replace("/cronograma", "") +
+      location.search +
+      location.hash
+    );
+
+    // Redireciona para o index do Cronograma
+    window.location.replace("/cronograma/");
+  </script>
+</head>
+<body></body>
+</html>
