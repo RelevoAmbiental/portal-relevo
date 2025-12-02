@@ -4,10 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cronogramas | Relevo Consultoria</title>
+
+    <!-- ============================================================
+         🔄 RESTAURADOR DE ROTA SPA (Cronograma)
+         Lê o path salvo pelo 404.html e repõe no histórico
+         ============================================================ -->
+    <script>
+      (function restoreRoute() {
+        try {
+          const saved = sessionStorage.getItem("relevo_spa_path");
+          if (!saved) return;
+
+          console.log(
+            "[Cronograma] Restaurando rota após redirecionamento:",
+            saved
+          );
+
+          // Remove após usar, evita reaplicar em page loads futuros
+          sessionStorage.removeItem("relevo_spa_path");
+
+          // Restaura a rota ANTES de o React Router assumir
+          history.replaceState(null, "", saved);
+        } catch (err) {
+          console.error("[Cronograma] Falha ao restaurar rota SPA:", err);
+        }
+      })();
+    </script>
+
+    <!-- ============================================================
+         🔥 Build do Vite (JS + CSS)
+         ============================================================ -->
     <script type="module" crossorigin src="/cronograma/assets/index-DJ7kJUvM.js"></script>
     <link rel="stylesheet" crossorigin href="/cronograma/assets/index-D-U69iqp.css">
   </head>
+
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   </body>
 </html>

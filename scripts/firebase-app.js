@@ -1,4 +1,11 @@
 <script type="module">
+/********************************************************************
+ * 🔒 WRAPPER SEGURO (IIFE)
+ * Isola todo o script em um escopo fechado, evita leaks globais
+ * e permite “return” de forma segura, sem warnings do VS Code.
+ ********************************************************************/
+(() => {
+
   /********************************************************************
    * 🔒 PROTEÇÃO CRÍTICA
    * Evita inicializar o Firebase modular v10 dentro do Cronograma,
@@ -27,7 +34,6 @@
    * - clientes
    * - etc.
    ********************************************************************/
-
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -76,4 +82,6 @@
       window.__RELEVO_USER__ = null;
     }
   });
+
+})(); // ← Fim da IIFE segura
 </script>
