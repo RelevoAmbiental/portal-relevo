@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -25,12 +25,12 @@
   <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css" />
 
-  <!-- Firebase SDK (compat) — necessário para guard + login -->
+  <!-- Firebase SDK (compat) para login + guard -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- Guard do Portal (usa compat e não deve ser alterado) -->
+  <!-- Guard do Portal -->
   <script src="scripts/firebase-init-guard.js"></script>
   <script src="scripts/expose-session.js"></script>
 
@@ -88,7 +88,10 @@
       opacity: 0.9;
     }
 
-    .form-group { text-align: left; margin-bottom: 18px; }
+    .form-group {
+      text-align: left;
+      margin-bottom: 18px;
+    }
 
     .form-label {
       display: block;
@@ -107,10 +110,12 @@
       color: #fff;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
 
-    .form-group input::placeholder { color: rgba(255, 255, 255, 0.6); }
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
 
     .form-group input:focus {
       border-color: var(--relevo-accent-gold);
@@ -133,7 +138,10 @@
       opacity: 0.8;
     }
 
-    .actions-row a:hover { opacity: 1; text-decoration: underline; }
+    .actions-row a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
 
     .btn-login {
       width: 100%;
@@ -149,7 +157,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+      transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
     }
 
     .btn-login:hover {
@@ -163,36 +171,6 @@
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     }
 
-    .btn-login.btn-loading { cursor: wait; opacity: 0.9; }
-
-    .helper-text {
-      font-size: 0.75rem;
-      opacity: 0.8;
-      margin-bottom: 15px;
-    }
-
-    .success-msg,
-    .error-msg {
-      display: none;
-      font-size: 0.82rem;
-      text-align: left;
-      margin-bottom: 12px;
-      padding: 8px 10px;
-      border-radius: 8px;
-    }
-
-    .success-msg {
-      background: rgba(60, 179, 113, 0.2);
-      border: 1px solid rgba(60, 179, 113, 0.7);
-      color: #d1fae5;
-    }
-
-    .error-msg {
-      background: rgba(255, 77, 79, 0.16);
-      border: 1px solid rgba(255, 77, 79, 0.8);
-      color: #fee2e2;
-    }
-
     footer {
       position: fixed;
       left: 0;
@@ -202,29 +180,11 @@
       font-size: 0.75rem;
       color: rgba(255, 255, 255, 0.7);
     }
-
-    @media (max-width: 480px) {
-      .login-container {
-        margin: 0 16px;
-        padding: 28px 22px;
-      }
-
-      .login-container h1 { font-size: 1.5rem; }
-
-      body {
-        align-items: flex-start;
-        padding-top: 40px;
-      }
-
-      footer {
-        position: static;
-        margin-top: 20px;
-      }
-    }
   </style>
 </head>
 
 <body>
+
   <div class="login-container">
     <img
       src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
@@ -239,30 +199,17 @@
     <form id="login-form" autocomplete="on">
       <div class="form-group">
         <label for="username" class="form-label">Usuário</label>
-        <input
-          type="text"
-          id="username"
-          placeholder="Digite seu usuário ou e-mail"
-          autocomplete="username"
-          required
-        />
+        <input type="text" id="username" placeholder="Digite seu usuário ou e-mail" autocomplete="username" required />
       </div>
+
       <div class="form-group">
         <label for="password" class="form-label">Senha</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Digite sua senha"
-          autocomplete="current-password"
-          required
-        />
+        <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required />
       </div>
 
       <div class="actions-row">
         <span class="helper-text">Usuários internos: <strong>usuario@relevo.eco.br</strong></span>
-        <a href="mailto:suporte@relevo.eco.br?subject=Suporte%20Portal%20Relevo">
-          Precisa de ajuda?
-        </a>
+        <a href="mailto:suporte@relevo.eco.br?subject=Suporte%20Portal%20Relevo">Precisa de ajuda?</a>
       </div>
 
       <button type="submit" id="login-btn" class="btn-login">
@@ -276,187 +223,51 @@
     © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
   </footer>
 
-  <!-- 🔥 Firebase Modular v10 — agora carregado no portal para suportar /cronograma/ -->
-  <script type="module" src="scripts/firebase-app.js"></script>
+  <!-- 🔥 Firebase Modular v10 — carregado corretamente como módulo -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  <!-- 🔒 Script original do portal (login) — não modificado -->
-  <script>
-    (function () {
-      console.log("🚀 Iniciando Portal Relevo (login)…");
+    console.log("[Portal] Carregando Firebase v10 (modular)…");
 
-      function getFirebaseContext() {
-        const app = window.__RELEVO_FIREBASE__ || null;
-        const compat = window.firebase || null;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
+      authDomain: "portal-relevo.firebaseapp.com",
+      projectId: "portal-relevo",
+      storageBucket: "portal-relevo.appspot.com",
+      messagingSenderId: "182759626683",
+      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
+    };
 
-        if (!app && !compat) {
-          console.error("❌ Firebase ainda não está disponível.");
-          return null;
-        }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        const auth = window.__RELEVO_AUTH__ || (compat && compat.auth());
-        const db = window.__RELEVO_DB__ || (compat && compat.firestore());
+    window.__RELEVO_FIREBASE__ = app;
+    window.__RELEVO_AUTH__ = auth;
+    window.__RELEVO_DB__ = db;
 
-        if (!auth || !db) {
-          console.error("❌ Auth ou Firestore não disponíveis.");
-          return null;
-        }
+    console.log("[Portal] Firebase v10 iniciado e exposto globalmente.");
 
-        return { auth, db };
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        window.__RELEVO_USER__ = {
+          uid: user.uid,
+          email: user.email,
+          provider: user.providerId,
+          raw: user
+        };
+        console.log("[Portal] Usuário autenticado:", user.email);
+      } else {
+        console.warn("[Portal] Nenhum usuário autenticado.");
+        window.__RELEVO_USER__ = null;
       }
-
-      const getRedirectUrl = (userData) => {
-        const tipo = userData.tipo || "colaborador";
-
-        switch (tipo) {
-          case "gestao":
-            return "https://portal.relevo.eco.br/gestao.html";
-          case "cliente":
-            return "https://portal.relevo.eco.br/clientes.html";
-          case "colaborador":
-          default:
-            return "https://portal.relevo.eco.br/colaboradores.html";
-        }
-      };
-
-      const checkPasswordChangeRequired = async (db, user) => {
-        try {
-          const userRef = db.collection("users").doc(user.uid);
-          const userDoc = await userRef.get();
-
-          if (!userDoc.exists) {
-            await userRef.set({
-              username: user.email.split("@")[0],
-              email: user.email,
-              requiresPasswordChange: true,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-            return true;
-          }
-
-          const data = userDoc.data();
-          return data.requiresPasswordChange === true;
-        } catch (error) {
-          console.error("Erro ao verificar necessidade de troca de senha:", error);
-          return false;
-        }
-      };
-
-      const form = document.getElementById("login-form");
-      const msgError = document.getElementById("msg-error");
-      const msgSuccess = document.getElementById("msg-success");
-      const btn = document.getElementById("login-btn");
-
-      const setLoading = (v) => {
-        if (!btn) return;
-        if (v) {
-          btn.classList.add("btn-loading");
-          btn.disabled = true;
-        } else {
-          btn.classList.remove("btn-loading");
-          btn.disabled = false;
-        }
-      };
-
-      const showError = (t) => {
-        msgError.textContent = t;
-        msgError.style.display = "block";
-        msgSuccess.style.display = "none";
-      };
-
-      const showSuccess = (t) => {
-        msgSuccess.textContent = t;
-        msgSuccess.style.display = "block";
-        msgError.style.display = "none";
-      };
-
-      if (!form) {
-        console.error("❌ Formulário de login não encontrado.");
-        return;
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const ctx = getFirebaseContext();
-        if (!ctx) {
-          showError("❌ Erro interno ao carregar autenticação. Tente novamente em instantes.");
-          return;
-        }
-
-        const { auth, db } = ctx;
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-
-        if (!username || !password) {
-          showError("⚠️ Preencha usuário e senha.");
-          return;
-        }
-
-        const email = username.includes("@") ? username : `${username}@relevo.eco.br`;
-
-        try {
-          setLoading(true);
-          showSuccess("🔐 Verificando credenciais…");
-
-          const userCredential = await auth.signInWithEmailAndPassword(email, password);
-          const user = userCredential.user;
-
-          const requiresPasswordChange = await checkPasswordChangeRequired(db, user);
-
-          if (requiresPasswordChange) {
-            showSuccess("✅ Primeiro acesso! Redirecionando para alteração de senha…");
-            setTimeout(() => {
-              window.location.href = "change-password.html";
-            }, 1000);
-            return;
-          }
-
-          const userDoc = await db.collection("users").doc(user.uid).get();
-          let redirectUrl = "https://portal.relevo.eco.br/colaboradores.html";
-
-          if (userDoc.exists) {
-            redirectUrl = getRedirectUrl(userDoc.data());
-          }
-
-          showSuccess("✅ Login efetuado! Redirecionando…");
-          setTimeout(() => {
-            window.location.href = redirectUrl;
-          }, 1000);
-        } catch (err) {
-          console.error("❌ Erro de login:", err);
-          setLoading(false);
-          msgSuccess.style.display = "none";
-
-          const code = err.code || "";
-          if (code.includes("wrong-password") || code.includes("invalid-credential")) {
-            showError("❌ Usuário ou senha incorretos.");
-          } else if (code.includes("user-not-found")) {
-            showError("⚠️ Usuário não encontrado.");
-          } else if (code.includes("network-request-failed")) {
-            showError("🌐 Erro de conexão. Verifique sua internet.");
-          } else {
-            showError("❌ Erro ao fazer login. Tente novamente.");
-          }
-        } finally {
-          setLoading(false);
-        }
-      });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const u = document.getElementById("username");
-        const p = document.getElementById("password");
-
-        if (u) u.focus();
-
-        [u, p].forEach((el) =>
-          el?.addEventListener("input", () => {
-            msgError.style.display = "none";
-            msgSuccess.style.display = "none";
-          })
-        );
-      });
-    })();
+    });
   </script>
+
+  <!-- Login -->
+  <script src="scripts/login.js"></script>
+
 </body>
 </html>
