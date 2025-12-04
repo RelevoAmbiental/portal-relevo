@@ -6,11 +6,14 @@
     <title>Cronogramas | Relevo Consultoria</title>
 
     <!-- ============================================================= -->
-    <!--  Scripts globais do Portal (compat v9)                        -->
-    <!--  Estes scripts fornecem:                                     -->
-    <!--  window.__RELEVO_AUTH__                                      -->
-    <!--  window.__RELEVO_DB__                                        -->
-    <!--  window.__RELEVO_USER__                                      -->
+    <!--  SDK Firebase COMPAT v9 — OBRIGATÓRIA para o Guard            -->
+    <!-- ============================================================= -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+    <!-- ============================================================= -->
+    <!--  Scripts globais do Portal (Guard + sessão)                   -->
     <!-- ============================================================= -->
     <script src="/scripts/firebase-app.js"></script>
     <script src="/scripts/firebase-init-guard.js"></script>
@@ -21,6 +24,7 @@
     <!-- ============================================================= -->
     <script type="module" crossorigin src="/cronograma/assets/index-C7PapWG5.js"></script>
     <link rel="stylesheet" crossorigin href="/cronograma/assets/index-D-U69iqp.css">
+
   </head>
 
   <body>
