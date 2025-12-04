@@ -25,7 +25,7 @@
   <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css" />
 
-  <!-- Firebase SDK (compat) para login + guard -->
+  <!-- 🔥 Firebase SDK (compat) – base do portal -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
@@ -166,11 +166,6 @@
       transform: translateY(-1px);
     }
 
-    .btn-login:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    }
-
     footer {
       position: fixed;
       left: 0;
@@ -223,51 +218,8 @@
     © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
   </footer>
 
-  <!-- 🔥 Firebase Modular v10 — carregado corretamente como módulo -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    console.log("[Portal] Carregando Firebase v10 (modular)…");
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
-      authDomain: "portal-relevo.firebaseapp.com",
-      projectId: "portal-relevo",
-      storageBucket: "portal-relevo.appspot.com",
-      messagingSenderId: "182759626683",
-      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    window.__RELEVO_FIREBASE__ = app;
-    window.__RELEVO_AUTH__ = auth;
-    window.__RELEVO_DB__ = db;
-
-    console.log("[Portal] Firebase v10 iniciado e exposto globalmente.");
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        window.__RELEVO_USER__ = {
-          uid: user.uid,
-          email: user.email,
-          provider: user.providerId,
-          raw: user
-        };
-        console.log("[Portal] Usuário autenticado:", user.email);
-      } else {
-        console.warn("[Portal] Nenhum usuário autenticado.");
-        window.__RELEVO_USER__ = null;
-      }
-    });
-  </script>
-
   <!-- Login -->
-  <script src="scripts/login.js"></script>
+  <script src="/scripts/login.js"></script>
 
 </body>
 </html>
