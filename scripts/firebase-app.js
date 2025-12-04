@@ -7,20 +7,19 @@
 (() => {
 
   /********************************************************************
-   * 🔒 PROTEÇÃO CRÍTICA
-   * Evita inicializar o Firebase modular v10 dentro do Cronograma,
-   * pois o cronograma usa Firebase v9 compat e depende do Guard.
+   * 🔒 PROTEÇÃO ATUALIZADA (2025-12)
+   *
+   * Antes: o portal bloqueava o carregamento do Firebase quando a rota
+   * era /cronograma/, porque o módulo antigo usava Firebase compat v9.
+   *
+   * Agora: o cronograma foi unificado ao portal e DEPENDE do Firebase
+   * v10 daqui. Portanto, NUNCA devemos impedir a inicialização.
+   *
+   * Mantemos apenas o log para auditoria.
    ********************************************************************/
   if (location.pathname.startsWith("/cronograma")) {
-    console.log("[Portal] Ignorando firebase-app.js dentro do Cronograma.");
-
-    // Garante que nada seja sobrescrito indevidamente
-    window.__RELEVO_FIREBASE__ ||= undefined;
-    window.__RELEVO_AUTH__ ||= undefined;
-    window.__RELEVO_DB__ ||= undefined;
-
-    // NÃO carregar Firebase v10 aqui
-    return;
+    console.log("[Portal] Firebase será carregado normalmente dentro de /cronograma.");
+    // Nenhum return aqui — Firebase deve iniciar sempre.
   }
 
   /********************************************************************
@@ -32,7 +31,7 @@
    * - colaboradores
    * - gestão interna
    * - clientes
-   * - etc.
+   * - cronograma (NOVO)
    ********************************************************************/
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -66,17 +65,19 @@
 
   /********************************************************************
    * 🔄 Controle de sessão global (user)
-   * Usado por várias telas do portal.
+   * Usado por todas as telas internas do portal, incluindo /cronograma/.
    ********************************************************************/
   onAuthStateChanged(auth, (user) => {
     if (user) {
       console.log("[Portal] Usuário autenticado:", user.email);
+
       window.__RELEVO_USER__ = {
         uid: user.uid,
         email: user.email,
         provider: user.providerId,
         raw: user
       };
+
     } else {
       console.warn("[Portal] Nenhum usuário autenticado.");
       window.__RELEVO_USER__ = null;
