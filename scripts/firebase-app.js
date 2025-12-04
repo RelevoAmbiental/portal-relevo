@@ -7,7 +7,18 @@
     console.log("[Portal] Firebase será carregado normalmente dentro de /cronograma.");
   }
 
-  /********************************************************************
+  /********************************************************************(() => {
+  console.log("[Portal] firebase-app.js carregado.");
+
+  // Nada de Firebase aqui.
+  // Este arquivo existe apenas para manter compatibilidade histórica
+  // e para permitir logs seguros caso seja carregado em páginas antigas.
+
+  // Toda a inicialização Firebase MODULAR v10 agora ocorre EXCLUSIVAMENTE
+  // no <script type='module'> dentro do HTML do portal.
+
+})();
+
    * 🔥 Firebase v10 (modular)
    ********************************************************************/
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
