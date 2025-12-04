@@ -6,13 +6,18 @@
     <title>Cronogramas | Relevo Consultoria</title>
 
     <!-- ============================================================= -->
-    <!--  Scripts globais do Portal (NÃO CARREGAR firebase-app aqui)   -->
+    <!--  Scripts globais do Portal (compat v9)                        -->
+    <!--  Estes scripts fornecem:                                     -->
+    <!--  window.__RELEVO_AUTH__                                      -->
+    <!--  window.__RELEVO_DB__                                        -->
+    <!--  window.__RELEVO_USER__                                      -->
     <!-- ============================================================= -->
+    <script src="/scripts/firebase-app.js"></script>
     <script src="/scripts/firebase-init-guard.js"></script>
     <script src="/scripts/expose-session.js"></script>
 
     <!-- ============================================================= -->
-    <!--  Bundle React do módulo Cronograma                           -->
+    <!--  React Bundle do módulo Cronograma (usa Firebase v10 interno) -->
     <!-- ============================================================= -->
     <script type="module" crossorigin src="/cronograma/assets/index-C7PapWG5.js"></script>
     <link rel="stylesheet" crossorigin href="/cronograma/assets/index-D-U69iqp.css">
