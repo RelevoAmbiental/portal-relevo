@@ -1,64 +1,22 @@
+// ======================================================================
+// firebase-app.js
+// ----------------------------------------------------------------------
+// Este arquivo existe apenas por legado. O Portal usa Firebase compat
+// carregado diretamente no index.html. O Cronograma usa Firebase v10
+// dentro do próprio bundle React, sem depender deste arquivo.
+//
+// Portanto NÃO inicializamos Firebase aqui.
+//
+// Mantemos apenas logs para depuração e para evitar erros de referência.
+// ======================================================================
+
 (() => {
+  console.log("[Portal] firebase-app.js carregado (modo legado).");
 
-  /********************************************************************
-   * 🔒 PROTEÇÃO ATUALIZADA (2025-12)
-   ********************************************************************/
-  if (location.pathname.startsWith("/cronograma")) {
-    console.log("[Portal] Firebase será carregado normalmente dentro de /cronograma.");
-  }
-
-  /********************************************************************(() => {
-  console.log("[Portal] firebase-app.js carregado.");
-
-  // Nada de Firebase aqui.
-  // Este arquivo existe apenas para manter compatibilidade histórica
-  // e para permitir logs seguros caso seja carregado em páginas antigas.
-
-  // Toda a inicialização Firebase MODULAR v10 agora ocorre EXCLUSIVAMENTE
-  // no <script type='module'> dentro do HTML do portal.
-
-})();
-
-   * 🔥 Firebase v10 (modular)
-   ********************************************************************/
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  console.log("[Portal] Inicializando Firebase v10 (modular)…");
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
-    authDomain: "portal-relevo.firebaseapp.com",
-    projectId: "portal-relevo",
-    storageBucket: "portal-relevo.appspot.com",
-    messagingSenderId: "182759626683",
-    appId: "1:182759626683:web:2dde2eeef910d4c288569e"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  window.__RELEVO_FIREBASE__ = app;
-  window.__RELEVO_AUTH__ = auth;
-  window.__RELEVO_DB__ = db;
-
-  console.log("[Portal] Firebase v10 carregado e exposto globalmente.");
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("[Portal] Usuário autenticado:", user.email);
-      window.__RELEVO_USER__ = {
-        uid: user.uid,
-        email: user.email,
-        provider: user.providerId,
-        raw: user
-      };
-    } else {
-      console.warn("[Portal] Nenhum usuário autenticado.");
-      window.__RELEVO_USER__ = null;
-    }
-  });
+  // Garante que variáveis globais existam (evita erros de leitura)
+  window.__RELEVO_FIREBASE__ ??= undefined;
+  window.__RELEVO_AUTH__ ??= undefined;
+  window.__RELEVO_DB__ ??= undefined;
+  window.__RELEVO_USER__ ??= undefined;
 
 })();
