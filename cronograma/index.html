@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cronogramas | Relevo Consultoria</title>
+    
+    <!-- Firebase compat herdado do Portal -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Guard + expose-session (mesmos do portal) -->
+    <script src="/scripts/firebase-init-guard.js"></script>
+    <script src="/scripts/expose-session.js"></script>
+
 
     <!-- ============================================================= -->
     <!--  Scripts globais do Portal (Firebase compat v9)               -->
@@ -37,3 +47,4 @@
     <div id="root"></div>
   </body>
 </html>
+
