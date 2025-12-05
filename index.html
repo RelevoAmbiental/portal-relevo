@@ -25,12 +25,12 @@
   <!-- CSS Global -->
   <link rel="stylesheet" href="styles/global.css" />
 
-  <!-- 🔥 Firebase SDK (compat) – base do portal -->
+  <!-- Firebase SDK (compat) — necessário para guard + login -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- Guard do Portal -->
+  <!-- Guard do Portal + expose-session (NÃO ALTERAR) -->
   <script src="scripts/firebase-init-guard.js"></script>
   <script src="scripts/expose-session.js"></script>
 
@@ -110,7 +110,7 @@
       color: #fff;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      transition: 0.2s;
     }
 
     .form-group input::placeholder {
@@ -157,13 +157,39 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+      transition: 0.1s;
     }
 
     .btn-login:hover {
       filter: brightness(1.05);
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
       transform: translateY(-1px);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .success-msg,
+    .error-msg {
+      display: none;
+      font-size: 0.82rem;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .success-msg {
+      background: rgba(60, 179, 113, 0.2);
+      border: 1px solid rgba(60, 179, 113, 0.7);
+      color: #d1fae5;
+    }
+
+    .error-msg {
+      background: rgba(255, 77, 79, 0.16);
+      border: 1px solid rgba(255, 77, 79, 0.8);
+      color: #fee2e2;
     }
 
     footer {
@@ -203,8 +229,12 @@
       </div>
 
       <div class="actions-row">
-        <span class="helper-text">Usuários internos: <strong>usuario@relevo.eco.br</strong></span>
-        <a href="mailto:suporte@relevo.eco.br?subject=Suporte%20Portal%20Relevo">Precisa de ajuda?</a>
+        <span class="helper-text">
+          Usuários internos: <strong>usuario@relevo.eco.br</strong>
+        </span>
+        <a href="mailto:suporte@relevo.eco.br?subject=Suporte%20Portal%20Relevo">
+          Precisa de ajuda?
+        </a>
       </div>
 
       <button type="submit" id="login-btn" class="btn-login">
@@ -218,8 +248,132 @@
     © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
   </footer>
 
-  <!-- Login -->
-  <script src="/scripts/login.js"></script>
+  <!-- 🔒 LOGIN INLINE (VERSÃO ORIGINAL E FUNCIONAL) -->
+  <script>
+    (function () {
+      console.log("🚀 Portal Relevo — Login iniciado…");
+
+      function getFirebaseContext() {
+        const compat = window.firebase || null;
+        const auth = window.__RELEVO_AUTH__ || (compat && compat.auth());
+        const db = window.__RELEVO_DB__ || (compat && compat.firestore());
+
+        if (!auth || !db) {
+          console.error("❌ Auth ou Firestore não disponíveis no contexto atual.");
+          return null;
+        }
+
+        return { auth, db };
+      }
+
+      const getRedirectUrl = (userData) => {
+        const tipo = userData.tipo || "colaborador";
+
+        switch (tipo) {
+          case "gestao": return "gestao.html";
+          case "cliente": return "clientes.html";
+          case "colaborador":
+          default: return "colaboradores.html";
+        }
+      };
+
+      const checkPasswordChangeRequired = async (db, user) => {
+        const userRef = db.collection("users").doc(user.uid);
+        const doc = await userRef.get();
+
+        if (!doc.exists) {
+          await userRef.set({
+            username: user.email.split("@")[0],
+            email: user.email,
+            requiresPasswordChange: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          return true;
+        }
+
+        return doc.data().requiresPasswordChange === true;
+      };
+
+      const form = document.getElementById("login-form");
+      const btn = document.getElementById("login-btn");
+      const msgError = document.getElementById("msg-error");
+      const msgSuccess = document.getElementById("msg-success");
+
+      const setLoading = (v) => {
+        btn.disabled = v;
+        btn.classList.toggle("btn-loading", v);
+      };
+
+      const showError = (msg) => {
+        msgError.textContent = msg;
+        msgError.style.display = "block";
+        msgSuccess.style.display = "none";
+      };
+
+      const showSuccess = (msg) => {
+        msgSuccess.textContent = msg;
+        msgSuccess.style.display = "block";
+        msgError.style.display = "none";
+      };
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const ctx = getFirebaseContext();
+        if (!ctx) {
+          showError("❌ Erro interno ao carregar autenticação.");
+          return;
+        }
+
+        const { auth, db } = ctx;
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!username || !password) {
+          showError("⚠️ Preencha usuário e senha.");
+          return;
+        }
+
+        const email = username.includes("@") ? username : `${username}@relevo.eco.br`;
+
+        try {
+          setLoading(true);
+          showSuccess("🔐 Verificando credenciais…");
+
+          const userCredential = await auth.signInWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+
+          const firstAccess = await checkPasswordChangeRequired(db, user);
+
+          if (firstAccess) {
+            showSuccess("Primeiro acesso! Redirecionando…");
+            setTimeout(() => window.location.href = "change-password.html", 1000);
+            return;
+          }
+
+          const doc = await db.collection("users").doc(user.uid).get();
+          const redirectUrl = doc.exists ? getRedirectUrl(doc.data()) : "colaboradores.html";
+
+          showSuccess("Login efetuado! Redirecionando…");
+          setTimeout(() => window.location.href = redirectUrl, 1000);
+
+        } catch (err) {
+          console.error(err);
+          setLoading(false);
+
+          if (err.code?.includes("wrong-password")) {
+            showError("❌ Senha incorreta.");
+          } else if (err.code?.includes("user-not-found")) {
+            showError("⚠️ Usuário não encontrado.");
+          } else {
+            showError("❌ Erro ao fazer login. Tente novamente.");
+          }
+        }
+      });
+
+    })();
+  </script>
 
 </body>
 </html>
