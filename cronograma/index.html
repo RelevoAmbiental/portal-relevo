@@ -4,47 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cronogramas | Relevo Consultoria</title>
-    
+
+    <!-- O caminho base do módulo Cronograma -->
+    <base href="/cronograma/" />
+
     <!-- Firebase compat herdado do Portal -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Guard + expose-session (mesmos do portal) -->
-    <script src="/scripts/firebase-init-guard.js"></script>
-    <script src="/scripts/expose-session.js"></script>
-
-
-    <!-- ============================================================= -->
-    <!--  Scripts globais do Portal (Firebase compat v9)               -->
-    <!--  Expõem:                                                      -->
-    <!--    window.__RELEVO_DB__                                       -->
-    <!--    window.__RELEVO_AUTH__                                     -->
-    <!--    window.__RELEVO_USER__                                     -->
-    <!-- ============================================================= -->
     <script src="/scripts/firebase-app.js"></script>
     <script src="/scripts/firebase-init-guard.js"></script>
     <script src="/scripts/expose-session.js"></script>
 
-    <!-- ============================================================= -->
-    <!--  Bundle React do módulo Cronograma (build do Vite)            -->
-    <!--  ⚠️ ATENÇÃO: manter o nome do arquivo JS igual ao da pasta    -->
-    <!--  dist/assets do cronogramas-relevo                            -->
-    <!-- ============================================================= -->
-    <script
-      type="module"
-      crossorigin
-      src="/cronograma/assets/index-jNNg_-wo.js"
-    ></script>
-    <link
-      rel="stylesheet"
-      crossorigin
-      href="/cronograma/assets/index-BL0SKu89.css"
-    />
+    <!-- Estes DOIS arquivos serão atualizados automaticamente pela CI -->
+    <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
+    <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css">
   </head>
 
   <body>
     <div id="root"></div>
   </body>
 </html>
-
