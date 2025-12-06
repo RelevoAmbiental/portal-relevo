@@ -1,24 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cronogramas | Relevo Consultoria</title>
 
-    <!-- O caminho base do módulo Cronograma -->
-    <base href="/cronograma/" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cronogramas | Relevo Consultoria</title>
 
-    <!-- Firebase compat herdado do Portal -->
-    <script src="/scripts/firebase-app.js"></script>
-    <script src="/scripts/firebase-init-guard.js"></script>
-    <script src="/scripts/expose-session.js"></script>
+  <!-- ============================================================= -->
+  <!-- Base href — necessário para navegação correta nos subpaths     -->
+  <!-- ============================================================= -->
+  <base href="/cronograma/" />
 
-    <!-- Bundles estáticos RENOMEADOS pela Action -->
-    <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
-    <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css">
-  </head>
+  <!-- ============================================================= -->
+  <!-- Firebase compat herdado do Portal                             -->
+  <!-- ============================================================= -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <body>
-    <div id="root"></div>
-  </body>
+  <!-- ============================================================= -->
+  <!-- Scripts globais do Portal (Guard + expose-session)             -->
+  <!-- ============================================================= -->
+  <script src="/scripts/firebase-init-guard.js"></script>
+  <script src="/scripts/expose-session.js"></script>
+
+  <!-- ============================================================= -->
+  <!-- Bundle React (Vite build atual)                                -->
+  <!-- ATENÇÃO: Use os nomes exatos da pasta dist/assets do cronograma -->
+  <!-- ============================================================= -->
+  <script type="module" crossorigin src="/cronograma/assets/index-jNNg_-wo.js"></script>
+  <link rel="stylesheet" crossorigin href="/cronograma/assets/index-BL0SKu89.css" />
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
 </html>
