@@ -3,11 +3,11 @@ name: Atualizar Cronograma no Portal
 on:
   repository_dispatch:
     types: [cronograma-atualizado]
-
   workflow_dispatch:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   update-cronograma:
@@ -32,8 +32,8 @@ jobs:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: |
-            cronogramas-src/package-lock.json
             cronogramas-src/package.json
+            cronogramas-src/package-lock.json
 
       - name: 📦 Instalar dependências do cronograma
         working-directory: cronogramas-src
@@ -43,26 +43,35 @@ jobs:
         working-directory: cronogramas-src
         run: npm run build
 
-      - name: 🧹 Limpar pasta cronograma atual
+      - name: 🧹 Limpar assets antigos
         run: |
-          rm -rf cronograma
-          mkdir cronograma
+          rm -rf cronograma/assets
+          mkdir -p cronograma/assets
 
-      - name: 📁 Copiar build completo para portal/cronograma
+      - name: 📁 Copiar novos assets
         run: |
-          cp -R cronogramas-src/dist/* cronograma/
+          cp -R cronogramas-src/dist/assets/* cronograma/assets/
+
+      - name: 🔄 Padronizar nomes (index.js / index.css)
+        run: |
+          # JS
+          JSFILE=$(ls cronograma/assets/*.js | head -n 1)
+          mv "$JSFILE" cronograma/assets/index.js
+          # CSS
+          CSSFILE=$(ls cronograma/assets/*.css | head -n 1)
+          mv "$CSSFILE" cronograma/assets/index.css
 
       - name: 💾 Commit e Push das alterações
         run: |
-          git status
-          if git diff --quiet; then
-            echo "✅ Sem mudanças para commitar."
-            exit 0
-          fi
-
           git config --local user.email "bot@relevo.eco.br"
           git config --local user.name "RelevoBot"
 
-          git add cronograma/
-          git commit -m "Atualização automática do Cronograma (build completo)"
+          git add cronograma/assets/
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração para commitar."
+            exit 0
+          fi
+
+          git commit -m "Atualização automática do Cronograma (assets atualizados)"
           git push
