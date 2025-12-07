@@ -1,31 +1,29 @@
 /* ============================================================
    IA — Interpretar texto e gerar tarefas estruturadas
-   Usa Secret Manager → process.env.OPENAI_API_KEY
+   Inicializa OpenAI SOMENTE dentro da função (evita erro no deploy)
    ============================================================ */
 
 const OpenAI = require("openai");
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY  // <── agora funciona no Firebase!
-});
-
 exports.interpretarTexto = async (texto) => {
+  // Inicializa a OpenAI APENAS em runtime (não no build!)
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+
   const prompt = `
 Você é um planejador sênior da Relevo Consultoria Ambiental.
 Sua missão é transformar o texto a seguir em uma lista de tarefas estruturadas.
 
 REQUISITOS:
-
-1) Identifique tarefas, etapas, atividades e produtos.
-2) Sempre que existir DATA explícita → usar a data.
-3) Se não existir data:
-   - inferir ordem lógica
-   - estimar datas relativas (ex: +5 dias)
-4) Classificar cada tarefa em UMA das categorias:
-   - ENTREGÁVEL (produto final)
-   - PRODUÇÃO (atividade técnica ou de campo)
+1) Identifique tarefas, etapas, produtos e responsáveis.
+2) Use datas explícitas sempre que existirem.
+3) Quando não houver datas → estimar datas relativas (+N dias).
+4) Classificar cada tarefa em:
+   - ENTREGÁVEL
+   - PRODUÇÃO
    - EMISSÃO_DE_NOTA
-   - RECEBÍVEL (momento de pagamento)
+   - RECEBÍVEL
 5) Cada tarefa deve ter:
 {
   "nome": "",
@@ -36,10 +34,9 @@ REQUISITOS:
   "inicioRelativoDias": número,
   "duracaoDias": número
 }
-6) Retorne SOMENTE um array JSON puro.
-7) NÃO inclua explicações, comentários ou texto fora do JSON.
+6) Retorne somente um array JSON puro.
 
-TEXTO A INTERPRETAR:
+TEXTO:
 ========================================
 ${texto}
 ========================================
