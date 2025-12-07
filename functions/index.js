@@ -1,13 +1,12 @@
 /* ============================================================
    Firebase Functions – Portal Relevo
-   Versão com SECRET OPENAI_API_KEY integrado
+   Versão com SECRET OPENAI_API_KEY + CORS CORPORATIVO CORRIGIDO
    ============================================================ */
 
 const functions = require("firebase-functions");
-const cors = require("cors")({ origin: true });
 const { defineSecret } = require("firebase-functions/params");
 
-// Carrega Secret Manager
+// Secret Manager
 const OPENAI_KEY = defineSecret("OPENAI_API_KEY");
 
 // Importações internas
@@ -15,57 +14,68 @@ const { extrairArquivo } = require("./src/ai-extrair");
 const { interpretarTexto } = require("./src/ai-interpretar");
 const { gerarCronograma } = require("./src/ai-cronograma");
 
-// Middleware CORS
+/* ============================================================
+   CORS DEFINITIVO — Resolve 100% bloqueios entre domínio e Cloud Functions
+   ============================================================ */
+
 function withCors(handler) {
-  return (req, res) => {
-    cors(req, res, () => handler(req, res));
+  return async (req, res) => {
+    // Sempre definir headers CORS
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+
+    // Pré-flight (OPTIONS)
+    if (req.method === "OPTIONS") {
+      return res.status(204).send("");
+    }
+
+    try {
+      await handler(req, res);
+    } catch (err) {
+      console.error("Erro interno:", err);
+      res.status(500).json({ error: "Erro interno do servidor." });
+    }
   };
 }
 
 /* ============================================================
-   1) interpretarArquivo — upload + OCR + interpretação IA
+   1) interpretarArquivo — upload + OCR + IA
    ============================================================ */
 exports.interpretarArquivo = functions
   .region("us-central1")
-  .runWith({ secrets: [OPENAI_KEY] }) // <── habilita OPENAI_API_KEY
+  .runWith({ secrets: [OPENAI_KEY] })
   .https.onRequest(
     withCors(async (req, res) => {
       if (req.method !== "POST") {
         return res.status(405).json({ error: "Método não permitido" });
       }
 
-      try {
-        const textoExtraido = await extrairArquivo(req);
+      const texto = await extrairArquivo(req);
 
-        if (!textoExtraido || textoExtraido.trim() === "") {
-          return res.status(400).json({ error: "Nenhum texto extraído" });
-        }
-
-        const tarefas = await interpretarTexto(textoExtraido);
-
-        return res.json({ texto: textoExtraido, tarefas });
-      } catch (err) {
-        console.error("Erro interpretarArquivo:", err);
-        return res.status(500).json({ error: err.message });
+      if (!texto || texto.trim() === "") {
+        return res.status(400).json({ error: "Nenhum texto extraído" });
       }
+
+      const tarefas = await interpretarTexto(texto);
+
+      return res.json({
+        texto,
+        tarefas,
+      });
     })
   );
 
 /* ============================================================
-   2) gerarCronograma — montagem final estruturada
+   2) gerarCronograma — lógica IA (se usada) + planificação
    ============================================================ */
 exports.gerarCronograma = functions
   .region("us-central1")
-  .runWith({ secrets: [OPENAI_KEY] }) // (necessário se usar IA dentro dele)
+  .runWith({ secrets: [OPENAI_KEY] })
   .https.onRequest(
     withCors(async (req, res) => {
-      try {
-        const estrutura = req.body;
-        const resultado = await gerarCronograma(estrutura);
-        res.json(resultado);
-      } catch (err) {
-        console.error("Erro gerarCronograma:", err);
-        res.status(500).json({ error: err.message });
-      }
+      const estrutura = req.body;
+      const resultado = await gerarCronograma(estrutura);
+      return res.json(resultado);
     })
   );
