@@ -2,8 +2,7 @@ name: Deploy Firebase Functions
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
     paths:
       - "functions/**"
       - ".firebaserc"
@@ -26,13 +25,21 @@ jobs:
       - name: 🔥 Instalar Firebase CLI
         run: npm install -g firebase-tools
 
-      # ⭐ NOVO PASSO ESSENCIAL ⭐
-      - name: 📦 Instalar dependências das Functions
+      # Autenticação CORRETA via Service Account (necessária para secrets)
+      - name: 🔐 Configurar credenciais
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_CONTENT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          cd functions
-          npm install
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_CONTENT" > /tmp/key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="/tmp/key.json"
+          firebase --project portal-relevo functions:secrets:access OPENAI_API_KEY
+
+      # Install dependencies inside /functions BEFORE deploy
+      - name: 📦 Instalar dependências das Functions
+        working-directory: ./functions
+        run: npm install
 
       - name: 🚀 Deploy Functions
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: firebase deploy --only functions --project portal-relevo --token "$FIREBASE_TOKEN"
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/key.json
+        run: firebase deploy --only functions --project portal-relevo
