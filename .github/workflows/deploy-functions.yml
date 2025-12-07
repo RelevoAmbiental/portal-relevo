@@ -26,7 +26,13 @@ jobs:
       - name: 🔥 Instalar Firebase CLI
         run: npm install -g firebase-tools
 
+      # ⭐ NOVO PASSO ESSENCIAL ⭐
+      - name: 📦 Instalar dependências das Functions
+        run: |
+          cd functions
+          npm install
+
       - name: 🚀 Deploy Functions
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: firebase deploy --only functions --project portal-relevo
+        run: firebase deploy --only functions --project portal-relevo --token "$FIREBASE_TOKEN"
