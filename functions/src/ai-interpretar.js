@@ -1,5 +1,13 @@
+/* ============================================================
+   IA — Interpretar texto e gerar tarefas estruturadas
+   Usa Secret Manager → process.env.OPENAI_API_KEY
+   ============================================================ */
+
 const OpenAI = require("openai");
-const client = new OpenAI();
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY  // <── agora funciona no Firebase!
+});
 
 exports.interpretarTexto = async (texto) => {
   const prompt = `
@@ -19,17 +27,17 @@ REQUISITOS:
    - EMISSÃO_DE_NOTA
    - RECEBÍVEL (momento de pagamento)
 5) Cada tarefa deve ter:
-   {
-     "nome": "",
-     "descricao": "",
-     "categoria": "",
-     "produto": "",
-     "responsavel": "",
-     "inicioRelativoDias": número,
-     "duracaoDias": número
-   }
-6) Retorne SOMENTE um array JSON.
-7) NÃO use texto fora do JSON.
+{
+  "nome": "",
+  "descricao": "",
+  "categoria": "",
+  "produto": "",
+  "responsavel": "",
+  "inicioRelativoDias": número,
+  "duracaoDias": número
+}
+6) Retorne SOMENTE um array JSON puro.
+7) NÃO inclua explicações, comentários ou texto fora do JSON.
 
 TEXTO A INTERPRETAR:
 ========================================
