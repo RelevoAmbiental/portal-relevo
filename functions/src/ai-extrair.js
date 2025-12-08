@@ -1,47 +1,41 @@
 const Busboy = require("busboy");
-const pdf = require("pdf-parse");
+const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 
 exports.extrairArquivo = (req) =>
   new Promise((resolve, reject) => {
-    try {
-      const busboy = Busboy({ headers: req.headers });
-      let arquivo;
+    const busboy = Busboy({ headers: req.headers });
+    let fileBuffer = Buffer.from([]);
+    let mimetype = "";
 
-      busboy.on("file", (_, file, info) => {
-        const { mimeType } = info;
-        const chunks = [];
+    busboy.on("file", (fieldname, file, info) => {
+      if (fieldname !== "arquivo") {
+        reject(new Error("Campo de upload inválido."));
+        return;
+      }
 
-        file.on("data", (data) => chunks.push(data));
+      mimetype = info.mimeType;
 
-        file.on("end", async () => {
-          const buffer = Buffer.concat(chunks);
-
-          try {
-            if (mimeType.includes("pdf")) {
-              const parsed = await pdf(buffer);
-              resolve(parsed.text);
-            } else if (
-              mimeType.includes("docx") ||
-              mimeType.includes("doc")
-            ) {
-              const parsed = await mammoth.extractRawText({ buffer });
-              resolve(parsed.value);
-            } else {
-              resolve(buffer.toString("utf8"));
-            }
-          } catch (err) {
-            reject(err);
-          }
-        });
+      file.on("data", (data) => {
+        fileBuffer = Buffer.concat([fileBuffer, data]);
       });
+    });
 
-      busboy.on("finish", () => {
-        if (!arquivo) resolve("");
-      });
+    busboy.on("finish", async () => {
+      try {
+        if (mimetype.includes("pdf")) {
+          const pdf = await pdfParse(fileBuffer);
+          resolve(pdf.text);
+        } else if (mimetype.includes("word") || mimetype.includes("docx")) {
+          const result = await mammoth.extractRawText({ buffer: fileBuffer });
+          resolve(result.value);
+        } else {
+          resolve(fileBuffer.toString("utf8"));
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
 
-      req.pipe(busboy);
-    } catch (err) {
-      reject(err);
-    }
+    req.pipe(busboy);
   });
