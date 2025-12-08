@@ -20,12 +20,10 @@ const { gerarCronograma } = require("./src/ai-cronograma");
 
 function withCors(handler) {
   return async (req, res) => {
-    // Sempre definir headers CORS
     res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.set("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
     res.set("Access-Control-Allow-Headers", "Content-Type");
 
-    // Pré-flight (OPTIONS)
     if (req.method === "OPTIONS") {
       return res.status(204).send("");
     }
@@ -51,13 +49,25 @@ exports.interpretarArquivo = functions
         return res.status(405).json({ error: "Método não permitido" });
       }
 
-      const texto = await extrairArquivo(req);
+      let texto = "";
+      try {
+        texto = await extrairArquivo(req);
+      } catch (e) {
+        console.error("Erro ao extrair arquivo:", e);
+        return res.status(500).json({ error: "Falha ao extrair arquivo." });
+      }
 
       if (!texto || texto.trim() === "") {
         return res.status(400).json({ error: "Nenhum texto extraído" });
       }
 
-      const tarefas = await interpretarTexto(texto);
+      let tarefas = [];
+      try {
+        tarefas = await interpretarTexto(texto);
+      } catch (e) {
+        console.error("Erro IA:", e);
+        return res.status(500).json({ error: "Falha ao interpretar texto." });
+      }
 
       return res.json({
         texto,
@@ -74,8 +84,13 @@ exports.gerarCronograma = functions
   .runWith({ secrets: [OPENAI_KEY] })
   .https.onRequest(
     withCors(async (req, res) => {
-      const estrutura = req.body;
-      const resultado = await gerarCronograma(estrutura);
-      return res.json(resultado);
+      try {
+        const estrutura = req.body;
+        const resultado = await gerarCronograma(estrutura);
+        return res.json(resultado);
+      } catch (err) {
+        console.error("Erro gerarCronograma:", err);
+        return res.status(500).json({ error: err.message });
+      }
     })
   );
