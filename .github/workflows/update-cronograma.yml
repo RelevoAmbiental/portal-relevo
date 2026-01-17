@@ -17,13 +17,13 @@ jobs:
       - name: 🧬 Checkout do portal-relevo
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.RELEVO_GH_PAT }}
+          token: ${{ secrets.PAT_RELEVO_AUTODEPLOY }}
 
       - name: 🧬 Checkout do cronogramas-relevo
         uses: actions/checkout@v4
         with:
           repository: RelevoAmbiental/cronogramas-relevo
-          token: ${{ secrets.RELEVO_GH_PAT }}
+          token: ${{ secrets.PAT_RELEVO_AUTODEPLOY }}
           path: cronogramas-src
 
       - name: 🔧 Configurar Node.js
