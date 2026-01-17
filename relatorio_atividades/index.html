@@ -1,175 +1,152 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <base target="_top">
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Relatório Diário de Atividades | Relevo Consultoria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Relevo | Relatório Diário</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <meta name="theme-color" content="#0b2e1b" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#26C04C" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <!-- (Opcional) Fonte; se o portal já carrega Montserrat globalmente, ok duplicar -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Fontes e Ícones -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Seu CSS do módulo (mantém separado). -->
+  <link rel="stylesheet" href="./styles.css" />
 
-  <!-- CSS Global + CSS do módulo -->
-  <link rel="stylesheet" href="../styles/global.css">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Firebase SDK (Compat v9) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-
-  <!-- Guard do Portal (usa o firebase do portal e expõe __RELEVO_DB__/__RELEVO_AUTH__) -->
-  <script src="../scripts/firebase-init-guard.js"></script>
-  <script src="../scripts/expose-session.js"></script>
+  <!-- Fallback mínimo (se styles.css não tiver algo, isso garante usabilidade no mobile) -->
+  <style>
+    :root { --bg1:#0b2e1b; --bg2:#0f4d2e; --card: rgba(255,255,255,.92); --txt:#0b1b12; --muted:#556; }
+    body{ margin:0; font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(135deg,var(--bg1),var(--bg2)); }
+    .wrap{ max-width:920px; margin:0 auto; padding:14px; }
+    .card{ background:var(--card); border-radius:18px; padding:14px; box-shadow:0 10px 28px rgba(0,0,0,.18); }
+    .header{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+    .title{ font-size:18px; font-weight:800; color:#0b2e1b; }
+    .sub{ font-size:12px; color:var(--muted); }
+    .tabs{ display:flex; gap:8px; margin:12px 0; }
+    .tab-btn{ flex:1; padding:12px; border:0; border-radius:14px; background:rgba(15,77,46,.12); font-weight:800; color:#0b2e1b; }
+    .tab-btn.active{ background:#0f4d2e; color:#fff; }
+    .hidden{ display:none !important; }
+    .grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+    @media(min-width:720px){ .grid-2{ grid-template-columns:1fr 1fr; } }
+    label{ font-weight:700; font-size:12px; color:#1a2b22; display:block; margin:0 0 6px; }
+    select,input,textarea{ width:100%; padding:12px; border-radius:14px; border:1px solid rgba(0,0,0,.12); font-family:inherit; font-size:14px; background:#fff; }
+    textarea{ min-height:84px; resize:vertical; }
+    .segmented{ display:flex; gap:10px; }
+    .segmented label{ flex:1; margin:0; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:14px; border:1px solid rgba(0,0,0,.12); background:#fff; font-weight:800; }
+    .actions{ display:flex; gap:10px; margin-top:12px; }
+    .btn{ flex:1; padding:13px; border:0; border-radius:14px; font-weight:900; }
+    .btn-primary{ background:#0f4d2e; color:#fff; }
+    .btn-ghost{ background:rgba(15,77,46,.12); color:#0b2e1b; }
+    .hint{ font-size:12px; color:var(--muted); margin-top:10px; }
+    .list{ display:grid; gap:10px; }
+    .item{ background:#fff; border-radius:16px; padding:12px; border:1px solid rgba(0,0,0,.08); }
+    .row{ display:flex; gap:10px; justify-content:space-between; align-items:flex-start; }
+    .badge{ font-size:11px; font-weight:900; padding:6px 10px; border-radius:999px; background:rgba(15,77,46,.12); color:#0b2e1b; }
+    .ok{ background:rgba(0,140,60,.14); }
+    .nok{ background:rgba(180,0,0,.12); }
+    .muted{ color:var(--muted); font-size:12px; }
+  </style>
 </head>
+
 <body>
-  <header class="app-header">
-    <div class="container">
-      <img class="logo" src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" />
-      <h1>Relatório Diário</h1>
-      <p>Registro rápido de atividades (mobile-first)</p>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div>
+          <div class="title">Relatório Diário de Atividades</div>
+          <div class="sub">Portal Relevo • registro rápido • foco mobile</div>
+        </div>
+        <div class="badge" id="userBadge">carregando usuário…</div>
+      </div>
+
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="novo">Novo relatório</button>
+        <button type="button" class="tab-btn" data-tab="meus">Meus relatórios</button>
+      </div>
+
+      <!-- Painel: Novo -->
+      <section class="tab-panel" data-panel="novo">
+        <form id="formRelatorio">
+          <div class="grid grid-2">
+            <div>
+              <label for="funcionario">Nome</label>
+              <select id="funcionario" required></select>
+            </div>
+            <div>
+              <label for="projeto">Projeto</label>
+              <select id="projeto" required></select>
+            </div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:10px;">
+            <div>
+              <label for="data">Data</label>
+              <input id="data" type="date" required />
+            </div>
+            <div>
+              <label for="atividade">Atividade realizada</label>
+              <select id="atividade" required></select>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label for="descricao">Descrição sucinta da atividade</label>
+            <input id="descricao" type="text" maxlength="140" placeholder="Ex.: inspeção de cavidades + ajustes de rota" />
+          </div>
+
+          <div style="margin-top:10px;">
+            <label for="observacao">Observação</label>
+            <textarea id="observacao" placeholder="Detalhes, condicionantes, imprevistos, ‘Outro’ etc."></textarea>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label>Objetivo alcançado?</label>
+            <div class="segmented">
+              <label><input type="radio" name="objetivo" value="sim" required> Sim</label>
+              <label><input type="radio" name="objetivo" value="nao"> Não</label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
+            <button type="button" class="btn btn-ghost" id="btnLimpar">Limpar</button>
+          </div>
+
+          <div class="hint" id="statusMsg"></div>
+        </form>
+      </section>
+
+      <!-- Painel: Meus -->
+      <section class="tab-panel hidden" data-panel="meus">
+        <div class="row" style="margin-bottom:10px;">
+          <div>
+            <div style="font-weight:900; color:#0b2e1b;">Meus relatórios</div>
+            <div class="muted">Últimos registros salvos por você</div>
+          </div>
+          <button type="button" class="btn btn-ghost" style="max-width:160px;" id="btnRecarregar">Recarregar</button>
+        </div>
+
+        <div class="grid grid-2" style="margin-bottom:10px;">
+          <div class="item">
+            <div class="muted">Total</div>
+            <div style="font-size:22px; font-weight:900;" id="kpiTotal">—</div>
+          </div>
+          <div class="item">
+            <div class="muted">Objetivo (Sim / Não)</div>
+            <div style="font-size:22px; font-weight:900;" id="kpiOk">—</div>
+          </div>
+        </div>
+
+        <div class="list" id="listaRelatorios"></div>
+        <div class="hint">Dica: se estiver offline, o Firebase pode enfileirar e sincronizar depois (dependendo das configs do portal).</div>
+      </section>
     </div>
-  </header>
+  </div>
 
-  <main class="container" style="padding-bottom: 90px;">
-    <section class="card" aria-label="Ações principais">
-      <div class="tabs" role="tablist" aria-label="Navegação">
-        <button class="tab active" id="tabNovo" role="tab" aria-selected="true" aria-controls="painelNovo">
-          <i class="fa-solid fa-pen-to-square"></i> Novo
-        </button>
-        <button class="tab" id="tabMeus" role="tab" aria-selected="false" aria-controls="painelMeus">
-          <i class="fa-solid fa-list-check"></i> Meus relatórios
-        </button>
-      </div>
-    </section>
-
-    <!-- Painel: Novo -->
-    <section class="card" id="painelNovo" role="tabpanel" aria-labelledby="tabNovo">
-      <div class="status" id="statusAuth" style="display:none;"></div>
-
-      <form id="formRelatorio" autocomplete="off">
-        <div class="grid">
-          <div class="form-group">
-            <label for="funcionario">Nome <span class="required">*</span></label>
-            <select id="funcionario" required></select>
-            <small class="hint">Dica: vamos lembrar seu nome neste aparelho.</small>
-          </div>
-
-          <div class="form-group">
-            <label for="projeto">Projeto <span class="required">*</span></label>
-            <select id="projeto" required></select>
-          </div>
-
-          <div class="form-group">
-            <label for="data">Data <span class="required">*</span></label>
-            <input type="date" id="data" required />
-          </div>
-
-          <div class="form-group">
-            <label for="atividade">Atividade realizada <span class="required">*</span></label>
-            <select id="atividade" required>
-              <option value="" selected disabled>Selecione…</option>
-              <option value="deslocamento">Deslocamento</option>
-              <option value="campo_diurno">Campo diurno</option>
-              <option value="campo_noturno">Campo noturno</option>
-              <option value="escritorio">Escritório</option>
-              <option value="folga">Folga</option>
-              <option value="manutencao_equipamentos">Manutenção de equipamentos</option>
-              <option value="treinamento">Treinamento</option>
-              <option value="outro">Outro (descrever nas observações)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="descricao">Descrição sucinta da atividade</label>
-          <textarea id="descricao" placeholder="Ex.: Prospecção em faixa norte; conferência de pontos amostrais…" rows="3"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="observacao">Observação</label>
-          <textarea id="observacao" placeholder="Ex.: impedimentos, chuva, acesso, equipe, pendências…" rows="3"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>Objetivo alcançado <span class="required">*</span></label>
-          <div class="segmented" role="radiogroup" aria-label="Objetivo alcançado">
-            <label class="seg-item">
-              <input type="radio" name="objetivo" value="sim" required>
-              <span><i class="fa-solid fa-check"></i> Sim</span>
-            </label>
-            <label class="seg-item">
-              <input type="radio" name="objetivo" value="nao" required>
-              <span><i class="fa-solid fa-xmark"></i> Não</span>
-            </label>
-          </div>
-        </div>
-
-        <button class="btn btn-primary" type="submit" id="btnSalvar">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Salvar relatório
-        </button>
-
-        <div class="subactions">
-          <button class="btn btn-ghost" type="button" id="btnLimpar">
-            <i class="fa-solid fa-broom"></i> Limpar campos
-          </button>
-          <button class="btn btn-ghost" type="button" id="btnInstalar" style="display:none;">
-            <i class="fa-solid fa-mobile-screen"></i> Instalar no celular
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <!-- Painel: Meus -->
-    <section class="card" id="painelMeus" role="tabpanel" aria-labelledby="tabMeus" style="display:none;">
-      <div class="filters">
-        <div class="form-group" style="margin-bottom:0;">
-          <label for="meusInicio">De</label>
-          <input type="date" id="meusInicio" />
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label for="meusFim">Até</label>
-          <input type="date" id="meusFim" />
-        </div>
-      </div>
-
-      <div class="list-actions">
-        <button class="btn btn-ghost" type="button" id="btnMeusLimpar">
-          <i class="fa-solid fa-broom"></i> Limpar período
-        </button>
-        <button class="btn btn-primary" type="button" id="btnMeusAtualizar">
-          <i class="fa-solid fa-rotate"></i> Atualizar lista
-        </button>
-      </div>
-
-      <div class="summary">
-        <div class="pill" id="meusQtd">Itens: 0</div>
-        <div class="pill" id="meusOk">OK: 0</div>
-        <div class="pill" id="meusNok">NOK: 0</div>
-      </div>
-
-      <div id="meusLista"></div>
-      <div id="meusVazio" class="empty" style="display:none;">
-        <i class="fa-solid fa-inbox"></i>
-        <p><b>Nada por aqui ainda.</b></p>
-        <p>Assim que você salvar um relatório, ele aparece aqui.</p>
-      </div>
-    </section>
-  </main>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
