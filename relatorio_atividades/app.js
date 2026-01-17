@@ -1,14 +1,14 @@
 /* =========================================================
    Relatório Diário de Atividades — Portal Relevo
    - Usa Firebase compat já inicializado pelo portal
-   - Evita índices compostos: consulta só por UID e ordena no cliente
+   - Evita índice composto: consulta só por UID e ordena no cliente
    ========================================================= */
 
 (function () {
-  // --------- Config: listas (cole aqui as mesmas do app.jsx de despesas) ---------
-  // Dica: mantenha esses arrays como “fonte única” também neste módulo.
+  "use strict";
+
+  // --------- Listas (iguais às do Despesas) ---------
   const FUNCIONARIOS = [
-    // Substitua pelos nomes existentes no app.jsx de despesas:
     "Samuel",
     "Tiago",
     "Gleysson",
@@ -18,7 +18,6 @@
   ];
 
   const PROJETOS = [
-    // Substitua pelos projetos existentes no app.jsx de despesas:
     "Grande Sertão 1",
     "BR-135/BA",
     "RIALMA"
@@ -37,175 +36,182 @@
 
   const COLLECTION = "relatorios_atividades";
 
-  // --------- Helpers ---------
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  // --------- Helpers DOM ---------
+  function $(sel) { return document.querySelector(sel); }
+  function $all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
 
-  function brDate(isoDate) {
-    if (!isoDate) return "";
-    // isoDate: yyyy-mm-dd
-    const [y, m, d] = isoDate.split("-");
-    return `${d}/${m}/${y}`;
-  }
-
-  function safeText(v) {
-    return (v ?? "").toString().trim();
-  }
-
-  function setStatus(msg, ok = true) {
+  function setStatus(msg, ok) {
     const el = $("#statusMsg");
     if (!el) return;
     el.textContent = msg || "";
-    el.style.color = ok ? "#0f4d2e" : "#8b1f1f";
+    el.style.color = ok === false ? "#8b1f1f" : "#0f4d2e";
   }
 
-  function fillSelect(selectEl, values, placeholder = "Selecione…") {
+  function fillSelect(selectEl, values, placeholder) {
     if (!selectEl) return;
+
     selectEl.innerHTML = "";
+
     const opt0 = document.createElement("option");
     opt0.value = "";
-    opt0.textContent = placeholder;
+    opt0.textContent = placeholder || "Selecione...";
     opt0.disabled = true;
     opt0.selected = true;
     selectEl.appendChild(opt0);
 
-    values.forEach((v) => {
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i];
       const opt = document.createElement("option");
       opt.value = v;
       opt.textContent = v;
       selectEl.appendChild(opt);
-    });
+    }
   }
 
-  function getPortalUser() {
-    // O portal costuma expor usuário globalmente (ex.: expose-session.js)
-    const u = window.__RELEVO_USER__ || null;
-    if (u && (u.uid || u.email)) return u;
+  function isoToday() {
+    const d = new Date();
+    const yyyy = String(d.getFullYear());
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return yyyy + "-" + mm + "-" + dd;
+  }
 
-    const auth = window.__RELEVO_AUTH__ || window.firebase?.auth?.();
-    const cu = auth?.currentUser || null;
-    if (cu) return { uid: cu.uid, email: cu.email, displayName: cu.displayName };
+  function brDate(iso) {
+    if (!iso) return "—";
+    const parts = iso.split("-");
+    if (parts.length !== 3) return iso;
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
+  }
 
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // --------- Firebase access (portal) ---------
+  function getFirestore() {
+    if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
+    if (window.firebase && window.firebase.firestore) return window.firebase.firestore();
     return null;
   }
 
-  function getFirestore() {
-    // Preferência total ao objeto já exposto pelo portal (compat)
-    if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
+  function getPortalUser() {
+    const u = window.__RELEVO_USER__ || null;
+    if (u && (u.uid || u.email)) return u;
 
-    // Fallback: se o portal carregou firebase global e inicializou
-    if (window.firebase?.firestore) return window.firebase.firestore();
+    // fallback: compat auth
+    try {
+      const auth = window.__RELEVO_AUTH__ || (window.firebase && window.firebase.auth && window.firebase.auth());
+      const cu = auth && auth.currentUser;
+      if (cu) return { uid: cu.uid, email: cu.email || "", displayName: cu.displayName || "" };
+    } catch (e) {}
 
     return null;
   }
 
   function serverTimestamp() {
-    // compat FieldValue
-    return window.firebase?.firestore?.FieldValue?.serverTimestamp
-      ? window.firebase.firestore.FieldValue.serverTimestamp()
-      : new Date();
+    try {
+      if (window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue) {
+        return window.firebase.firestore.FieldValue.serverTimestamp();
+      }
+    } catch (e) {}
+    return new Date();
   }
 
-  // --------- Tabs (blindado) ---------
-  function setTab(tab) {
-    const btns = $$(".tab-btn[data-tab]");
-    const panels = $$(".tab-panel[data-panel]");
+  // --------- Tabs (blindadas) ---------
+  function setTab(tabName) {
+    const btns = $all(".tab-btn[data-tab]");
+    const panels = $all(".tab-panel[data-panel]");
+    if (!btns.length || !panels.length) return;
 
-    if (!btns.length || !panels.length) {
-      console.warn("[Relatorio] Tabs/painéis não encontrados. Verifique index.html.");
-      return;
-    }
+    btns.forEach(function (b) {
+      b.classList.toggle("active", b.getAttribute("data-tab") === tabName);
+    });
 
-    btns.forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
-    panels.forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== tab));
+    panels.forEach(function (p) {
+      p.classList.toggle("hidden", p.getAttribute("data-panel") !== tabName);
+    });
   }
 
-  // --------- Render list ---------
+  // --------- Listagem ---------
   function renderLista(items) {
     const lista = $("#listaRelatorios");
     if (!lista) return;
 
     if (!items.length) {
-      lista.innerHTML = `<div class="item"><div style="font-weight:900;">Nenhum registro ainda.</div><div class="muted">Assim que você salvar, aparece aqui.</div></div>`;
+      lista.innerHTML =
+        '<div class="item">' +
+          '<div style="font-weight:900;">Nenhum registro ainda.</div>' +
+          '<div class="muted">Assim que você salvar, aparece aqui.</div>' +
+        "</div>";
       return;
     }
 
-    lista.innerHTML = items
-      .map((it) => {
-        const ok = !!it.objetivoAlcancado;
-        const badgeClass = ok ? "badge ok" : "badge nok";
-        const badgeTxt = ok ? "Objetivo: SIM" : "Objetivo: NÃO";
-        const dataTxt = it.data ? brDate(it.data) : "—";
-        const projeto = safeText(it.projeto) || "—";
-        const atividade = safeText(it.atividade) || "—";
-        const desc = safeText(it.descricao);
-        const obs = safeText(it.observacao);
+    let html = "";
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      const ok = !!it.objetivoAlcancado;
+      const badgeClass = ok ? "badge ok" : "badge nok";
+      const badgeTxt = ok ? "Objetivo: SIM" : "Objetivo: NÃO";
 
-        return `
-          <div class="item">
-            <div class="row">
-              <div>
-                <div style="font-weight:900; color:#0b2e1b;">${dataTxt} • ${projeto}</div>
-                <div class="muted">${atividade}</div>
-              </div>
-              <div class="${badgeClass}">${badgeTxt}</div>
-            </div>
-            ${desc ? `<div style="margin-top:8px; font-weight:700;">${escapeHtml(desc)}</div>` : ""}
-            ${obs ? `<div style="margin-top:6px;" class="muted">${escapeHtml(obs)}</div>` : ""}
-          </div>
-        `;
-      })
-      .join("");
+      const linha1 = escapeHtml(brDate(it.data)) + " • " + escapeHtml(it.projeto || "—");
+      const linha2 = escapeHtml(it.atividade || "—");
+      const desc = it.descricao ? '<div style="margin-top:8px; font-weight:700;">' + escapeHtml(it.descricao) + "</div>" : "";
+      const obs = it.observacao ? '<div style="margin-top:6px;" class="muted">' + escapeHtml(it.observacao) + "</div>" : "";
+
+      html +=
+        '<div class="item">' +
+          '<div class="row">' +
+            '<div>' +
+              '<div style="font-weight:900; color:#0b2e1b;">' + linha1 + "</div>" +
+              '<div class="muted">' + linha2 + "</div>" +
+            "</div>" +
+            '<div class="' + badgeClass + '">' + badgeTxt + "</div>" +
+          "</div>" +
+          desc +
+          obs +
+        "</div>";
+    }
+
+    lista.innerHTML = html;
   }
 
-  function escapeHtml(str) {
-    return str
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  // --------- Load my reports (no composite index) ---------
   async function carregarMeusRelatorios() {
     const db = getFirestore();
     const user = getPortalUser();
 
-    if (!db) {
-      setStatus("Firebase/Firestore não disponível no portal.", false);
-      return;
-    }
-    if (!user?.uid) {
-      setStatus("Usuário não identificado. Faça login no portal.", false);
-      return;
-    }
+    if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
+    if (!user || !user.uid) { setStatus("Usuário não identificado. Faça login no portal.", false); return; }
 
     $("#kpiTotal").textContent = "…";
     $("#kpiOk").textContent = "…";
 
     try {
-      // Sem orderBy para evitar índice composto; ordenamos no cliente.
-      const snap = await db
-        .collection(COLLECTION)
-        .where("createdByUid", "==", user.uid)
-        .get();
+      const snap = await db.collection(COLLECTION).where("createdByUid", "==", user.uid).get();
+      const items = snap.docs.map(function (d) {
+        const data = d.data();
+        data.id = d.id;
+        return data;
+      });
 
-      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      // Ordenação cliente: createdAt desc quando existir
-      items.sort((a, b) => {
-        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
-        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+      // Ordena no cliente por createdAt desc (quando existir)
+      items.sort(function (a, b) {
+        const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
         return tb - ta;
       });
 
       const total = items.length;
-      const ok = items.filter((x) => !!x.objetivoAlcancado).length;
+      let ok = 0;
+      for (let i = 0; i < items.length; i++) if (items[i].objetivoAlcancado) ok++;
       const nok = total - ok;
 
       $("#kpiTotal").textContent = String(total);
-      $("#kpiOk").textContent = `${ok} / ${nok}`;
+      $("#kpiOk").textContent = String(ok) + " / " + String(nok);
 
       renderLista(items);
     } catch (err) {
@@ -214,74 +220,64 @@
     }
   }
 
-  // --------- Save ---------
-  async function salvar(e) {
-    e?.preventDefault?.();
+  // --------- Salvar ---------
+  async function salvar(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
 
     const db = getFirestore();
     const user = getPortalUser();
 
-    if (!db) {
-      setStatus("Firebase/Firestore não disponível no portal.", false);
-      return;
-    }
-    if (!user?.uid) {
-      setStatus("Usuário não identificado. Faça login no portal.", false);
-      return;
-    }
+    if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
+    if (!user || !user.uid) { setStatus("Usuário não identificado. Faça login no portal.", false); return; }
 
-    const funcionario = $("#funcionario")?.value || "";
-    const projeto = $("#projeto")?.value || "";
-    const data = $("#data")?.value || "";
-    const atividade = $("#atividade")?.value || "";
-    const descricao = safeText($("#descricao")?.value || "");
-    const observacao = safeText($("#observacao")?.value || "");
+    const funcionario = $("#funcionario").value || "";
+    const projeto = $("#projeto").value || "";
+    const data = $("#data").value || "";
+    const atividade = $("#atividade").value || "";
 
-    const objetivoVal = document.querySelector('input[name="objetivo"]:checked')?.value;
-    if (!objetivoVal) {
+    const descricao = ($("#descricao").value || "").trim();
+    const observacao = ($("#observacao").value || "").trim();
+
+    const objetivoNode = document.querySelector('input[name="objetivo"]:checked');
+    if (!objetivoNode) {
       alert("Selecione se o objetivo foi alcançado (Sim ou Não).");
       return;
     }
-    const objetivoAlcancado = (objetivoVal === "sim");
+    const objetivoAlcancado = (objetivoNode.value === "sim");
 
     if (!funcionario || !projeto || !data || !atividade) {
       alert("Preencha Nome, Projeto, Data e Atividade.");
       return;
     }
 
-    // Persistir seleções para facilitar preenchimento no mobile
     localStorage.setItem("ra_funcionario", funcionario);
     localStorage.setItem("ra_projeto", projeto);
 
     const payload = {
-      funcionario,
-      projeto,
-      data,
-      atividade,
-      descricao,
-      observacao,
-      objetivoAlcancado,
-
+      funcionario: funcionario,
+      projeto: projeto,
+      data: data,
+      atividade: atividade,
+      descricao: descricao,
+      observacao: observacao,
+      objetivoAlcancado: objetivoAlcancado,
       createdAt: serverTimestamp(),
       createdByUid: user.uid,
-      createdByEmail: user.email || "",
+      createdByEmail: user.email || ""
     };
 
     const btn = $("#btnSalvar");
     if (btn) btn.disabled = true;
-    setStatus("Salvando…");
+    setStatus("Salvando...");
 
     try {
       await db.collection(COLLECTION).add(payload);
       setStatus("✅ Registro salvo com sucesso.");
 
-      // Limpar campos de texto (mantém dropdowns e data)
       $("#descricao").value = "";
       $("#observacao").value = "";
-      // reseta objetivo
-      $$('input[name="objetivo"]').forEach((r) => (r.checked = false));
+      $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
 
-      // Vai pra aba “Meus” e recarrega
       setTab("meus");
       await carregarMeusRelatorios();
     } catch (err) {
@@ -296,31 +292,59 @@
   function limpar() {
     $("#descricao").value = "";
     $("#observacao").value = "";
-    $$('input[name="objetivo"]').forEach((r) => (r.checked = false));
+    $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
     setStatus("");
   }
 
-  // --------- Init ---------
-  function initUI() {
-    // selects
-    fillSelect($("#funcionario"), FUNCIONARIOS, "Selecione seu nome…");
-    fillSelect($("#projeto"), PROJETOS, "Selecione o projeto…");
-    fillSelect($("#atividade"), ATIVIDADES, "Selecione…");
+  // --------- Boot ---------
+  function init() {
+    // Popula selects
+    fillSelect($("#funcionario"), FUNCIONARIOS, "Selecione seu nome...");
+    fillSelect($("#projeto"), PROJETOS, "Selecione o projeto...");
+    fillSelect($("#atividade"), ATIVIDADES, "Selecione...");
 
-    // data hoje
-    const today = new Date();
-    const yyyy = String(today.getFullYear());
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    const iso = `${yyyy}-${mm}-${dd}`;
-    $("#data").value = iso;
+    // Data default
+    $("#data").value = isoToday();
 
-    // restore selections
+    // Restore
     const savedFunc = localStorage.getItem("ra_funcionario");
     const savedProj = localStorage.getItem("ra_projeto");
-    if (savedFunc && FUNCIONARIOS.includes(savedFunc)) $("#funcionario").value = savedFunc;
-    if (savedProj && PROJETOS.includes(savedProj)) $("#projeto").value = savedProj;
+    if (savedFunc && FUNCIONARIOS.indexOf(savedFunc) >= 0) $("#funcionario").value = savedFunc;
+    if (savedProj && PROJETOS.indexOf(savedProj) >= 0) $("#projeto").value = savedProj;
 
-    // tabs handlers
-    $$(".tab-btn[data-tab]").forEach((btn) => {
-      btn.addEventListener("click"
+    // User badge
+    const badge = $("#userBadge");
+    const u = getPortalUser();
+    if (badge) badge.textContent = (u && (u.email || u.displayName)) ? (u.email || u.displayName) : "usuário";
+
+    // Tabs
+    $all(".tab-btn[data-tab]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const tab = btn.getAttribute("data-tab");
+        setTab(tab);
+        if (tab === "meus") carregarMeusRelatorios();
+      });
+    });
+
+    // Actions
+    $("#formRelatorio").addEventListener("submit", salvar);
+    $("#btnLimpar").addEventListener("click", limpar);
+    $("#btnRecarregar").addEventListener("click", carregarMeusRelatorios);
+
+    // PWA SW
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js")
+        .then(function () { console.log("✅ SW registrado (Relatório Atividades)"); })
+        .catch(function (e) { console.warn("⚠️ Falha ao registrar SW:", e); });
+    }
+
+    setTab("novo");
+    setStatus("");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
