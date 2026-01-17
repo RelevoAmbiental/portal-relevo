@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Relatório Diário de Atividades | Relevo Consultoria</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#26C04C" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Fontes e Ícones -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- CSS Global + CSS do módulo -->
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase SDK (Compat v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <!-- Guard do Portal (usa o firebase do portal e expõe __RELEVO_DB__/__RELEVO_AUTH__) -->
+  <script src="../scripts/firebase-init-guard.js"></script>
+  <script src="../scripts/expose-session.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <img class="logo" src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" />
+      <h1>Relatório Diário</h1>
+      <p>Registro rápido de atividades (mobile-first)</p>
+    </div>
+  </header>
+
+  <main class="container" style="padding-bottom: 90px;">
+    <section class="card" aria-label="Ações principais">
+      <div class="tabs" role="tablist" aria-label="Navegação">
+        <button class="tab active" id="tabNovo" role="tab" aria-selected="true" aria-controls="painelNovo">
+          <i class="fa-solid fa-pen-to-square"></i> Novo
+        </button>
+        <button class="tab" id="tabMeus" role="tab" aria-selected="false" aria-controls="painelMeus">
+          <i class="fa-solid fa-list-check"></i> Meus relatórios
+        </button>
+      </div>
+    </section>
+
+    <!-- Painel: Novo -->
+    <section class="card" id="painelNovo" role="tabpanel" aria-labelledby="tabNovo">
+      <div class="status" id="statusAuth" style="display:none;"></div>
+
+      <form id="formRelatorio" autocomplete="off">
+        <div class="grid">
+          <div class="form-group">
+            <label for="funcionario">Nome <span class="required">*</span></label>
+            <select id="funcionario" required></select>
+            <small class="hint">Dica: vamos lembrar seu nome neste aparelho.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="projeto">Projeto <span class="required">*</span></label>
+            <select id="projeto" required></select>
+          </div>
+
+          <div class="form-group">
+            <label for="data">Data <span class="required">*</span></label>
+            <input type="date" id="data" required />
+          </div>
+
+          <div class="form-group">
+            <label for="atividade">Atividade realizada <span class="required">*</span></label>
+            <select id="atividade" required>
+              <option value="" selected disabled>Selecione…</option>
+              <option value="deslocamento">Deslocamento</option>
+              <option value="campo_diurno">Campo diurno</option>
+              <option value="campo_noturno">Campo noturno</option>
+              <option value="escritorio">Escritório</option>
+              <option value="folga">Folga</option>
+              <option value="manutencao_equipamentos">Manutenção de equipamentos</option>
+              <option value="treinamento">Treinamento</option>
+              <option value="outro">Outro (descrever nas observações)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descricao">Descrição sucinta da atividade</label>
+          <textarea id="descricao" placeholder="Ex.: Prospecção em faixa norte; conferência de pontos amostrais…" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="observacao">Observação</label>
+          <textarea id="observacao" placeholder="Ex.: impedimentos, chuva, acesso, equipe, pendências…" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Objetivo alcançado <span class="required">*</span></label>
+          <div class="segmented" role="radiogroup" aria-label="Objetivo alcançado">
+            <label class="seg-item">
+              <input type="radio" name="objetivo" value="sim" required>
+              <span><i class="fa-solid fa-check"></i> Sim</span>
+            </label>
+            <label class="seg-item">
+              <input type="radio" name="objetivo" value="nao" required>
+              <span><i class="fa-solid fa-xmark"></i> Não</span>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit" id="btnSalvar">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Salvar relatório
+        </button>
+
+        <div class="subactions">
+          <button class="btn btn-ghost" type="button" id="btnLimpar">
+            <i class="fa-solid fa-broom"></i> Limpar campos
+          </button>
+          <button class="btn btn-ghost" type="button" id="btnInstalar" style="display:none;">
+            <i class="fa-solid fa-mobile-screen"></i> Instalar no celular
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Painel: Meus -->
+    <section class="card" id="painelMeus" role="tabpanel" aria-labelledby="tabMeus" style="display:none;">
+      <div class="filters">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="meusInicio">De</label>
+          <input type="date" id="meusInicio" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="meusFim">Até</label>
+          <input type="date" id="meusFim" />
+        </div>
+      </div>
+
+      <div class="list-actions">
+        <button class="btn btn-ghost" type="button" id="btnMeusLimpar">
+          <i class="fa-solid fa-broom"></i> Limpar período
+        </button>
+        <button class="btn btn-primary" type="button" id="btnMeusAtualizar">
+          <i class="fa-solid fa-rotate"></i> Atualizar lista
+        </button>
+      </div>
+
+      <div class="summary">
+        <div class="pill" id="meusQtd">Itens: 0</div>
+        <div class="pill" id="meusOk">OK: 0</div>
+        <div class="pill" id="meusNok">NOK: 0</div>
+      </div>
+
+      <div id="meusLista"></div>
+      <div id="meusVazio" class="empty" style="display:none;">
+        <i class="fa-solid fa-inbox"></i>
+        <p><b>Nada por aqui ainda.</b></p>
+        <p>Assim que você salvar um relatório, ele aparece aqui.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
