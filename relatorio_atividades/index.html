@@ -146,19 +146,17 @@
       </section>
     </div>
   </div>
-  <!-- Firebase compat (mesmo padrão do Portal) -->
-  <script src="/scripts/firebase-app-compat.js"></script>
-  <script src="/scripts/firebase-auth-compat.js"></script>
-  <script src="/scripts/firebase-firestore-compat.js"></script>
   
-  <!-- Inicialização guard do Portal (cria window.__RELEVO_DB__ etc.) -->
-  <script src="/scripts/firebase-init-guard.js"></script>
+  <!-- Firebase compat (MESMO padrão do portal) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   
-  <!-- Exposição do usuário (se o portal usa) -->
-  <script src="/scripts/expose-session.js"></script>
+  <!-- Config do Firebase (já usado no portal) -->
+  <script src="/despesas/firebase-config.js"></script>
   
-  <!-- Bootstrap do Portal (se existir no seu portal e for onde cria __RELEVO_DB__) -->
-  <script src="/scripts/index.js"></script>
+  <!-- Seu app -->
   <script src="./app.js"></script>
+  
 </body>
 </html>
