@@ -1,0 +1,42 @@
+{
+  "name": "Relatório Diário de Atividades - Relevo",
+  "short_name": "Relatório",
+  "description": "Registro diário de atividades - Portal Relevo",
+  "start_url": "/relatorio_atividades/",
+  "scope": "/relatorio_atividades/",
+  "display": "standalone",
+  "background_color": "#26C04C",
+  "theme_color": "#26C04C",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Novo Relatório",
+      "short_name": "Novo",
+      "description": "Registrar atividade do dia",
+      "url": "/relatorio_atividades/?action=new",
+      "icons": [
+        {
+          "src": "https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
