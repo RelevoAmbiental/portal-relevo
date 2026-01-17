@@ -1,398 +1,326 @@
-/* global firebase */
+/* =========================================================
+   Relatório Diário de Atividades — Portal Relevo
+   - Usa Firebase compat já inicializado pelo portal
+   - Evita índices compostos: consulta só por UID e ordena no cliente
+   ========================================================= */
 
-// ============================================================
-// RELATÓRIO DIÁRIO DE ATIVIDADES — Portal Relevo (Firebase compat)
-// Salva no Firestore do portal: coleção "relatorios_atividades"
-// ============================================================
+(function () {
+  // --------- Config: listas (cole aqui as mesmas do app.jsx de despesas) ---------
+  // Dica: mantenha esses arrays como “fonte única” também neste módulo.
+  const FUNCIONARIOS = [
+    // Substitua pelos nomes existentes no app.jsx de despesas:
+    "Samuel",
+    "Tiago",
+    "Gleysson",
+    "Gerly",
+    "Henever",
+    "Roberto Aquino"
+  ];
 
-(() => {
-  const COLECAO = 'relatorios_atividades';
+  const PROJETOS = [
+    // Substitua pelos projetos existentes no app.jsx de despesas:
+    "Grande Sertão 1",
+    "BR-135/BA",
+    "RIALMA"
+  ];
 
-  const CONFIG = {
-    projetos: ['ADM Geral', 'BR-135/BA', 'EOL Ibitiara/Assurua', 'LT Rialma', 'Grande Sertão 1'],
-    funcionarios: ['Gleisson', 'Sandro', 'Emílio', 'Yuri', 'João', 'Danilo', 'Roberto Aquino', 'Daniel', 'Tiago', 'Samuel Neto', 'Roberto Inácio', 'Samuel Almeida', 'Gerly', 'Henever'],
-    atividades: [
-      'Deslocamento',
-      'Campo diurno',
-      'Campo noturno',
-      'Escritório',
-      'Folga',
-      'Manutenção de equipamentos',
-      'Treinamento',
-      'Outro (descrever nas observações)'
-    ]
-  };
+  const ATIVIDADES = [
+    "deslocamento",
+    "Campo diurno",
+    "Campo noturno",
+    "Escritório",
+    "Folga",
+    "Manutenção de equipamentos",
+    "Treinamento",
+    "Outro (descrever nas observações)"
+  ];
 
-  // ---- DOM
-  const el = (id) => document.getElementById(id);
+  const COLLECTION = "relatorios_atividades";
 
-  const tabNovo = el('tabNovo');
-  const tabMeus = el('tabMeus');
-  const secNovo = el('secNovo');
-  const secMeus = el('secMeus');
+  // --------- Helpers ---------
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  const form = el('formRelatorio');
-  const funcionarioSel = el('funcionario');
-  const projetoSel = el('projeto');
-  const dataInp = el('data');
-  const atividadeSel = el('atividade');
-  const descricaoInp = el('descricao');
-  const observacaoInp = el('observacao');
-  const objetivoSim = el('objetivoSim');
-  const objetivoNao = el('objetivoNao');
-
-  const btnSalvar = el('btnSalvar');
-
-  const meusInicio = el('meusInicio');
-  const meusFim = el('meusFim');
-  const btnMeusLimpar = el('btnMeusLimpar');
-  const btnMeusAtualizar = el('btnMeusAtualizar');
-  const meusLista = el('meusLista');
-  const meusVazio = el('meusVazio');
-  const meusQtd = el('meusQtd');
-  const meusOk = el('meusOk');
-  const meusNok = el('meusNok');
-
-  const toast = el('toast');
-
-  // ---- Firebase
-  const db = window.__RELEVO_DB__ || (window.firebase && firebase.firestore && firebase.firestore());
-  const auth = window.__RELEVO_AUTH__ || (window.firebase && firebase.auth && firebase.auth());
-
-  if (!db || !auth) {
-    console.error('❌ Relatório Atividades: Firebase do portal não está disponível.');
-    alert('Firebase do portal não está disponível. Recarregue a página pelo Portal.');
-    return;
+  function brDate(isoDate) {
+    if (!isoDate) return "";
+    // isoDate: yyyy-mm-dd
+    const [y, m, d] = isoDate.split("-");
+    return `${d}/${m}/${y}`;
   }
 
-  // Persistência offline (best effort)
-  try {
-    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-  } catch (_) {}
-
-  // ---- Helpers
-  function hojeISO() {
-    const d = new Date();
-    const tz = d.getTimezoneOffset() * 60000;
-    return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+  function safeText(v) {
+    return (v ?? "").toString().trim();
   }
 
-  function toastMsg(msg, type = 'info') {
-    toast.textContent = msg;
-    toast.classList.remove('show', 'ok', 'error');
-    if (type === 'ok') toast.classList.add('ok');
-    if (type === 'error') toast.classList.add('error');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2600);
+  function setStatus(msg, ok = true) {
+    const el = $("#statusMsg");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.style.color = ok ? "#0f4d2e" : "#8b1f1f";
   }
 
-  function setTab(which) {
-    const isNovo = which === 'novo';
-    tabNovo.classList.toggle('active', isNovo);
-    tabMeus.classList.toggle('active', !isNovo);
-    secNovo.classList.toggle('hidden', !isNovo);
-    secMeus.classList.toggle('hidden', isNovo);
-  }
-
-  function fillSelect(select, values, placeholder) {
-    select.innerHTML = '';
-    const opt0 = document.createElement('option');
-    opt0.value = '';
+  function fillSelect(selectEl, values, placeholder = "Selecione…") {
+    if (!selectEl) return;
+    selectEl.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
     opt0.textContent = placeholder;
     opt0.disabled = true;
     opt0.selected = true;
-    select.appendChild(opt0);
+    selectEl.appendChild(opt0);
 
     values.forEach((v) => {
-      const o = document.createElement('option');
-      o.value = v;
-      o.textContent = v;
-      select.appendChild(o);
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      selectEl.appendChild(opt);
     });
   }
 
-  function sanitizeText(s) {
-    return (s || '').toString().trim();
+  function getPortalUser() {
+    // O portal costuma expor usuário globalmente (ex.: expose-session.js)
+    const u = window.__RELEVO_USER__ || null;
+    if (u && (u.uid || u.email)) return u;
+
+    const auth = window.__RELEVO_AUTH__ || window.firebase?.auth?.();
+    const cu = auth?.currentUser || null;
+    if (cu) return { uid: cu.uid, email: cu.email, displayName: cu.displayName };
+
+    return null;
   }
 
-  function getCurrentUser() {
-    const u = window.__RELEVO_USER__ || auth.currentUser;
-    if (!u) return null;
-    if (u.uid) return { uid: u.uid, email: u.email || null };
-    return { uid: u.raw?.uid || null, email: u.raw?.email || null };
+  function getFirestore() {
+    // Preferência total ao objeto já exposto pelo portal (compat)
+    if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
+
+    // Fallback: se o portal carregou firebase global e inicializou
+    if (window.firebase?.firestore) return window.firebase.firestore();
+
+    return null;
   }
 
-  function enableForm(enabled) {
-    [funcionarioSel, projetoSel, dataInp, atividadeSel, descricaoInp, observacaoInp, objetivoSim, objetivoNao, btnSalvar]
-      .forEach((n) => { if (n) n.disabled = !enabled; });
+  function serverTimestamp() {
+    // compat FieldValue
+    return window.firebase?.firestore?.FieldValue?.serverTimestamp
+      ? window.firebase.firestore.FieldValue.serverTimestamp()
+      : new Date();
   }
 
-  // ---- Init UI
-  function init() {
-    // selects
-    fillSelect(funcionarioSel, CONFIG.funcionarios, 'Selecione seu nome');
-    fillSelect(projetoSel, CONFIG.projetos, 'Selecione o projeto');
-    fillSelect(atividadeSel, CONFIG.atividades, 'Selecione a atividade');
+  // --------- Tabs (blindado) ---------
+  function setTab(tab) {
+    const btns = $$(".tab-btn[data-tab]");
+    const panels = $$(".tab-panel[data-panel]");
 
-    // data
-    dataInp.value = hojeISO();
-
-    // lembrar ultimo nome/projeto
-    try {
-      const lastNome = localStorage.getItem('relatorio_funcionario') || '';
-      const lastProjeto = localStorage.getItem('relatorio_projeto') || '';
-      if (lastNome && CONFIG.funcionarios.includes(lastNome)) funcionarioSel.value = lastNome;
-      if (lastProjeto && CONFIG.projetos.includes(lastProjeto)) projetoSel.value = lastProjeto;
-    } catch (_) {}
-
-    // tabs
-    tabNovo.addEventListener('click', () => setTab('novo'));
-    tabMeus.addEventListener('click', () => {
-      setTab('meus');
-      carregarMeus();
-    });
-
-    // form submit
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      salvar();
-    });
-
-    // meus filtros
-    btnMeusLimpar.addEventListener('click', () => {
-      meusInicio.value = '';
-      meusFim.value = '';
-      carregarMeus();
-    });
-
-    btnMeusAtualizar.addEventListener('click', () => carregarMeus());
-
-    // observar auth
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        enableForm(false);
-        toastMsg('Faça login no Portal para lançar seu relatório.', 'error');
-        return;
-      }
-      enableForm(true);
-    });
-
-    // PWA SW
-    registrarServiceWorker();
-
-    // deep link
-    const params = new URLSearchParams(location.search);
-    if (params.get('tab') === 'meus') {
-      setTab('meus');
-      carregarMeus();
-    }
-  }
-
-  async function salvar() {
-    const funcionario = funcionarioSel.value;
-    const projeto = projetoSel.value;
-    const data = dataInp.value || hojeISO();
-    const atividade = atividadeSel.value;
-    const descricao = sanitizeText(descricaoInp.value);
-    const observacao = sanitizeText(observacaoInp.value);
-    const objetivoAlcancado = objetivoSim.checked ? true : (objetivoNao.checked ? false : null);
-
-    const obrigatorios = [
-      [funcionario, 'Nome'],
-      [projeto, 'Projeto'],
-      [data, 'Data'],
-      [atividade, 'Atividade realizada'],
-      [objetivoAlcancado !== null, 'Objetivo alcançado']
-    ];
-
-    const faltando = obrigatorios.find(([ok]) => !ok);
-    if (faltando) {
-      toastMsg(`Preencha: ${faltando[1]}.`, 'error');
+    if (!btns.length || !panels.length) {
+      console.warn("[Relatorio] Tabs/painéis não encontrados. Verifique index.html.");
       return;
     }
 
-    const user = getCurrentUser();
+    btns.forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+    panels.forEach((p) => p.classList.toggle("hidden", p.dataset.panel !== tab));
+  }
+
+  // --------- Render list ---------
+  function renderLista(items) {
+    const lista = $("#listaRelatorios");
+    if (!lista) return;
+
+    if (!items.length) {
+      lista.innerHTML = `<div class="item"><div style="font-weight:900;">Nenhum registro ainda.</div><div class="muted">Assim que você salvar, aparece aqui.</div></div>`;
+      return;
+    }
+
+    lista.innerHTML = items
+      .map((it) => {
+        const ok = !!it.objetivoAlcancado;
+        const badgeClass = ok ? "badge ok" : "badge nok";
+        const badgeTxt = ok ? "Objetivo: SIM" : "Objetivo: NÃO";
+        const dataTxt = it.data ? brDate(it.data) : "—";
+        const projeto = safeText(it.projeto) || "—";
+        const atividade = safeText(it.atividade) || "—";
+        const desc = safeText(it.descricao);
+        const obs = safeText(it.observacao);
+
+        return `
+          <div class="item">
+            <div class="row">
+              <div>
+                <div style="font-weight:900; color:#0b2e1b;">${dataTxt} • ${projeto}</div>
+                <div class="muted">${atividade}</div>
+              </div>
+              <div class="${badgeClass}">${badgeTxt}</div>
+            </div>
+            ${desc ? `<div style="margin-top:8px; font-weight:700;">${escapeHtml(desc)}</div>` : ""}
+            ${obs ? `<div style="margin-top:6px;" class="muted">${escapeHtml(obs)}</div>` : ""}
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // --------- Load my reports (no composite index) ---------
+  async function carregarMeusRelatorios() {
+    const db = getFirestore();
+    const user = getPortalUser();
+
+    if (!db) {
+      setStatus("Firebase/Firestore não disponível no portal.", false);
+      return;
+    }
+    if (!user?.uid) {
+      setStatus("Usuário não identificado. Faça login no portal.", false);
+      return;
+    }
+
+    $("#kpiTotal").textContent = "…";
+    $("#kpiOk").textContent = "…";
+
+    try {
+      // Sem orderBy para evitar índice composto; ordenamos no cliente.
+      const snap = await db
+        .collection(COLLECTION)
+        .where("createdByUid", "==", user.uid)
+        .get();
+
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      // Ordenação cliente: createdAt desc quando existir
+      items.sort((a, b) => {
+        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : 0);
+        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : 0);
+        return tb - ta;
+      });
+
+      const total = items.length;
+      const ok = items.filter((x) => !!x.objetivoAlcancado).length;
+      const nok = total - ok;
+
+      $("#kpiTotal").textContent = String(total);
+      $("#kpiOk").textContent = `${ok} / ${nok}`;
+
+      renderLista(items);
+    } catch (err) {
+      console.error("❌ Erro ao carregar relatórios:", err);
+      setStatus("Erro ao carregar seus relatórios. Veja o console.", false);
+    }
+  }
+
+  // --------- Save ---------
+  async function salvar(e) {
+    e?.preventDefault?.();
+
+    const db = getFirestore();
+    const user = getPortalUser();
+
+    if (!db) {
+      setStatus("Firebase/Firestore não disponível no portal.", false);
+      return;
+    }
+    if (!user?.uid) {
+      setStatus("Usuário não identificado. Faça login no portal.", false);
+      return;
+    }
+
+    const funcionario = $("#funcionario")?.value || "";
+    const projeto = $("#projeto")?.value || "";
+    const data = $("#data")?.value || "";
+    const atividade = $("#atividade")?.value || "";
+    const descricao = safeText($("#descricao")?.value || "");
+    const observacao = safeText($("#observacao")?.value || "");
+
+    const objetivoVal = document.querySelector('input[name="objetivo"]:checked')?.value;
+    if (!objetivoVal) {
+      alert("Selecione se o objetivo foi alcançado (Sim ou Não).");
+      return;
+    }
+    const objetivoAlcancado = (objetivoVal === "sim");
+
+    if (!funcionario || !projeto || !data || !atividade) {
+      alert("Preencha Nome, Projeto, Data e Atividade.");
+      return;
+    }
+
+    // Persistir seleções para facilitar preenchimento no mobile
+    localStorage.setItem("ra_funcionario", funcionario);
+    localStorage.setItem("ra_projeto", projeto);
 
     const payload = {
       funcionario,
       projeto,
-      data, // yyyy-mm-dd
+      data,
       atividade,
       descricao,
       observacao,
       objetivoAlcancado,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdByUid: user?.uid || null,
-      createdByEmail: user?.email || null,
-      origem: 'portal-relevo/relatorio_atividades'
+
+      createdAt: serverTimestamp(),
+      createdByUid: user.uid,
+      createdByEmail: user.email || "",
     };
 
+    const btn = $("#btnSalvar");
+    if (btn) btn.disabled = true;
+    setStatus("Salvando…");
+
     try {
-      btnSalvar.disabled = true;
-      btnSalvar.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Salvando...';
+      await db.collection(COLLECTION).add(payload);
+      setStatus("✅ Registro salvo com sucesso.");
 
-      await db.collection(COLECAO).add(payload);
+      // Limpar campos de texto (mantém dropdowns e data)
+      $("#descricao").value = "";
+      $("#observacao").value = "";
+      // reseta objetivo
+      $$('input[name="objetivo"]').forEach((r) => (r.checked = false));
 
-      try {
-        localStorage.setItem('relatorio_funcionario', funcionario);
-        localStorage.setItem('relatorio_projeto', projeto);
-      } catch (_) {}
-
-      // reset (mantendo nome/projeto)
-      atividadeSel.selectedIndex = 0;
-      descricaoInp.value = '';
-      observacaoInp.value = '';
-      objetivoSim.checked = false;
-      objetivoNao.checked = false;
-      dataInp.value = hojeISO();
-
-      toastMsg('Relatório salvo. Missão cumprida ✅', 'ok');
+      // Vai pra aba “Meus” e recarrega
+      setTab("meus");
+      await carregarMeusRelatorios();
     } catch (err) {
-      console.error('❌ Erro ao salvar relatório:', err);
-      toastMsg('Erro ao salvar. Verifique sua conexão e tente novamente.', 'error');
+      console.error("❌ Erro ao salvar:", err);
+      setStatus("Erro ao salvar. Veja o console.", false);
+      alert("Não foi possível salvar. Verifique conexão/permissões.");
     } finally {
-      btnSalvar.disabled = false;
-      btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Relatório';
+      if (btn) btn.disabled = false;
     }
   }
 
-  async function carregarMeus() {
-    meusLista.innerHTML = '';
-    meusVazio.style.display = 'none';
-    meusQtd.textContent = 'Itens: 0';
-    meusOk.textContent = 'OK: 0';
-    meusNok.textContent = 'NOK: 0';
-
-    const user = getCurrentUser();
-    const funcionario = funcionarioSel.value || (tryGetLocal('relatorio_funcionario') || '');
-
-    if (!user?.uid && !funcionario) {
-      meusVazio.style.display = '';
-      return;
-    }
-
-    let q = db.collection(COLECAO);
-
-    // Evitar índice composto: query simples (sem orderBy), e ordena no client.
-    if (user?.uid) {
-      q = q.where('createdByUid', '==', user.uid);
-    } else {
-      q = q.where('funcionario', '==', funcionario);
-    }
-
-    // Limite para não explodir o mobile.
-    q = q.limit(100);
-
-    try {
-      const snap = await q.get();
-      let items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      const di = meusInicio.value || '';
-      const df = meusFim.value || '';
-      if (di) items = items.filter((it) => (it.data || '') >= di);
-      if (df) items = items.filter((it) => (it.data || '') <= df);
-
-      items.sort((a, b) => {
-        const da = a.data || '';
-        const dbb = b.data || '';
-        if (da === dbb) return (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0);
-        return dbb.localeCompare(da);
-      });
-
-      if (!items.length) {
-        meusVazio.style.display = '';
-        return;
-      }
-
-      let ok = 0;
-      let nok = 0;
-
-      items.forEach((it) => {
-        if (it.objetivoAlcancado) ok += 1; else nok += 1;
-        meusLista.appendChild(renderCard(it));
-      });
-
-      meusQtd.textContent = `Itens: ${items.length}`;
-      meusOk.textContent = `OK: ${ok}`;
-      meusNok.textContent = `NOK: ${nok}`;
-
-    } catch (err) {
-      console.error('❌ Erro ao carregar meus relatórios:', err);
-      toastMsg('Não consegui carregar seus relatórios agora. Tente de novo.', 'error');
-      meusVazio.style.display = '';
-    }
+  function limpar() {
+    $("#descricao").value = "";
+    $("#observacao").value = "";
+    $$('input[name="objetivo"]').forEach((r) => (r.checked = false));
+    setStatus("");
   }
 
-  function renderCard(it) {
-    const wrap = document.createElement('div');
-    wrap.className = 'card';
+  // --------- Init ---------
+  function initUI() {
+    // selects
+    fillSelect($("#funcionario"), FUNCIONARIOS, "Selecione seu nome…");
+    fillSelect($("#projeto"), PROJETOS, "Selecione o projeto…");
+    fillSelect($("#atividade"), ATIVIDADES, "Selecione…");
 
-    const top = document.createElement('div');
-    top.className = 'card-top';
+    // data hoje
+    const today = new Date();
+    const yyyy = String(today.getFullYear());
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const iso = `${yyyy}-${mm}-${dd}`;
+    $("#data").value = iso;
 
-    const title = document.createElement('div');
-    title.className = 'card-title';
-    title.textContent = it.projeto || '—';
+    // restore selections
+    const savedFunc = localStorage.getItem("ra_funcionario");
+    const savedProj = localStorage.getItem("ra_projeto");
+    if (savedFunc && FUNCIONARIOS.includes(savedFunc)) $("#funcionario").value = savedFunc;
+    if (savedProj && PROJETOS.includes(savedProj)) $("#projeto").value = savedProj;
 
-    const badge = document.createElement('span');
-    badge.className = 'badge ' + (it.objetivoAlcancado ? 'ok' : 'nok');
-    badge.textContent = it.objetivoAlcancado ? 'Objetivo: SIM' : 'Objetivo: NÃO';
-
-    top.appendChild(title);
-    top.appendChild(badge);
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.innerHTML = `
-      <span><i class="fa-regular fa-calendar"></i> ${it.data || '—'}</span>
-      <span><i class="fa-solid fa-person-walking"></i> ${it.funcionario || '—'}</span>
-    `;
-
-    const activity = document.createElement('div');
-    activity.className = 'activity';
-    activity.innerHTML = `<i class="fa-solid fa-clipboard-check"></i> ${escapeHtml(it.atividade || '—')}`;
-
-    const desc = document.createElement('div');
-    desc.className = 'text';
-    const d = sanitizeText(it.descricao);
-    desc.innerHTML = d ? `<b>Descrição:</b> ${escapeHtml(d)}` : '<span class="muted">Sem descrição.</span>';
-
-    const obs = document.createElement('div');
-    obs.className = 'text';
-    const o = sanitizeText(it.observacao);
-    obs.innerHTML = o ? `<b>Obs.:</b> ${escapeHtml(o)}` : '<span class="muted">Sem observações.</span>';
-
-    wrap.appendChild(top);
-    wrap.appendChild(meta);
-    wrap.appendChild(activity);
-    wrap.appendChild(desc);
-    wrap.appendChild(obs);
-
-    return wrap;
-  }
-
-  function escapeHtml(str) {
-    return (str || '').toString()
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  function tryGetLocal(key) {
-    try { return localStorage.getItem(key) || ''; } catch (_) { return ''; }
-  }
-
-  function registrarServiceWorker() {
-    if (!('serviceWorker' in navigator)) return;
-
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('✅ SW registrado (Relatório Atividades)'))
-        .catch((e) => console.warn('⚠️ Falha ao registrar SW:', e));
-    });
-  }
-
-  init();
-})();
+    // tabs handlers
+    $$(".tab-btn[data-tab]").forEach((btn) => {
+      btn.addEventListener("click"
