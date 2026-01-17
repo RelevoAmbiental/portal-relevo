@@ -93,11 +93,12 @@
   }
 
   // --------- Firebase access (portal) ---------
-  function getFirestore() {
-    if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
-    if (window.firebase && window.firebase.firestore) return window.firebase.firestore();
-    return null;
-  }
+   function getFirestore() {
+     if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
+     if (window.db) return window.db;                 // muitos módulos usam window.db
+     if (window.firebase && window.firebase.firestore) return window.firebase.firestore();
+     return null;
+   }
 
   function getPortalUser() {
     const u = window.__RELEVO_USER__ || null;
