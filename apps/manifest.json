@@ -1,0 +1,14 @@
+{
+  "name": "Apps Relevo",
+  "short_name": "Relevo Apps",
+  "description": "Launcher de aplicativos do Portal Relevo",
+  "start_url": "/apps/",
+  "scope": "/apps/",
+  "display": "standalone",
+  "background_color": "#0b2e1b",
+  "theme_color": "#0b2e1b",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity"],
+  "prefer_related_applications": false
+}
