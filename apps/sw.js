@@ -1,4 +1,4 @@
-const CACHE = "relevo-apps-launcher-v2";
+const CACHE = "relevo-apps-launcher-v1";
 const ASSETS = [
   "/apps/",
   "/apps/index.html",
@@ -26,10 +26,13 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Só controla escopo /apps/
   if (!url.pathname.startsWith("/apps/")) return;
 
   event.respondWith(
-    caches.match(req).then(cached => cached || fetch(req))
+    fetch(req).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE).then((cache) => cache.put(req, copy));
+      return res;
+    }).catch(() => caches.match(req))
   );
 });
