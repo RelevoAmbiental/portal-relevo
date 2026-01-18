@@ -187,13 +187,21 @@
     const user = getPortalUser();
 
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
-    if (!user || !user.uid) { setStatus("Usuário não identificado. Faça login no portal.", false); return; }
 
+    // ✅ ALTERACAO: Não exigir usuário logado. Se não houver UID, não filtra.
     $("#kpiTotal").textContent = "…";
     $("#kpiOk").textContent = "…";
 
     try {
-      const snap = await db.collection(COLLECTION).where("createdByUid", "==", user.uid).get();
+      let ref = db.collection(COLLECTION);
+
+      // Se houver usuário logado, mantém o comportamento atual (somente "meus").
+      if (user && user.uid) {
+        ref = ref.where("createdByUid", "==", user.uid);
+      }
+
+      const snap = await ref.get();
+
       const items = snap.docs.map(function (d) {
         const data = d.data();
         data.id = d.id;
@@ -216,9 +224,14 @@
       $("#kpiOk").textContent = String(ok) + " / " + String(nok);
 
       renderLista(items);
+
+      // Pequeno aviso de UX: se não estiver logado, deixa claro que é lista geral (se houver dados).
+      if (!user || !user.uid) {
+        setStatus("Modo público: exibindo registros disponíveis.", true);
+      }
     } catch (err) {
       console.error("❌ Erro ao carregar relatórios:", err);
-      setStatus("Erro ao carregar seus relatórios. Veja o console.", false);
+      setStatus("Erro ao carregar relatórios. Veja o console.", false);
     }
   }
 
@@ -230,7 +243,7 @@
     const user = getPortalUser();
 
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
-    if (!user || !user.uid) { setStatus("Usuário não identificado. Faça login no portal.", false); return; }
+    // ✅ ALTERACAO: Não exigir login para salvar.
 
     const funcionario = $("#funcionario").value || "";
     const projeto = $("#projeto").value || "";
@@ -264,8 +277,10 @@
       observacao: observacao,
       objetivoAlcancado: objetivoAlcancado,
       createdAt: serverTimestamp(),
-      createdByUid: user.uid,
-      createdByEmail: user.email || ""
+
+      // ✅ ALTERACAO: Metadados opcionais (sem depender de login)
+      createdByUid: (user && user.uid) ? user.uid : null,
+      createdByEmail: (user && user.email) ? user.email : null
     };
 
     const btn = $("#btnSalvar");
@@ -317,7 +332,9 @@
     // User badge
     const badge = $("#userBadge");
     const u = getPortalUser();
-    if (badge) badge.textContent = (u && (u.email || u.displayName)) ? (u.email || u.displayName) : "usuário";
+
+    // ✅ ALTERACAO: não assustar usuário. Se não tiver login, mantém neutro.
+    if (badge) badge.textContent = (u && (u.email || u.displayName)) ? (u.email || u.displayName) : "Acesso público";
 
     // Tabs
     $all(".tab-btn[data-tab]").forEach(function (btn) {
