@@ -82,6 +82,23 @@ body{
   color: var(--muted);
 }
 
+.card-icon-img{
+  width: 36px;          /* tamanho fixo */
+  height: 36px;         /* tamanho fixo */
+  min-width: 36px;
+  min-height: 36px;
+
+  object-fit: contain;  /* mantém proporção */
+  display: block;
+
+  margin-bottom: 6px;
+  padding: 4px;
+
+  background: rgba(15,77,46,.08);
+  border-radius: 8px;
+}
+
+
 .btn{
   border:0;
   border-radius: 14px;
