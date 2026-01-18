@@ -18,6 +18,7 @@
   ];
 
   const PROJETOS = [
+    "ADM Geral",
     "Grande Sertão 1",
     "BR-135/BA",
     "RIALMA"
