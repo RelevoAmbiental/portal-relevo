@@ -25,7 +25,7 @@
   ];
 
   const ATIVIDADES = [
-    "deslocamento",
+    "Deslocamento",
     "Campo diurno",
     "Campo noturno",
     "Escritório",
