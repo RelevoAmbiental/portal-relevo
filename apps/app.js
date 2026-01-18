@@ -28,15 +28,21 @@
       const desc = safeText(app.descricao) || "";
       const url = safeText(app.url);
 
-      return `
-        <div class="card">
-          <div class="left">
-            <div class="card-title">${escapeHtml(titulo)}</div>
-            <div class="card-desc">${escapeHtml(desc)}</div>
-          </div>
-          <button class="btn" data-url="${escapeAttr(url)}">Abrir</button>
+    const iconHtml = app.icon
+      ? `<img class="card-icon-img" src="${escapeAttr(app.icon)}" alt="" loading="lazy" />`
+      : "";
+    
+    return `
+      <div class="card">
+        <div class="left">
+          ${iconHtml}
+          <div class="card-title">${escapeHtml(titulo)}</div>
+          <div class="card-desc">${escapeHtml(desc)}</div>
         </div>
-      `;
+        <button class="btn" data-url="${escapeAttr(url)}">Abrir</button>
+      </div>
+    `;
+      
     }).join("");
 
     grid.querySelectorAll("button[data-url]").forEach(btn => {
