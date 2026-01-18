@@ -1,7 +1,7 @@
 /* =========================================================
    Relatório Diário de Atividades — Portal Relevo
    - Usa Firebase compat já inicializado pelo portal
-   - Evita índice composto: consulta só por UID e ordena no cliente
+   - Modo público: não exige login
    ========================================================= */
 
 (function () {
@@ -36,6 +36,7 @@
   ];
 
   const COLLECTION = "relatorios_atividades";
+  const LIMIT_RELATORIOS = 10;
 
   // --------- Helpers DOM ---------
   function $(sel) { return document.querySelector(sel); }
@@ -94,18 +95,17 @@
   }
 
   // --------- Firebase access (portal) ---------
-   function getFirestore() {
-     if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
-     if (window.db) return window.db;                 // muitos módulos usam window.db
-     if (window.firebase && window.firebase.firestore) return window.firebase.firestore();
-     return null;
-   }
+  function getFirestore() {
+    if (window.__RELEVO_DB__) return window.__RELEVO_DB__;
+    if (window.db) return window.db;
+    if (window.firebase && window.firebase.firestore) return window.firebase.firestore();
+    return null;
+  }
 
   function getPortalUser() {
     const u = window.__RELEVO_USER__ || null;
     if (u && (u.uid || u.email)) return u;
 
-    // fallback: compat auth
     try {
       const auth = window.__RELEVO_AUTH__ || (window.firebase && window.firebase.auth && window.firebase.auth());
       const cu = auth && auth.currentUser;
@@ -160,8 +160,15 @@
       const badgeClass = ok ? "badge ok" : "badge nok";
       const badgeTxt = ok ? "Objetivo: SIM" : "Objetivo: NÃO";
 
-      const linha1 = escapeHtml(brDate(it.data)) + " • " + escapeHtml(it.projeto || "—");
-      const linha2 = escapeHtml(it.atividade || "—");
+      // ✅ ALTERAÇÃO: mostrar funcionário + projeto de forma explícita
+      const funcionario = escapeHtml(it.funcionario || "—");
+      const projeto = escapeHtml(it.projeto || "—");
+      const dataTxt = escapeHtml(brDate(it.data));
+      const atividade = escapeHtml(it.atividade || "—");
+
+      const linha1 = funcionario + " • " + projeto;
+      const linha2 = dataTxt + " • " + atividade;
+
       const desc = it.descricao ? '<div style="margin-top:8px; font-weight:700;">' + escapeHtml(it.descricao) + "</div>" : "";
       const obs = it.observacao ? '<div style="margin-top:6px;" class="muted">' + escapeHtml(it.observacao) + "</div>" : "";
 
@@ -184,21 +191,16 @@
 
   async function carregarMeusRelatorios() {
     const db = getFirestore();
-    const user = getPortalUser();
+    const user = getPortalUser(); // mantém, só pra metadados/UX
 
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
 
-    // ✅ ALTERACAO: Não exigir usuário logado. Se não houver UID, não filtra.
     $("#kpiTotal").textContent = "…";
     $("#kpiOk").textContent = "…";
 
     try {
-      let ref = db.collection(COLLECTION);
-
-      // Se houver usuário logado, mantém o comportamento atual (somente "meus").
-      if (user && user.uid) {
-        ref = ref.where("createdByUid", "==", user.uid);
-      }
+      // ✅ ALTERAÇÃO: listar APENAS os 10 últimos relatórios (geral)
+      let ref = db.collection(COLLECTION).orderBy("createdAt", "desc").limit(LIMIT_RELATORIOS);
 
       const snap = await ref.get();
 
@@ -208,7 +210,7 @@
         return data;
       });
 
-      // Ordena no cliente por createdAt desc (quando existir)
+      // Segurança: se algum doc não tiver createdAt, ainda ordena no cliente.
       items.sort(function (a, b) {
         const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
         const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
@@ -220,14 +222,17 @@
       for (let i = 0; i < items.length; i++) if (items[i].objetivoAlcancado) ok++;
       const nok = total - ok;
 
+      // ✅ KPI agora representa os últimos 10 (ou menos)
       $("#kpiTotal").textContent = String(total);
       $("#kpiOk").textContent = String(ok) + " / " + String(nok);
 
       renderLista(items);
 
-      // Pequeno aviso de UX: se não estiver logado, deixa claro que é lista geral (se houver dados).
+      // Status discreto
       if (!user || !user.uid) {
-        setStatus("Modo público: exibindo registros disponíveis.", true);
+        setStatus("Últimos " + LIMIT_RELATORIOS + " relatórios (modo público).", true);
+      } else {
+        setStatus("Últimos " + LIMIT_RELATORIOS + " relatórios.", true);
       }
     } catch (err) {
       console.error("❌ Erro ao carregar relatórios:", err);
@@ -243,7 +248,6 @@
     const user = getPortalUser();
 
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
-    // ✅ ALTERACAO: Não exigir login para salvar.
 
     const funcionario = $("#funcionario").value || "";
     const projeto = $("#projeto").value || "";
@@ -278,7 +282,7 @@
       objetivoAlcancado: objetivoAlcancado,
       createdAt: serverTimestamp(),
 
-      // ✅ ALTERACAO: Metadados opcionais (sem depender de login)
+      // metadados opcionais
       createdByUid: (user && user.uid) ? user.uid : null,
       createdByEmail: (user && user.email) ? user.email : null
     };
@@ -291,6 +295,7 @@
       await db.collection(COLLECTION).add(payload);
       setStatus("✅ Registro salvo com sucesso.");
 
+      // mantém o comportamento de não resetar dropdown automaticamente após salvar
       $("#descricao").value = "";
       $("#observacao").value = "";
       $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
@@ -307,9 +312,29 @@
   }
 
   function limpar() {
-    $("#descricao").value = "";
-    $("#observacao").value = "";
+    // ✅ ALTERAÇÃO: agora limpa TUDO de verdade
+    const selFunc = $("#funcionario");
+    const selProj = $("#projeto");
+    const selAtv = $("#atividade");
+    const inpData = $("#data");
+
+    if (selFunc) selFunc.selectedIndex = 0;
+    if (selProj) selProj.selectedIndex = 0;
+    if (selAtv) selAtv.selectedIndex = 0;
+
+    if (inpData) inpData.value = isoToday();
+
+    const desc = $("#descricao");
+    const obs = $("#observacao");
+    if (desc) desc.value = "";
+    if (obs) obs.value = "";
+
     $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
+
+    // limpa “memória” do preenchimento
+    localStorage.removeItem("ra_funcionario");
+    localStorage.removeItem("ra_projeto");
+
     setStatus("");
   }
 
@@ -332,8 +357,6 @@
     // User badge
     const badge = $("#userBadge");
     const u = getPortalUser();
-
-    // ✅ ALTERACAO: não assustar usuário. Se não tiver login, mantém neutro.
     if (badge) badge.textContent = (u && (u.email || u.displayName)) ? (u.email || u.displayName) : "Acesso público";
 
     // Tabs
