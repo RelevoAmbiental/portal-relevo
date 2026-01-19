@@ -16,9 +16,11 @@ paths:
         - firebaseAuth: []
       x-google-backend:
         address: https://gateway-ia-182759626683.us-central1.run.app
+        jwt_audience: https://gateway-ia-182759626683.us-central1.run.app
       responses:
         "200":
           description: OK
+
 
 components:
   securitySchemes:
