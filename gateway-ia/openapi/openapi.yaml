@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Gateway IA - Portal Relevo
+  description: Gateway autenticado para IA do Cronograma
+  version: 1.0.0
+
+servers:
+  - url: https://gateway.relevo.eco.br
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      security:
+        - firebaseAuth: []
+      x-google-backend:
+        address: https://gateway-ia-182759626683.us-central1.run.app
+      responses:
+        "200":
+          description: OK
+
+components:
+  securitySchemes:
+    firebaseAuth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: ""
+      x-google-issuer: "https://securetoken.google.com/portal-relevo"
+      x-google-jwks_uri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+      x-google-audiences: "portal-relevo"
