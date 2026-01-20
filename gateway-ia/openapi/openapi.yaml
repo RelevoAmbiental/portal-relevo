@@ -19,6 +19,7 @@ paths:
         - firebaseAuth: []
       x-google-backend:
         address: https://gateway-ia-182759626683.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
       responses:
         "200":
           description: OK
@@ -33,11 +34,13 @@ paths:
         - firebaseAuth: []
       x-google-backend:
         address: https://gateway-ia-182759626683.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
       responses:
         "200":
           description: OK
         "400":
           description: Bad Request
+
 
 securityDefinitions:
   firebaseAuth:
