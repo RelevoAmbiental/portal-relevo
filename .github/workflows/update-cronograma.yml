@@ -52,15 +52,6 @@ jobs:
         run: |
           cp -R cronogramas-src/dist/assets/* cronograma/assets/
 
-      - name: 🔄 Padronizar nomes (index.js / index.css)
-        run: |
-          # JS
-          JSFILE=$(ls cronograma/assets/*.js | head -n 1)
-          mv "$JSFILE" cronograma/assets/index.js
-          # CSS
-          CSSFILE=$(ls cronograma/assets/*.css | head -n 1)
-          mv "$CSSFILE" cronograma/assets/index.css
-
       - name: 💾 Commit e Push das alterações
         run: |
           git config --local user.email "bot@relevo.eco.br"
