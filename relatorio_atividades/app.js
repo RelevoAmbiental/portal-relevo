@@ -25,7 +25,7 @@
   ];
 
   const ATIVIDADES = [
-    "Deslocamento",
+    "deslocamento",
     "Campo diurno",
     "Campo noturno",
     "Escritório",
@@ -36,7 +36,14 @@
   ];
 
   const COLLECTION = "relatorios_atividades";
-  const LIMIT_RELATORIOS = 10;
+  const DEFAULT_LIMIT = 10;
+  const MAX_FETCH_CAP = 1000; // segurança
+
+  // ✅ Estado apenas da aba [Relatórios]
+  const relatoriosState = {
+    fetched: [],   // itens buscados do Firestore (janela recente)
+    filtered: []   // itens após filtro + limite (o que está na tela e vai pro CSV)
+  };
 
   // --------- Helpers DOM ---------
   function $(sel) { return document.querySelector(sel); }
@@ -60,6 +67,27 @@
     opt0.disabled = true;
     opt0.selected = true;
     selectEl.appendChild(opt0);
+
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i];
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      selectEl.appendChild(opt);
+    }
+  }
+
+  // ✅ select de filtro (permite "Todos" selecionável)
+  function fillFilterSelect(selectEl, values, allLabel) {
+    if (!selectEl) return;
+
+    selectEl.innerHTML = "";
+
+    const optAll = document.createElement("option");
+    optAll.value = "";
+    optAll.textContent = allLabel || "Todos";
+    optAll.selected = true;
+    selectEl.appendChild(optAll);
 
     for (let i = 0; i < values.length; i++) {
       const v = values[i];
@@ -147,8 +175,8 @@
     if (!items.length) {
       lista.innerHTML =
         '<div class="item">' +
-          '<div style="font-weight:900;">Nenhum registro ainda.</div>' +
-          '<div class="muted">Assim que você salvar, aparece aqui.</div>' +
+          '<div style="font-weight:900;">Nenhum registro encontrado.</div>' +
+          '<div class="muted">Ajuste os filtros ou aumente a quantidade.</div>' +
         "</div>";
       return;
     }
@@ -160,7 +188,7 @@
       const badgeClass = ok ? "badge ok" : "badge nok";
       const badgeTxt = ok ? "Objetivo: SIM" : "Objetivo: NÃO";
 
-      // ✅ ALTERAÇÃO: mostrar funcionário + projeto de forma explícita
+      // ✅ Exibe funcionário + projeto + data + atividade
       const funcionario = escapeHtml(it.funcionario || "—");
       const projeto = escapeHtml(it.projeto || "—");
       const dataTxt = escapeHtml(brDate(it.data));
@@ -189,20 +217,65 @@
     lista.innerHTML = html;
   }
 
+  // ✅ Aplica filtros/limite somente na aba [Relatórios]
+  function aplicarFiltrosELimite() {
+    const funcionario = $("#filtroFuncionario") ? ($("#filtroFuncionario").value || "") : "";
+    const projeto = $("#filtroProjeto") ? ($("#filtroProjeto").value || "") : "";
+    const limite = $("#filtroLimite") ? parseInt($("#filtroLimite").value || String(DEFAULT_LIMIT), 10) : DEFAULT_LIMIT;
+
+    let items = relatoriosState.fetched.slice();
+
+    if (funcionario) items = items.filter(it => (it.funcionario || "") === funcionario);
+    if (projeto) items = items.filter(it => (it.projeto || "") === projeto);
+
+    // ordena no cliente por createdAt desc (segurança)
+    items.sort(function (a, b) {
+      const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+      const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+
+    // corta para exibição
+    const view = items.slice(0, Math.max(0, limite));
+    relatoriosState.filtered = view;
+
+    // KPIs passam a refletir o que está sendo exibido
+    const total = view.length;
+    let ok = 0;
+    for (let i = 0; i < view.length; i++) if (view[i].objetivoAlcancado) ok++;
+    const nok = total - ok;
+
+    if ($("#kpiTotal")) $("#kpiTotal").textContent = String(total);
+    if ($("#kpiOk")) $("#kpiOk").textContent = String(ok) + " / " + String(nok);
+
+    renderLista(view);
+
+    const u = getPortalUser();
+    const labelModo = (!u || !u.uid) ? "modo público" : "logado";
+    setStatus("Relatórios: " + total + " exibidos (" + labelModo + ").", true);
+  }
+
   async function carregarMeusRelatorios() {
     const db = getFirestore();
-    const user = getPortalUser(); // mantém, só pra metadados/UX
-
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
 
-    $("#kpiTotal").textContent = "…";
-    $("#kpiOk").textContent = "…";
+    // lê o limite desejado (para definir uma janela de busca maior e filtrar localmente)
+    const limiteExibir = $("#filtroLimite")
+      ? parseInt($("#filtroLimite").value || String(DEFAULT_LIMIT), 10)
+      : DEFAULT_LIMIT;
+
+    // buscamos uma janela maior que o limite, pra filtro funcionar sem “sumir”
+    const fetchN = Math.min(MAX_FETCH_CAP, Math.max(200, limiteExibir * 20));
+
+    if ($("#kpiTotal")) $("#kpiTotal").textContent = "…";
+    if ($("#kpiOk")) $("#kpiOk").textContent = "…";
+    setStatus("Carregando relatórios…", true);
 
     try {
-      // ✅ ALTERAÇÃO: listar APENAS os 10 últimos relatórios (geral)
-      let ref = db.collection(COLLECTION).orderBy("createdAt", "desc").limit(LIMIT_RELATORIOS);
-
-      const snap = await ref.get();
+      const snap = await db.collection(COLLECTION)
+        .orderBy("createdAt", "desc")
+        .limit(fetchN)
+        .get();
 
       const items = snap.docs.map(function (d) {
         const data = d.data();
@@ -210,37 +283,78 @@
         return data;
       });
 
-      // Segurança: se algum doc não tiver createdAt, ainda ordena no cliente.
-      items.sort(function (a, b) {
-        const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-        const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-        return tb - ta;
-      });
-
-      const total = items.length;
-      let ok = 0;
-      for (let i = 0; i < items.length; i++) if (items[i].objetivoAlcancado) ok++;
-      const nok = total - ok;
-
-      // ✅ KPI agora representa os últimos 10 (ou menos)
-      $("#kpiTotal").textContent = String(total);
-      $("#kpiOk").textContent = String(ok) + " / " + String(nok);
-
-      renderLista(items);
-
-      // Status discreto
-      if (!user || !user.uid) {
-        setStatus("Últimos " + LIMIT_RELATORIOS + " relatórios (modo público).", true);
-      } else {
-        setStatus("Últimos " + LIMIT_RELATORIOS + " relatórios.", true);
-      }
+      relatoriosState.fetched = items;
+      aplicarFiltrosELimite();
     } catch (err) {
       console.error("❌ Erro ao carregar relatórios:", err);
       setStatus("Erro ao carregar relatórios. Veja o console.", false);
     }
   }
 
-  // --------- Salvar ---------
+  // --------- Export CSV (somente o que está exibido) ---------
+  function csvEscape(value) {
+    const s = String(value ?? "");
+    // se tiver separador, aspas ou quebra de linha -> aspas + escape
+    if (/[;"\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function exportarCsv() {
+    const rows = relatoriosState.filtered || [];
+    if (!rows.length) {
+      alert("Não há dados para exportar com os filtros atuais.");
+      return;
+    }
+
+    // Cabeçalho (mantém simples e útil)
+    const header = [
+      "Data",
+      "Funcionario",
+      "Projeto",
+      "Atividade",
+      "Descricao",
+      "Observacao",
+      "ObjetivoAlcancado"
+    ];
+
+    const lines = [];
+    lines.push(header.join(";"));
+
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      const line = [
+        csvEscape(r.data || ""),
+        csvEscape(r.funcionario || ""),
+        csvEscape(r.projeto || ""),
+        csvEscape(r.atividade || ""),
+        csvEscape(r.descricao || ""),
+        csvEscape(r.observacao || ""),
+        csvEscape(r.objetivoAlcancado ? "Sim" : "Nao")
+      ];
+      lines.push(line.join(";"));
+    }
+
+    // UTF-8 BOM + separador ; (PT-BR friendly)
+    const csv = "\uFEFF" + lines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const fileName = "relatorios_atividades_" + yyyy + "-" + mm + "-" + dd + ".csv";
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // --------- Salvar (INTACTO: não mexer no que funciona) ---------
   async function salvar(ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
 
@@ -281,8 +395,6 @@
       observacao: observacao,
       objetivoAlcancado: objetivoAlcancado,
       createdAt: serverTimestamp(),
-
-      // metadados opcionais
       createdByUid: (user && user.uid) ? user.uid : null,
       createdByEmail: (user && user.email) ? user.email : null
     };
@@ -295,7 +407,6 @@
       await db.collection(COLLECTION).add(payload);
       setStatus("✅ Registro salvo com sucesso.");
 
-      // mantém o comportamento de não resetar dropdown automaticamente após salvar
       $("#descricao").value = "";
       $("#observacao").value = "";
       $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
@@ -312,7 +423,7 @@
   }
 
   function limpar() {
-    // ✅ ALTERAÇÃO: agora limpa TUDO de verdade
+    // (mantém comportamento atual do seu projeto — não mexer aqui conforme pedido anterior)
     const selFunc = $("#funcionario");
     const selProj = $("#projeto");
     const selAtv = $("#atividade");
@@ -331,7 +442,6 @@
 
     $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
 
-    // limpa “memória” do preenchimento
     localStorage.removeItem("ra_funcionario");
     localStorage.removeItem("ra_projeto");
 
@@ -340,7 +450,7 @@
 
   // --------- Boot ---------
   function init() {
-    // Popula selects
+    // Popula selects (Novo relatório)
     fillSelect($("#funcionario"), FUNCIONARIOS, "Selecione seu nome...");
     fillSelect($("#projeto"), PROJETOS, "Selecione o projeto...");
     fillSelect($("#atividade"), ATIVIDADES, "Selecione...");
@@ -348,16 +458,27 @@
     // Data default
     $("#data").value = isoToday();
 
-    // Restore
+    // Restore (Novo relatório)
     const savedFunc = localStorage.getItem("ra_funcionario");
     const savedProj = localStorage.getItem("ra_projeto");
     if (savedFunc && FUNCIONARIOS.indexOf(savedFunc) >= 0) $("#funcionario").value = savedFunc;
     if (savedProj && PROJETOS.indexOf(savedProj) >= 0) $("#projeto").value = savedProj;
 
-    // User badge
+    // Badge
     const badge = $("#userBadge");
     const u = getPortalUser();
     if (badge) badge.textContent = (u && (u.email || u.displayName)) ? (u.email || u.displayName) : "Acesso público";
+
+    // ✅ Relatórios: preencher filtros (somente se os elementos existirem no HTML)
+    fillFilterSelect($("#filtroFuncionario"), FUNCIONARIOS, "Todos os funcionários");
+    fillFilterSelect($("#filtroProjeto"), PROJETOS, "Todos os projetos");
+    if ($("#filtroLimite") && !$("#filtroLimite").value) $("#filtroLimite").value = String(DEFAULT_LIMIT);
+
+    // ✅ Eventos dos filtros (não mexe na aba Novo relatório)
+    if ($("#filtroFuncionario")) $("#filtroFuncionario").addEventListener("change", aplicarFiltrosELimite);
+    if ($("#filtroProjeto")) $("#filtroProjeto").addEventListener("change", aplicarFiltrosELimite);
+    if ($("#filtroLimite")) $("#filtroLimite").addEventListener("change", carregarMeusRelatorios);
+    if ($("#btnExportarCsv")) $("#btnExportarCsv").addEventListener("click", exportarCsv);
 
     // Tabs
     $all(".tab-btn[data-tab]").forEach(function (btn) {
@@ -368,7 +489,7 @@
       });
     });
 
-    // Actions
+    // Actions (Novo relatório + recarregar)
     $("#formRelatorio").addEventListener("submit", salvar);
     $("#btnLimpar").addEventListener("click", limpar);
     $("#btnRecarregar").addEventListener("click", carregarMeusRelatorios);
