@@ -39,7 +39,7 @@ jobs:
 
       - name: 📦 Instalar dependências das Functions
         working-directory: ./functions
-        run: npm ci
+        run: npm install
 
       - name: 🚀 Deploy Functions
         run: firebase deploy --only functions --project portal-relevo
