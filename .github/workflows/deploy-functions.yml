@@ -8,7 +8,12 @@ on:
       - "functions/**"
       - ".firebaserc"
       - "firebase.json"
+      - ".github/workflows/deploy-functions.yml"
   workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   deploy:
@@ -17,6 +22,12 @@ jobs:
     steps:
       - name: 🧬 Checkout do repositório
         uses: actions/checkout@v4
+
+      - name: 🔐 Autenticar no Google Cloud (OIDC)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: "projects/182759626683/locations/global/workloadIdentityPools/github-actions/providers/github"
+          service_account: "github-actions-firebase-deploy@portal-relevo.iam.gserviceaccount.com"
 
       - name: 🔧 Configurar Node.js
         uses: actions/setup-node@v4
@@ -28,9 +39,7 @@ jobs:
 
       - name: 📦 Instalar dependências das Functions
         working-directory: ./functions
-        run: npm install
+        run: npm ci
 
       - name: 🚀 Deploy Functions
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: firebase deploy --only functions --project portal-relevo --token "$FIREBASE_TOKEN"
+        run: firebase deploy --only functions --project portal-relevo
