@@ -301,9 +301,6 @@ class DespesasApp {
         );
       }
 
-        listaEl.appendChild(card);
-      });
-
       totalEl.textContent = `Total: ${this.formatarMoedaBR(total)}`;
       qtdEl.textContent = `Itens: ${qtd}`;
       pendEl.textContent = `Pendentes: ${pendentes}`;
@@ -573,10 +570,3 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
-
-
-
-
-
-
-
