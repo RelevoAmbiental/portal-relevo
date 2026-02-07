@@ -299,7 +299,7 @@ class DespesasApp {
           `Mostrando os ${LIMITE_PADRAO_MEUS} lançamentos mais recentes. Use o filtro de data para ver mais.`,
           'info'
         );
-      }}
+      }
 
         listaEl.appendChild(card);
       });
@@ -573,6 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
+
 
 
 
