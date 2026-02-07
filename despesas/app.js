@@ -233,7 +233,10 @@ class DespesasApp {
       let pendentes = 0;
       let qtd = 0;
 
-      snap.forEach((doc) => {
+      const docs = snap.docs || [];
+      const exibidos = docs.slice(0, LIMITE_PADRAO_MEUS);
+
+      exibidos.forEach((doc) => {
         const d = doc.data() || {};
         qtd += 1;
         total += Number(d.valor || 0);
@@ -264,11 +267,12 @@ class DespesasApp {
           ${descricao ? `<div class="expense-desc">${this.escapeHtml(descricao)}</div>` : ''}
           <div class="expense-actions">
             ${comprovanteLink}
-            <button type="button" class="link-btn" data-docid="${doc.id}"><i class="fas fa-copy"></i> Copiar ID</button>
+            <button type="button" class="link-btn" data-docid="${doc.id}">
+              <i class="fas fa-copy"></i> Copiar ID
+            </button>
           </div>
         `;
 
-        // Copiar ID sem depender de permissões extras
         const btnCopy = card.querySelector('button[data-docid]');
         if (btnCopy) {
           btnCopy.addEventListener('click', async () => {
@@ -276,7 +280,6 @@ class DespesasApp {
               await navigator.clipboard.writeText(doc.id);
               this.mostrarNotificacao('✅ ID copiado!', 'success');
             } catch (e) {
-              // fallback
               const ta = document.createElement('textarea');
               ta.value = doc.id;
               document.body.appendChild(ta);
@@ -287,6 +290,16 @@ class DespesasApp {
             }
           });
         }
+
+        listaEl.appendChild(card);
+      });
+
+      if (docs.length > LIMITE_PADRAO_MEUS) {
+        this.mostrarNotificacao(
+          `Mostrando os ${LIMITE_PADRAO_MEUS} lançamentos mais recentes. Use o filtro de data para ver mais.`,
+          'info'
+        );
+      }}
 
         listaEl.appendChild(card);
       });
