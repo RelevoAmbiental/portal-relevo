@@ -19,9 +19,6 @@ class DespesasApp {
     this.init();
   }
 
-  // ============================================
-  // INICIALIZAÇÃO
-  // ============================================
   init() {
     console.log('🚀 Inicializando App...');
     if (!window.db || !window.storage) {
@@ -58,9 +55,6 @@ class DespesasApp {
     }
   }
 
-  // ============================================
-  // INTERFACE (SELECTS E ABAS)
-  // ============================================
   carregarSelects() {
     this.carregarOptions('projeto', this.CONFIG.projetos);
     this.carregarOptions('funcionario', this.CONFIG.funcionarios);
@@ -107,9 +101,6 @@ class DespesasApp {
     btnMeus.addEventListener('click', () => ativar('meus'));
   }
 
-  // ============================================
-  // ABA MEUS LANÇAMENTOS (COM FILTRO CORRIGIDO)
-  // ============================================
   setupMeusLancamentos() {
     const meusFuncionario = document.getElementById('meusFuncionario');
     const btnAtualizar = document.getElementById('btnMeusAtualizar');
@@ -121,18 +112,23 @@ class DespesasApp {
     if (btnAtualizar) btnAtualizar.addEventListener('click', () => this.carregarMeusLancamentos());
     if (btnLimpar) {
       btnLimpar.addEventListener('click', () => {
-        document.getElementById('meusInicio').value = '';
-        document.getElementById('meusFim').value = '';
+        const inicio = document.getElementById('meusInicio');
+        const fim = document.getElementById('meusFim');
+        if (inicio) inicio.value = '';
+        if (fim) fim.value = '';
         this.carregarMeusLancamentos();
       });
     }
   }
 
+  // ============================================
+  // FUNÇÃO DE BUSCA CORRIGIDA
+  // ============================================
   async carregarMeusLancamentos() {
     const funcionario = document.getElementById('meusFuncionario')?.value;
-    const inicio = document.getElementById('meusInicio')?.value;
-    const fim = document.getElementById('meusFim')?.value;
-    
+    const dataInicio = document.getElementById('meusInicio')?.value; // Ex: "2023-10-01"
+    const dataFim = document.getElementById('meusFim')?.value;
+
     const listaEl = document.getElementById('meusLista');
     const vazioEl = document.getElementById('meusVazio');
     
@@ -141,33 +137,43 @@ class DespesasApp {
       return;
     }
 
-    listaEl.innerHTML = '<div class="loading">Carregando despesas...</div>';
+    listaEl.innerHTML = '<div class="loading">Buscando no servidor...</div>';
     vazioEl.style.display = 'none';
 
     try {
       let q = window.db.collection('despesas').where('funcionario', '==', funcionario);
       
-      if (inicio) q = q.where('data', '>=', inicio);
-      if (fim) q = q.where('data', '<=', fim);
+      // Aplicar filtros de data se existirem
+      if (dataInicio && dataInicio !== "") q = q.where('data', '>=', dataInicio);
+      if (dataFim && dataFim !== "") q = q.where('data', '<=', dataFim);
 
-      const snap = await q.orderBy('data', 'desc').limit(200).get();
+      // Ordenar por data decrescente
+      q = q.orderBy('data', 'desc');
+
+      // Se houver filtro de data, aumentamos o limite para 500 (praticamente todos)
+      // Se não houver, pegamos apenas os últimos 50 do banco para filtrar visualmente
+      const snap = await q.limit(500).get();
 
       listaEl.innerHTML = '';
       if (snap.empty) {
         vazioEl.style.display = 'block';
+        this.atualizarResumo(0, 0, 0);
         return;
       }
 
-      let total = 0, pendentes = 0;
+      let total = 0, pendentes = 0, contador = 0;
       
-      // ✅ Se usar filtro de data, mostra tudo. Se não, limita a 10.
-      const temFiltro = (inicio || fim);
-      const docsExibidos = temFiltro ? snap.docs : snap.docs.slice(0, LIMITE_PADRAO_MEUS);
+      // LOGICA DE CORTE:
+      // Se dataInicio ou dataFim estiverem preenchidos, usamos TUDO (snap.docs)
+      // Se ambos estiverem vazios, usamos apenas os 10 primeiros (snap.docs.slice(0, 10))
+      const estaFiltrandoData = (dataInicio && dataInicio !== "") || (dataFim && dataFim !== "");
+      const docsParaExibir = estaFiltrandoData ? snap.docs : snap.docs.slice(0, LIMITE_PADRAO_MEUS);
 
-      docsExibidos.forEach(doc => {
+      docsParaExibir.forEach(doc => {
         const d = doc.data();
         total += Number(d.valor || 0);
         if (d.status === 'pendente') pendentes += 1;
+        contador++;
 
         const card = document.createElement('div');
         card.className = 'expense-card';
@@ -195,18 +201,30 @@ class DespesasApp {
         listaEl.appendChild(card);
       });
 
-      document.getElementById('meusTotal').textContent = `Total: ${this.formatarMoedaBR(total)}`;
-      document.getElementById('meusQtd').textContent = `Itens: ${docsExibidos.length}`;
-      document.getElementById('meusPendentes').textContent = `Pendentes: ${pendentes}`;
+      this.atualizarResumo(total, contador, pendentes);
+
+      if (!estaFiltrandoData && snap.docs.length > LIMITE_PADRAO_MEUS) {
+        this.mostrarNotificacao(`Exibindo as últimas ${LIMITE_PADRAO_MEUS} despesas. Use o filtro de data para ver o histórico completo.`, 'info');
+      }
 
     } catch (err) {
-      console.error(err);
-      this.mostrarNotificacao('Erro ao buscar dados. Verifique os índices do Firebase.', 'error');
+      console.error("Erro Firestore:", err);
+      listaEl.innerHTML = '<div class="error">Erro ao carregar. Verifique o console.</div>';
+      this.mostrarNotificacao('Erro: Verifique se o índice do Firestore foi criado.', 'error');
     }
   }
 
+  atualizarResumo(total, qtd, pendentes) {
+    const t = document.getElementById('meusTotal');
+    const q = document.getElementById('meusQtd');
+    const p = document.getElementById('meusPendentes');
+    if (t) t.textContent = `Total: ${this.formatarMoedaBR(total)}`;
+    if (q) q.textContent = `Itens: ${qtd}`;
+    if (p) p.textContent = `Pendentes: ${pendentes}`;
+  }
+
   // ============================================
-  // SALVAR E FORMATAR
+  // OUTROS MÉTODOS
   // ============================================
   async salvarDespesa() {
     const btn = document.getElementById('submitBtn');
@@ -267,7 +285,7 @@ class DespesasApp {
   }
 
   validarFormulario(d) {
-    if (!d.projeto || !d.funcionario || !d.valor) {
+    if (!d.projeto || !d.funcionario || !d.valor || !d.data) {
       this.mostrarNotificacao('⚠️ Preencha os campos obrigatórios!', 'error');
       return false;
     }
