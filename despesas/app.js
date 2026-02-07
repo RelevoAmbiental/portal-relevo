@@ -1,3 +1,9 @@
+// ✅ Limite padrão de exibição na aba "Meus lançamentos" (mais recentes)
+const LIMITE_PADRAO_MEUS = 10;
+// (fallback) se algum bundling/escopo esconder a constante, garante valor
+// eslint-disable-next-line no-unused-vars
+const __LIMITE_PADRAO_MEUS__ = LIMITE_PADRAO_MEUS;
+
 // ============================================
 // APP DE DESPESAS - VERSÃO CORRIGIDA E INTEGRADA
 // Relevo Consultoria Ambiental - 2025
@@ -233,73 +239,76 @@ class DespesasApp {
       let pendentes = 0;
       let qtd = 0;
 
-      const docs = snap.docs || [];
-      const exibidos = docs.slice(0, LIMITE_PADRAO_MEUS);
+const docs = snap.docs || [];
+const exibidos = docs.slice(0, LIMITE_PADRAO_MEUS);
 
-      exibidos.forEach((doc) => {
-        const d = doc.data() || {};
-        qtd += 1;
-        total += Number(d.valor || 0);
-        if ((d.status || 'pendente') === 'pendente') pendentes += 1;
+exibidos.forEach((doc) => {
+  const d = doc.data() || {};
+  qtd += 1;
+  total += Number(d.valor || 0);
+  if ((d.status || 'pendente') === 'pendente') pendentes += 1;
 
-        const badgeClass = (d.status || 'pendente').toLowerCase();
-        const tipo = d.tipo || '—';
-        const projeto = d.projeto || '—';
-        const data = d.data || '—';
-        const descricao = (d.descricao || '').trim();
-        const valor = this.formatarMoedaBR(d.valor || 0);
+  const badgeClass = (d.status || 'pendente').toLowerCase();
+  const tipo = d.tipo || '—';
+  const projeto = d.projeto || '—';
+  const data = d.data || '—';
+  const descricao = (d.descricao || '').trim();
+  const valor = this.formatarMoedaBR(d.valor || 0);
 
-        const comprovanteLink = d.comprovanteUrl
-          ? `<a class="link-btn" href="${d.comprovanteUrl}" target="_blank" rel="noopener noreferrer"><i class="fas fa-paperclip"></i> Comprovante</a>`
-          : '';
+  const comprovanteLink = d.comprovanteUrl
+    ? `<a class="link-btn" href="${d.comprovanteUrl}" target="_blank" rel="noopener noreferrer"><i class="fas fa-paperclip"></i> Comprovante</a>`
+    : '';
 
-        const card = document.createElement('div');
-        card.className = 'expense-card';
-        card.innerHTML = `
-          <div class="expense-top">
-            <div class="expense-title">${tipo} • ${valor}</div>
-            <div class="badge ${badgeClass}">${d.status || 'pendente'}</div>
-          </div>
-          <div class="expense-meta">
-            <span><i class="fas fa-briefcase"></i> ${projeto}</span>
-            <span><i class="fas fa-calendar"></i> ${data}</span>
-          </div>
-          ${descricao ? `<div class="expense-desc">${this.escapeHtml(descricao)}</div>` : ''}
-          <div class="expense-actions">
-            ${comprovanteLink}
-            <button type="button" class="link-btn" data-docid="${doc.id}">
-              <i class="fas fa-copy"></i> Copiar ID
-            </button>
-          </div>
-        `;
+  const card = document.createElement('div');
+  card.className = 'expense-card';
+  card.innerHTML = `
+    <div class="expense-top">
+      <div class="expense-title">${tipo} • ${valor}</div>
+      <div class="badge ${badgeClass}">${d.status || 'pendente'}</div>
+    </div>
+    <div class="expense-meta">
+      <span><i class="fas fa-briefcase"></i> ${projeto}</span>
+      <span><i class="fas fa-calendar"></i> ${data}</span>
+    </div>
+    ${descricao ? `<div class="expense-desc">${this.escapeHtml(descricao)}</div>` : ''}
+    <div class="expense-actions">
+      ${comprovanteLink}
+      <button type="button" class="link-btn" data-docid="${doc.id}"><i class="fas fa-copy"></i> Copiar ID</button>
+    </div>
+  `;
 
-        const btnCopy = card.querySelector('button[data-docid]');
-        if (btnCopy) {
-          btnCopy.addEventListener('click', async () => {
-            try {
-              await navigator.clipboard.writeText(doc.id);
-              this.mostrarNotificacao('✅ ID copiado!', 'success');
-            } catch (e) {
-              const ta = document.createElement('textarea');
-              ta.value = doc.id;
-              document.body.appendChild(ta);
-              ta.select();
-              document.execCommand('copy');
-              ta.remove();
-              this.mostrarNotificacao('✅ ID copiado!', 'success');
-            }
-          });
-        }
+  // Copiar ID sem depender de permissões extras
+  const btnCopy = card.querySelector('button[data-docid]');
+  if (btnCopy) {
+    btnCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(doc.id);
+        this.mostrarNotificacao('✅ ID copiado!', 'success');
+      } catch (e) {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = doc.id;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        this.mostrarNotificacao('✅ ID copiado!', 'success');
+      }
+    });
+  }
+
+  listaEl.appendChild(card);
+});
+
+if (docs.length > LIMITE_PADRAO_MEUS) {
+  this.mostrarNotificacao(
+    `Mostrando os ${LIMITE_PADRAO_MEUS} lançamentos mais recentes. Use o filtro de data para ver mais.`,
+    'info'
+  );
+}}
 
         listaEl.appendChild(card);
       });
-
-      if (docs.length > LIMITE_PADRAO_MEUS) {
-        this.mostrarNotificacao(
-          `Mostrando os ${LIMITE_PADRAO_MEUS} lançamentos mais recentes. Use o filtro de data para ver mais.`,
-          'info'
-        );
-      }
 
       totalEl.textContent = `Total: ${this.formatarMoedaBR(total)}`;
       qtdEl.textContent = `Itens: ${qtd}`;
@@ -570,3 +579,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.despesasApp = new DespesasApp();
   console.log('✅ App de Despesas inicializado globalmente');
 });
+
+
+
+
+
+
