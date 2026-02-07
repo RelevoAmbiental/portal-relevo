@@ -3,7 +3,7 @@
    Versão com SECRET OPENAI_API_KEY + CORS ajustado
    ============================================================ */
 
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1");
 const cors = require("cors")({ origin: true });
 const { defineSecret } = require("firebase-functions/params");
 
