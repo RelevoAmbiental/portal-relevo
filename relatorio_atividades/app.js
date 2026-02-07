@@ -1,7 +1,7 @@
 /* =========================================================
    Relatório Diário de Atividades — Portal Relevo
    - Usa Firebase compat já inicializado pelo portal
-   - Modo público: não exige login
+   - ✅ Agora exige login (sem modo público)
    ========================================================= */
 
 (function () {
@@ -130,12 +130,20 @@
     return null;
   }
 
+  function getPortalAuth() {
+    try {
+      return window.__RELEVO_AUTH__ || (window.firebase && window.firebase.auth && window.firebase.auth()) || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function getPortalUser() {
     const u = window.__RELEVO_USER__ || null;
     if (u && (u.uid || u.email)) return u;
 
     try {
-      const auth = window.__RELEVO_AUTH__ || (window.firebase && window.firebase.auth && window.firebase.auth());
+      const auth = getPortalAuth();
       const cu = auth && auth.currentUser;
       if (cu) return { uid: cu.uid, email: cu.email || "", displayName: cu.displayName || "" };
     } catch (e) {}
@@ -150,6 +158,34 @@
       }
     } catch (e) {}
     return new Date();
+  }
+
+  // ✅ Exige login (sem modo público)
+  function ensureLoginOrRedirect() {
+    const auth = getPortalAuth();
+    if (!auth || !auth.onAuthStateChanged) {
+      setStatus("Auth do Portal não disponível. Abra pelo Portal Relevo.", false);
+      // não redireciona agressivamente aqui porque pode estar carregando scripts ainda
+      return;
+    }
+
+    setStatus("Verificando login…", true);
+
+    auth.onAuthStateChanged(function (u) {
+      if (!u) {
+        setStatus("Você precisa estar logado para usar o Relatório. Redirecionando…", false);
+        setTimeout(function () {
+          window.location.href = "/index.html";
+        }, 700);
+        return;
+      }
+
+      // ✅ usuário logado: segue o boot normal
+      const badge = $("#userBadge");
+      if (badge) badge.textContent = u.email || u.displayName || "Usuário logado";
+
+      bootComUsuario();
+    });
   }
 
   // --------- Tabs (blindadas) ---------
@@ -250,14 +286,15 @@
 
     renderLista(view);
 
-    const u = getPortalUser();
-    const labelModo = (!u || !u.uid) ? "modo público" : "logado";
-    setStatus("Relatórios: " + total + " exibidos (" + labelModo + ").", true);
+    setStatus("Relatórios: " + total + " exibidos (logado).", true);
   }
 
   async function carregarMeusRelatorios() {
     const db = getFirestore();
+    const user = getPortalUser();
+
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
+    if (!user || !user.uid) { setStatus("Sessão não encontrada. Faça login no Portal.", false); return; }
 
     // lê o limite desejado (para definir uma janela de busca maior e filtrar localmente)
     const limiteExibir = $("#filtroLimite")
@@ -272,6 +309,8 @@
     setStatus("Carregando relatórios…", true);
 
     try {
+      // ✅ Por enquanto carrega a janela recente (como estava)
+      // (Depois a gente filtra por createdByUid no Firestore quando as rules apertarem)
       const snap = await db.collection(COLLECTION)
         .orderBy("createdAt", "desc")
         .limit(fetchN)
@@ -354,7 +393,7 @@
     URL.revokeObjectURL(url);
   }
 
-  // --------- Salvar (INTACTO: não mexer no que funciona) ---------
+  // --------- Salvar ---------
   async function salvar(ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
 
@@ -362,6 +401,13 @@
     const user = getPortalUser();
 
     if (!db) { setStatus("Firestore não disponível no portal.", false); return; }
+
+    // ✅ trava: não salva sem login
+    if (!user || !user.uid) {
+      setStatus("Você precisa estar logado para salvar. Redirecionando…", false);
+      setTimeout(function () { window.location.href = "/index.html"; }, 700);
+      return;
+    }
 
     const funcionario = $("#funcionario").value || "";
     const projeto = $("#projeto").value || "";
@@ -395,8 +441,8 @@
       observacao: observacao,
       objetivoAlcancado: objetivoAlcancado,
       createdAt: serverTimestamp(),
-      createdByUid: (user && user.uid) ? user.uid : null,
-      createdByEmail: (user && user.email) ? user.email : null
+      createdByUid: user.uid,
+      createdByEmail: user.email || null
     };
 
     const btn = $("#btnSalvar");
@@ -449,25 +495,20 @@
   }
 
   // --------- Boot ---------
-  function init() {
+  function bootComUsuario() {
     // Popula selects (Novo relatório)
     fillSelect($("#funcionario"), FUNCIONARIOS, "Selecione seu nome...");
     fillSelect($("#projeto"), PROJETOS, "Selecione o projeto...");
     fillSelect($("#atividade"), ATIVIDADES, "Selecione...");
 
     // Data default
-    $("#data").value = isoToday();
+    if ($("#data")) $("#data").value = isoToday();
 
     // Restore (Novo relatório)
     const savedFunc = localStorage.getItem("ra_funcionario");
     const savedProj = localStorage.getItem("ra_projeto");
     if (savedFunc && FUNCIONARIOS.indexOf(savedFunc) >= 0) $("#funcionario").value = savedFunc;
     if (savedProj && PROJETOS.indexOf(savedProj) >= 0) $("#projeto").value = savedProj;
-
-    // Badge
-    const badge = $("#userBadge");
-    const u = getPortalUser();
-    if (badge) badge.textContent = (u && (u.email || u.displayName)) ? (u.email || u.displayName) : "Acesso público";
 
     // ✅ Relatórios: preencher filtros (somente se os elementos existirem no HTML)
     fillFilterSelect($("#filtroFuncionario"), FUNCIONARIOS, "Todos os funcionários");
@@ -490,9 +531,9 @@
     });
 
     // Actions (Novo relatório + recarregar)
-    $("#formRelatorio").addEventListener("submit", salvar);
-    $("#btnLimpar").addEventListener("click", limpar);
-    $("#btnRecarregar").addEventListener("click", carregarMeusRelatorios);
+    if ($("#formRelatorio")) $("#formRelatorio").addEventListener("submit", salvar);
+    if ($("#btnLimpar")) $("#btnLimpar").addEventListener("click", limpar);
+    if ($("#btnRecarregar")) $("#btnRecarregar").addEventListener("click", carregarMeusRelatorios);
 
     // PWA SW
     if ("serviceWorker" in navigator) {
@@ -503,6 +544,11 @@
 
     setTab("novo");
     setStatus("");
+  }
+
+  function init() {
+    // ✅ Exige login (isso chama bootComUsuario quando autenticar)
+    ensureLoginOrRedirect();
   }
 
   if (document.readyState === "loading") {
