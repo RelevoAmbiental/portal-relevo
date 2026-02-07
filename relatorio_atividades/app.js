@@ -45,6 +45,37 @@
     filtered: []   // itens após filtro + limite (o que está na tela e vai pro CSV)
   };
 
+  // ✅ Perfil do usuário (gestao/colaborador/cliente) carregado do Firestore (/users/{uid})
+  let __USER_TIPO__ = "colaborador"; // default seguro: restringe (melhor negar demais do que expor)
+  let __USER_TIPO_READY__ = false;
+
+  async function carregarUserTipo() {
+    const db = getFirestore();
+    const user = getPortalUser();
+    if (!db || !user || !user.uid) {
+      __USER_TIPO__ = "colaborador";
+      __USER_TIPO_READY__ = true;
+      return __USER_TIPO__;
+    }
+
+    try {
+      // coleção do portal: /users/{uid} com campo "tipo"
+      const doc = await db.collection("users").doc(user.uid).get();
+      const data = doc && doc.exists ? doc.data() : null;
+
+      const tipo = (data && (data.tipo || data.role || data.perfil)) ? String(data.tipo || data.role || data.perfil) : "";
+      __USER_TIPO__ = (tipo || "colaborador").toLowerCase();
+    } catch (e) {
+      // fallback seguro
+      __USER_TIPO__ = "colaborador";
+    } finally {
+      __USER_TIPO_READY__ = true;
+    }
+
+    return __USER_TIPO__;
+  }
+
+
   // --------- Helpers DOM ---------
   function $(sel) { return document.querySelector(sel); }
   function $all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
@@ -311,12 +342,40 @@
     try {
       // ✅ Por enquanto carrega a janela recente (como estava)
       // (Depois a gente filtra por createdByUid no Firestore quando as rules apertarem)
-      const snap = await db.collection(COLLECTION)
-        .orderBy("createdAt", "desc")
-        .limit(fetchN)
-        .get();
+      // ✅ Aplica controle por papel:
+// - gestao: vê tudo (orderBy + limit)
+// - demais: vê apenas os próprios (where createdByUid == uid)
+// Observação: where + orderBy pode exigir índice composto; se faltar, fazemos fallback sem orderBy e ordenamos no cliente.
+let snap;
 
-      const items = snap.docs.map(function (d) {
+// garante perfil carregado (não trava a UI)
+if (!__USER_TIPO_READY__) {
+  await carregarUserTipo();
+}
+
+if (__USER_TIPO__ === "gestao") {
+  snap = await db.collection(COLLECTION)
+    .orderBy("createdAt", "desc")
+    .limit(fetchN)
+    .get();
+} else {
+  try {
+    snap = await db.collection(COLLECTION)
+      .where("createdByUid", "==", user.uid)
+      .orderBy("createdAt", "desc")
+      .limit(fetchN)
+      .get();
+  } catch (e) {
+    // fallback: evita quebra por índice composto
+    console.warn("⚠️ Consulta com where+orderBy falhou (possível índice). Usando fallback sem orderBy.", e);
+    snap = await db.collection(COLLECTION)
+      .where("createdByUid", "==", user.uid)
+      .limit(fetchN)
+      .get();
+  }
+}
+
+const items = snap.docs.map(function (d) {
         const data = d.data();
         data.id = d.id;
         return data;
@@ -503,6 +562,10 @@
 
     // Data default
     if ($("#data")) $("#data").value = isoToday();
+
+    // ✅ Carrega perfil do usuário (gestao/colaborador/cliente)
+    // Não bloqueia a tela; a listagem aguarda quando necessário.
+    carregarUserTipo();
 
     // Restore (Novo relatório)
     const savedFunc = localStorage.getItem("ra_funcionario");
