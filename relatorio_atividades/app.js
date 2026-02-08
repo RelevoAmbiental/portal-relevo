@@ -45,6 +45,46 @@
     filtered: []   // itens após filtro + limite (o que está na tela e vai pro CSV)
   };
 
+  // ✅ Estado de edição (para corrigir/editar sem duplicar)
+  let __EDIT_ID__ = null;
+  let __EDIT_OWNER_UID__ = null; // uid do dono do relatório em edição
+
+  function isEditing() {
+    return !!__EDIT_ID__;
+  }
+
+  function setEditing(id, ownerUid) {
+    __EDIT_ID__ = id || null;
+    __EDIT_OWNER_UID__ = ownerUid || null;
+
+    const btn = $("#btnSalvar");
+    if (btn) btn.textContent = __EDIT_ID__ ? "Atualizar" : "Salvar";
+
+    // feedback visual simples (sem mexer em CSS global)
+    const st = $("#statusMsg");
+    if (st && __EDIT_ID__) {
+      st.textContent = "Modo edição: você está atualizando um relatório existente.";
+      st.style.color = "#0f4d2e";
+    }
+  }
+
+  function clearEditing() {
+    setEditing(null, null);
+  }
+
+  function canEditItem(it) {
+    const user = getPortalUser();
+    if (!user || !user.uid) return false;
+    if (__USER_TIPO__ === "gestao") return true;
+    return (__USER_TIPO__ === "colaborador") && (it && it.createdByUid === user.uid);
+  }
+
+  function canDeleteItem(it) {
+    // ✅ decisão: colaborador pode apagar o próprio
+    return canEditItem(it);
+  }
+
+
   // ✅ Perfil do usuário (gestao/colaborador/cliente) carregado do Firestore (/users/{uid})
   let __USER_TIPO__ = "colaborador"; // default seguro: restringe (melhor negar demais do que expor)
   let __USER_TIPO_READY__ = false;
@@ -274,7 +314,25 @@
               '<div style="font-weight:900; color:#0b2e1b;">' + linha1 + "</div>" +
               '<div class="muted">' + linha2 + "</div>" +
             "</div>" +
-            '<div class="' + badgeClass + '">' + badgeTxt + "</div>" +
+            \
+'<div style="display:flex; gap:8px; align-items:center;">' +
+  '<div class="' + badgeClass + '">' + badgeTxt + '</div>' +
+  (function(){
+    const user = getPortalUser();
+    const uid = user && user.uid ? user.uid : "";
+    const canEdit = (__USER_TIPO__ === "gestao") || (__USER_TIPO__ === "colaborador" && it.createdByUid === uid);
+    const canDel  = canEdit; // colaborador pode apagar o próprio
+    if (!canEdit && !canDel) return "";
+    return '' +
+      '<div style="display:flex; gap:6px; align-items:center;">' +
+        (canEdit ? '<button class="ra-action ra-edit" data-id="' + escapeHtml(it.id) + '" type="button" title="Editar" ' +
+          'style="border:1px solid #cbd5d1; background:#fff; color:#0b2e1b; padding:6px 10px; border-radius:10px; cursor:pointer; font-weight:800;">✏️</button>' : '') +
+        (canDel ? '<button class="ra-action ra-del" data-id="' + escapeHtml(it.id) + '" type="button" title="Apagar" ' +
+          'style="border:1px solid #e0b4b4; background:#fff; color:#8b1f1f; padding:6px 10px; border-radius:10px; cursor:pointer; font-weight:900;">🗑️</button>' : '') +
+      '</div>';
+  })() +
+'</div>' +
+
           "</div>" +
           desc +
           obs +
@@ -509,8 +567,30 @@ const items = snap.docs.map(function (d) {
     setStatus("Salvando...");
 
     try {
-      await db.collection(COLLECTION).add(payload);
-      setStatus("✅ Registro salvo com sucesso.");
+if (isEditing()) {
+  // ✅ Atualiza relatório existente (sem alterar autoria/data)
+  const updatePayload = {
+    funcionario: funcionario,
+    projeto: projeto,
+    data: data,
+    atividade: atividade,
+    descricao: descricao,
+    observacao: observacao,
+    objetivoAlcancado: objetivoAlcancado,
+    updatedAt: serverTimestamp(),
+    updatedByUid: user.uid,
+    updatedByEmail: user.email || null
+  };
+
+  await db.collection(COLLECTION).doc(__EDIT_ID__).update(updatePayload);
+  setStatus("✅ Registro atualizado com sucesso.");
+
+  // sai do modo edição
+  clearEditing();
+} else {
+  await db.collection(COLLECTION).add(payload);
+  setStatus("✅ Registro salvo com sucesso.");
+}
 
       $("#descricao").value = "";
       $("#observacao").value = "";
@@ -528,6 +608,11 @@ const items = snap.docs.map(function (d) {
   }
 
   function limpar() {
+    // ✅ Se estava em edição, limpar também cancela o modo edição
+    if (isEditing()) {
+      clearEditing();
+    }
+
     // (mantém comportamento atual do seu projeto — não mexer aqui conforme pedido anterior)
     const selFunc = $("#funcionario");
     const selProj = $("#projeto");
@@ -583,6 +668,92 @@ const items = snap.docs.map(function (d) {
     if ($("#filtroProjeto")) $("#filtroProjeto").addEventListener("change", aplicarFiltrosELimite);
     if ($("#filtroLimite")) $("#filtroLimite").addEventListener("change", carregarMeusRelatorios);
     if ($("#btnExportarCsv")) $("#btnExportarCsv").addEventListener("click", exportarCsv);
+
+    // ✅ Ações na lista (Editar / Apagar) — delegação de eventos
+    const lista = $("#listaRelatorios");
+    if (lista) {
+      lista.addEventListener("click", async function (ev) {
+        const t = ev.target;
+        if (!t) return;
+
+        const btn = t.closest ? t.closest("button.ra-action") : null;
+        if (!btn) return;
+
+        const id = btn.getAttribute("data-id");
+        if (!id) return;
+
+        // encontra item no estado atual
+        const it = (relatoriosState.fetched || []).find(function (x) { return x && x.id === id; });
+        if (!it) {
+          alert("Não foi possível localizar esse relatório na memória. Recarregue a lista.");
+          return;
+        }
+
+        if (btn.classList.contains("ra-edit")) {
+          if (!canEditItem(it)) {
+            alert("Você não tem permissão para editar este relatório.");
+            return;
+          }
+
+          // entra em modo edição e preenche formulário
+          setEditing(id, it.createdByUid);
+
+          // preenche campos
+          if ($("#funcionario")) $("#funcionario").value = it.funcionario || "";
+          if ($("#projeto")) $("#projeto").value = it.projeto || "";
+          if ($("#data")) $("#data").value = it.data || isoToday();
+          if ($("#atividade")) $("#atividade").value = it.atividade || "";
+
+          if ($("#descricao")) $("#descricao").value = it.descricao || "";
+          if ($("#observacao")) $("#observacao").value = it.observacao || "";
+
+          // objetivo
+          $all('input[name="objetivo"]').forEach(function (r) { r.checked = false; });
+          const objetivo = it.objetivoAlcancado ? "sim" : "nao";
+          const radio = document.querySelector('input[name="objetivo"][value="' + objetivo + '"]');
+          if (radio) radio.checked = true;
+
+          // vai para aba novo (reutiliza o formulário)
+          setTab("novo");
+          setStatus("Modo edição ativado. Ajuste o formulário e clique em Atualizar.", true);
+          return;
+        }
+
+        if (btn.classList.contains("ra-del")) {
+          if (!canDeleteItem(it)) {
+            alert("Você não tem permissão para apagar este relatório.");
+            return;
+          }
+
+          const resumo = (it.funcionario || "—") + " • " + (it.projeto || "—") + " • " + brDate(it.data);
+          const ok = confirm("Apagar este relatório?
+
+" + resumo + "
+
+Essa ação não pode ser desfeita.");
+          if (!ok) return;
+
+          try {
+            const db = getFirestore();
+            await db.collection(COLLECTION).doc(id).delete();
+
+            // se estava editando este mesmo item, sai do modo edição
+            if (__EDIT_ID__ === id) {
+              clearEditing();
+            }
+
+            setStatus("✅ Relatório apagado.", true);
+            await carregarMeusRelatorios();
+          } catch (e) {
+            console.error("❌ Erro ao apagar relatório:", e);
+            alert("Não foi possível apagar. Verifique permissões/conexão.");
+          }
+          return;
+        }
+      });
+    }
+
+
 
     // Tabs
     $all(".tab-btn[data-tab]").forEach(function (btn) {
