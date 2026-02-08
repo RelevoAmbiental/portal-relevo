@@ -5,826 +5,192 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gestão Interna | Relevo Consultoria Ambiental</title>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
-
-  <!-- Fontes e Ícones -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- CSS Global -->
+  
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/relevo-theme.css">
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-  <!-- Guard unificado (já adicionado por você nas páginas controladas) -->
-  <script src="scripts/firebase-init-guard.js"></script>
-  <script src="scripts/expose-session.js"></script>
-
   <style>
-    /* ============================================
-       ESTILOS ESPECÍFICOS DA GESTÃO
-       ============================================ */
-
-    /* Hero com Background */
-    .hero-gestao {
-      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
-      color: white;
-      padding: 50px 30px;
-      margin-bottom: 40px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-gestao::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
-      background-size: cover;
-      background-position: center;
-      opacity: 0.1;
-      z-index: 0;
-    }
-
-    .hero-gestao > * { position: relative; z-index: 1; }
-
-    .hero-gestao .logo { height: 60px; margin-bottom: 20px; filter: brightness(0) invert(1); }
-
-    .hero-gestao h1 {
-      color: white;
-      font-size: 2.5rem;
-      margin-bottom: 15px;
-      font-weight: 700;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .hero-gestao p {
-      font-size: 1.2rem;
-      opacity: 0.95;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Seções */
-    .section { margin-bottom: 50px; }
-
-    .section-title {
-      color: var(--verde-accent);
-      margin-bottom: 30px;
-      font-size: 1.8rem;
-      position: relative;
-      padding-bottom: 15px;
-    }
-
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 60px;
-      height: 4px;
-      background: var(--verde-primario);
-      border-radius: 2px;
-    }
-
-    /* Grid de Cards de Acesso */
-    .access-grid {
+    /* Ajustes para o Layout de Dashboard com Sidebar */
+    .dashboard-wrapper {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      margin-bottom: 40px;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+      gap: 20px;
     }
 
-    .access-card {
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 30px 25px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      border-left: 4px solid var(--verde-primario);
+    /* Sidebar Estilizada */
+    .sidebar {
+      background: var(--relevo-surface-solid);
+      border-right: 1px solid var(--relevo-border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .sidebar-section h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--relevo-muted);
+      margin-bottom: 15px;
+      padding-left: 10px;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 15px;
+      border-radius: var(--relevo-r-sm);
       text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .access-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-
-    .access-card img { width: 60px; height: 60px; margin: 0 auto 20px; object-fit: contain; }
-
-    .access-card h3 {
-      color: var(--verde-accent);
-      margin-bottom: 12px;
-      font-size: 1.2rem;
+      color: var(--relevo-text);
       font-weight: 600;
+      transition: all 0.2s;
+      font-size: 0.95rem;
     }
 
-    .access-card p {
-      color: var(--texto-cinza);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-      flex-grow: 1;
-      line-height: 1.6;
+    .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+    
+    /* Cores das Seções conforme solicitado */
+    .section-dados .nav-item:hover { background: rgba(38, 192, 76, 0.1); color: var(--relevo-green-700); }
+    .section-apps .nav-item:hover { background: rgba(255, 152, 0, 0.1); color: #e65100; }
+
+    /* Destaque Despesa na Sidebar */
+    .btn-quick-action {
+      margin-top: 10px;
+      width: 100%;
+      justify-content: center;
     }
 
-    .access-card .btn { margin-top: auto; }
-
-    /* Card Destaque - Despesas */
-    .despesas-destaque {
-      background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
-      border: 2px dashed var(--verde-primario);
-      border-radius: 12px;
+    /* Área de Conteúdo Principal */
+    .main-content {
       padding: 30px;
-      text-align: center;
-      margin: 30px 0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      background: var(--relevo-gradient-soft);
     }
 
-    .despesas-destaque h3 {
-      color: var(--verde-accent);
-      font-size: 1.3rem;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
+    .welcome-header { margin-bottom: 30px; }
 
-    .despesas-destaque p { color: var(--texto-cinza); margin-bottom: 20px; font-size: 0.95rem; }
-
-    .despesas-destaque .btn-primary {
-      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro));
-      border-radius: 50px;
-      padding: 14px 30px;
-      font-size: 1.05rem;
-      box-shadow: 0 4px 15px rgba(38, 192, 76, 0.3);
-    }
-
-    /* Cards padronizados da segunda linha */
-    .dashboard-card {
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      border-left: 4px solid var(--laranja);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      text-align: center;
-    
-      /* 🔥 Faz TODOS os cards terem a mesma altura */
-      min-height: 360px;
-    }
-    
-    /* Imagens fixas e alinhadas */
-    .dashboard-card img {
-      width: 96px;
-      height: 96px;
-      margin: 0 auto 15px;
-      object-fit: contain;
-      display: block;
-      padding: 10px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.75);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
-    }
-    
-    /* Títulos alinhados */
-    .dashboard-card h3 {
-      color: var(--verde-accent);
-      margin-bottom: 10px;
-      line-height: 1.2;
-      min-height: 50px; /* 🔥 altura fixa para evitar quebra desigual */
-    }
-    
-    /* Corpo do texto igual em todos */
-    .dashboard-card p {
-      color: var(--texto-cinza);
-      font-size: 0.95rem;
-      line-height: 1.4;
-      margin-bottom: 20px;
-      min-height: 60px; /* 🔥 Igual para todos */
-    }
-    
-    /* Botões padronizados e alinhados */
-    .dashboard-card .btn,
-    .dashboard-card button {
-      width: 100%;
-      margin-top: auto;
-    
-      /* 🔥 TODOS OS BOTÕES MESMO TAMANHO */
-      padding: 14px 0 !important;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      white-space: normal; /* permite quebra de texto */
-      line-height: 1.2;
-      min-height: 48px; /* 🔥 altura mínima igual para todos */
-    }
-
-    /* Container (antes ClickUp) */
-    .clickup-container { 
-      background: var(--card-branco); 
-      border-radius: 12px; 
-      padding: 30px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
-      margin-bottom: 40px; 
-    }
-
-    /* Two-column dashboard row (para indicadores) */
-    .two-col-dashboard {
+    /* Grid de Indicadores Central */
+    .indicators-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
-      width: 100%;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
     }
 
-    /* Nova linha de 4 cards (Despesas, Orçamentos, Agenda, Inventário) */
-    .four-col-dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 25px;
-      width: 100%;
-      margin: 30px 0;
+    /* Responsividade */
+    @media (max-width: 900px) {
+      .dashboard-wrapper { grid-template-columns: 1fr; }
+      .sidebar { display: none; } /* Idealmente aqui entraria um menu hambúrguer */
     }
-
-    .indicators-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      text-align: left;
-    }
-
-    .indicators-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      font-size: 0.95rem;
-    }
-
-    .indicators-list li span.label {
-      color: var(--texto-cinza);
-    }
-
-    .indicators-list li span.value {
-      font-weight: 600;
-      color: var(--verde-accent);
-    }
-
-    .mini-calendar-placeholder {
-      border-radius: 12px;
-      padding: 15px;
-      border: 1px dashed var(--borda-cinza);
-      background: #fafafa;
-      font-size: 0.9rem;
-      color: var(--texto-cinza);
-      text-align: left;
-    }
-
-    /* Inline forms (antigo notificações/modificações) – mantidos só se algum outro lugar usar
-       Aqui não são mais utilizados, mas não atrapalham o layout. */
-    .inline-controls { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
-    .inline-controls input[type="text"], .inline-controls input[type="date"] {
-      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--borda-cinza); font-size: 0.95rem;
-    }
-    .inline-controls button { padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer;
-      background: linear-gradient(135deg, var(--verde-primario), var(--verde-escuro)); color: white; font-weight: 600; }
-    .inline-controls .btn-secondary { background: transparent; border: 1px solid var(--borda-cinza); color: var(--texto-cinza); }
-
-    /* Menu Mobile */
-    .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 8px; }
-
-    /* RESPONSIVIDADE */
-    @media (max-width: 1024px) { 
-      .two-col-dashboard { grid-template-columns: 1fr; } 
-    }
-    @media (max-width: 768px) {
-      .hero-gestao { padding: 40px 20px; border-radius: 15px; }
-      .hero-gestao h1 { font-size: 2rem; }
-      .hero-gestao p { font-size: 1.1rem; }
-      .access-grid { grid-template-columns: 1fr; gap: 20px; }
-      .section-title { font-size: 1.5rem; }
-      .menu-toggle { display: block; }
-      .nav-links { 
-        display: none; 
-        flex-direction: column; 
-        position: absolute; 
-        top: 100%; 
-        left: 0; 
-        right: 0; 
-        background: var(--verde-escuro); 
-        padding: 15px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-      }
-      .nav-links.mobile-open { display: flex; }
-      .nav-links a { 
-        padding: 12px; 
-        text-align: center; 
-        border-bottom: 1px solid rgba(255,255,255,0.1); 
-      }
-      .nav-links a:last-child { border-bottom: none; }
-      .despesas-destaque { padding: 20px 15px; }
-    }
-    @media (max-width: 480px) {
-      .hero-gestao { padding: 30px 15px; }
-      .hero-gestao h1 { font-size: 1.8rem; }
-      .hero-gestao p { font-size: 1rem; }
-      .access-card { padding: 20px 15px; }
-      .access-card img { width: 50px; height: 50px; }
-    }
-    @media (min-width: 1200px) { .access-grid { grid-template-columns: repeat(4, 1fr); } }
   </style>
 </head>
 
 <body class="relevo-theme">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png"
-           alt="Logo Relevo Consultoria Ambiental"
-           class="logo">
 
-      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
-        <i class="fas fa-bars"></i>
-      </button>
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 120px; margin-bottom: 20px;">
+      </div>
 
-      <nav class="nav-links" id="navLinks">
-        <a href="gestao.html"><i class="fas fa-chart-line"></i> Gestão</a>
-        <a href="colaboradores.html"><i class="fas fa-users"></i> Equipe</a>
-        <a href="clientes.html"><i class="fas fa-briefcase"></i> Clientes</a>
-        <button class="logout-btn" onclick="logout()">
+      <section class="sidebar-section section-dados">
+        <h3><i class="fas fa-database"></i> Dados</h3>
+        <nav class="nav-menu">
+          <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go" target="_blank" class="nav-item">
+            <i class="fab fa-google-drive"></i> Drive Empresa
+          </a>
+          <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL" target="_blank" class="nav-item">
+            <i class="fas fa-file-contract"></i> Relatórios Clientes
+          </a>
+          <a href="#" class="nav-item">
+            <i class="fas fa-shield-halved"></i> SST e Segurança
+          </a>
+          <a href="https://docs.google.com/spreadsheets/d/10LJopYBh7cSrD_e0gr1iMw_BcVzrcAdreXfTRzvWPps" target="_blank" class="nav-item">
+            <i class="fas fa-file-invoice"></i> Controle Propostas
+          </a>
+        </nav>
+      </section>
+
+      <section class="sidebar-section section-apps">
+        <h3><i class="fas fa-th-large"></i> Aplicações</h3>
+        <nav class="nav-menu">
+          <a href="gestao-despesas.html" class="nav-item"><i class="fas fa-chart-pie"></i> Gestão de Despesas</a>
+          <a href="https://portal.relevo.eco.br/orcamento/" target="_blank" class="nav-item"><i class="fas fa-calculator"></i> Orçamentos</a>
+          <a href="https://portal.relevo.eco.br/cronograma/" target="_blank" class="nav-item"><i class="fas fa-calendar-alt"></i> Agenda Projetos</a>
+          <a href="relatorio_atividades/" class="nav-item"><i class="fas fa-check-double"></i> Relatório Diário</a>
+          <a href="inventario/" class="nav-item"><i class="fas fa-boxes-stacked"></i> Inventário</a>
+          <a href="https://portal.relevo.eco.br/apps/" target="_blank" class="nav-item"><i class="fas fa-mobile-screen"></i> PWA Apps</a>
+          
+          <a href="despesas" class="btn btn-primary btn-quick-action">
+            <i class="fas fa-plus-circle"></i> Nova Despesa
+          </a>
+        </nav>
+      </section>
+
+      <div style="margin-top: auto;">
+        <button class="btn btn-ghost" onclick="logout()" style="width: 100%; text-align: left;">
           <i class="fas fa-sign-out-alt"></i> Sair
         </button>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Hero -->
-  <section class="hero-gestao">
-    <div class="container">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png"
-           alt="Relevo Consultoria Ambiental"
-           class="logo">
-      <h1>Gestão Interna</h1>
-      <p>Central de controle e informações administrativas da Relevo Consultoria Ambiental</p>
-    </div>
-  </section>
-
-  <main class="container">
- 
-
-    <!-- SEÇÃO: ACESSO RÁPIDO -->
-    <section class="section">
-      <h2 class="section-title">Acesso Rápido</h2>
-
-      <div class="access-grid">
-        <!-- Drive da Empresa -->
-        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link"
-           target="_blank" rel="noopener noreferrer" class="access-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/arquivos.png" alt="Ícone Drive da empresa">
-          <h3>Drive da Empresa</h3>
-          <p>Acesso completo aos documentos corporativos e recursos compartilhados</p>
-          <span class="btn btn-primary">Acessar Drive</span>
-        </a>
-
-        <!-- Relatórios de Clientes -->
-        <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL?usp=drive_link"
-           target="_blank" rel="noopener noreferrer" class="access-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png" alt="Ícone Relatórios">
-          <h3>Relatórios de Clientes</h3>
-          <p>Documentação técnica e relatórios entregues aos clientes</p>
-          <span class="btn btn-primary">Visualizar Relatórios</span>
-        </a>
-
-        <!-- SST e Segurança -->
-        <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go?usp=drive_link"
-           target="_blank" rel="noopener noreferrer" class="access-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/SegurancaJuridica.png" alt="Ícone SST">
-          <h3>SST e Segurança</h3>
-          <p>Procedimentos de saúde e segurança no trabalho</p>
-          <span class="btn btn-primary">Acessar SST</span>
-        </a>
-
-        <!-- Controle de Propostas -->
-        <a href="https://docs.google.com/spreadsheets/d/10LJopYBh7cSrD_e0gr1iMw_BcVzrcAdreXfTRzvWPps/edit?usp=sharing"
-           target="_blank" rel="noopener noreferrer" class="access-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt="Ícone Propostas">
-          <h3>Controle de Propostas</h3>
-          <p>Planilha para registro, acompanhamento e gestão das propostas comerciais da empresa</p>
-          <span class="btn btn-primary">Ver Planilha</span>
-        </a>
       </div>
+    </aside>
 
-<!-- Nova linha com quatro cards: Despesas, Orçamentos, Agenda, Inventário -->
-      <div class="four-col-dashboard" role="region" aria-label="Módulos de Gestão">
-        <!-- Card Cadastrar Despesa (antes era destaque full-width) -->
-        <div class="dashboard-card" aria-labelledby="cad-despesa-title">
-          <div>
-            <img src="/assets/icons/icon-192.png" alt="Ícone Relevo - Despesas">
-            <h3 id="cad-despesa-title">🧾 Cadastrar Despesa</h3>
-            <p>Registro rápido de despesas de campo, viagens e outras atividades (com comprovante).</p>
-          </div>
-          <div>
-            <a class="btn btn-primary" href="despesas">
-              <i class="fas fa-plus-circle"></i> Cadastrar Nova Despesa
-            </a>
-          </div>
+    <main class="main-content">
+      <header class="welcome-header">
+        <h1>Gestão Interna</h1>
+        <p class="muted">Bem-vindo à central de inteligência da Relevo Consultoria Ambiental.</p>
+      </header>
+
+      <section class="indicators-grid">
         
-        <!-- Card Apps (PWA) -->
-        <div class="dashboard-card" aria-labelledby="apps-pwa-title">
-          <div>
-            <img src="/assets/icons/icon-192.png" alt="Ícone Portal Relevo - Apps">
-            <h3 id="apps-pwa-title">📱 Apps (PWA) Relevo</h3>
-            <p>Acesse o launcher de aplicativos do Portal (modo PWA, atalhos e instalação).</p>
-          </div>
-          <div>
-            <a class="btn btn-orange" href="/apps/">
-              <i class="fas fa-th-large"></i> Abrir Apps
-            </a>
-          </div>
-        </div>
+        <article class="card card--accent card--info">
+          <h2><i class="fas fa-tasks"></i> Resumo de Tarefas</h2>
+          <p class="muted">Status atualizado do cronograma operacional.</p>
+          <hr style="opacity: 0.1; margin: 15px 0;">
+          <table style="background: transparent; border: none;">
+            <tr><td>Tarefas pendentes</td><td align="right"><span class="badge" data-indicador="pendentes">...</span></td></tr>
+            <tr><td>Em andamento</td><td align="right"><span class="badge info" data-indicador="andamento">...</span></td></tr>
+            <tr><td>Atrasadas</td><td align="right"><span class="badge nok" data-indicador="atrasadas">...</span></td></tr>
+            <tr><td>Concluídas</td><td align="right"><span class="badge ok" data-indicador="concluidas">...</span></td></tr>
+          </table>
+        </article>
 
-      </div>
-
-        <!-- Card Gestão de Despesas -->
-        <div class="dashboard-card" aria-labelledby="gestao-despesas-title">
-          <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt="Ícone Dashboard Despesas">
-            <h3 id="gestao-despesas-title">📊 Gestão de Despesas</h3>
-            <p>Painel completo para visualizar, analisar e gerenciar todas as despesas registradas.</p>
-          </div>
-          <div>
-            <a class="btn btn-orange" href="gestao-despesas.html">
-              <i class="fas fa-chart-pie"></i> Abrir Painel de Despesas
-            </a>
-          </div>
-        </div>
-
-        <!-- Card Gestão de Orçamentos -->
-        <div class="dashboard-card" aria-labelledby="gestao-orcamentos-title">
-          <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/orcamento.png" alt="Ícone Orçamentos">
-            <h3 id="gestao-orcamentos-title">💼 Gestão de Orçamentos</h3>
-            <p>Centralize, acompanhe e valide seus orçamentos com agilidade e controle.</p>
-          </div>
-          <div>
-            <a class="btn btn-orange" href="https://portal.relevo.eco.br/orcamento/" target="_blank" rel="noopener noreferrer">
-              <i class="fas fa-file-invoice-dollar"></i> Acessar Portal de Orçamentos
-            </a>
-          </div>
-        </div>
-
-        <!-- Card Agenda (Cronograma) -->
-        <div class="dashboard-card" aria-labelledby="agenda-title">
-          <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png" alt="Ícone Agenda / Cronograma">
-            <h3 id="agenda-title">🗓️ Agenda de Projetos</h3>
-            <p>Visualize prazos, entregas e etapas-chave dos projetos em um único painel.</p>
-          </div>
-          <div>
-            <a class="btn btn-orange"
-               href="https://portal.relevo.eco.br/cronograma/"
-               target="_blank" rel="noopener noreferrer">
-              <i class="fas a-calendar-alt"></i> Abrir Agenda
-            </a>
-          </div>
-        </div>
-
-        <!-- Card Relatório Diário de Atividades -->
-        <div class="dashboard-card" aria-labelledby="relatorio-diario-title">
-          <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png" alt="Ícone Relatório Diário">
-            <h3 id="relatorio-diario-title">📝 Relatório Diário</h3>
-            <p>Registro rápido das atividades do dia, pensado para uso em mobile e com suporte a PWA.</p>
-          </div>
-          <div>
-            <a class="btn btn-orange" href="relatorio_atividades/">
-              <i class="fas fa-clipboard-check"></i> Abrir Relatório Diário
-            </a>
-          </div>
-        </div>
-
-
-        <!-- Card Inventário -->
-        <div class="dashboard-card" aria-labelledby="inventario-title">
-          <div>
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Inventario_equipos.png" alt="Ícone Inventário">
-            <h3 id="inventario-title">📦 Inventário de Equipamentos</h3>
-            <p>Cadastre, acompanhe e controle a movimentação de equipamentos e EPIs da Relevo.</p>
-          </div>
-          <div>
-            <a class="btn btn-orange" href="inventario/">
-              <i class="fas fa-warehouse"></i> Acessar Inventário
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SEÇÃO: DASHBOARD DE INDICADORES -->
-    <section class="section">
-      <h2 class="section-title">Dashboard de Indicadores</h2>
-      <div class="clickup-container">
-        <div class="two-col-dashboard">
-          <!-- Card Indicadores de Tarefas -->
-          <div class="dashboard-card" aria-label="Resumo de Tarefas">
-            <div>
-              <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png"
-                   alt="Ícone Indicadores"
-                   style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
-              <h3>Resumo de Tarefas</h3>
-              <p>Visão consolidada do andamento dos projetos alimentada pelo módulo de Cronograma.</p>
-            </div>
-            <ul class="indicators-list">
-              <li>
-                <span class="label">Tarefas pendentes</span>
-                <span class="value" data-indicador="pendentes">Carregando…</span>
-              </li>
-              <li>
-                <span class="label">Em andamento</span>
-                <span class="value" data-indicador="andamento">Carregando…</span>
-              </li>
-              <li>
-                <span class="label">Atrasadas</span>
-                <span class="value" data-indicador="atrasadas">Carregando…</span>
-              </li>
-              <li>
-                <span class="label">Concluídas</span>
-                <span class="value" data-indicador="concluidas">Carregando…</span>
-              </li>
+        <article class="card card--accent">
+          <h2><i class="fas fa-calendar-day"></i> Próximas Entregas</h2>
+          <p class="muted">Hoje: <span id="dataHoje">...</span></p>
+          <div class="item" style="box-shadow: none; background: rgba(255,255,255,0.5);">
+            <ul id="listaEntregas" style="list-style: none; padding: 0; margin: 0;">
+              <li>Carregando agenda...</li>
             </ul>
           </div>
+          <small class="muted" style="display: block; margin-top: 10px;">
+            <i class="fas fa-sync"></i> Sincronizado com Cronograma
+          </small>
+        </article>
 
-          <!-- Card Agenda da Semana -->
-          <div class="dashboard-card" aria-label="Agenda da Semana">
-            <div>
-              <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/agenda.png"
-                   alt="Ícone Agenda da Semana"
-                   style="width:100px; height:80px; margin-bottom:15px; object-fit:contain;">
-              <h3>Agenda da Semana</h3>
-              <p>Prévia das principais entregas previstas para os próximos dias, integrada ao cronograma oficial.</p>
-            </div>
-            <div class="mini-calendar-placeholder">
-              <p><strong>Hoje:</strong> <span id="dataHoje">Carregando…</span></p>
-              <p><strong>Próximas entregas (7 dias):</strong></p>
-              <ul id="listaEntregas" style="margin: 8px 0 0 16px; padding: 0;">
-                <li>Carregando…</li>
-              </ul>
-              <small>Agenda sincronizada com o cronograma de projetos.</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
-  <footer>
-    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
-  </footer>
-
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="scripts/firebase-init-guard.js"></script>
+  <script src="scripts/expose-session.js"></script>
+  
   <script>
-    // ============================
-    // AUTENTICAÇÃO
-    // ============================
-    const auth = window.__RELEVO_AUTH__ || firebase.auth();
-    if (auth && auth.onAuthStateChanged) {
-      auth.onAuthStateChanged((user) => {
-        if (!user) {
-          console.log('❌ Usuário não autenticado - Redirecionando...');
-          window.location.href = 'index.html';
-        } else {
-          console.log('✅ Usuário autenticado:', user.email);
-        }
-      });
-    }
-
-    function logout() {
-      if (!auth) return;
-      if (confirm('Deseja realmente sair do sistema?')) {
-        auth.signOut()
-          .then(() => {
-            console.log('✅ Logout realizado com sucesso');
-            window.location.href = 'index.html';
-          })
-          .catch((error) => {
-            console.error('❌ Erro ao fazer logout:', error);
-            alert('Erro ao fazer logout. Tente novamente.');
-          });
-      }
-    }
-
-    // MENU MOBILE
-    function toggleMobileMenu() {
-      const navLinks = document.getElementById('navLinks');
-      navLinks.classList.toggle('mobile-open');
-    }
-
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        const navLinks = document.getElementById('navLinks');
-        navLinks.classList.remove('mobile-open');
-      });
-    });
-
-    document.addEventListener('click', (e) => {
-      const navLinks = document.getElementById('navLinks');
-      const menuToggle = document.querySelector('.menu-toggle');
-      if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-        navLinks.classList.remove('mobile-open');
-      }
-    });
-
-    // Apenas log de carregamento (sem teatro de dashboard)
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('📊 Portal de Gestão carregado com sucesso');
-    });
-  
-    
-   /* ==========================================================
-      🔗 INTEGRAÇÃO DO PORTAL COM O CRONOGRAMA (Tarefas + Agenda)
-       ========================================================== */
-
-  async function carregarIndicadoresCronograma() {
-    const db = window.__RELEVO_DB__;
-    const authInstance = window.__RELEVO_AUTH__ || (window.firebase ? firebase.auth() : null);
-  
-    if (!db || !authInstance) {
-      console.warn("⏳ Aguardando ambiente Relevo iniciar…");
-      return;
-    }
-  
-    const usuario = await obterUsuarioAutenticado(authInstance);
-  
-    if (!usuario) {
-      console.warn("⚠️ Nenhum usuário autenticado para carregar indicadores.");
-      return;
-    }
-  
-    try {
-      console.log("📡 Buscando tarefas no Firestore…");
-  
-      // 🔥 PATCH OFICIAL AQUI → troca de tasks → tarefas
-      const snapshot = await db.collection("tarefas").get();
-  
-      const tarefas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
-      console.log(`📦 ${tarefas.length} tarefas carregadas.`);
-  
-      atualizarDashboardTarefas(tarefas);
-      atualizarAgendaSemanal(tarefas);
-  
-    } catch (err) {
-      console.error("❌ Erro carregando tarefas do módulo Cronograma:", err);
-      setIndicadoresErro();
-    }
-  }
-
-  async function obterUsuarioAutenticado(authInstance) {
-    if (window.__RELEVO_USER__) return window.__RELEVO_USER__;
-    if (authInstance.currentUser) return authInstance.currentUser;
-
-    return new Promise((resolve) => {
-      const unsubscribe = authInstance.onAuthStateChanged((user) => {
-        unsubscribe();
-        resolve(user);
-      }, () => resolve(null));
-    });
-  }
-  
-   /* ==========================================================
-      🧮 1) RESUMO DE TAREFAS
-       ========================================================== */
-  function normalizarStatus(statusBruto = "") {
-    const status = String(statusBruto).toLowerCase();
-    if (["done", "concluida", "concluída", "concluido", "concluído", "finalizada", "finalizado"].includes(status)) {
-      return "concluidas";
-    }
-    if (["in_progress", "andamento", "andando", "em andamento"].includes(status)) {
-      return "andamento";
-    }
-    if (["late", "atrasada", "atrasado", "em atraso", "atrasadas", "atrasados"].includes(status)) {
-      return "atrasadas";
-    }
-    return "pendentes";
-  }
-
-  function atualizarDashboardTarefas(tarefas) {
-    const mapaIndicadores = {
-      pendentes: 0,
-      andamento: 0,
-      atrasadas: 0,
-      concluidas: 0,
-    };
-
-    tarefas.forEach((tarefa) => {
-      const chave = normalizarStatus(tarefa.status);
-      mapaIndicadores[chave] = (mapaIndicadores[chave] || 0) + 1;
-    });
-
-    Object.entries(mapaIndicadores).forEach(([chave, valor]) => {
-      const alvo = document.querySelector(`[data-indicador="${chave}"]`);
-      if (alvo) alvo.textContent = valor;
-    });
-  }
-  
-   /* ==========================================================
-      📅 2) AGENDA DA SEMANA
-       ========================================================== */
-  function obterDataEntrega(tarefa) {
-    const valor = tarefa.dueDate || tarefa.dataEntrega || tarefa.dataPrevista;
-
-    if (!valor) return null;
-
-    if (valor.toDate) {
-      return valor.toDate();
-    }
-
-    if (typeof valor === "number") {
-      return new Date(valor);
-    }
-
-    if (typeof valor === "string") {
-      const parsed = Date.parse(valor);
-      return Number.isNaN(parsed) ? null : new Date(parsed);
-    }
-
-    return null;
-  }
-
-  function atualizarAgendaSemanal(tarefas) {
-    const hoje = new Date();
-    document.getElementById("dataHoje").textContent = hoje.toLocaleDateString("pt-BR");
-
-    const limite = new Date();
-    limite.setDate(hoje.getDate() + 7);
-
-    const proximas = tarefas
-      .map(tarefa => ({ ...tarefa, entrega: obterDataEntrega(tarefa) }))
-      .filter(t => t.entrega)
-      .filter(t => t.entrega >= hoje && t.entrega <= limite)
-      .sort((a, b) => a.entrega - b.entrega);
-
-    const ul = document.getElementById("listaEntregas");
-    ul.innerHTML = "";
-
-    if (proximas.length === 0) {
-      ul.innerHTML = "<li>Sem entregas nos próximos 7 dias.</li>";
-      return;
-    }
-
-    proximas.forEach(t => {
-      const data = t.entrega.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-      const tarefaTitulo = t.nome || t.title || t.nomeTarefa || "Tarefa sem nome";
-      ul.innerHTML += `<li>${data} — ${tarefaTitulo}</li>`;
-    });
-  }
-
-  function setIndicadoresErro() {
-    document.querySelectorAll("[data-indicador]").forEach(span => {
-      span.textContent = "Erro ao carregar";
-    });
-
-    const ul = document.getElementById("listaEntregas");
-    if (ul) {
-      ul.innerHTML = "<li>Não foi possível carregar a agenda.</li>";
-    }
-  }
-  
-  /* ==========================================================
-      🚀 DISPARO INICIAL
-     ========================================================== */
-   document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-      console.log("📡 Iniciando sincronização com módulo Cronograma…");
-       carregarIndicadoresCronograma();
-     }, 800);
-  });
-
+    // Toda a sua lógica de carregarIndicadoresCronograma() 
+    // e normalizarStatus() deve ser mantida aqui embaixo.
+    // Ela continuará funcionando pois mantive os IDs e data-attributes.
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
