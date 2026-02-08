@@ -1,198 +1,129 @@
 /* =========================================================
    Relatório Diário de Atividades — Portal Relevo
-   - Usa Firebase compat já inicializado pelo portal
-   - ✅ Agora exige login (sem modo público)
+   Versão Corrigida: Filtro de Usuário + Fallback
    ========================================================= */
 
 (function () {
   "use strict";
 
-  // --------- Configurações e Listas ---------
   const FUNCIONARIOS = ["Samuel", "Tiago", "Gleysson", "Gerly", "Henever", "Roberto Aquino"];
   const PROJETOS = ["ADM Geral", "Grande Sertão 1", "BR-135/BA", "RIALMA"];
-  const ATIVIDADES = [
-    "deslocamento", "Campo diurno", "Campo noturno", "Escritório", 
-    "Folga", "Manutenção de equipamentos", "Treinamento", "Outro (descrever nas observações)"
-  ];
+  const ATIVIDADES = ["deslocamento", "Campo diurno", "Campo noturno", "Escritório", "Folga", "Manutenção de equipamentos", "Treinamento", "Outro"];
 
   const COLLECTION = "relatorios_atividades";
-  const DEFAULT_LIMIT = 10;
-  const MAX_FETCH_CAP = 1000;
-
   const relatoriosState = { fetched: [], filtered: [] };
   let __EDIT_ID__ = null;
-  let __EDIT_OWNER_UID__ = null;
-  let __USER_TIPO__ = "colaborador";
+  let __USER_TIPO__ = "colaborador"; 
   let __USER_TIPO_READY__ = false;
 
-  // --------- Helpers de Estado ---------
-  const isEditing = () => !!__EDIT_ID__;
-
-  function setEditing(id, ownerUid) {
-    __EDIT_ID__ = id || null;
-    __EDIT_OWNER_UID__ = ownerUid || null;
-    const btn = $("#btnSalvar");
-    if (btn) btn.textContent = __EDIT_ID__ ? "Atualizar" : "Salvar";
-    
-    const st = $("#statusMsg");
-    if (st && __EDIT_ID__) {
-      st.textContent = "Modo edição: você está atualizando um relatório existente.";
-      st.style.color = "#0f4d2e";
-    }
-  }
-
-  function clearEditing() { setEditing(null, null); }
-
-  function canEditItem(it) {
-    const user = getPortalUser();
-    if (!user || !user.uid) return false;
-    if (__USER_TIPO__ === "gestao") return true;
-    return (__USER_TIPO__ === "colaborador") && (it && it.createdByUid === user.uid);
-  }
-
-  // --------- Helpers DOM ---------
+  // Helpers Básicos
   function $(sel) { return document.querySelector(sel); }
   function $all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-
   function setStatus(msg, ok) {
     const el = $("#statusMsg");
-    if (!el) return;
-    el.textContent = msg || "";
-    el.style.color = ok === false ? "#8b1f1f" : "#0f4d2e";
+    if (el) { el.textContent = msg; el.style.color = ok === false ? "#8b1f1f" : "#0f4d2e"; }
   }
-
-  function fillSelect(selectEl, values, placeholder, isFilter = false) {
-    if (!selectEl) return;
-    selectEl.innerHTML = "";
-    const opt0 = document.createElement("option");
-    opt0.value = "";
-    opt0.textContent = placeholder || (isFilter ? "Todos" : "Selecione...");
-    if (!isFilter) opt0.disabled = true;
-    opt0.selected = true;
-    selectEl.appendChild(opt0);
-
-    values.forEach(v => {
-      const opt = document.createElement("option");
-      opt.value = v;
-      opt.textContent = v;
-      selectEl.appendChild(opt);
-    });
-  }
-
-  function isoToday() { return new Date().toISOString().split('T')[0]; }
   function brDate(iso) { return iso ? iso.split('-').reverse().join('/') : "—"; }
-  function escapeHtml(str) {
-    return String(str || "").replace(/[&<>"']/g, m => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    }[m]));
-  }
+  function escapeHtml(str) { return String(str || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
 
-  // --------- Firebase Access ---------
+  // Firebase Access
   function getFirestore() { return window.__RELEVO_DB__ || window.db || (window.firebase && window.firebase.firestore()); }
-  function getPortalAuth() { return window.__RELEVO_AUTH__ || (window.firebase && window.firebase.auth()); }
   function getPortalUser() {
     const u = window.__RELEVO_USER__;
     if (u && u.uid) return u;
-    const auth = getPortalAuth();
+    const auth = window.firebase && window.firebase.auth && window.firebase.auth();
     const cu = auth && auth.currentUser;
-    return cu ? { uid: cu.uid, email: cu.email, displayName: cu.displayName } : null;
+    return cu ? { uid: cu.uid, email: cu.email } : null;
   }
 
+  // Identifica se é Gestão ou Colaborador
   async function carregarUserTipo() {
     const db = getFirestore();
     const user = getPortalUser();
     if (!db || !user) { __USER_TIPO_READY__ = true; return "colaborador"; }
     try {
       const doc = await db.collection("users").doc(user.uid).get();
-      const data = doc.exists ? doc.data() : null;
-      const tipo = data?.tipo || data?.role || data?.perfil || "colaborador";
-      __USER_TIPO__ = tipo.toLowerCase();
-    } catch (e) { __USER_TIPO__ = "colaborador"; }
+      if (doc.exists) {
+        const data = doc.data();
+        __USER_TIPO__ = (data.tipo || data.role || "colaborador").toLowerCase();
+      }
+    } catch (e) { console.error("Erro perfil:", e); }
     __USER_TIPO_READY__ = true;
     return __USER_TIPO__;
   }
 
-  // --------- Listagem e Filtros ---------
+  // Renderização da Lista
   function renderLista(items) {
     const lista = $("#listaRelatorios");
     if (!lista) return;
     if (!items.length) {
-      lista.innerHTML = '<div class="item"><b>Nenhum registro encontrado.</b></div>';
+      lista.innerHTML = `<div class="item"><b>Nenhum relatório encontrado para o seu perfil.</b></div>`;
       return;
     }
-
     const user = getPortalUser();
     lista.innerHTML = items.map(it => {
-      const ok = !!it.objetivoAlcancado;
       const canEdit = (__USER_TIPO__ === "gestao") || (it.createdByUid === user?.uid);
-      
       return `
         <div class="item">
-          <div class="row" style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div class="row" style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <div style="font-weight:900; color:#0b2e1b;">${escapeHtml(it.funcionario)} • ${escapeHtml(it.projeto)}</div>
-              <div class="muted">${escapeHtml(brDate(it.data))} • ${escapeHtml(it.atividade)}</div>
+              <div style="font-weight:900;">${escapeHtml(it.funcionario)} • ${escapeHtml(it.projeto)}</div>
+              <div class="muted">${brDate(it.data)} • ${it.atividade}</div>
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <div class="badge ${ok ? 'ok' : 'nok'}">Objetivo: ${ok ? 'SIM' : 'NÃO'}</div>
-              ${canEdit ? `
-                <div style="display:flex; gap:6px;">
-                  <button class="ra-action ra-edit" data-id="${it.id}" style="border:1px solid #cbd5d1; background:#fff; padding:6px 10px; border-radius:10px; cursor:pointer;">✏️</button>
-                  <button class="ra-action ra-del" data-id="${it.id}" style="border:1px solid #e0b4b4; background:#fff; color:#8b1f1f; padding:6px 10px; border-radius:10px; cursor:pointer;">🗑️</button>
-                </div>
-              ` : ''}
+            <div style="display:flex; gap:8px;">
+              <div class="badge ${it.objetivoAlcancado ? 'ok' : 'nok'}">${it.objetivoAlcancado ? 'SIM' : 'NÃO'}</div>
+              ${canEdit ? `<button class="ra-action ra-edit" data-id="${it.id}">✏️</button>` : ''}
             </div>
           </div>
-          ${it.descricao ? `<div style="margin-top:8px; font-weight:700;">${escapeHtml(it.descricao)}</div>` : ""}
-          ${it.observacao ? `<div style="margin-top:6px;" class="muted">${escapeHtml(it.observacao)}</div>` : ""}
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
-  function aplicarFiltrosELimite() {
-    const func = $("#filtroFuncionario")?.value || "";
-    const proj = $("#filtroProjeto")?.value || "";
-    const lim = parseInt($("#filtroLimite")?.value || DEFAULT_LIMIT, 10);
-
-    let items = [...relatoriosState.fetched];
-    if (func) items = items.filter(it => it.funcionario === func);
-    if (proj) items = items.filter(it => it.projeto === proj);
-
-    items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    
-    const view = items.slice(0, lim);
-    relatoriosState.filtered = view;
-
-    if ($("#kpiTotal")) $("#kpiTotal").textContent = view.length;
-    renderLista(view);
-    setStatus(`Exibindo ${view.length} registros.`, true);
-  }
-
+  // BUSCA DE DADOS (Aqui está a correção principal)
   async function carregarMeusRelatorios() {
     const db = getFirestore();
     const user = getPortalUser();
     if (!db || !user) return;
 
-    setStatus("Carregando...", true);
     if (!__USER_TIPO_READY__) await carregarUserTipo();
+    setStatus("Buscando registros...", true);
 
     try {
       let query = db.collection(COLLECTION);
-      if (__USER_TIPO__ !== "gestao") {
-        query = query.where("createdByUid", "==", user.uid);
+      let snap;
+
+      if (__USER_TIPO__ === "gestao") {
+        // Gestão vê tudo
+        snap = await query.orderBy("createdAt", "desc").limit(100).get();
+      } else {
+        // Colaborador: Tentativa 1 (Com Filtro de Servidor - Exige Índice)
+        try {
+          snap = await query.where("createdByUid", "==", user.uid).orderBy("createdAt", "desc").limit(50).get();
+        } catch (err) {
+          console.warn("Falha no filtro de servidor (índice ausente?). Tentando filtro local...");
+          // Fallback: Busca os últimos 100 e filtra no navegador para não travar o usuário
+          snap = await query.orderBy("createdAt", "desc").limit(100).get();
+        }
       }
-      
-      const snap = await query.orderBy("createdAt", "desc").limit(100).get();
-      relatoriosState.fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      aplicarFiltrosELimite();
+
+      let items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // Se não for gestão, garantir que ele só veja o dele (dupla checagem local)
+      if (__USER_TIPO__ !== "gestao") {
+        items = items.filter(it => it.createdByUid === user.uid);
+      }
+
+      relatoriosState.fetched = items;
+      renderLista(items);
+      setStatus(__USER_TIPO__ === "gestao" ? "Modo Gestão: Vendo tudo" : "Vendo seus relatórios", true);
+
     } catch (e) {
       console.error(e);
-      setStatus("Erro ao carregar. Verifique os índices do Firebase.", false);
+      setStatus("Erro de conexão com o banco.", false);
     }
   }
 
-  // --------- Ações ---------
+  // Salvar e Editar (Reutilizando a lógica anterior)
   async function salvar(ev) {
     if (ev) ev.preventDefault();
     const db = getFirestore();
@@ -204,94 +135,44 @@
       projeto: $("#projeto").value,
       data: $("#data").value,
       atividade: $("#atividade").value,
-      descricao: $("#descricao").value.trim(),
-      observacao: $("#observacao").value.trim(),
+      descricao: ($("#descricao")?.value || "").trim(),
+      observacao: ($("#observacao")?.value || "").trim(),
       objetivoAlcancado: document.querySelector('input[name="objetivo"]:checked')?.value === "sim",
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdByUid: __EDIT_ID__ ? undefined : user.uid // Não sobrescreve o dono na edição
     };
 
     try {
-      if (isEditing()) {
+      if (__EDIT_ID__) {
         await db.collection(COLLECTION).doc(__EDIT_ID__).update(payload);
-        setStatus("Atualizado!", true);
       } else {
         payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-        payload.createdByUid = user.uid;
         await db.collection(COLLECTION).add(payload);
-        setStatus("Salvo!", true);
       }
-      limpar();
-      setTab("meus");
-      carregarMeusRelatorios();
+      location.reload(); // Recarrega para limpar estado
     } catch (e) { setStatus("Erro ao salvar.", false); }
   }
 
-  function limpar() {
-    clearEditing();
-    $("#descricao").value = "";
-    $("#observacao").value = "";
-    $all('input[name="objetivo"]').forEach(r => r.checked = false);
-    $("#data").value = isoToday();
-  }
-
-  function setTab(tabName) {
-    $all(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tabName));
-    $all(".tab-panel").forEach(p => p.classList.toggle("hidden", p.dataset.panel !== tabName));
-  }
-
-  // --------- Inicialização ---------
   function boot() {
-    fillSelect($("#funcionario"), FUNCIONARIOS, "Selecione seu nome...");
-    fillSelect($("#projeto"), PROJETOS, "Selecione o projeto...");
-    fillSelect($("#atividade"), ATIVIDADES, "Selecione...");
-    fillSelect($("#filtroFuncionario"), FUNCIONARIOS, "Todos os funcionários", true);
-    fillSelect($("#filtroProjeto"), PROJETOS, "Todos os projetos", true);
-    
-    $("#data").value = isoToday();
-
-    // Delegar cliques na lista (Editar/Apagar)
-    $("#listaRelatorios")?.addEventListener("click", async (e) => {
-      const btn = e.target.closest(".ra-action");
-      if (!btn) return;
-      const id = btn.dataset.id;
-      const it = relatoriosState.fetched.find(x => x.id === id);
-
-      if (btn.classList.contains("ra-edit")) {
-        setEditing(id, it.createdByUid);
-        $("#funcionario").value = it.funcionario;
-        $("#projeto").value = it.projeto;
-        $("#data").value = it.data;
-        $("#atividade").value = it.atividade;
-        $("#descricao").value = it.descricao;
-        $("#observacao").value = it.observacao;
-        const rad = document.querySelector(`input[name="objetivo"][value="${it.objetivoAlcancado ? 'sim' : 'nao'}"]`);
-        if (rad) rad.checked = true;
-        setTab("novo");
-      } else if (btn.classList.contains("ra-del")) {
-        if (confirm("Apagar registro?")) {
-          await getFirestore().collection(COLLECTION).doc(id).delete();
-          carregarMeusRelatorios();
-        }
-      }
-    });
-
-    $all(".tab-btn").forEach(b => b.addEventListener("click", () => {
-      setTab(b.dataset.tab);
-      if (b.dataset.tab === "meus") carregarMeusRelatorios();
-    }));
+    // Popula Selects
+    const f = (id, vals) => { 
+        const el = $(id); 
+        if(el) vals.forEach(v => { const o = document.createElement("option"); o.value=v; o.textContent=v; el.appendChild(o); });
+    };
+    f("#funcionario", FUNCIONARIOS);
+    f("#projeto", PROJETOS);
+    f("#atividade", ATIVIDADES);
 
     $("#formRelatorio")?.addEventListener("submit", salvar);
-    $("#btnLimpar")?.addEventListener("click", limpar);
-    setTab("novo");
+    $all(".tab-btn").forEach(b => b.addEventListener("click", () => {
+        const t = b.dataset.tab;
+        $all(".tab-panel").forEach(p => p.classList.toggle("hidden", p.dataset.panel !== t));
+        if (t === "meus") carregarMeusRelatorios();
+    }));
   }
 
-  function ensureLogin() {
-    const auth = getPortalAuth();
-    auth?.onAuthStateChanged(u => {
-      if (!u) { window.location.href = "/index.html"; }
-      else { boot(); }
-    });
-  }
+  // Auth Guard
+  const auth = window.firebase && window.firebase.auth && window.firebase.auth();
+  auth?.onAuthStateChanged(u => { if (u) boot(); else window.location.href = "/index.html"; });
 
-  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", ensureLogin) : ensureLogin();
 })();
