@@ -1,606 +1,639 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal do Cliente | Relevo Consultoria Ambiental</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clientes | Portal Relevo</title>
 
-    <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <!-- Favicons / PWA -->
+  <link rel="icon" href="/assets/icons/favicon.ico">
+  <link rel="icon" sizes="32x32" href="/assets/icons/favicon-32.png">
+  <link rel="icon" sizes="16x16" href="/assets/icons/favicon-16.png">
+  <link rel="icon" sizes="192x192" href="/assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0b2e1b">
 
-  <!-- Fontes e Ícones -->
+  <!-- Fonte -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- CSS Global -->
-  <link rel="stylesheet" href="styles/global.css">
+  <!-- CSS global do portal -->
+  <link rel="stylesheet" href="/styles/global.css" />
+  <link rel="stylesheet" href="/styles/relevo-theme.css" />
 
-  <!-- Firebase SDK -->
+  <style>
+    /* =========================
+       LAYOUT (apenas estrutura)
+       ========================= */
+    .dashboard-wrapper{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      min-height:100vh;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      padding: 24px 18px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .sidebar .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .sidebar .brand img{ width:38px; height:38px; }
+    .sidebar .brand .title{
+      font-weight:700;
+      letter-spacing:.2px;
+      line-height:1.1;
+    }
+    .sidebar .brand .subtitle{
+      font-size:12px;
+      opacity:.85;
+      margin-top:2px;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .nav a{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      text-decoration:none;
+      color: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform .12s ease, background .12s ease;
+    }
+    .nav a:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.10); }
+    .nav a.active{ background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.18); }
+
+    .nav a img{ width:18px; height:18px; opacity:.95; }
+
+    /* Conteúdo */
+    .main{
+      padding: 26px 26px 34px 26px;
+    }
+
+    .page-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .page-head h1{
+      margin:0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .page-head p{
+      margin: 6px 0 0 0;
+      opacity: .9;
+      max-width: 760px;
+    }
+
+    /* “Centro da página”: limita largura e centraliza */
+    .center-wrap{
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* Seletor (apenas gestão) */
+    .toolbar{
+      display:flex;
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 16px 0 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .toolbar .label{
+      font-weight: 700;
+      opacity: .95;
+    }
+    .toolbar select{
+      min-width: 280px;
+      max-width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.92);
+      outline: none;
+    }
+
+    /* Cards */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .card{
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+    .card h2{
+      margin: 0 0 6px 0;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .card p{
+      margin: 0 0 10px 0;
+      opacity: .92;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.92);
+      text-decoration: none;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .pill img{ width:18px; height:18px; }
+
+    /* Mapa ocupa a largura toda */
+    .map-card{
+      grid-column: 1 / -1;
+      padding: 14px;
+    }
+    .map-frame{
+      width: 100%;
+      height: 560px;
+      border: 0;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.12);
+    }
+
+    .muted{
+      opacity: .82;
+      font-size: 13px;
+    }
+
+    /* Mobile */
+    .mobile-top-bar{
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 14px;
+      background: rgba(0,0,0,0.20);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(12px);
+    }
+    .hamburger{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      cursor: pointer;
+    }
+    .hamburger img{ width:20px; height:20px; }
+
+    .sidebar-overlay{
+      display:none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 45;
+    }
+
+    @media (max-width: 900px){
+      .dashboard-wrapper{ grid-template-columns: 1fr; }
+      .mobile-top-bar{ display:flex; }
+
+      .sidebar{
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 290px;
+        z-index: 50;
+        transform: translateX(-105%);
+        transition: transform .18s ease;
+        height: 100vh;
+      }
+      .sidebar.active{ transform: translateX(0); }
+
+      .sidebar-overlay.active{ display:block; }
+
+      .main{ padding: 18px 14px 26px 14px; }
+      .grid{ grid-template-columns: 1fr; }
+      .map-frame{ height: 420px; }
+      .toolbar select{ min-width: 220px; flex:1; }
+    }
+  </style>
+
+  <!-- Firebase compat (carregado no portal em outras páginas também) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-  <script src="scripts/firebase-init-guard.js"></script>
 
-  <style>
-    /* ============================================
-       ESTILOS ESPECÍFICOS DOS CLIENTES
-       ============================================ */
-    
-    /* Header Clientes */
-    .header-clientes {
-      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
-      color: white;
-      padding: 15px 0;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .header-clientes-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .header-clientes .logo {
-      height: 50px;
-      width: auto;
-      filter: brightness(0) invert(1);
-    }
-
-    /* Hero com Background */
-    .hero-clientes {
-      background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-escuro) 100%);
-      color: white;
-      padding: 50px 30px;
-      margin-bottom: 40px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-clientes::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('https://raw.githubusercontent.com/RelevoAmbiental/imagens/main/DSC_0842.JPG');
-      background-size: cover;
-      background-position: center;
-      opacity: 0.1;
-      z-index: 0;
-    }
-
-    .hero-clientes > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-clientes .logo {
-      height: 60px;
-      margin-bottom: 20px;
-      filter: brightness(0) invert(1);
-    }
-
-    .hero-clientes h1 {
-      color: white;
-      font-size: 2.5rem;
-      margin-bottom: 15px;
-      font-weight: 700;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .hero-clientes p {
-      font-size: 1.2rem;
-      opacity: 0.95;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Mensagem de Boas-Vindas */
-    .welcome-message {
-      text-align: center;
-      color: var(--verde-accent);
-      font-size: 1.3rem;
-      margin-bottom: 30px;
-      font-weight: 600;
-      padding: 15px;
-      background: rgba(38, 192, 76, 0.1);
-      border-radius: 8px;
-      border-left: 4px solid var(--verde-primario);
-    }
-
-    /* Seções */
-    .content-section {
-      margin: 40px 0;
-    }
-
-    .content-section:first-of-type {
-      margin-top: 0;
-    }
-
-    .section-title {
-      color: var(--verde-accent);
-      margin: 0 0 25px;
-      border-left: 6px solid var(--verde-primario);
-      padding-left: 15px;
-      font-size: 1.6rem;
-      font-weight: 600;
-    }
-
-    /* Grid de Projetos */
-    .project-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 25px;
-      margin: 20px 0;
-    }
-
-    .project-card {
-      background: var(--card-branco);
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      border-left: 4px solid var(--verde-primario);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .project-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-    }
-
-    .project-card img {
-      width: 70px;
-      height: 70px;
-      object-fit: contain;
-      margin: 0 auto 15px;
-      display: block;
-    }
-
-    .project-card h3 {
-      color: var(--verde-escuro);
-      margin: 0 0 12px;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    .project-card p {
-      color: var(--texto-cinza);
-      font-size: 0.95rem;
-      margin: 0 0 20px;
-      line-height: 1.5;
-      flex-grow: 1;
-    }
-
-    /* Botões específicos para clientes */
-    .btn-client {
-      display: inline-block;
-      padding: 12px 25px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    .btn-client-primary {
-      background: var(--verde-primario);
-      color: white;
-      border: 2px solid var(--verde-primario);
-    }
-
-    .btn-client-primary:hover {
-      background: var(--verde-escuro);
-      border-color: var(--verde-escuro);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(38, 192, 76, 0.3);
-    }
-
-    .btn-client-light {
-      background: var(--cinza-claro);
-      color: var(--texto-escuro);
-      border: 1px solid var(--borda-cinza);
-    }
-
-    .btn-client-light:hover {
-      background: #e6e6e6;
-      transform: translateY(-1px);
-    }
-
-    /* Botão Voltar */
-    .back-button {
-      text-align: center;
-      margin: 40px 0 20px;
-    }
-
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--texto-cinza);
-    }
-
-    .loading-spinner {
-      border: 3px solid var(--borda-cinza);
-      border-top: 3px solid var(--verde-primario);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 15px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* RESPONSIVIDADE */
-    @media (max-width: 768px) {
-      .header-clientes-content {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-
-      .hero-clientes {
-        padding: 40px 15px;
-        border-radius: 15px;
-      }
-
-      .hero-clientes h1 {
-        font-size: 2rem;
-      }
-
-      .hero-clientes p {
-        font-size: 1.1rem;
-      }
-
-      .project-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-
-      .project-card {
-        padding: 20px;
-      }
-
-      .project-card img {
-        width: 60px;
-        height: 60px;
-      }
-
-      .welcome-message {
-        font-size: 1.1rem;
-        margin-bottom: 25px;
-      }
-
-      .section-title {
-        font-size: 1.4rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero-clientes {
-        padding: 30px 15px;
-      }
-
-      .hero-clientes h1 {
-        font-size: 1.8rem;
-      }
-
-      .hero-clientes p {
-        font-size: 1rem;
-      }
-
-      .project-card {
-        padding: 15px;
-      }
-
-      .project-card h3 {
-        font-size: 1.1rem;
-      }
-
-      .btn-client {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-      }
-
-      .welcome-message {
-        font-size: 1rem;
-        padding: 12px;
-      }
-    }
-
-    @media (min-width: 1200px) {
-      .project-grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      }
-    }
-  </style>
+  <!-- Guard/Session do portal -->
+  <script src="/scripts/firebase-init-guard.js"></script>
+  <script src="/scripts/expose-session.js"></script>
 </head>
 
-<body>
-  <!-- Header Clientes -->
-  <header class="header-clientes">
-    <div class="header-clientes-content">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" 
-           alt="Logo Relevo Consultoria Ambiental" 
-           class="logo">
-      <button class="logout-btn" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> Sair
-      </button>
+<body class="relevo-bg">
+  <!-- Top bar mobile -->
+  <div class="mobile-top-bar">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="/assets/icons/icon-192.png" alt="Relevo" style="width:28px;height:28px;border-radius:8px;">
+      <div style="line-height:1;">
+        <div style="font-weight:800;">Portal Relevo</div>
+        <div style="font-size:12px;opacity:.85;">Clientes</div>
+      </div>
     </div>
-  </header>
+    <button class="hamburger" id="btnMenu" aria-label="Abrir menu">
+      <img src="/styles/icons/menu.png" alt="Menu">
+    </button>
+  </div>
 
-  <!-- Hero Clientes -->
-  <section class="hero-clientes">
-    <div class="container">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_horizontal.png" 
-           alt="Relevo Consultoria Ambiental" 
-           class="logo">
-      <h1>Portal do Cliente</h1>
-      <p id="hero-subtitle">Acesso rápido e seguro aos documentos do seu projeto</p>
-    </div>
-  </section>
-
-  <main class="container">
-    <!-- Mensagem de Boas-Vindas Personalizada -->
-    <div class="welcome-message" id="welcome-message">
-      <i class="fas fa-spinner fa-spin"></i> Carregando...
-    </div>
-
-    <!-- SEÇÃO: Dados Cadastrais Relevo -->
-    <section class="content-section">
-      <h2 class="section-title">Dados Cadastrais Relevo</h2>
-      <div class="project-grid">
-        <div class="project-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/arquivos.png" 
-               alt="Ícone pasta de dados cadastrais">
-          <h3>Dados Cadastrais</h3>
-          <p>Acesso à pasta de dados cadastrais da Relevo Consultoria Ambiental</p>
-          <a class="btn btn-client-primary" 
-             href="https://drive.google.com/drive/folders/1FYLVclzIJBzMlENBAQpSuAKLyTYLnEE4" 
-             target="_blank" 
-             rel="noopener noreferrer">
-            <i class="fas fa-folder-open"></i> Abrir Dados Cadastrais
-          </a>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="/assets/icons/icon-192.png" alt="Relevo">
+        <div>
+          <div class="title">Portal Relevo</div>
+          <div class="subtitle">Central de aplicações</div>
         </div>
       </div>
-    </section>
 
-    <!-- SEÇÃO: Pasta do Projeto do Cliente (APARECE APENAS SE TIVER PROJETO) -->
-    <section class="content-section" id="projeto-section" style="display: none;">
-      <h2 class="section-title">Seu Projeto</h2>
-      <div class="project-grid" id="projeto-container">
-        <!-- Conteúdo carregado dinamicamente pelo JavaScript -->
-        <div class="loading">
-          <div class="loading-spinner"></div>
-          <p>Carregando informações do projeto...</p>
-        </div>
+      <nav class="nav">
+        <a href="/index.html">
+          <img src="/styles/icons/home.png" alt="Home"> Home
+        </a>
+        <a href="/gestao.html">
+          <img src="/styles/icons/gestao.png" alt="Gestão"> Gestão
+        </a>
+        <a href="/clientes.html" class="active">
+          <img src="/styles/icons/clientes.png" alt="Clientes"> Clientes
+        </a>
+        <a href="/colaboradores.html">
+          <img src="/styles/icons/colaboradores.png" alt="Colaboradores"> Colaboradores
+        </a>
+        <a href="/gestao-despesas.html">
+          <img src="/styles/icons/despesas.png" alt="Despesas"> Despesas
+        </a>
+        <a href="/inventario/index.html">
+          <img src="/styles/icons/inventario.png" alt="Inventário"> Inventário
+        </a>
+        <a href="/relatorio_atividades/index.html">
+          <img src="/styles/icons/relatorio.png" alt="Relatório"> Relatório diário
+        </a>
+        <a href="/orcamento/index.html">
+          <img src="/styles/icons/orcamento.png" alt="Orçamentos"> Orçamentos
+        </a>
+        <a href="/change-password.html">
+          <img src="/styles/icons/key.png" alt="Senha"> Trocar senha
+        </a>
+      </nav>
+
+      <div style="margin-top:16px" class="muted" id="userInfo">Carregando usuário…</div>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="main">
+      <div class="center-wrap">
+        <header class="page-head">
+          <div>
+            <h1>Área do Cliente</h1>
+            <p>
+              Acesso rápido ao material do projeto (pasta do cliente, pasta padrão da Relevo) e ao mapa do empreendimento.
+              <span class="muted">Cada cliente vê apenas o próprio conteúdo; a gestão enxerga tudo.</span>
+            </p>
+          </div>
+        </header>
+
+        <!-- Barra de seleção (somente gestão) -->
+        <section class="toolbar" id="toolbarGestao" style="display:none;">
+          <div class="label">Selecionar cliente</div>
+          <select id="selectCliente" aria-label="Selecionar cliente"></select>
+        </section>
+
+        <!-- Cards -->
+        <section class="grid" aria-live="polite">
+          <div class="card">
+            <h2>Pasta de Drive do Cliente</h2>
+            <p class="muted">Documentos, entregáveis e arquivos compartilhados com o cliente.</p>
+            <a class="pill" id="linkDriveCliente" href="#" target="_blank" rel="noopener">
+              <img src="/styles/icons/drive.png" alt=""> Abrir pasta
+            </a>
+          </div>
+
+          <div class="card">
+            <h2>Pasta de Dados da Relevo</h2>
+            <p class="muted">Pasta padrão interna (base para todos os clientes).</p>
+            <a class="pill" id="linkDriveRelevo" href="#" target="_blank" rel="noopener">
+              <img src="/styles/icons/folder.png" alt=""> Abrir pasta padrão
+            </a>
+          </div>
+
+          <div class="card map-card">
+            <h2>Mapa do Projeto</h2>
+            <p class="muted">Iframe editável manualmente (um por cliente).</p>
+            <iframe
+              id="mapIframe"
+              class="map-frame"
+              src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </section>
+
+        <div class="muted" style="margin-top:14px" id="status">Pronto.</div>
       </div>
-    </section>
+    </main>
+  </div>
 
-    <!-- Botão Voltar -->
-    <div class="back-button">
-      <a class="btn btn-client-light" href="index.html" style="text-decoration:none">
-        <i class="fas fa-arrow-left"></i> Voltar ao Login
-      </a>
-    </div>
-  </main>
-
-  <footer>
-    © 2025 Relevo Consultoria Ambiental — Todos os direitos reservados.
-  </footer>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
   <script>
-    // ============================================
-    // CONFIGURAÇÃO DO FIREBASE
-    // ============================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcQi5nToMOGVDBWprhhOY0NSJX4qE100w",
-      authDomain: "portal-relevo.firebaseapp.com",
-      projectId: "portal-relevo",
-      storageBucket: "portal-relevo.firebasestorage.app",
-      messagingSenderId: "182759626683",
-      appId: "1:182759626683:web:2dde2eeef910d4c288569e"
-    };
+    // ==========================================================
+    // CONFIG (ajuste só aqui quando precisar)
+    // ==========================================================
+    // Pasta padrão interna da Relevo (mesma para todos os clientes)
+    const RELEVO_PASTA_PADRAO_URL = "https://drive.google.com/drive/folders/COLE_AQUI_O_ID_DA_PASTA_PADRAO";
 
-    // Inicializar Firebase
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-      console.log('✅ Firebase Portal inicializado');
+    // Coleção Firestore sugerida:
+    // /clientes/{docId} com campos (exemplos):
+    //   nome: "Cliente X"
+    //   driveUrl: "https://drive.google.com/drive/folders/..."
+    //   mapaSrc: "https://www.google.com/maps/d/embed?mid=...."
+    //   usuarios: ["uid1","uid2"]  (uids autorizados)
+    //   email: "cliente@dominio.com" (fallback opcional)
+    //   uid: "uidDoCliente"         (fallback opcional)
+    const COLLECTION_CLIENTES = "clientes";
+
+    // ==========================================================
+    // MENU MOBILE (defensivo, sem framework)
+    // ==========================================================
+    (function () {
+      const btn = document.getElementById("btnMenu");
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+
+      function openMenu() {
+        if (!sidebar || !overlay) return;
+        sidebar.classList.add("active");
+        overlay.classList.add("active");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+      function closeMenu() {
+        if (!sidebar || !overlay) return;
+        sidebar.classList.remove("active");
+        overlay.classList.remove("active");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      if (btn) btn.addEventListener("click", function () {
+        if (!sidebar) return;
+        if (sidebar.classList.contains("active")) closeMenu();
+        else openMenu();
+      });
+
+      if (overlay) overlay.addEventListener("click", closeMenu);
+
+      // desktop: garante fechado
+      function enforceDesktop() {
+        if (window.innerWidth > 900) closeMenu();
+      }
+      window.addEventListener("resize", enforceDesktop);
+      enforceDesktop();
+    })();
+
+    // ==========================================================
+    // HELPERS Firebase (compat do portal)
+    // ==========================================================
+    function getFirestore() { return window.__RELEVO_DB__ || (window.RelevoFirebase && window.RelevoFirebase.db) || null; }
+    function getPortalUser() { return window.__RELEVO_USER__ || null; }
+
+    function setStatus(msg) {
+      const el = document.getElementById("status");
+      if (!el) return;
+      el.textContent = msg || "";
     }
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    function setUserInfo(msg) {
+      const el = document.getElementById("userInfo");
+      if (!el) return;
+      el.textContent = msg || "";
+    }
 
-    // ============================================
-    // MAPEAMENTO DE PROJETOS PARA LINKS
-    // ============================================
-    const projetos = {
-      'jgp': {
-        nome: 'JGP - BR-135/BA',
-        link: 'https://drive.google.com/drive/folders/1u4_aYfnNJ22mMWVEWy5zZByZGszosrwh',
-        descricao: 'Documentos técnicos, relatórios e entregas do projeto JGP'
-      },
-      'dossel': {
-        nome: 'Dossel - Projeto Serra Dourada',
-        link: 'https://drive.google.com/drive/folders/1AlebDIVnQkVqiL2YlMQlhd7yYbZpAWjE',
-        descricao: 'Relatórios e entregas relacionadas ao projeto Serra Dourada'
-      },
-      'habilis': {
-        nome: 'Habilis - GO',
-        link: 'https://drive.google.com/drive/folders/1sSfpz5P5I5siG9ZKkd8qXeO8cRyEO4Tw',
-        descricao: 'Documentação técnica e entregas do projeto Habilis'
+    // Perfil do usuário: /users/{uid} campo tipo/role/perfil (gestao/colaborador/cliente)
+    let __USER_TIPO__ = "colaborador"; // default seguro
+    async function carregarUserTipo() {
+      const db = getFirestore();
+      const u = getPortalUser();
+
+      if (!db || !u || !u.uid) return __USER_TIPO__;
+
+      try {
+        const doc = await db.collection("users").doc(u.uid).get();
+        const data = doc && doc.exists ? doc.data() : null;
+        const tipo = (data && (data.tipo || data.role || data.perfil)) ? String(data.tipo || data.role || data.perfil) : "";
+        __USER_TIPO__ = (tipo || "colaborador").toLowerCase();
+      } catch (e) {
+        __USER_TIPO__ = "colaborador";
       }
-    };
 
-    // ============================================
-    // VERIFICAR AUTENTICAÇÃO E CARREGAR DADOS
-    // ============================================
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        console.log('❌ Usuário não autenticado - Redirecionando...');
-        window.location.href = 'index.html';
+      return __USER_TIPO__;
+    }
+
+    // ==========================================================
+    // CARREGAMENTO DE CLIENTES (controle por perfil)
+    // ==========================================================
+    const elToolbar = document.getElementById("toolbarGestao");
+    const elSelect = document.getElementById("selectCliente");
+    const elLinkCliente = document.getElementById("linkDriveCliente");
+    const elLinkRelevo = document.getElementById("linkDriveRelevo");
+    const elIframe = document.getElementById("mapIframe");
+
+    // sempre seta a pasta padrão da Relevo
+    if (elLinkRelevo) elLinkRelevo.href = RELEVO_PASTA_PADRAO_URL;
+
+    function renderCliente(data) {
+      const nome = (data && (data.nome || data.titulo || data.cliente)) ? String(data.nome || data.titulo || data.cliente) : "Cliente";
+      const driveUrl = (data && (data.driveUrl || data.pastaDrive || data.pastaCliente)) ? String(data.driveUrl || data.pastaDrive || data.pastaCliente) : "#";
+      const mapaSrc = (data && (data.mapaSrc || data.mapaUrl || data.iframeSrc)) ? String(data.mapaSrc || data.mapaUrl || data.iframeSrc) : null;
+
+      document.title = nome + " | Portal Relevo";
+      if (elLinkCliente) elLinkCliente.href = driveUrl;
+
+      if (elIframe) {
+        if (mapaSrc) elIframe.src = mapaSrc;
+        // se não tiver, mantém o default do HTML (evita quebrar)
+      }
+
+      setStatus("Cliente carregado: " + nome);
+    }
+
+    async function fetchMeuCliente(db, u) {
+      // Estratégia 1: usuarios array-contains uid
+      try {
+        const q1 = await db.collection(COLLECTION_CLIENTES).where("usuarios", "array-contains", u.uid).limit(1).get();
+        if (!q1.empty) return q1.docs[0].data();
+      } catch(e) {}
+
+      // Estratégia 2: uid == user.uid
+      try {
+        const q2 = await db.collection(COLLECTION_CLIENTES).where("uid", "==", u.uid).limit(1).get();
+        if (!q2.empty) return q2.docs[0].data();
+      } catch(e) {}
+
+      // Estratégia 3: email == user.email
+      try {
+        if (u.email) {
+          const q3 = await db.collection(COLLECTION_CLIENTES).where("email", "==", u.email).limit(1).get();
+          if (!q3.empty) return q3.docs[0].data();
+        }
+      } catch(e) {}
+
+      return null;
+    }
+
+    async function fetchTodosClientes(db) {
+      // Tenta ordenar por nome (se não existir índice/campo, cai no get simples)
+      try {
+        const qs = await db.collection(COLLECTION_CLIENTES).orderBy("nome").get();
+        return qs.docs.map(d => ({ id: d.id, data: d.data() }));
+      } catch(e) {
+        const qs2 = await db.collection(COLLECTION_CLIENTES).get();
+        return qs2.docs.map(d => ({ id: d.id, data: d.data() }));
+      }
+    }
+
+    function fillSelectClientes(list) {
+      if (!elSelect) return;
+      elSelect.innerHTML = "";
+
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "Selecione...";
+      opt0.disabled = true;
+      opt0.selected = true;
+      elSelect.appendChild(opt0);
+
+      for (let i = 0; i < list.length; i++) {
+        const it = list[i];
+        const nome = (it.data && it.data.nome) ? String(it.data.nome) : ("Cliente " + (i+1));
+        const opt = document.createElement("option");
+        opt.value = it.id;
+        opt.textContent = nome;
+        elSelect.appendChild(opt);
+      }
+    }
+
+    async function boot() {
+      setStatus("Carregando…");
+
+      // Aguarda sessão exposta pelo portal (defensivo)
+      const waitUser = () => new Promise((resolve) => {
+        const t0 = Date.now();
+        const timer = setInterval(() => {
+          const u = getPortalUser();
+          if (u && u.uid) { clearInterval(timer); return resolve(u); }
+          if (Date.now() - t0 > 4000) { clearInterval(timer); return resolve(null); }
+        }, 60);
+      });
+
+      const u = await waitUser();
+      const db = getFirestore();
+
+      if (!u || !u.uid) {
+        setUserInfo("⚠️ Faça login para acessar.");
+        setStatus("Sem usuário logado.");
+        return;
+      }
+      setUserInfo("Logado: " + (u.email || u.uid));
+
+      if (!db) {
+        setStatus("❌ Firestore indisponível (verifique /scripts/firebase-init-guard.js).");
         return;
       }
 
-      console.log('✅ Usuário autenticado:', user.uid);
-      await carregarDadosCliente(user.uid);
-    });
+      const tipo = await carregarUserTipo();
 
-    // ============================================
-    // CARREGAR DADOS DO CLIENTE
-    // ============================================
-    async function carregarDadosCliente(uid) {
-      try {
-        const userDoc = await db.collection('users').doc(uid).get();
-        
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          const nomeExibicao = userData.nome || userData.username || 'Cliente';
-          
-          // Atualizar mensagem de boas-vindas
-          document.getElementById('welcome-message').innerHTML = 
-            `<i class="fas fa-user-circle"></i> Bem-vindo, <strong>${nomeExibicao}</strong>!`;
-          
-          console.log('✅ Dados do usuário carregados:', userData);
+      // Gestão vê tudo (com seletor)
+      if (tipo === "gestao" || tipo === "admin" || tipo === "gestor") {
+        if (elToolbar) elToolbar.style.display = "flex";
+        setStatus("Modo gestão: carregando lista completa…");
 
-          // Se o usuário tem um projeto específico, mostrar apenas esse projeto
-          if (userData.projeto && projetos[userData.projeto]) {
-            mostrarProjetoEspecifico(userData.projeto);
-          } else {
-            // Se não tem projeto específico, mostrar todos os projetos
-            mostrarTodosProjetos();
-          }
-          
-        } else {
-          console.warn('⚠️ Documento do usuário não encontrado');
-          mostrarErro();
+        const list = await fetchTodosClientes(db);
+        if (!list || list.length === 0) {
+          setStatus("Nenhum cliente cadastrado em /" + COLLECTION_CLIENTES + ".");
+          return;
         }
-      } catch (error) {
-        console.error('❌ Erro ao carregar dados do usuário:', error);
-        mostrarErro();
-      }
-    }
 
-    // ============================================
-    // MOSTRAR PROJETO ESPECÍFICO DO CLIENTE
-    // ============================================
-    function mostrarProjetoEspecifico(projetoId) {
-      const projeto = projetos[projetoId];
-      
-      // Mostrar seção do projeto
-      document.getElementById('projeto-section').style.display = 'block';
-      
-      // Atualizar container do projeto
-      document.getElementById('projeto-container').innerHTML = `
-        <div class="project-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png" 
-               alt="Ícone pasta ${projeto.nome}">
-          <h3>${projeto.nome}</h3>
-          <p>${projeto.descricao}</p>
-          <a class="btn btn-client-light" 
-             href="${projeto.link}" 
-             target="_blank" 
-             rel="noopener noreferrer">
-            <i class="fas fa-external-link-alt"></i> Abrir Pasta do Projeto
-          </a>
-        </div>
-      `;
-      
-      // Atualizar subtítulo do hero
-      document.getElementById('hero-subtitle').textContent = 
-        `Acesso aos documentos do projeto ${projeto.nome}`;
-      
-      console.log('✅ Projeto específico carregado:', projeto.nome);
-    }
+        fillSelectClientes(list);
 
-    // ============================================
-    // MOSTRAR TODOS OS PROJETOS
-    // ============================================
-    function mostrarTodosProjetos() {
-      // Mostrar seção do projeto
-      document.getElementById('projeto-section').style.display = 'block';
-      
-      // Criar HTML para todos os projetos
-      const projetosHTML = Object.values(projetos).map(projeto => `
-        <div class="project-card">
-          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png" 
-               alt="Ícone pasta ${projeto.nome}">
-          <h3>${projeto.nome}</h3>
-          <p>${projeto.descricao}</p>
-          <a class="btn btn-client-light" 
-             href="${projeto.link}" 
-             target="_blank" 
-             rel="noopener noreferrer">
-            <i class="fas fa-external-link-alt"></i> Abrir Pasta
-          </a>
-        </div>
-      `).join('');
-      
-      document.getElementById('projeto-container').innerHTML = projetosHTML;
-      
-      console.log('✅ Todos os projetos carregados');
-    }
+        // auto seleciona o primeiro para já mostrar algo
+        const first = list[0];
+        renderCliente(first.data);
+        if (elSelect) elSelect.value = first.id;
 
-    // ============================================
-    // MOSTRAR ERRO
-    // ============================================
-    function mostrarErro() {
-      document.getElementById('welcome-message').innerHTML = 
-        '<i class="fas fa-exclamation-triangle"></i> Erro ao carregar dados.';
-      document.getElementById('welcome-message').style.background = '#ffebee';
-      document.getElementById('welcome-message').style.color = '#c62828';
-      document.getElementById('welcome-message').style.borderLeftColor = '#c62828';
-    }
-
-    // ============================================
-    // FUNÇÃO DE LOGOUT
-    // ============================================
-    function logout() {
-      if (confirm('Deseja realmente sair do sistema?')) {
-        auth.signOut()
-          .then(() => {
-            console.log('✅ Logout realizado com sucesso');
-            window.location.href = 'index.html';
-          })
-          .catch((error) => {
-            console.error('❌ Erro ao fazer logout:', error);
-            alert('Erro ao fazer logout. Tente novamente.');
+        if (elSelect) {
+          elSelect.addEventListener("change", function () {
+            const id = elSelect.value;
+            const found = list.find(x => x.id === id);
+            if (found) renderCliente(found.data);
           });
+        }
+        return;
       }
+
+      // Cliente/colaborador: vê só o próprio
+      setStatus("Carregando seu cliente…");
+      const data = await fetchMeuCliente(db, u);
+
+      if (!data) {
+        setStatus("⚠️ Nenhum cliente vinculado a este usuário. Cadastre na coleção /" + COLLECTION_CLIENTES + ".");
+        return;
+      }
+
+      renderCliente(data);
     }
 
-    // ============================================
-    // MELHORIAS DE UX
-    // ============================================
-    
-    // Prevenir zoom em dispositivos iOS
-    document.addEventListener('touchstart', function() {}, { passive: true });
-
-    // Log quando página carrega
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('✅ Portal do Cliente carregado');
-    });
+    boot();
   </script>
 </body>
 </html>
-
-
-
