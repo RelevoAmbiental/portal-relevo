@@ -314,7 +314,6 @@
               '<div style="font-weight:900; color:#0b2e1b;">' + linha1 + "</div>" +
               '<div class="muted">' + linha2 + "</div>" +
             "</div>" +
-            \
 '<div style="display:flex; gap:8px; align-items:center;">' +
   '<div class="' + badgeClass + '">' + badgeTxt + '</div>' +
   (function(){
@@ -726,11 +725,11 @@ if (isEditing()) {
           }
 
           const resumo = (it.funcionario || "—") + " • " + (it.projeto || "—") + " • " + brDate(it.data);
-          const ok = confirm("Apagar este relatório?
-
-" + resumo + "
-
-Essa ação não pode ser desfeita.");
+          const ok = confirm(
+            "Apagar este relatório?\n\n" +
+            resumo +
+            "\n\nEssa ação não pode ser desfeita."
+          );
           if (!ok) return;
 
           try {
