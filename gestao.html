@@ -13,84 +13,84 @@
   <link rel="stylesheet" href="styles/relevo-theme.css">
 
   <style>
-    /* Ajustes para o Layout de Dashboard com Sidebar */
     .dashboard-wrapper {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: 300px 1fr;
       min-height: 100vh;
-      gap: 20px;
     }
 
-    /* Sidebar Estilizada */
     .sidebar {
       background: var(--relevo-surface-solid);
       border-right: 1px solid var(--relevo-border);
       padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      gap: 25px;
+      overflow-y: auto;
     }
 
     .sidebar-section h3 {
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
       color: var(--relevo-muted);
       margin-bottom: 15px;
-      padding-left: 10px;
+      border-bottom: 1px solid var(--relevo-border);
+      padding-bottom: 5px;
     }
 
     .nav-menu {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 15px;
+      padding: 10px 12px;
       border-radius: var(--relevo-r-sm);
       text-decoration: none;
       color: var(--relevo-text);
       font-weight: 600;
       transition: all 0.2s;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
-    .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+    /* Estilização para as imagens originais nos links */
+    .nav-item img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
     
-    /* Cores das Seções conforme solicitado */
-    .section-dados .nav-item:hover { background: rgba(38, 192, 76, 0.1); color: var(--relevo-green-700); }
-    .section-apps .nav-item:hover { background: rgba(255, 152, 0, 0.1); color: #e65100; }
+    .section-dados .nav-item:hover { background: rgba(38, 192, 76, 0.08); }
+    .section-apps .nav-item:hover { background: rgba(255, 152, 0, 0.08); }
 
-    /* Destaque Despesa na Sidebar */
     .btn-quick-action {
-      margin-top: 10px;
+      margin-top: 15px;
       width: 100%;
+      display: flex;
+      align-items: center;
       justify-content: center;
+      gap: 8px;
     }
 
-    /* Área de Conteúdo Principal */
     .main-content {
-      padding: 30px;
+      padding: 40px;
       background: var(--relevo-gradient-soft);
     }
 
-    .welcome-header { margin-bottom: 30px; }
-
-    /* Grid de Indicadores Central */
     .indicators-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
       gap: 24px;
     }
 
-    /* Responsividade */
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
       .dashboard-wrapper { grid-template-columns: 1fr; }
-      .sidebar { display: none; } /* Idealmente aqui entraria um menu hambúrguer */
+      .sidebar { display: none; }
     }
   </style>
 </head>
@@ -99,40 +99,52 @@
 
   <div class="dashboard-wrapper">
     <aside class="sidebar">
-      <div class="brand">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 120px; margin-bottom: 20px;">
+      <div class="brand" style="text-align: center;">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px; margin-bottom: 10px;">
       </div>
 
       <section class="sidebar-section section-dados">
-        <h3><i class="fas fa-database"></i> Dados</h3>
+        <h3>Dados</h3>
         <nav class="nav-menu">
           <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go" target="_blank" class="nav-item">
-            <i class="fab fa-google-drive"></i> Drive Empresa
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/arquivos.png" alt=""> Drive Empresa
           </a>
           <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL" target="_blank" class="nav-item">
-            <i class="fas fa-file-contract"></i> Relatórios Clientes
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png" alt=""> Relatórios Clientes
           </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-shield-halved"></i> SST e Segurança
+          <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/SegurancaJuridica.png" alt=""> SST e Segurança
           </a>
           <a href="https://docs.google.com/spreadsheets/d/10LJopYBh7cSrD_e0gr1iMw_BcVzrcAdreXfTRzvWPps" target="_blank" class="nav-item">
-            <i class="fas fa-file-invoice"></i> Controle Propostas
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt=""> Controle Propostas
           </a>
         </nav>
       </section>
 
       <section class="sidebar-section section-apps">
-        <h3><i class="fas fa-th-large"></i> Aplicações</h3>
+        <h3>Aplicações</h3>
         <nav class="nav-menu">
-          <a href="gestao-despesas.html" class="nav-item"><i class="fas fa-chart-pie"></i> Gestão de Despesas</a>
-          <a href="https://portal.relevo.eco.br/orcamento/" target="_blank" class="nav-item"><i class="fas fa-calculator"></i> Orçamentos</a>
-          <a href="https://portal.relevo.eco.br/cronograma/" target="_blank" class="nav-item"><i class="fas fa-calendar-alt"></i> Agenda Projetos</a>
-          <a href="relatorio_atividades/" class="nav-item"><i class="fas fa-check-double"></i> Relatório Diário</a>
-          <a href="inventario/" class="nav-item"><i class="fas fa-boxes-stacked"></i> Inventário</a>
-          <a href="https://portal.relevo.eco.br/apps/" target="_blank" class="nav-item"><i class="fas fa-mobile-screen"></i> PWA Apps</a>
-          
-          <a href="despesas" class="btn btn-primary btn-quick-action">
-            <i class="fas fa-plus-circle"></i> Nova Despesa
+          <a href="gestao-despesas.html" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt=""> Gestão de Despesas
+          </a>
+          <a href="https://portal.relevo.eco.br/orcamento/" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/orcamento.png" alt=""> Gestão de Orçamentos
+          </a>
+          <a href="https://portal.relevo.eco.br/cronograma/" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png" alt=""> Agenda de Projetos
+          </a>
+          <a href="relatorio_atividades/" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png" alt=""> Relatório Diário
+          </a>
+          <a href="inventario/" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Inventario_equipos.png" alt=""> Inventário
+          </a>
+          <a href="https://portal.relevo.eco.br/apps/" target="_blank" class="nav-item">
+            <i class="fas fa-mobile-alt" style="font-size: 20px; color: var(--laranja);"></i> PWA Apps
+          </a>
+
+          <a href="despesas" target="_blank" class="btn btn-primary btn-quick-action">
+            <i class="fas fa-receipt"></i> Cadastrar Despesa
           </a>
         </nav>
       </section>
@@ -145,38 +157,37 @@
     </aside>
 
     <main class="main-content">
-      <header class="welcome-header">
-        <h1>Gestão Interna</h1>
-        <p class="muted">Bem-vindo à central de inteligência da Relevo Consultoria Ambiental.</p>
+      <header style="margin-bottom: 40px;">
+        <h1 style="font-size: 32px; font-weight: 800; color: var(--relevo-green-900);">Painel de Gestão</h1>
+        <p class="muted">Central administrativa Relevo Consultoria Ambiental</p>
       </header>
 
       <section class="indicators-grid">
-        
         <article class="card card--accent card--info">
-          <h2><i class="fas fa-tasks"></i> Resumo de Tarefas</h2>
-          <p class="muted">Status atualizado do cronograma operacional.</p>
-          <hr style="opacity: 0.1; margin: 15px 0;">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png" style="width: 40px;" alt="">
+            <h2 style="margin: 0;">Resumo de Tarefas</h2>
+          </div>
           <table style="background: transparent; border: none;">
-            <tr><td>Tarefas pendentes</td><td align="right"><span class="badge" data-indicador="pendentes">...</span></td></tr>
-            <tr><td>Em andamento</td><td align="right"><span class="badge info" data-indicador="andamento">...</span></td></tr>
-            <tr><td>Atrasadas</td><td align="right"><span class="badge nok" data-indicador="atrasadas">...</span></td></tr>
-            <tr><td>Concluídas</td><td align="right"><span class="badge ok" data-indicador="concluidas">...</span></td></tr>
+            <tr><td>Tarefas pendentes</td><td align="right"><span class="value" data-indicador="pendentes">...</span></td></tr>
+            <tr><td>Em andamento</td><td align="right"><span class="value" data-indicador="andamento">...</span></td></tr>
+            <tr><td>Atrasadas</td><td align="right"><span class="value" data-indicador="atrasadas">...</span></td></tr>
+            <tr><td>Concluídas</td><td align="right"><span class="value" data-indicador="concluidas">...</span></td></tr>
           </table>
         </article>
 
         <article class="card card--accent">
-          <h2><i class="fas fa-calendar-day"></i> Próximas Entregas</h2>
-          <p class="muted">Hoje: <span id="dataHoje">...</span></p>
-          <div class="item" style="box-shadow: none; background: rgba(255,255,255,0.5);">
-            <ul id="listaEntregas" style="list-style: none; padding: 0; margin: 0;">
-              <li>Carregando agenda...</li>
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/agenda.png" style="width: 40px;" alt="">
+            <h2 style="margin: 0;">Agenda da Semana</h2>
+          </div>
+          <div class="item" style="box-shadow: none; background: rgba(0,0,0,0.03);">
+            <p><strong>Hoje:</strong> <span id="dataHoje">...</span></p>
+            <ul id="listaEntregas" style="list-style: none; padding: 0; margin: 10px 0 0 0;">
+              <li>Sincronizando...</li>
             </ul>
           </div>
-          <small class="muted" style="display: block; margin-top: 10px;">
-            <i class="fas fa-sync"></i> Sincronizado com Cronograma
-          </small>
         </article>
-
       </section>
     </main>
   </div>
@@ -186,11 +197,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="scripts/firebase-init-guard.js"></script>
   <script src="scripts/expose-session.js"></script>
-  
   <script>
-    // Toda a sua lógica de carregarIndicadoresCronograma() 
-    // e normalizarStatus() deve ser mantida aqui embaixo.
-    // Ela continuará funcionando pois mantive os IDs e data-attributes.
+    // Mantenha aqui as suas funções carregarIndicadoresCronograma(),
+    // atualizarDashboardTarefas(), etc., do seu arquivo original.
   </script>
 </body>
 </html>
