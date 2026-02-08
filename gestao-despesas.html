@@ -15,18 +15,15 @@
   <style>
     .dashboard-wrapper { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
     .sidebar { background: var(--relevo-surface-solid); border-right: 1px solid var(--relevo-border); padding: 24px; display: flex; flex-direction: column; gap: 25px; position: sticky; top: 0; height: 100vh; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--relevo-r-sm); text-decoration: none; color: var(--relevo-text); font-weight: 600; font-size: 0.9rem; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--relevo-r-sm); text-decoration: none; color: var(--relevo-text); font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
     .nav-item img { width: 22px; height: 22px; object-fit: contain; }
     .nav-item.active { background: rgba(255, 152, 0, 0.1); color: #e65100; border-left: 4px solid #ff9800; }
     .main-content { padding: 40px; background: var(--relevo-gradient-soft); overflow-y: auto; }
 
-    /* Estilos dos Gráficos e Filtros */
     .filter-bar { background: var(--relevo-surface); padding: 20px; border-radius: var(--relevo-r-md); display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; border: 1px solid var(--relevo-border); align-items: flex-end; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-    .chart-container { background: #fff; padding: 20px; border-radius: var(--relevo-r-md); border: 1px solid var(--relevo-border); position: relative; min-height: 350px; }
+    .chart-container { background: #fff; padding: 20px; border-radius: var(--relevo-r-md); border: 1px solid var(--relevo-border); min-height: 350px; }
     
-    canvas { width: 100% !important; height: 100% !important; }
-
     @media (max-width: 1100px) { .stats-grid { grid-template-columns: 1fr; } .dashboard-wrapper { grid-template-columns: 1fr; } .sidebar { display: none; } }
   </style>
 </head>
@@ -38,9 +35,9 @@
       <div class="brand" style="text-align: center;">
         <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px; margin-bottom: 10px;">
       </div>
-      <nav class="nav-menu" style="display: flex; flex-direction: column; gap: 5px;">
+      <nav class="nav-menu">
         <a href="gestao.html" class="nav-item"><i class="fas fa-home"></i> Voltar ao Painel</a>
-        <h3 style="font-size: 11px; text-transform: uppercase; color: var(--relevo-muted); margin-top: 15px;">Financeiro</h3>
+        <h3 style="font-size: 11px; text-transform: uppercase; color: var(--relevo-muted); margin-top: 15px; margin-bottom: 10px;">Financeiro</h3>
         <a href="gestao-despesas.html" class="nav-item active">
           <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png"> Relatórios
         </a>
@@ -52,8 +49,8 @@
 
     <main class="main-content">
       <header style="margin-bottom: 30px;">
-        <h1>Gestão de Despesas</h1>
-        <p class="muted">Relatórios financeiros e análise de custos por projeto.</p>
+        <h1>Relatório de Despesas</h1>
+        <p class="muted">Dados financeiros do projeto <strong>app-despesas-7029f</strong></p>
       </header>
 
       <div class="filter-bar">
@@ -74,7 +71,7 @@
           </select>
         </div>
         <button class="btn btn-secondary" onclick="exportarCSV()">
-          <i class="fas fa-file-csv"></i> Exportar
+          <i class="fas fa-file-csv"></i> Exportar CSV
         </button>
       </div>
 
@@ -91,10 +88,8 @@
 
       <div class="card">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h2>Registros de Despesas</h2>
-          <span class="badge info" style="font-size: 1.1rem; padding: 10px 20px;">
-            Total: <strong id="totalGeral">R$ 0,00</strong>
-          </span>
+          <h2>Registros</h2>
+          <span class="badge info" style="font-size: 1.1rem;">Total: <strong id="totalGeral">R$ 0,00</strong></span>
         </div>
         <div style="overflow-x: auto;">
           <table id="tabelaDespesas">
@@ -108,8 +103,7 @@
                 <th>Ações</th>
               </tr>
             </thead>
-            <tbody>
-              </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </div>
@@ -121,14 +115,38 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <script src="scripts/firebase-init-guard.js"></script>
+  <script>
+    // 1. Configuração do SEU Firebase (app-despesas-7029f)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCDIrPqQs7S_E2UeDGPNeFCVYcv09JFoTs",
+      authDomain: "app-despesas-7029f.firebaseapp.com",
+      projectId: "app-despesas-7029f",
+      storageBucket: "app-despesas-7029f.firebasestorage.app",
+      messagingSenderId: "843931176271",
+      appId: "1:843931176271:web:5cdafdd10bc28c3bd8893a"
+    };
+
+    // 2. Inicialização (Sintaxe Compat)
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+  </script>
+
   <script src="scripts/firebase-despesas-reader.js"></script>
 
   <script>
-    /* Nesta tag script, certifique-se de manter apenas a lógica de inicialização 
-      das Despesas que estava no seu gestao-despesas.html original. 
-      NÃO COPIE nada de cronograma para cá.
-    */
+    // Funções de apoio que o seu firebase-despesas-reader.js costuma chamar
+    function aplicarFiltros() {
+      if (typeof filtrarDados === "function") {
+        filtrarDados(); 
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("Dashboard de Despesas Iniciado...");
+      // A função carregarDespesas() deve estar dentro do seu firebase-despesas-reader.js
+    });
   </script>
 </body>
 </html>
