@@ -3,46 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gestão Interna | Relevo Consultoria Ambiental</title>
+  <title>Gestão de Despesas | Relevo Consultoria</title>
 
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   
-  <link rel="stylesheet" href="styles/global.css">
-  <link rel="stylesheet" href="styles/relevo-theme.css">
+  <link rel="stylesheet" href="styles/global.css"/>
+  <link rel="stylesheet" href="styles/relevo-theme.css"/>
 
   <style>
-    /* Estrutura de Layout */
     .dashboard-wrapper { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
-    .sidebar { 
-      background: var(--relevo-surface-solid); 
-      border-right: 1px solid var(--relevo-border); 
-      padding: 24px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 25px; 
-    }
-    .main-content { padding: 40px; background: var(--relevo-gradient-soft); }
-    
-    /* Menu Lateral */
-    .nav-item { 
-      display: flex; align-items: center; gap: 12px; padding: 10px 12px; 
-      border-radius: var(--relevo-r-sm); text-decoration: none; color: var(--relevo-text); 
-      font-weight: 600; font-size: 0.9rem; transition: 0.2s;
-    }
-    .nav-item:hover { background: rgba(15, 77, 46, 0.05); }
+    .sidebar { background: var(--relevo-surface-solid); border-right: 1px solid var(--relevo-border); padding: 24px; display: flex; flex-direction: column; gap: 25px; position: sticky; top: 0; height: 100vh; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--relevo-r-sm); text-decoration: none; color: var(--relevo-text); font-weight: 600; font-size: 0.9rem; }
     .nav-item img { width: 22px; height: 22px; object-fit: contain; }
+    .nav-item.active { background: rgba(255, 152, 0, 0.1); color: #e65100; border-left: 4px solid #ff9800; }
+    .main-content { padding: 40px; background: var(--relevo-gradient-soft); overflow-y: auto; }
 
-    /* Grid de Indicadores */
-    .indicators-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
+    /* Estilos dos Gráficos e Filtros */
+    .filter-bar { background: var(--relevo-surface); padding: 20px; border-radius: var(--relevo-r-md); display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; border: 1px solid var(--relevo-border); align-items: flex-end; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+    .chart-container { background: #fff; padding: 20px; border-radius: var(--relevo-r-md); border: 1px solid var(--relevo-border); position: relative; min-height: 350px; }
     
-    /* Estilo da Tabela Interna dos Cards (Dashboard) */
-    .dashboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .dashboard-table td { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .value-bold { font-weight: 800; color: var(--relevo-green-900); }
+    canvas { width: 100% !important; height: 100% !important; }
 
-    @media (max-width: 1024px) { .dashboard-wrapper { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    @media (max-width: 1100px) { .stats-grid { grid-template-columns: 1fr; } .dashboard-wrapper { grid-template-columns: 1fr; } .sidebar { display: none; } }
   </style>
 </head>
 
@@ -53,83 +38,97 @@
       <div class="brand" style="text-align: center;">
         <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px; margin-bottom: 10px;">
       </div>
-
-      <section class="sidebar-section">
-        <h3 style="font-size: 11px; text-transform: uppercase; color: var(--relevo-muted); margin-bottom: 10px;">Dados</h3>
-        <nav class="nav-menu" style="display: flex; flex-direction: column; gap: 5px;">
-          <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/arquivos.png"> Drive Empresa
-          </a>
-          <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png"> Relatórios Clientes
-          </a>
-        </nav>
-      </section>
-
-      <section class="sidebar-section">
-        <h3 style="font-size: 11px; text-transform: uppercase; color: var(--relevo-muted); margin-bottom: 10px;">Aplicações</h3>
-        <nav class="nav-menu" style="display: flex; flex-direction: column; gap: 5px;">
-          <a href="gestao-despesas.html" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png"> Gestão de Despesas
-          </a>
-          <a href="https://portal.relevo.eco.br/cronograma/" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png"> Cronograma
-          </a>
-          <a href="https://portal.relevo.eco.br/apps/" target="_blank" class="nav-item">
-            <i class="fas fa-mobile-alt" style="font-size: 20px; color: #f39c12; margin-left: 2px;"></i> PWA Apps
-          </a>
-          <a href="despesas" target="_blank" class="btn btn-primary" style="margin-top: 10px; justify-content: center;">
-            <i class="fas fa-plus"></i> Nova Despesa
-          </a>
-        </nav>
-      </section>
+      <nav class="nav-menu" style="display: flex; flex-direction: column; gap: 5px;">
+        <a href="gestao.html" class="nav-item"><i class="fas fa-home"></i> Voltar ao Painel</a>
+        <h3 style="font-size: 11px; text-transform: uppercase; color: var(--relevo-muted); margin-top: 15px;">Financeiro</h3>
+        <a href="gestao-despesas.html" class="nav-item active">
+          <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png"> Relatórios
+        </a>
+        <a href="despesas" target="_blank" class="btn btn-primary" style="margin-top: 15px; justify-content: center;">
+           <i class="fas fa-plus-circle"></i> Nova Despesa
+        </a>
+      </nav>
     </aside>
 
     <main class="main-content">
       <header style="margin-bottom: 30px;">
-        <h1>Painel de Gestão</h1>
-        <p class="muted">Indicadores em tempo real extraídos do Firebase.</p>
+        <h1>Gestão de Despesas</h1>
+        <p class="muted">Relatórios financeiros e análise de custos por projeto.</p>
       </header>
 
-      <section class="indicators-grid">
-        <article class="card card--accent card--info">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png" style="width: 30px;">
-            <h2 style="margin: 0;">Status de Operações</h2>
-          </div>
-          <table class="dashboard-table">
-            <tr><td>Pendentes</td><td align="right" class="value-bold"><span data-indicador="pendentes">...</span></td></tr>
-            <tr><td>Em andamento</td><td align="right" class="value-bold"><span data-indicador="andamento">...</span></td></tr>
-            <tr><td>Atrasadas</td><td align="right" class="value-bold"><span data-indicador="atrasadas" style="color: #e74c3c;">...</span></td></tr>
-            <tr><td>Concluídas</td><td align="right" class="value-bold"><span data-indicador="concluidas" style="color: #27ae60;">...</span></td></tr>
-          </table>
-        </article>
+      <div class="filter-bar">
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label>Projeto</label>
+          <select id="filterProjeto" onchange="aplicarFiltros()"><option value="">Todos</option></select>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label>Tipo</label>
+          <select id="filterTipo" onchange="aplicarFiltros()"><option value="">Todos</option></select>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label>Status</label>
+          <select id="filterStatus" onchange="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option value="pendente">Pendente</option>
+            <option value="aprovado">Aprovado</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" onclick="exportarCSV()">
+          <i class="fas fa-file-csv"></i> Exportar
+        </button>
+      </div>
 
-        <article class="card card--accent">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/agenda.png" style="width: 30px;">
-            <h2 style="margin: 0;">Agenda da Semana</h2>
-          </div>
-          <p class="muted" style="font-size: 0.85rem;">Hoje: <span id="dataHoje">...</span></p>
-          <ul id="listaEntregas" style="list-style: none; padding: 0; margin-top: 10px; line-height: 1.6;">
-            <li>Carregando compromissos...</li>
-          </ul>
-        </article>
-      </section>
+      <div class="stats-grid">
+        <div class="chart-container">
+          <h3>Distribuição por Tipo</h3>
+          <canvas id="chartTipos"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>Gastos por Projeto</h3>
+          <canvas id="chartProjetos"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2>Registros de Despesas</h2>
+          <span class="badge info" style="font-size: 1.1rem; padding: 10px 20px;">
+            Total: <strong id="totalGeral">R$ 0,00</strong>
+          </span>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="tabelaDespesas">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Projeto</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              </tbody>
+          </table>
+        </div>
+      </div>
     </main>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
+  <script src="scripts/firebase-init-guard.js"></script>
+  <script src="scripts/firebase-despesas-reader.js"></script>
+
   <script>
-    /* Aqui você deve colar TODO o conteúdo <script> que estava no final 
-       do seu arquivo gestao.html original, começando pela configuração do Firebase 
-       até as funções carregarIndicadoresCronograma() e atualizarDashboardTarefas().
-       
-       Como os IDs (data-indicador, listaEntregas, dataHoje) foram mantidos, 
-       a comunicação voltará a funcionar imediatamente. */
+    /* Nesta tag script, certifique-se de manter apenas a lógica de inicialização 
+      das Despesas que estava no seu gestao-despesas.html original. 
+      NÃO COPIE nada de cronograma para cá.
+    */
   </script>
 </body>
 </html>
