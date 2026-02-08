@@ -5,8 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gestão Interna | Relevo Consultoria Ambiental</title>
 
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Favicons / PWA -->
+  <link rel="icon" href="/assets/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0b2e1b">
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <link rel="stylesheet" href="styles/global.css">
@@ -90,7 +97,34 @@
 
     @media (max-width: 1024px) {
       .dashboard-wrapper { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
+
+      .sidebar{
+        display:flex;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        z-index: 1000;
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        box-shadow: 18px 0 40px rgba(0,0,0,.18);
+      }
+      .sidebar.open{ transform: translateX(0); }
+
+      .sidebar-overlay{ display:none; }
+      .sidebar-overlay.show{
+        display:block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.28);
+        backdrop-filter: blur(2px);
+        z-index: 900;
+      }
+
+      .mobile-menu-btn{ display:inline-flex; }
+
+      .main-content{ padding: 20px; }
     }
   </style>
 </head>
@@ -100,23 +134,23 @@
   <div class="dashboard-wrapper">
     <aside class="sidebar">
       <div class="brand" style="text-align: center;">
-        <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px; margin-bottom: 10px;">
+        <img src="/styles/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px; margin-bottom: 10px;">
       </div>
 
       <section class="sidebar-section section-dados">
         <h3>Dados</h3>
         <nav class="nav-menu">
           <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/arquivos.png" alt=""> Drive Empresa
+            <img src="/styles/icons/arquivos.png" alt=""> Drive Empresa
           </a>
           <a href="https://drive.google.com/drive/folders/1yeL1JVgOQquw33ypUFv9wjMtHKxBd1RL" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/compartilhados.png" alt=""> Relatórios Clientes
+            <img src="/styles/icons/compartilhados.png" alt=""> Relatórios Clientes
           </a>
           <a href="https://drive.google.com/drive/folders/1S6JDVXcLChU-Tm4MESNgDQEz_zPRh5go" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/SegurancaJuridica.png" alt=""> SST e Segurança
+            <img src="/styles/icons/SegurancaJuridica.png" alt=""> SST e Segurança
           </a>
           <a href="https://docs.google.com/spreadsheets/d/10LJopYBh7cSrD_e0gr1iMw_BcVzrcAdreXfTRzvWPps" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt=""> Controle Propostas
+            <img src="/styles/icons/Gastos.png" alt=""> Controle Propostas
           </a>
         </nav>
       </section>
@@ -125,19 +159,19 @@
         <h3>Aplicações</h3>
         <nav class="nav-menu">
           <a href="gestao-despesas.html" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/Gastos.png" alt=""> Gestão de Despesas
+            <img src="/styles/icons/Gastos.png" alt=""> Gestão de Despesas
           </a>
           <a href="https://portal.relevo.eco.br/orcamento/" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/orcamento.png" alt=""> Gestão de Orçamentos
+            <img src="/styles/icons/orcamento.png" alt=""> Gestão de Orçamentos
           </a>
           <a href="https://portal.relevo.eco.br/cronograma/" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/cronograma.png" alt=""> Agenda de Projetos
+            <img src="/styles/icons/cronograma.png" alt=""> Agenda de Projetos
           </a>
           <a href="relatorio_atividades/" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png" alt=""> Relatório Diário
+            <img src="/styles/icons/Tarefas.png" alt=""> Relatório Diário
           </a>
           <a href="inventario/" target="_blank" class="nav-item">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Inventario_equipos.png" alt=""> Inventário
+            <img src="/styles/icons/Inventario_equipos.png" alt=""> Inventário
           </a>
           <a href="https://portal.relevo.eco.br/apps/" target="_blank" class="nav-item">
             <i class="fas fa-mobile-alt" style="font-size: 20px; color: var(--laranja);"></i> PWA Apps
@@ -157,6 +191,8 @@
     </aside>
 
     <main class="main-content">
+      <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+      <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
       <header style="margin-bottom: 40px;">
         <h1 style="font-size: 32px; font-weight: 800; color: var(--relevo-green-900);">Painel de Gestão</h1>
         <p class="muted">Central administrativa Relevo Consultoria Ambiental</p>
@@ -165,7 +201,7 @@
       <section class="indicators-grid">
         <article class="card card--accent card--info">
           <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Tarefas.png" style="width: 40px;" alt="">
+            <img src="/styles/icons/Tarefas.png" style="width: 40px;" alt="">
             <h2 style="margin: 0;">Resumo de Tarefas</h2>
           </div>
           <table style="background: transparent; border: none;">
@@ -178,7 +214,7 @@
 
         <article class="card card--accent">
           <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/agenda.png" style="width: 40px;" alt="">
+            <img src="/styles/icons/agenda.png" style="width: 40px;" alt="">
             <h2 style="margin: 0;">Agenda da Semana</h2>
           </div>
           <div class="item" style="box-shadow: none; background: rgba(0,0,0,0.03);">
@@ -201,5 +237,41 @@
     // Mantenha aqui as suas funções carregarIndicadoresCronograma(),
     // atualizarDashboardTarefas(), etc., do seu arquivo original.
   </script>
+
+  <script>
+    (function () {
+      const btn = document.getElementById("mobileMenuBtn");
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebarOverlay");
+      if (!btn || !sidebar || !overlay) return;
+
+      function openMenu() {
+        sidebar.classList.add("open");
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        btn.setAttribute("aria-expanded", "true");
+      }
+      function closeMenu() {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        btn.setAttribute("aria-expanded", "false");
+      }
+
+      btn.addEventListener("click", function () {
+        if (sidebar.classList.contains("open")) closeMenu();
+        else openMenu();
+      });
+      overlay.addEventListener("click", closeMenu);
+      sidebar.addEventListener("click", function (e) {
+        const a = e.target && e.target.closest ? e.target.closest("a") : null;
+        if (a) closeMenu();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeMenu();
+      });
+    })();
+  </script>
+
 </body>
 </html>
