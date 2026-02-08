@@ -1,0 +1,250 @@
+/* =========================================================
+   RELEVO THEME (Portal Relevo) — v1
+   Objetivo: tema global reutilizável (tokens + componentes).
+   Aplicação segura: adicione class="relevo-theme" no <body>
+   e inclua este CSS após os CSS locais do módulo.
+
+   Convenção:
+   - Tokens em :root
+   - Estilos aplicados sob body.relevo-theme (opt-in)
+   ========================================================= */
+
+:root{
+  /* Fonts */
+  --relevo-font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --relevo-font-title: Montserrat, Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Neutrals */
+  --relevo-bg: #eaf4ee;
+  --relevo-surface: rgba(255,255,255,0.86);
+  --relevo-surface-solid: #ffffff;
+  --relevo-text: #0b2e1b;
+  --relevo-muted: rgba(11,46,27,0.70);
+  --relevo-border: rgba(15, 77, 46, 0.18);
+  --relevo-shadow: 0 14px 36px rgba(0,0,0,0.12);
+
+  /* Brand */
+  --relevo-green-900: #0b2e1b;
+  --relevo-green-700: #0f4d2e;
+  --relevo-green-500: #26c04c;
+  --relevo-teal-500: #00b3a6;
+  --relevo-blue-500: #2f80ed;
+
+  --relevo-gradient: linear-gradient(135deg, #0b2e1b 0%, #0f4d2e 45%, #00b3a6 100%);
+  --relevo-gradient-soft: linear-gradient(180deg, rgba(11,46,27,0.12) 0%, rgba(0,179,166,0.10) 100%);
+
+  /* Semantic */
+  --relevo-ok: #26c04c;
+  --relevo-warn: #f2c94c;
+  --relevo-danger: #e14b4b;
+  --relevo-info: #2f80ed;
+
+  /* Radius / spacing */
+  --relevo-r-sm: 10px;
+  --relevo-r-md: 14px;
+  --relevo-r-lg: 18px;
+
+  --relevo-p-1: 8px;
+  --relevo-p-2: 12px;
+  --relevo-p-3: 16px;
+  --relevo-p-4: 22px;
+}
+
+body.relevo-theme{
+  font-family: var(--relevo-font-sans);
+  color: var(--relevo-text);
+  background: var(--relevo-gradient-soft);
+  min-height: 100vh;
+}
+
+/* Layout helpers */
+body.relevo-theme .relevo-container{
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 28px;
+}
+
+body.relevo-theme h1,
+body.relevo-theme h2,
+body.relevo-theme h3{
+  font-family: var(--relevo-font-title);
+  letter-spacing: 0.2px;
+}
+
+body.relevo-theme h1{ font-size: 28px; margin: 0 0 14px; }
+body.relevo-theme h2{ font-size: 20px; margin: 0 0 12px; }
+body.relevo-theme h3{ font-size: 16px; margin: 0 0 10px; }
+
+body.relevo-theme .muted{ color: var(--relevo-muted); }
+
+/* Cards */
+body.relevo-theme .card{
+  background: var(--relevo-surface);
+  border: 1px solid var(--relevo-border);
+  border-radius: var(--relevo-r-lg);
+  box-shadow: var(--relevo-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: var(--relevo-p-4);
+}
+
+body.relevo-theme .card--flat{
+  box-shadow: 0 8px 22px rgba(0,0,0,0.10);
+}
+
+body.relevo-theme .card--accent{
+  position: relative;
+  overflow: hidden;
+}
+
+body.relevo-theme .card--accent::before{
+  content:"";
+  position:absolute;
+  left:0; top:0; right:0;
+  height: 6px;
+  background: var(--relevo-gradient);
+}
+
+body.relevo-theme .card--ok::before{ background: linear-gradient(90deg, var(--relevo-ok), rgba(38,192,76,0.35)); }
+body.relevo-theme .card--warn::before{ background: linear-gradient(90deg, var(--relevo-warn), rgba(242,201,76,0.35)); }
+body.relevo-theme .card--danger::before{ background: linear-gradient(90deg, var(--relevo-danger), rgba(225,75,75,0.35)); }
+body.relevo-theme .card--info::before{ background: linear-gradient(90deg, var(--relevo-info), rgba(47,128,237,0.35)); }
+
+/* Buttons */
+body.relevo-theme .btn{
+  border: 1px solid var(--relevo-border);
+  background: #fff;
+  color: var(--relevo-text);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+  user-select: none;
+}
+
+body.relevo-theme .btn:hover{
+  border-color: rgba(15,77,46,0.35);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
+body.relevo-theme .btn:active{ transform: translateY(0px); }
+
+body.relevo-theme .btn:disabled{
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+body.relevo-theme .btn-primary{
+  border: none;
+  color: #fff;
+  background: var(--relevo-gradient);
+}
+
+body.relevo-theme .btn-danger{
+  border: 1px solid rgba(225,75,75,0.45);
+  color: #8b1f1f;
+}
+
+body.relevo-theme .btn-ghost{
+  background: transparent;
+}
+
+/* Inputs */
+body.relevo-theme input,
+body.relevo-theme select,
+body.relevo-theme textarea{
+  font-family: var(--relevo-font-sans);
+  border: 1px solid var(--relevo-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  background: rgba(255,255,255,0.92);
+  color: var(--relevo-text);
+}
+
+body.relevo-theme textarea{ min-height: 110px; resize: vertical; }
+
+body.relevo-theme input:focus,
+body.relevo-theme select:focus,
+body.relevo-theme textarea:focus{
+  border-color: rgba(38,192,76,0.65);
+  box-shadow: 0 0 0 4px rgba(38,192,76,0.18);
+}
+
+/* Badges */
+body.relevo-theme .badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  border: 1px solid var(--relevo-border);
+  background: rgba(255,255,255,0.85);
+}
+
+body.relevo-theme .badge.ok{ border-color: rgba(38,192,76,0.45); color: var(--relevo-green-700); }
+body.relevo-theme .badge.nok{ border-color: rgba(225,75,75,0.45); color: #8b1f1f; }
+body.relevo-theme .badge.warn{ border-color: rgba(242,201,76,0.55); color: #7a5a00; }
+body.relevo-theme .badge.info{ border-color: rgba(47,128,237,0.55); color: #0b3a7a; }
+
+/* Tables (safe default) */
+body.relevo-theme table{
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: var(--relevo-r-md);
+  overflow: hidden;
+  border: 1px solid var(--relevo-border);
+}
+
+body.relevo-theme th, body.relevo-theme td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(15,77,46,0.10);
+  text-align: left;
+}
+
+body.relevo-theme th{
+  background: rgba(11,46,27,0.06);
+  font-family: var(--relevo-font-title);
+  font-weight: 900;
+}
+
+/* Simple “item list” (compatível com Relatório/Despesas) */
+body.relevo-theme .item{
+  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(15,77,46,0.14);
+  border-radius: var(--relevo-r-lg);
+  padding: 14px 16px;
+  margin: 10px 0;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+}
+
+body.relevo-theme .row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+/* Tabs (optional) */
+body.relevo-theme .tab-btn{
+  border: 1px solid var(--relevo-border);
+  background: rgba(255,255,255,0.80);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+body.relevo-theme .tab-btn.active{
+  background: var(--relevo-gradient);
+  color: #fff;
+  border: none;
+}
+
+body.relevo-theme .hidden{ display:none !important; }
