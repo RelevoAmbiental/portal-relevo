@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clientes | Portal Relevo</title>
+  <title>Área do Cliente | Portal Relevo</title>
 
-  <!-- Favicons / PWA -->
+  <!-- Favicons / PWA (padrão decidido) -->
   <link rel="icon" href="/assets/icons/favicon.ico">
   <link rel="icon" sizes="32x32" href="/assets/icons/favicon-32.png">
   <link rel="icon" sizes="16x16" href="/assets/icons/favicon-16.png">
@@ -14,626 +14,414 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#0b2e1b">
 
-  <!-- Fonte -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Fontes (mantém o padrão do portal) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- CSS global do portal -->
+  <!-- CSS global + tema (padrão decidido) -->
   <link rel="stylesheet" href="/styles/global.css" />
   <link rel="stylesheet" href="/styles/relevo-theme.css" />
 
   <style>
-    /* =========================
-       LAYOUT (apenas estrutura)
-       ========================= */
-    .dashboard-wrapper{
-      display:grid;
-      grid-template-columns:280px 1fr;
-      min-height:100vh;
-    }
+    /* CSS LOCAL (somente estrutura/responsividade) */
 
-    /* Sidebar */
-    .sidebar{
-      background: rgba(255,255,255,0.10);
-      backdrop-filter: blur(10px);
-      padding: 24px 18px;
-      border-right: 1px solid var(--relevo-border);
+    .client-topbar{
       position: sticky;
       top: 0;
-      height: 100vh;
-      overflow: auto;
+      z-index: 30;
+      backdrop-filter: blur(10px);
+      background: rgba(234,244,238,0.75);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
 
-    .sidebar .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:18px;
-    }
-    .sidebar .brand img{ width:38px; height:38px; }
-    .sidebar .brand .title{
-      font-weight:700;
-      letter-spacing:.2px;
-      line-height:1.1;
-    }
-    .sidebar .brand .subtitle{
-      font-size:12px;
-      opacity:.85;
-      margin-top:2px;
+    .client-topbar-inner{
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    .nav{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top: 10px;
+    .brand{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
     }
-    .nav a{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      text-decoration:none;
+
+    .brand img{
+      height: 44px;
+      width: auto;
+      display: block;
+    }
+
+    .brand-meta{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-meta .title{
+      font-family: var(--relevo-font-title);
+      font-weight: 800;
       color: var(--relevo-text);
-      background: var(--relevo-surface);
-      border: 1px solid var(--relevo-border);
-      transition: transform .12s ease, background .12s ease;
+      font-size: 16px;
+      margin: 0;
     }
-    .nav a:hover{ transform: translateY(-1px); background: var(--relevo-surface-solid); }
-    .nav a.active{ background: var(--relevo-surface-solid); border-color: rgba(11,46,27,0.45); }
 
-    .nav a img{ width:18px; height:18px; opacity:.95; }
+    .brand-meta .subtitle{
+      font-size: 12px;
+      color: var(--relevo-muted);
+      margin: 2px 0 0;
+    }
 
-    /* Conteúdo */
-    .main{
-      padding: 26px 26px 34px 26px;
+    .top-actions{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-pill{
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--relevo-border);
+      background: rgba(255,255,255,0.72);
+      color: var(--relevo-text);
+      white-space: nowrap;
+      max-width: 46vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .page-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .page-head h1{
-      margin:0;
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .page-head p{
-      margin: 6px 0 0 0;
-      opacity: .9;
-      max-width: 760px;
-    }
-
-    /* “Centro da página”: limita largura e centraliza */
-    .center-wrap{
-      max-width: 1120px;
-      margin: 0 auto;
-    }
-
-    /* Seletor (apenas gestão) */
-    .toolbar{
-      display:flex;
-      flex-wrap: wrap;
-      align-items:center;
+      display: flex;
+      align-items: flex-end;
       justify-content: space-between;
-      gap: 10px;
-      margin: 16px 0 18px;
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.10);
-    }
-    .toolbar .label{
-      font-weight: 700;
-      opacity: .95;
-    }
-    .toolbar select{
-      min-width: 280px;
-      max-width: 100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.10);
-      color: var(--relevo-text);
-      outline: none;
+      gap: 16px;
+      margin-bottom: 14px;
     }
 
-    /* Cards */
-    .grid{
-      display:grid;
+    .page-head .left h1{
+      margin-bottom: 6px;
+    }
+
+    .page-head .right{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .select-wrap{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 280px;
+    }
+    .select-wrap label{
+      font-weight: 800;
+      color: var(--relevo-text);
+      font-family: var(--relevo-font-title);
+      font-size: 14px;
+    }
+
+    .grid-2{
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      align-items: stretch;
+      margin-top: 14px;
     }
 
-    .card{
-      border-radius: 18px;
-      padding: 16px;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.10);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
-    }
-    .card h2{
-      margin: 0 0 6px 0;
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .card p{
-      margin: 0 0 10px 0;
-      opacity: .92;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--relevo-text);
-      text-decoration: none;
-      font-weight: 700;
-      width: fit-content;
-    }
-    .pill img{ width:18px; height:18px; }
-
-    /* Mapa ocupa a largura toda */
-    .map-card{
-      grid-column: 1 / -1;
-      padding: 14px;
-    }
     .map-frame{
       width: 100%;
-      height: 560px;
+      height: 520px;
       border: 0;
       border-radius: 14px;
-      background: rgba(0,0,0,0.12);
     }
 
-    .muted{
-      opacity: .82;
-      font-size: 13px;
+    .card .card-title{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
-    /* Mobile */
-    .mobile-top-bar{
-      display:none;
-      align-items:center;
-      justify-content:space-between;
-      padding: 14px 14px;
-      background: rgba(0,0,0,0.20);
-      border-bottom: 1px solid rgba(255,255,255,0.10);
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      backdrop-filter: blur(12px);
+    .link-row{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
     }
-    .hamburger{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.10);
-      cursor: pointer;
-    }
-    .hamburger img{ width:20px; height:20px; }
 
-    .sidebar-overlay{
-      display:none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 45;
+    .note{
+      font-size: 12px;
+      color: var(--relevo-muted);
+      margin-top: 10px;
+    }
+
+    .alert{
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(170, 72, 72, 0.28);
+      background: rgba(255, 235, 235, 0.6);
+      color: #5a1515;
+      font-weight: 700;
     }
 
     @media (max-width: 900px){
-      .dashboard-wrapper{ grid-template-columns: 1fr; }
-      .mobile-top-bar{ display:flex; }
-
-      .sidebar{
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 290px;
-        z-index: 50;
-        transform: translateX(-105%);
-        transition: transform .18s ease;
-        height: 100vh;
+      .brand-meta{ display: none; }
+      .select-wrap{ min-width: 0; width: 100%; }
+      .page-head{
+        flex-direction: column;
+        align-items: stretch;
       }
-      .sidebar.active{ transform: translateX(0); }
-
-      .sidebar-overlay.active{ display:block; }
-
-      .main{ padding: 18px 14px 26px 14px; }
-      .grid{ grid-template-columns: 1fr; }
+      .grid-2{ grid-template-columns: 1fr; }
       .map-frame{ height: 420px; }
-      .toolbar select{ min-width: 220px; flex:1; }
+      .user-pill{ display: none; }
     }
   </style>
-
-  <!-- Firebase compat (carregado no portal em outras páginas também) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-
-  <!-- Guard/Session do portal -->
-  <script src="/scripts/firebase-init-guard.js"></script>
-  <script src="/scripts/expose-session.js"></script>
 </head>
 
 <body class="relevo-theme">
-  <!-- Top bar mobile -->
-  <div class="mobile-top-bar">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <img src="/assets/icons/icon-192.png" alt="Relevo" style="width:28px;height:28px;border-radius:8px;">
-      <div style="line-height:1;">
-        <div style="font-weight:800;">Portal Relevo</div>
-        <div style="font-size:12px;opacity:.85;">Clientes</div>
-      </div>
-    </div>
-    <button class="hamburger" id="btnMenu" aria-label="Abrir menu">
-      <img src="/styles/icons/menu.png" alt="Menu">
-    </button>
-  </div>
-
-  <div class="dashboard-wrapper">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+  <!-- Topbar (sem sidebar nesta página) -->
+  <header class="client-topbar">
+    <div class="client-topbar-inner">
       <div class="brand">
-        <img src="/assets/icons/icon-192.png" alt="Relevo">
-        <div>
-          <div class="title">Portal Relevo</div>
-          <div class="subtitle">Central de aplicações</div>
+        <!-- Ícone/Logo LOCAL (sem links externos) -->
+        <img src="/styles/icons/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" />
+        <div class="brand-meta">
+          <p class="title">Portal Relevo</p>
+          <p class="subtitle">Área do Cliente</p>
         </div>
       </div>
 
-      <nav class="nav">
-        <a href="/index.html">
-          <img src="/styles/icons/home.png" alt="Home"> Home
-        </a>
-        <a href="/gestao.html">
-          <img src="/styles/icons/gestao.png" alt="Gestão"> Gestão
-        </a>
-        <a href="/clientes.html" class="active">
-          <img src="/styles/icons/clientes.png" alt="Clientes"> Clientes
-        </a>
-        <a href="/colaboradores.html">
-          <img src="/styles/icons/colaboradores.png" alt="Colaboradores"> Colaboradores
-        </a>
-        <a href="/gestao-despesas.html">
-          <img src="/styles/icons/despesas.png" alt="Despesas"> Despesas
-        </a>
-        <a href="/inventario/index.html">
-          <img src="/styles/icons/inventario.png" alt="Inventário"> Inventário
-        </a>
-        <a href="/relatorio_atividades/index.html">
-          <img src="/styles/icons/relatorio.png" alt="Relatório"> Relatório diário
-        </a>
-        <a href="/orcamento/index.html">
-          <img src="/styles/icons/orcamento.png" alt="Orçamentos"> Orçamentos
-        </a>
-        <a href="/change-password.html">
-          <img src="/styles/icons/key.png" alt="Senha"> Trocar senha
-        </a>
-      </nav>
-
-      <div style="margin-top:16px" class="muted" id="userInfo">Carregando usuário…</div>
-    </aside>
-
-    <!-- Conteúdo -->
-    <main class="main"><div class="relevo-container">
-      <div class="center-wrap">
-        <header class="page-head">
-          <div>
-            <h1>Área do Cliente</h1>
-            <p>
-              Acesso rápido ao material do projeto (pasta do cliente, pasta padrão da Relevo) e ao mapa do empreendimento.
-              <span class="muted">Cada cliente vê apenas o próprio conteúdo; a gestão enxerga tudo.</span>
-            </p>
-          </div>
-        </header>
-
-        <!-- Barra de seleção (somente gestão) -->
-        <section class="toolbar" id="toolbarGestao" style="display:none;">
-          <div class="label">Selecionar cliente</div>
-          <select id="selectCliente" aria-label="Selecionar cliente"></select>
-        </section>
-
-        <!-- Cards -->
-        <section class="grid" aria-live="polite">
-          <div class="card">
-            <h2>Pasta de Drive do Cliente</h2>
-            <p class="muted">Documentos, entregáveis e arquivos compartilhados com o cliente.</p>
-            <a class="pill" id="linkDriveCliente" href="#" target="_blank" rel="noopener">
-              <img src="/styles/icons/drive.png" alt=""> Abrir pasta
-            </a>
-          </div>
-
-          <div class="card">
-            <h2>Pasta de Dados da Relevo</h2>
-            <p class="muted">Pasta padrão interna (base para todos os clientes).</p>
-            <a class="pill" id="linkDriveRelevo" href="#" target="_blank" rel="noopener">
-              <img src="/styles/icons/folder.png" alt=""> Abrir pasta padrão
-            </a>
-          </div>
-
-          <div class="card map-card">
-            <h2>Mapa do Projeto</h2>
-            <p class="muted">Iframe editável manualmente (um por cliente).</p>
-            <iframe
-              id="mapIframe"
-              class="map-frame"
-              src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-            ></iframe>
-          </div>
-        </section>
-
-        <div class="muted" style="margin-top:14px" id="status">Pronto.</div>
+      <div class="top-actions">
+        <div id="userPill" class="user-pill" title="Usuário logado">Carregando usuário…</div>
+        <button id="btnLogout" class="btn" type="button">Sair</button>
       </div>
-    </div></main>
-  </div>
+    </div>
+  </header>
 
-  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <main class="relevo-container">
+    <div class="page-head">
+      <div class="left">
+        <h1>Área do Cliente</h1>
+        <p class="muted" style="margin:0;">
+          Acesso rápido ao material do projeto (pasta do cliente, pasta padrão da Relevo) e ao mapa do empreendimento.
+        </p>
+      </div>
+
+      <!-- Só aparece para gestão -->
+      <div class="right" id="adminChooser" style="display:none;">
+        <div class="select-wrap">
+          <label for="clienteSelect">Selecionar cliente (gestão)</label>
+          <select id="clienteSelect" aria-label="Selecionar cliente"></select>
+        </div>
+      </div>
+    </div>
+
+    <div id="noClient" class="alert" style="display:none;">
+      Nenhum cliente vinculado a este login. Se você é da gestão, verifique seu perfil. Se você é cliente, solicite o vínculo do seu e-mail/UID ao projeto.
+    </div>
+
+    <section class="grid-2" id="cardsSection" style="display:none;">
+      <div class="card">
+        <div class="card-title">
+          <h2 style="margin:0;">Pasta de Drive do Cliente</h2>
+        </div>
+        <p class="muted" style="margin:0;">
+          Documentos, entregáveis e arquivos compartilhados com o cliente.
+        </p>
+
+        <div class="link-row">
+          <a id="btnDriveCliente" class="btn" href="#" target="_blank" rel="noopener">Abrir pasta</a>
+        </div>
+        <div class="note" id="driveClienteHint"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <h2 style="margin:0;">Pasta de Dados da Relevo</h2>
+        </div>
+        <p class="muted" style="margin:0;">
+          Pasta padrão interna (base para todos os clientes).
+        </p>
+
+        <div class="link-row">
+          <a id="btnDriveRelevo" class="btn" href="#" target="_blank" rel="noopener">Abrir pasta padrão</a>
+        </div>
+        <div class="note">Esse link é fixo (troca em um lugar só no código).</div>
+      </div>
+    </section>
+
+    <section class="card" id="mapSection" style="display:none; margin-top:16px;">
+      <div class="card-title">
+        <h2 style="margin:0;">Mapa do Projeto</h2>
+      </div>
+      <p class="muted" style="margin-top:0;">
+        Iframe editável manualmente (um por cliente).
+      </p>
+
+      <div id="mapWrap" style="margin-top:12px;">
+        <!-- iframe entra aqui -->
+      </div>
+    </section>
+
+    <p class="note" style="margin-top:14px;">
+      Dica prática: a gestão pode manter “Cliente A/B/C” como placeholders e só trocar os links quando necessário. Sem framework, sem mágica, sem susto.
+    </p>
+  </main>
+
+  <!-- Firebase (compat) + Guard do Portal -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="/scripts/firebase-init-guard.js"></script>
+  <script src="/scripts/expose-session.js"></script>
 
   <script>
-    // ==========================================================
-    // CONFIG (ajuste só aqui quando precisar)
-    // ==========================================================
-    // Pasta padrão interna da Relevo (mesma para todos os clientes)
-    const RELEVO_PASTA_PADRAO_URL = "https://drive.google.com/drive/folders/COLE_AQUI_O_ID_DA_PASTA_PADRAO";
+    // ======================================================================
+    //  CLIENTES — SEM SIDEBAR (área focada)
+    //  Regras:
+    //  - Gestão: pode escolher Cliente A/B/C
+    //  - Cliente: vê somente o vínculo pelo e-mail (placeholder editável)
+    // ======================================================================
 
-    // Coleção Firestore sugerida:
-    // /clientes/{docId} com campos (exemplos):
-    //   nome: "Cliente X"
-    //   driveUrl: "https://drive.google.com/drive/folders/..."
-    //   mapaSrc: "https://www.google.com/maps/d/embed?mid=...."
-    //   usuarios: ["uid1","uid2"]  (uids autorizados)
-    //   email: "cliente@dominio.com" (fallback opcional)
-    //   uid: "uidDoCliente"         (fallback opcional)
-    const COLLECTION_CLIENTES = "clientes";
+    // ✅ Padrão: pasta interna da Relevo (igual para todos)
+    const DRIVE_RELEVO_PADRAO = "https://drive.google.com/drive/folders/SEU_ID_AQUI";
 
-    // ==========================================================
-    // MENU MOBILE (defensivo, sem framework)
-    // ==========================================================
-    (function () {
-      const btn = document.getElementById("btnMenu");
-      const sidebar = document.getElementById("sidebar");
-      const overlay = document.getElementById("sidebarOverlay");
-
-      function openMenu() {
-        if (!sidebar || !overlay) return;
-        sidebar.classList.add("active");
-        overlay.classList.add("active");
-        overlay.setAttribute("aria-hidden", "false");
+    // ✅ Clientes pré-programados (você só substitui depois)
+    // Dica: preencha allowedEmails para “travar” o acesso por e-mail.
+    const CLIENTES = [
+      {
+        id: "cliente-a",
+        nome: "Cliente A",
+        driveUrl: "https://drive.google.com/drive/folders/SEU_ID_CLIENTE_A",
+        mapaIframeHtml: '<iframe src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F" class="map-frame" loading="lazy"></iframe>',
+        allowedEmails: ["clientea@exemplo.com"]
+      },
+      {
+        id: "cliente-b",
+        nome: "Cliente B",
+        driveUrl: "https://drive.google.com/drive/folders/SEU_ID_CLIENTE_B",
+        mapaIframeHtml: '<iframe src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F" class="map-frame" loading="lazy"></iframe>',
+        allowedEmails: ["clienteb@exemplo.com"]
+      },
+      {
+        id: "cliente-c",
+        nome: "Cliente C",
+        driveUrl: "https://drive.google.com/drive/folders/SEU_ID_CLIENTE_C",
+        mapaIframeHtml: '<iframe src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F" class="map-frame" loading="lazy"></iframe>',
+        allowedEmails: ["clientec@exemplo.com"]
       }
-      function closeMenu() {
-        if (!sidebar || !overlay) return;
-        sidebar.classList.remove("active");
-        overlay.classList.remove("active");
-        overlay.setAttribute("aria-hidden", "true");
-      }
+    ];
 
-      if (btn) btn.addEventListener("click", function () {
-        if (!sidebar) return;
-        if (sidebar.classList.contains("active")) closeMenu();
-        else openMenu();
-      });
-
-      if (overlay) overlay.addEventListener("click", closeMenu);
-
-      // desktop: garante fechado
-      function enforceDesktop() {
-        if (window.innerWidth > 900) closeMenu();
-      }
-      window.addEventListener("resize", enforceDesktop);
-      enforceDesktop();
-    })();
-
-    // ==========================================================
-    // HELPERS Firebase (compat do portal)
-    // ==========================================================
-    function getFirestore() { return window.__RELEVO_DB__ || (window.RelevoFirebase && window.RelevoFirebase.db) || null; }
-    function getPortalUser() { return window.__RELEVO_USER__ || null; }
-
-    function setStatus(msg) {
-      const el = document.getElementById("status");
-      if (!el) return;
-      el.textContent = msg || "";
+    // Critério simples para "gestão"
+    // - Se quiser, você pode endurecer depois via Firestore (/users/{uid}.role).
+    function isGestao(user){
+      if(!user) return false;
+      const email = (user.email || "").toLowerCase();
+      return email.endsWith("@relevo.eco.br");
     }
 
-    function setUserInfo(msg) {
-      const el = document.getElementById("userInfo");
-      if (!el) return;
-      el.textContent = msg || "";
-    }
+    function $(id){ return document.getElementById(id); }
 
-    // Perfil do usuário: /users/{uid} campo tipo/role/perfil (gestao/colaborador/cliente)
-    let __USER_TIPO__ = "colaborador"; // default seguro
-    async function carregarUserTipo() {
-      const db = getFirestore();
-      const u = getPortalUser();
-
-      if (!db || !u || !u.uid) return __USER_TIPO__;
-
-      try {
-        const doc = await db.collection("users").doc(u.uid).get();
-        const data = doc && doc.exists ? doc.data() : null;
-        const tipo = (data && (data.tipo || data.role || data.perfil)) ? String(data.tipo || data.role || data.perfil) : "";
-        __USER_TIPO__ = (tipo || "colaborador").toLowerCase();
-      } catch (e) {
-        __USER_TIPO__ = "colaborador";
-      }
-
-      return __USER_TIPO__;
-    }
-
-    // ==========================================================
-    // CARREGAMENTO DE CLIENTES (controle por perfil)
-    // ==========================================================
-    const elToolbar = document.getElementById("toolbarGestao");
-    const elSelect = document.getElementById("selectCliente");
-    const elLinkCliente = document.getElementById("linkDriveCliente");
-    const elLinkRelevo = document.getElementById("linkDriveRelevo");
-    const elIframe = document.getElementById("mapIframe");
-
-    // sempre seta a pasta padrão da Relevo
-    if (elLinkRelevo) elLinkRelevo.href = RELEVO_PASTA_PADRAO_URL;
-
-    function renderCliente(data) {
-      const nome = (data && (data.nome || data.titulo || data.cliente)) ? String(data.nome || data.titulo || data.cliente) : "Cliente";
-      const driveUrl = (data && (data.driveUrl || data.pastaDrive || data.pastaCliente)) ? String(data.driveUrl || data.pastaDrive || data.pastaCliente) : "#";
-      const mapaSrc = (data && (data.mapaSrc || data.mapaUrl || data.iframeSrc)) ? String(data.mapaSrc || data.mapaUrl || data.iframeSrc) : null;
-
-      document.title = nome + " | Portal Relevo";
-      if (elLinkCliente) elLinkCliente.href = driveUrl;
-
-      if (elIframe) {
-        if (mapaSrc) elIframe.src = mapaSrc;
-        // se não tiver, mantém o default do HTML (evita quebrar)
-      }
-
-      setStatus("Cliente carregado: " + nome);
-    }
-
-    async function fetchMeuCliente(db, u) {
-      // Estratégia 1: usuarios array-contains uid
-      try {
-        const q1 = await db.collection(COLLECTION_CLIENTES).where("usuarios", "array-contains", u.uid).limit(1).get();
-        if (!q1.empty) return q1.docs[0].data();
-      } catch(e) {}
-
-      // Estratégia 2: uid == user.uid
-      try {
-        const q2 = await db.collection(COLLECTION_CLIENTES).where("uid", "==", u.uid).limit(1).get();
-        if (!q2.empty) return q2.docs[0].data();
-      } catch(e) {}
-
-      // Estratégia 3: email == user.email
-      try {
-        if (u.email) {
-          const q3 = await db.collection(COLLECTION_CLIENTES).where("email", "==", u.email).limit(1).get();
-          if (!q3.empty) return q3.docs[0].data();
-        }
-      } catch(e) {}
-
-      return null;
-    }
-
-    async function fetchTodosClientes(db) {
-      // Tenta ordenar por nome (se não existir índice/campo, cai no get simples)
-      try {
-        const qs = await db.collection(COLLECTION_CLIENTES).orderBy("nome").get();
-        return qs.docs.map(d => ({ id: d.id, data: d.data() }));
-      } catch(e) {
-        const qs2 = await db.collection(COLLECTION_CLIENTES).get();
-        return qs2.docs.map(d => ({ id: d.id, data: d.data() }));
+    function setHrefSafe(el, url){
+      if(!el) return;
+      if(url && typeof url === "string" && url.startsWith("http")){
+        el.href = url;
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+      } else {
+        el.href = "#";
+        el.style.opacity = "0.5";
+        el.style.pointerEvents = "none";
       }
     }
 
-    function fillSelectClientes(list) {
-      if (!elSelect) return;
-      elSelect.innerHTML = "";
+    function renderCliente(cliente){
+      $("noClient").style.display = "none";
+      $("cardsSection").style.display = "grid";
+      $("mapSection").style.display = "block";
 
-      const opt0 = document.createElement("option");
-      opt0.value = "";
-      opt0.textContent = "Selecione...";
-      opt0.disabled = true;
-      opt0.selected = true;
-      elSelect.appendChild(opt0);
+      setHrefSafe($("btnDriveCliente"), cliente?.driveUrl);
+      $("driveClienteHint").textContent = cliente?.driveUrl ? "" : "Link não configurado para este cliente.";
+      setHrefSafe($("btnDriveRelevo"), DRIVE_RELEVO_PADRAO);
 
-      for (let i = 0; i < list.length; i++) {
-        const it = list[i];
-        const nome = (it.data && it.data.nome) ? String(it.data.nome) : ("Cliente " + (i+1));
+      const mapWrap = $("mapWrap");
+      mapWrap.innerHTML = cliente?.mapaIframeHtml || '<div class="alert">Mapa não configurado para este cliente.</div>';
+    }
+
+    function showNoClient(){
+      $("cardsSection").style.display = "none";
+      $("mapSection").style.display = "none";
+      $("noClient").style.display = "block";
+    }
+
+    function findClienteForUser(user){
+      const email = (user?.email || "").toLowerCase();
+      // procura por e-mail liberado (placeholder)
+      const match = CLIENTES.find(c => (c.allowedEmails || []).map(e => e.toLowerCase()).includes(email));
+      return match || null;
+    }
+
+    function initAdminChooser(){
+      const select = $("clienteSelect");
+      select.innerHTML = "";
+      CLIENTES.forEach(c => {
         const opt = document.createElement("option");
-        opt.value = it.id;
-        opt.textContent = nome;
-        elSelect.appendChild(opt);
-      }
-    }
-
-    async function boot() {
-      setStatus("Carregando…");
-
-      // Aguarda sessão exposta pelo portal (defensivo)
-      const waitUser = () => new Promise((resolve) => {
-        const t0 = Date.now();
-        const timer = setInterval(() => {
-          const u = getPortalUser();
-          if (u && u.uid) { clearInterval(timer); return resolve(u); }
-          if (Date.now() - t0 > 4000) { clearInterval(timer); return resolve(null); }
-        }, 60);
+        opt.value = c.id;
+        opt.textContent = c.nome;
+        select.appendChild(opt);
       });
 
-      const u = await waitUser();
-      const db = getFirestore();
+      // default
+      renderCliente(CLIENTES[0]);
 
-      if (!u || !u.uid) {
-        setUserInfo("⚠️ Faça login para acessar.");
-        setStatus("Sem usuário logado.");
-        return;
-      }
-      setUserInfo("Logado: " + (u.email || u.uid));
-
-      if (!db) {
-        setStatus("❌ Firestore indisponível (verifique /scripts/firebase-init-guard.js).");
-        return;
-      }
-
-      const tipo = await carregarUserTipo();
-
-      // Gestão vê tudo (com seletor)
-      if (tipo === "gestao" || tipo === "admin" || tipo === "gestor") {
-        if (elToolbar) elToolbar.style.display = "flex";
-        setStatus("Modo gestão: carregando lista completa…");
-
-        const list = await fetchTodosClientes(db);
-        if (!list || list.length === 0) {
-          setStatus("Nenhum cliente cadastrado em /" + COLLECTION_CLIENTES + ".");
-          return;
-        }
-
-        fillSelectClientes(list);
-
-        // auto seleciona o primeiro para já mostrar algo
-        const first = list[0];
-        renderCliente(first.data);
-        if (elSelect) elSelect.value = first.id;
-
-        if (elSelect) {
-          elSelect.addEventListener("change", function () {
-            const id = elSelect.value;
-            const found = list.find(x => x.id === id);
-            if (found) renderCliente(found.data);
-          });
-        }
-        return;
-      }
-
-      // Cliente/colaborador: vê só o próprio
-      setStatus("Carregando seu cliente…");
-      const data = await fetchMeuCliente(db, u);
-
-      if (!data) {
-        setStatus("⚠️ Nenhum cliente vinculado a este usuário. Cadastre na coleção /" + COLLECTION_CLIENTES + ".");
-        return;
-      }
-
-      renderCliente(data);
+      select.addEventListener("change", () => {
+        const chosen = CLIENTES.find(c => c.id === select.value);
+        if(chosen) renderCliente(chosen);
+      });
     }
 
-    boot();
+    // Logout
+    $("btnLogout").addEventListener("click", async () => {
+      try{
+        await firebase.auth().signOut();
+        // volta para home do portal (ajuste se preferir outra rota)
+        window.location.href = "/index.html";
+      }catch(err){
+        console.error("Erro ao sair:", err);
+        alert("Não foi possível sair agora. Tente novamente.");
+      }
+    });
+
+    // Auth bootstrap
+    firebase.auth().onAuthStateChanged((user) => {
+      // Se não logou, joga para home/login (portal decide)
+      if(!user){
+        $("userPill").textContent = "Não autenticado";
+        // se existir fluxo de login separado, ajuste aqui
+        return;
+      }
+
+      $("userPill").textContent = user.email || user.uid;
+
+      if(isGestao(user)){
+        $("adminChooser").style.display = "flex";
+        initAdminChooser();
+      } else {
+        $("adminChooser").style.display = "none";
+        const cliente = findClienteForUser(user);
+        if(cliente) renderCliente(cliente);
+        else showNoClient();
+      }
+    });
   </script>
 </body>
 </html>
