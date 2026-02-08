@@ -33,10 +33,10 @@
 
     /* Sidebar */
     .sidebar{
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.10);
       backdrop-filter: blur(10px);
       padding: 24px 18px;
-      border-right: 1px solid rgba(255,255,255,0.12);
+      border-right: 1px solid var(--relevo-border);
       position: sticky;
       top: 0;
       height: 100vh;
@@ -74,13 +74,13 @@
       padding: 10px 12px;
       border-radius: 12px;
       text-decoration:none;
-      color: rgba(255,255,255,0.92);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--relevo-text);
+      background: var(--relevo-surface);
+      border: 1px solid var(--relevo-border);
       transition: transform .12s ease, background .12s ease;
     }
-    .nav a:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.10); }
-    .nav a.active{ background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.18); }
+    .nav a:hover{ transform: translateY(-1px); background: var(--relevo-surface-solid); }
+    .nav a.active{ background: var(--relevo-surface-solid); border-color: rgba(11,46,27,0.45); }
 
     .nav a img{ width:18px; height:18px; opacity:.95; }
 
@@ -124,7 +124,7 @@
       margin: 16px 0 18px;
       padding: 14px;
       border-radius: 16px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.10);
       border: 1px solid rgba(255,255,255,0.10);
     }
     .toolbar .label{
@@ -138,7 +138,7 @@
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.18);
       background: rgba(255,255,255,0.10);
-      color: rgba(255,255,255,0.92);
+      color: var(--relevo-text);
       outline: none;
     }
 
@@ -153,7 +153,7 @@
     .card{
       border-radius: 18px;
       padding: 16px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.10);
       border: 1px solid rgba(255,255,255,0.10);
       box-shadow: 0 12px 28px rgba(0,0,0,0.18);
     }
@@ -176,7 +176,7 @@
       border-radius: 14px;
       background: rgba(255,255,255,0.10);
       border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.92);
+      color: var(--relevo-text);
       text-decoration: none;
       font-weight: 700;
       width: fit-content;
@@ -222,7 +222,7 @@
       height: 44px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.10);
       cursor: pointer;
     }
     .hamburger img{ width:20px; height:20px; }
@@ -271,7 +271,7 @@
   <script src="/scripts/expose-session.js"></script>
 </head>
 
-<body class="relevo-bg">
+<body class="relevo-theme">
   <!-- Top bar mobile -->
   <div class="mobile-top-bar">
     <div style="display:flex; align-items:center; gap:10px;">
@@ -331,7 +331,7 @@
     </aside>
 
     <!-- Conteúdo -->
-    <main class="main">
+    <main class="main"><div class="relevo-container">
       <div class="center-wrap">
         <header class="page-head">
           <div>
@@ -382,7 +382,7 @@
 
         <div class="muted" style="margin-top:14px" id="status">Pronto.</div>
       </div>
-    </main>
+    </div></main>
   </div>
 
   <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
