@@ -161,10 +161,7 @@
           <button class="btn btn-primary" id="btnVerGraficos" type="button" style="flex:1;">Gráficos</button>
           <button class="btn btn-secondary" id="btnVerLista" type="button" style="flex:1;">Lista</button>
         </div>
-
-        <ul class="mini-list" id="miniLista"><li class="mini-item">Carregando despesas…</li></ul>
-        <p class="muted" style="font-size:12px;margin:10px 2px 0;">Clique em uma despesa para abrir a <strong>Lista</strong> já posicionada.</p>
-      </section>
+</section>
 
       <div style="margin-top:auto; padding-top:8px; display:flex; flex-direction:column; gap:10px;">
         <a class="btn btn-primary" href="/despesas" target="_blank" rel="noopener" style="justify-content:center;">Lançar despesa</a>
@@ -301,26 +298,6 @@
       $('kpiTotalGasto').textContent=formatarMoeda(total);
       $('kpiDespesasMes').textContent=String(despesasMes);
       $('kpiTotalAprovado').textContent=formatarMoeda(totalAprovado);
-    }
-
-    function atualizarMiniLista(){
-      const ul=$('miniLista'); if(!ul) return;
-      const dados=getDadosAtivos().slice(0,20);
-      if(!dados.length){ ul.innerHTML='<li class="mini-item">Nenhuma despesa encontrada.</li>'; return; }
-      ul.innerHTML=dados.map(d=>{
-        const proj=d.projeto||'-'; const val=formatarMoeda(d.valor||0); const data=formatarData(d.data);
-        const func=d.funcionario||'-'; const status=d.status||'pendente';
-        return `<li class="mini-item" data-id="${escapeHtml(d.id)}"><div class="top"><div class="proj" title="${escapeHtml(proj)}">${escapeHtml(proj)}</div><div class="valor">${escapeHtml(val)}</div></div><div class="meta"><span>${escapeHtml(data)}</span><span title="${escapeHtml(func)}">${escapeHtml(func)}</span><span>${escapeHtml(status)}</span></div></li>`;
-      }).join('');
-      ul.querySelectorAll('.mini-item[data-id]').forEach(li=>{
-        li.addEventListener('click', ()=>{ setView('lista'); requestAnimationFrame(()=>scrollToRow(li.getAttribute('data-id'))); });
-      });
-    }
-
-    function scrollToRow(id){
-      try{ const row=document.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
-        if(row){ row.scrollIntoView({behavior:'smooth',block:'center'}); row.style.outline='3px solid rgba(38,192,76,.35)'; row.style.outlineOffset='2px'; setTimeout(()=>{row.style.outline='';row.style.outlineOffset='';},1200); }
-      }catch(e){}
     }
 
     function atualizarTabela(){
