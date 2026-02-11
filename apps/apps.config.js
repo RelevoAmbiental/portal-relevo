@@ -19,7 +19,7 @@ window.RELEVO_APPS = [
     descricao: "Coleta de informações em campo",
     url: "https://www.appsheet.com/newshortcut/fcb9385d-2a8a-4787-87e0-5387a5f04628",
     icon: "https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/ficha%20de%20campo.jpg"
-  }
+  },
   {
     titulo: "SST e Segurança",
     descricao: "Gestão de documentos e segurança jurídica",
