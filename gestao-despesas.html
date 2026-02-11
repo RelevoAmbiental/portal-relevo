@@ -23,6 +23,7 @@
   <!-- Firebase (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
   <script src="/scripts/firebase-init-guard.js"></script>
   <script src="/scripts/firebase-despesas-reader.js"></script>
@@ -286,7 +287,7 @@
 
     function getDadosAtivos(){ return (filteredDespesas && filteredDespesas.length) ? filteredDespesas : despesas; }
 
-    function atualizarTudo(){ atualizarKPIs(); atualizarMiniLista(); atualizarTabela(); atualizarGraficos(); }
+    function atualizarTudo(){ atualizarKPIs(); atualizarTabela(); atualizarGraficos(); }
 
     function atualizarKPIs(){
       const dados=getDadosAtivos();
