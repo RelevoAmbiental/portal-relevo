@@ -1,130 +1,128 @@
-:root{
-  --bg1:#0b2e1b;
-  --bg2:#0f4d2e;
-  --card: rgba(255,255,255,.92);
-  --txt:#0b1b12;
-  --muted:#556;
-  --shadow: 0 10px 28px rgba(0,0,0,.18);
-  --radius: 18px;
+/* Importa o tema global para usar as variáveis --relevo */
+@import url('relevo-theme.css');
+
+:root {
+  /* Mantemos as variáveis locais mas apontando para os tokens globais */
+  --bg-gradient: var(--relevo-gradient);
+  --card-glass: var(--relevo-surface);
+  --txt-main: var(--relevo-text);
+  --radius-pwa: var(--relevo-r-lg);
 }
 
-*{ box-sizing:border-box; }
+* { box-sizing: border-box; }
 
-body{
-  margin:0;
-  font-family: Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: linear-gradient(135deg,var(--bg1),var(--bg2));
-  color: var(--txt);
+body {
+  margin: 0;
+  font-family: var(--relevo-font-sans);
+  /* Fundo gradiente oficial Relevo */
+  background: var(--relevo-gradient-soft); 
+  color: var(--txt-main);
+  min-height: 100vh;
 }
 
-.top{
-  padding: 16px 16px 6px;
+/* Header estilizado como o portal */
+.top {
+  padding: 30px 20px 20px;
+  background: var(--relevo-green-900);
+  border-bottom: 3px solid var(--relevo-green-500);
+  text-align: center;
 }
 
-.brand{
-  max-width: 980px;
-  margin: 0 auto;
-}
-
-.title{
-  font-size: 20px;
-  font-weight: 900;
+.title {
+  font-family: var(--relevo-font-title);
+  font-size: 22px;
+  font-weight: 800;
   color: #ffffff;
 }
 
-.subtitle{
+.subtitle {
   margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255,255,255,.85);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.wrap{
-  max-width: 980px;
+.wrap {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 10px 14px 18px;
+  padding: 24px 16px;
 }
 
-.grid{
-  display:grid;
+/* Grid adaptável */
+.grid {
+  display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 16px;
 }
 
-@media (min-width: 720px){
-  .grid{ grid-template-columns: 1fr 1fr; }
+@media (min-width: 720px) {
+  .grid { grid-template-columns: 1fr 1fr; }
 }
 
-.card{
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(0,0,0,.06);
-  display:flex;
+/* Card com efeito Glassmorphism do Portal Relevo */
+.card {
+  background: var(--card-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--relevo-border);
+  border-radius: var(--radius-pwa);
+  padding: 20px;
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 15px;
+  box-shadow: var(--relevo-shadow);
+  transition: transform 0.2s ease;
 }
 
-.left{
-  min-width: 0;
-}
-.card .left{
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--relevo-green-500);
 }
 
-.card-title{
-  font-weight: 900;
-  font-size: 16px;
-  color: #0b2e1b;
+.card-icon-img {
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain;
+  background: rgba(15, 77, 46, 0.08);
+  border-radius: 10px;
+  padding: 6px;
 }
 
-.card-desc{
+.card-title {
+  font-family: var(--relevo-font-title);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--relevo-green-900);
+}
+
+.card-desc {
   margin-top: 4px;
   font-size: 12px;
-  color: var(--muted);
+  color: var(--relevo-muted);
+  line-height: 1.4;
 }
 
-.card-icon-img{
-  width: 36px !important;
-  height: 36px !important;
-  max-width: 36px !important;
-  max-height: 36px !important;
-
-  flex: 0 0 36px !important; /* <- ESSENCIAL no mobile */
-  object-fit: contain;
-
-  display: block;
-  box-sizing: border-box;
-
-  margin-bottom: 6px;
-  padding: 4px;
-
-  background: rgba(15,77,46,.08);
-  border-radius: 8px;
-}
-
-
-.btn{
-  border:0;
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-weight: 900;
-  cursor: pointer;
-  background: #0f4d2e;
+/* Botão seguindo o estilo do Portal de Gestão */
+.btn {
+  background: var(--relevo-gradient);
   color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
   flex-shrink: 0;
+  transition: opacity 0.2s;
 }
 
-.btn:active{
-  transform: translateY(1px);
+.btn:hover {
+  opacity: 0.9;
 }
 
-.footer{
-  margin-top: 12px;
-  font-size: 12px;
-  color: rgba(255,255,255,.85);
-  padding: 6px 2px;
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--relevo-muted);
 }
