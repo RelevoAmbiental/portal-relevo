@@ -21,6 +21,7 @@ window.RELEVO_APPS = [
     icon: "https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/ficha%20de%20campo.jpg"
   },
   {
+    id: "seguranca",
     titulo: "SST e Segurança",
     descricao: "Gestão de documentos e segurança jurídica",
     url: "https://drive.google.com/drive/folders/12fEU0bPCOT8ThPQWYEZjt2opdXjJdOuG",
