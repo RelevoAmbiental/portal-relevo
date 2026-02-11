@@ -2,428 +2,88 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Área do Cliente | Portal Relevo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal do Cliente | Relevo</title>
 
-  <!-- Favicons / PWA (padrão decidido) -->
-  <link rel="icon" href="/assets/icons/favicon.ico">
-  <link rel="icon" sizes="32x32" href="/assets/icons/favicon-32.png">
-  <link rel="icon" sizes="16x16" href="/assets/icons/favicon-16.png">
-  <link rel="icon" sizes="192x192" href="/assets/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#0b2e1b">
-
-  <!-- Fontes (mantém o padrão do portal) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
-  <!-- CSS global + tema (padrão decidido) -->
-  <link rel="stylesheet" href="/styles/global.css" />
-  <link rel="stylesheet" href="/styles/relevo-theme.css" />
-
+  <link rel="stylesheet" href="styles/relevo-theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
-    /* CSS LOCAL (somente estrutura/responsividade) */
-
-    .client-topbar{
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      backdrop-filter: blur(10px);
-      background: rgba(234,244,238,0.75);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-    }
-
-    .client-topbar-inner{
-      width: min(1200px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 14px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 220px;
-    }
-
-    .brand img{
-      height: 44px;
-      width: auto;
-      display: block;
-    }
-
-    .brand-meta{
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-
-    .brand-meta .title{
-      font-family: var(--relevo-font-title);
-      font-weight: 800;
-      color: var(--relevo-text);
-      font-size: 16px;
-      margin: 0;
-    }
-
-    .brand-meta .subtitle{
-      font-size: 12px;
-      color: var(--relevo-muted);
-      margin: 2px 0 0;
-    }
-
-    .top-actions{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .user-pill{
-      font-size: 12px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--relevo-border);
-      background: rgba(255,255,255,0.72);
-      color: var(--relevo-text);
-      white-space: nowrap;
-      max-width: 46vw;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .page-head{
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 14px;
-    }
-
-    .page-head .left h1{
-      margin-bottom: 6px;
-    }
-
-    .page-head .right{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .select-wrap{
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 280px;
-    }
-    .select-wrap label{
-      font-weight: 800;
-      color: var(--relevo-text);
-      font-family: var(--relevo-font-title);
-      font-size: 14px;
-    }
-
-    .grid-2{
+    /* Reaproveitando sua estrutura de grid do gestao.html */
+    .dashboard-wrapper {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 14px;
+      grid-template-columns: 280px 1fr;
+      height: 100vh;
+      overflow: hidden; /* Trava o scroll para o mapa ocupar tudo */
     }
 
-    .map-frame{
+    /* Ajuste na Main Content para o Mapa */
+    .main-content {
+      padding: 0; /* Remove o padding para o mapa encostar nas bordas */
+      background: #f0f0f0;
+      position: relative;
+    }
+
+    .map-iframe {
       width: 100%;
-      height: 520px;
-      border: 0;
-      border-radius: 14px;
+      height: 100%;
+      border: none;
     }
 
-    .card .card-title{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
+    /* Estilo para os ícones da sidebar (baseado no seu gestao.html) */
+    .nav-item i {
+      width: 24px;
+      text-align: center;
+      color: var(--relevo-green-500);
     }
 
-    .link-row{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    .note{
-      font-size: 12px;
-      color: var(--relevo-muted);
-      margin-top: 10px;
-    }
-
-    .alert{
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(170, 72, 72, 0.28);
-      background: rgba(255, 235, 235, 0.6);
-      color: #5a1515;
-      font-weight: 700;
-    }
-
-    @media (max-width: 900px){
-      .brand-meta{ display: none; }
-      .select-wrap{ min-width: 0; width: 100%; }
-      .page-head{
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .grid-2{ grid-template-columns: 1fr; }
-      .map-frame{ height: 420px; }
-      .user-pill{ display: none; }
+    @media (max-width: 900px) {
+      .dashboard-wrapper { grid-template-columns: 1fr; }
+      .sidebar { display: none; } /* Pode adicionar seu menuTrigger mobile depois */
     }
   </style>
 </head>
 
 <body class="relevo-theme">
-  <!-- Topbar (sem sidebar nesta página) -->
-  <header class="client-topbar">
-    <div class="client-topbar-inner">
-      <div class="brand">
-        <!-- Ícone/Logo LOCAL (sem links externos) -->
-        <img src="/styles/icons/Logo_atualizada_horizontal.png" alt="Relevo Consultoria Ambiental" />
-        <div class="brand-meta">
-          <p class="title">Portal Relevo</p>
-          <p class="subtitle">Área do Cliente</p>
-        </div>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <div class="brand" style="text-align: center; margin-bottom: 30px;">
+        <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px;">
       </div>
 
-      <div class="top-actions">
-        <div id="userPill" class="user-pill" title="Usuário logado">Carregando usuário…</div>
-        <button id="btnLogout" class="btn" type="button">Sair</button>
+      <section class="sidebar-section">
+        <h3>Dados do Projeto</h3>
+        <nav class="nav-menu">
+          <a href="LINK_DADOS_BRUTOS" target="_blank" class="nav-item">
+            <i class="fas fa-database"></i> Dados de Campo
+          </a>
+          <a href="LINK_RELATORIOS" target="_blank" class="nav-item">
+            <i class="fas fa-file-alt"></i> Relatórios
+          </a>
+          <a href="LINK_NOTAS_FISCAIS" target="_blank" class="nav-item">
+            <i class="fas fa-receipt"></i> Notas Fiscais
+          </a>
+          <a href="LINK_CADASTRO" target="_blank" class="nav-item">
+            <i class="fas fa-user-check"></i> Dados Cadastrais
+          </a>
+        </nav>
+      </section>
+
+      <div style="margin-top: auto;">
+        <button class="btn btn-ghost" onclick="window.location.href='index.html'" style="width: 100%; text-align: left;">
+          <i class="fas fa-sign-out-alt"></i> Sair
+        </button>
       </div>
-    </div>
-  </header>
+    </aside>
 
-  <main class="relevo-container">
-    <div class="page-head">
-      <div class="left">
-        <h1>Área do Cliente</h1>
-        <p class="muted" style="margin:0;">
-          Acesso rápido ao material do projeto e ao mapa do empreendimento.
-        </p>
-      </div>
+    <main class="main-content">
+      <iframe 
+        src="https://www.google.com/maps/d/u/0/embed?mid=SEU_ID_DO_MAPA" 
+        class="map-iframe">
+      </iframe>
+    </main>
+  </div>
 
-      <!-- Só aparece para gestão -->
-      <div class="right" id="adminChooser" style="display:none;">
-        <div class="select-wrap">
-          <label for="clienteSelect">Selecionar cliente (gestão)</label>
-          <select id="clienteSelect" aria-label="Selecionar cliente"></select>
-        </div>
-      </div>
-    </div>
-
-    <div id="noClient" class="alert" style="display:none;">
-      Nenhum cliente vinculado a este login. Se você é da gestão, verifique seu perfil. Se você é cliente, solicite o vínculo do seu e-mail/UID ao projeto.
-    </div>
-
-    <section class="grid-2" id="cardsSection" style="display:none;">
-      <div class="card">
-        <div class="card-title">
-          <h2 style="margin:0;">Drive do Cliente</h2>
-        </div>
-        <p class="muted" style="margin:0;">
-          Dados Brutos, Entregáveis e Arquivos compartilhados.
-        </p>
-
-        <div class="link-row">
-          <a id="btnDriveCliente" class="btn" href="#" target="_blank" rel="noopener">Abrir pasta</a>
-        </div>
-        <div class="note" id="driveClienteHint"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <h2 style="margin:0;">Dados contratuais da Relevo</h2>
-        </div>
-        <p class="muted" style="margin:0;">
-          Documentos e arquivos contratuais.
-        </p>
-
-        <div class="link-row">
-          <a id="btnDriveRelevo" class="btn" href="https://drive.google.com/drive/folders/17W8Pi9jHH98-iM9k54godrKFYA_LuYCY?usp=sharing" target="_blank" rel="noopener">Abrir pasta</a>
-        </div>
-        <div class="note">Dados para consulta.</div>
-      </div>
-    </section>
-
-    <section class="card" id="mapSection" style="display:none; margin-top:16px;">
-      <div class="card-title">
-        <h2 style="margin:0;">Mapa do Projeto</h2>
-      </div>
-      
-      <div id="mapWrap" style="margin-top:12px;">
-        <!-- iframe entra aqui -->
-      </div>
-    </section>
-
-    <p class="note" style="margin-top:14px;">
-      O mapa pode ser visualizado em detalhes e os dados nele contidos podem ser baixados no formato KML.
-    </p>
-  </main>
-
-  <!-- Firebase (compat) + Guard do Portal -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-  <script src="/scripts/firebase-init-guard.js"></script>
-  <script src="/scripts/expose-session.js"></script>
-
-  <script>
-    // ======================================================================
-    //  CLIENTES — SEM SIDEBAR (área focada)
-    //  Regras:
-    //  - Gestão: pode escolher Cliente A/B/C
-    //  - Cliente: vê somente o vínculo pelo e-mail (placeholder editável)
-    // ======================================================================
-
-    // ✅ Padrão: pasta interna da Relevo (igual para todos)
-    const DRIVE_RELEVO_PADRAO = "https://drive.google.com/drive/folders/17W8Pi9jHH98-iM9k54godrKFYA_LuYCY?usp=sharing";
-
-    // ✅ Clientes pré-programados (você só substitui depois)
-    // Dica: preencha allowedEmails para “travar” o acesso por e-mail.
-    const CLIENTES = [
-      {
-        id: "cliente-a",
-        nome: "RIALMA",
-        driveUrl: "https://drive.google.com/drive/folders/1GV-heteqMPXzWbbo24c4UVMmatZqAldS?usp=sharing",
-        mapaIframeHtml: '<iframe src="https://www.google.com/maps/d/embed?mid=19WXycgUZgWKFdYWRD-83l1fA706qQIc&ehbc=2E312F" class="map-frame" loading="lazy"></iframe>',
-        allowedEmails: ["rialma@relevo.eco.br"]
-      },
-      {
-        id: "cliente-b",
-        nome: "Ambientari",
-        driveUrl: "https://drive.google.com/drive/folders/1ji-6NNbqtPKhTbg4TvbpkwEoMPV33f8u?usp=sharing",
-        mapaIframeHtml: '<iframe src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F" class="map-frame" loading="lazy"></iframe>',
-        allowedEmails: ["clienteb@exemplo.com"]
-      },
-      {
-        id: "cliente-c",
-        nome: "Cliente C",
-        driveUrl: "https://drive.google.com/drive/folders/SEU_ID_CLIENTE_C",
-        mapaIframeHtml: '<iframe src="https://www.google.com/maps/d/embed?mid=1gWI1DXq8bjm-uLDVFIGvDq3G_IxCCXE&ehbc=2E312F" class="map-frame" loading="lazy"></iframe>',
-        allowedEmails: ["clientec@exemplo.com"]
-      }
-    ];
-
-    // Critério simples para "gestão"
-    // - Se quiser, você pode endurecer depois via Firestore (/users/{uid}.role).
-    function isGestao(user){
-      if(!user) return false;
-      const email = (user.email || "").toLowerCase();
-      return email.endsWith("@relevo.eco.br");
-    }
-
-    function $(id){ return document.getElementById(id); }
-
-    function setHrefSafe(el, url){
-      if(!el) return;
-      if(url && typeof url === "string" && url.startsWith("http")){
-        el.href = url;
-        el.style.opacity = "1";
-        el.style.pointerEvents = "auto";
-      } else {
-        el.href = "#";
-        el.style.opacity = "0.5";
-        el.style.pointerEvents = "none";
-      }
-    }
-
-    function renderCliente(cliente){
-      $("noClient").style.display = "none";
-      $("cardsSection").style.display = "grid";
-      $("mapSection").style.display = "block";
-
-      setHrefSafe($("btnDriveCliente"), cliente?.driveUrl);
-      $("driveClienteHint").textContent = cliente?.driveUrl ? "" : "Link não configurado para este cliente.";
-      setHrefSafe($("btnDriveRelevo"), DRIVE_RELEVO_PADRAO);
-
-      const mapWrap = $("mapWrap");
-      mapWrap.innerHTML = cliente?.mapaIframeHtml || '<div class="alert">Mapa não configurado para este cliente.</div>';
-    }
-
-    function showNoClient(){
-      $("cardsSection").style.display = "none";
-      $("mapSection").style.display = "none";
-      $("noClient").style.display = "block";
-    }
-
-    function findClienteForUser(user){
-      const email = (user?.email || "").toLowerCase();
-      // procura por e-mail liberado (placeholder)
-      const match = CLIENTES.find(c => (c.allowedEmails || []).map(e => e.toLowerCase()).includes(email));
-      return match || null;
-    }
-
-    function initAdminChooser(){
-      const select = $("clienteSelect");
-      select.innerHTML = "";
-      CLIENTES.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c.id;
-        opt.textContent = c.nome;
-        select.appendChild(opt);
-      });
-
-      // default
-      renderCliente(CLIENTES[0]);
-
-      select.addEventListener("change", () => {
-        const chosen = CLIENTES.find(c => c.id === select.value);
-        if(chosen) renderCliente(chosen);
-      });
-    }
-
-    // Logout
-    $("btnLogout").addEventListener("click", async () => {
-      try{
-        await firebase.auth().signOut();
-        // volta para home do portal (ajuste se preferir outra rota)
-        window.location.href = "/index.html";
-      }catch(err){
-        console.error("Erro ao sair:", err);
-        alert("Não foi possível sair agora. Tente novamente.");
-      }
-    });
-
-    // Auth bootstrap
-    firebase.auth().onAuthStateChanged((user) => {
-      // Se não logou, joga para home/login (portal decide)
-      if(!user){
-        $("userPill").textContent = "Não autenticado";
-        // se existir fluxo de login separado, ajuste aqui
-        return;
-      }
-
-      $("userPill").textContent = user.email || user.uid;
-
-      if(isGestao(user)){
-        $("adminChooser").style.display = "flex";
-        initAdminChooser();
-      } else {
-        $("adminChooser").style.display = "none";
-        const cliente = findClienteForUser(user);
-        if(cliente) renderCliente(cliente);
-        else showNoClient();
-      }
-    });
-  </script>
 </body>
 </html>
-
-
-
-
-
