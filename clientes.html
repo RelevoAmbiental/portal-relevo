@@ -3,43 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portal do Cliente | Relevo</title>
+  <title>Portal do Cliente | Relevo Consultoria Ambiental</title>
 
-  <link rel="stylesheet" href="styles/relevo-theme.css">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/assets/icons/icon-192.png">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/relevo-theme.css">
+
   <style>
-    /* Reaproveitando sua estrutura de grid do gestao.html */
+    /* 1. LAYOUT ESTRUTURAL (Baseado no seu gestao.html) */
     .dashboard-wrapper {
       display: grid;
       grid-template-columns: 280px 1fr;
       height: 100vh;
-      overflow: hidden; /* Trava o scroll para o mapa ocupar tudo */
+      overflow: hidden; /* Importante para o mapa não criar scroll na página */
     }
 
-    /* Ajuste na Main Content para o Mapa */
+    .sidebar {
+      background: var(--relevo-surface-solid);
+      border-right: 1px solid var(--relevo-border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    /* 2. ESTILIZAÇÃO DA SIDEBAR (Estilo Print 2) */
+    .sidebar-section h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--relevo-muted);
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--relevo-border);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--relevo-r-sm);
+      text-decoration: none;
+      color: var(--relevo-text);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .nav-item img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    /* Efeito de hover verde suave */
+    .nav-item:hover {
+      background: rgba(38, 192, 76, 0.08);
+      color: var(--relevo-green-700);
+    }
+
+    /* 3. ÁREA CENTRAL (Mapa) */
     .main-content {
-      padding: 0; /* Remove o padding para o mapa encostar nas bordas */
-      background: #f0f0f0;
       position: relative;
+      background: #e5e7eb;
     }
 
-    .map-iframe {
+    .map-container {
       width: 100%;
       height: 100%;
       border: none;
     }
 
-    /* Estilo para os ícones da sidebar (baseado no seu gestao.html) */
-    .nav-item i {
-      width: 24px;
-      text-align: center;
-      color: var(--relevo-green-500);
-    }
-
+    /* Ajuste Mobile básico */
     @media (max-width: 900px) {
       .dashboard-wrapper { grid-template-columns: 1fr; }
-      .sidebar { display: none; } /* Pode adicionar seu menuTrigger mobile depois */
+      .sidebar { display: none; } /* Aqui você pode implementar o menu hambúrguer depois */
     }
   </style>
 </head>
@@ -47,31 +92,41 @@
 <body class="relevo-theme">
 
   <div class="dashboard-wrapper">
-    <aside class="sidebar">
-      <div class="brand" style="text-align: center; margin-bottom: 30px;">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand" style="text-align: center; margin-bottom: 10px;">
         <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Logo_atualizada_vertical.png" alt="Relevo" style="width: 100px;">
       </div>
 
       <section class="sidebar-section">
         <h3>Dados do Projeto</h3>
         <nav class="nav-menu">
-          <a href="LINK_DADOS_BRUTOS" target="_blank" class="nav-item">
-            <i class="fas fa-database"></i> Dados de Campo
+          <a id="link-dados" href="#" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/arquivos.jpg">
+            <span>Dados de Campo</span>
           </a>
-          <a href="LINK_RELATORIOS" target="_blank" class="nav-item">
-            <i class="fas fa-file-alt"></i> Relatórios
-          </a>
-          <a href="LINK_NOTAS_FISCAIS" target="_blank" class="nav-item">
-            <i class="fas fa-receipt"></i> Notas Fiscais
-          </a>
-          <a href="LINK_CADASTRO" target="_blank" class="nav-item">
-            <i class="fas fa-user-check"></i> Dados Cadastrais
+          <a id="link-relatorios" href="#" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/compartilhados.jpg">
+            <span>Relatórios</span>
           </a>
         </nav>
       </section>
 
-      <div style="margin-top: auto;">
-        <button class="btn btn-ghost" onclick="window.location.href='index.html'" style="width: 100%; text-align: left;">
+      <section class="sidebar-section">
+        <h3>Administrativo</h3>
+        <nav class="nav-menu">
+          <a id="link-notas" href="#" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Gastos.png">
+            <span>Notas Fiscais</span>
+          </a>
+          <a id="link-cadastro" href="#" target="_blank" class="nav-item">
+            <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/multidisciplinar.png">
+            <span>Dados Cadastrais</span>
+          </a>
+        </nav>
+      </section>
+
+      <div style="margin-top: auto; padding-top: 10px;">
+        <button class="btn btn-ghost" id="logoutBtn" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 8px;">
           <i class="fas fa-sign-out-alt"></i> Sair
         </button>
       </div>
@@ -79,11 +134,53 @@
 
     <main class="main-content">
       <iframe 
-        src="https://www.google.com/maps/d/u/0/embed?mid=SEU_ID_DO_MAPA" 
-        class="map-iframe">
+        id="mapa-cliente"
+        src="about:blank" 
+        class="map-container"
+        allowfullscreen>
       </iframe>
     </main>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="scripts/firebase-init-guard.js"></script>
+
+  <script>
+    // Lógica para carregar dados dinâmicos do Firestore
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        const db = firebase.firestore();
+        try {
+          // Busca na coleção 'clientes_data' usando o UID do usuário logado
+          const doc = await db.collection("clientes_data").doc(user.uid).get();
+
+          if (doc.exists) {
+            const data = doc.data();
+            // Preenche o mapa e os links
+            if(data.mapa_url) document.getElementById('mapa-cliente').src = data.mapa_url;
+            if(data.drive_dados) document.getElementById('link-dados').href = data.drive_dados;
+            if(data.drive_relatorios) document.getElementById('link-relatorios').href = data.drive_relatorios;
+            if(data.drive_notas) document.getElementById('link-notas').href = data.drive_notas;
+            if(data.drive_cadastro) document.getElementById('link-cadastro').href = data.drive_cadastro;
+          } else {
+            console.error("Nenhum dado encontrado para este UID de cliente.");
+          }
+        } catch (error) {
+          console.error("Erro ao buscar dados:", error);
+        }
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    // Botão de Sair
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    });
+  </script>
 </body>
 </html>
