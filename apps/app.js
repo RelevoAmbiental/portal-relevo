@@ -59,7 +59,12 @@
       btn.addEventListener("click", () => {
         const url = btn.getAttribute("data-url");
         if (!url) return;
-        window.location.href = url;
+    
+        if(/^https?:\/\//i.test(url)) {
+          window.open(url, "_blank", "noopener");
+        } else {
+          window.location.href = url;
+        }
       });
     });
   }
