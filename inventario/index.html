@@ -3,14 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inventário de Equipamentos | Relevo Consultoria</title>
+  <title>Inventário | Portal Relevo</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/relevo-site/refs/heads/main/assets/icons/favicon_menos.png">
+  <!-- Favicons / PWA (padrão decidido) -->
+  <link rel="icon" href="/assets/icons/favicon.ico">
+  <link rel="icon" sizes="32x32" href="/assets/icons/favicon-32.png">
+  <link rel="icon" sizes="16x16" href="/assets/icons/favicon-16.png">
+  <link rel="icon" sizes="192x192" href="/assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0b2e1b">
 
   <!-- Fonte e ícones -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- CSS global + tema -->
+  <link rel="stylesheet" href="/styles/global.css" />
+  <link rel="stylesheet" href="/styles/relevo-theme.css" />
 
   <!-- CSS do módulo -->
   <link rel="stylesheet" href="styles.css" />
@@ -20,354 +32,76 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
-  <script src="../scripts/firebase-init-guard.js"></script>
+  <script src="/scripts/firebase-init-guard.js"></script>
 </head>
-<body>
-  <div class="container">
-    <!-- HEADER / TÍTULO -->
-    <header class="inventario-header">
-      <div>
-        <h1>Inventário de Equipamentos</h1>
-        <p>Controle de EPIs, equipamentos e materiais operacionais da Relevo</p>
-      </div>
-      <a href="../gestao.html" class="btn btn-link">
-        <i class="fas fa-arrow-left"></i> Voltar para Gestão
-      </a>
-    </header>
 
-    <!-- TABS -->
-    <nav class="tabs">
-      <button class="tab-button active" data-tab="tab-patrimonio">
-        <i class="fas fa-boxes-stacked"></i> Patrimônio
-      </button>
-      <button class="tab-button" data-tab="tab-movimentacao">
-        <i class="fas fa-exchange-alt"></i> Movimentação / Custódia
-      </button>
-      <button class="tab-button" data-tab="tab-operacional">
-        <i class="fas fa-clipboard-list"></i> Inventário Operacional
-      </button>
-    </nav>
+<body class="relevo-theme">
 
-    <!-- DASHBOARD DE ESTATÍSTICAS GERAIS -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <h3>Total de unidades</h3>
-        <p id="kpi-total">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Disponíveis</h3>
-        <p id="kpi-disponiveis">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Emprestadas</h3>
-        <p id="kpi-emprestadas">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Em manutenção</h3>
-        <p id="kpi-manutencao">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Perdidas</h3>
-        <p id="kpi-perdidas">0</p>
-      </div>
-    </section>
+  <!-- Header mobile (hamburger) -->
+  <header class="mobile-top-bar">
+    <div class="left">
+      <img src="/assets/icons/icon-192.png" alt="Relevo">
+      <div class="title">Inventário</div>
+    </div>
+    <button id="menuTrigger" class="icon-btn" type="button" aria-label="Abrir menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </header>
 
-    <!-- ===============================
-         TAB 1 – PATRIMÔNIO (CADASTRO)
-         =============================== -->
-    <section id="tab-patrimonio" class="tab-content active">
-      <!-- CARD DE CADASTRO -->
-      <section class="card">
-        <div class="card-header">
-          <h2>Cadastro de Patrimônio</h2>
-          <p>Registre os itens que compõem o patrimônio da Relevo. Campos obrigatórios marcados com *.</p>
+  <div class="sidebar-overlay" id="overlay"></div>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="/styles/icons/Logo_atualizada_vertical.png" alt="Relevo">
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Inventário</h3>
+        <a class="nav-item active" href="#" data-view="view-patrimonio"><i class="fas fa-boxes-stacked"></i> Patrimônio</a>
+        <a class="nav-item" href="#" data-view="view-movimentacao"><i class="fas fa-exchange-alt"></i> Movimentação / Custódia</a>
+        <a class="nav-item" href="#" data-view="view-operacional"><i class="fas fa-clipboard-list"></i> Inventário Operacional</a>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Navegação</h3>
+        <a class="nav-item" href="/apps/"><i class="fas fa-arrow-left"></i> Voltar para início</a>
+      </div>
+
+      <div class="sidebar-footer">
+        <div id="userPill" class="user-pill">—</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-head">
+        <div>
+          <h1>Inventário</h1>
+          <p class="muted" style="margin:0;">Controle de EPIs, equipamentos e materiais operacionais da Relevo.</p>
         </div>
+      </div>
 
-        <form id="form-patrimonio">
-          <div class="form-grid">
-            <!-- Código interno (auto) -->
-            <div class="form-group">
-              <label for="pat-codigoInterno">Código interno *</label>
-              <input id="pat-codigoInterno" type="text" readonly placeholder="Gerado automaticamente (ex: EPI-001)" />
-            </div>
-
-            <!-- Categoria -->
-            <div class="form-group">
-              <label for="pat-categoria">Categoria *</label>
-              <select id="pat-categoria" required>
-                <option value="">Selecione...</option>
-                <option value="EPI e Segurança">EPI e Segurança</option>
-                <option value="Iluminação">Iluminação</option>
-                <option value="Espeleologia">Espeleologia</option>
-                <option value="Progressão Vertical">Progressão Vertical</option>
-                <option value="Topografia e Medição">Topografia e Medição</option>
-                <option value="Registro e Documentação">Registro e Documentação</option>
-                <option value="Coleta e Amostragem Ambiental">Coleta e Amostragem Ambiental</option>
-                <option value="Acessórios e Logística">Acessórios e Logística</option>
-                <option value="Comunicação">Comunicação</option>
-                <option value="Outros">Outros</option>
-              </select>
-            </div>
-
-            <!-- Nome -->
-            <div class="form-group">
-              <label for="pat-nome">Nome do equipamento *</label>
-              <input id="pat-nome" type="text" placeholder="Ex: Bateria AA recarregável, Macacão Cordura G" required />
-            </div>
-
-            <!-- Quantidade total -->
-            <div class="form-group">
-              <label for="pat-quantidadeTotal">Quantidade total *</label>
-              <input id="pat-quantidadeTotal" type="number" min="1" step="1" placeholder="Ex: 40" required />
-            </div>
-
-            <!-- Data de aquisição -->
-            <div class="form-group">
-              <label for="pat-dataAquisicao">Data de aquisição</label>
-              <input id="pat-dataAquisicao" type="date" />
-            </div>
-
-            <!-- Valor estimado -->
-            <div class="form-group">
-              <label for="pat-valorEstimado">Valor estimado (R$)</label>
-              <input id="pat-valorEstimado" type="number" min="0" step="0.01" placeholder="Ex: 250,00" />
-            </div>
-
-            <!-- Foto -->
-            <div class="form-group">
-              <label for="pat-foto">Foto *</label>
-              <input id="pat-foto" type="file" accept="image/*" capture="environment" required />
-              <small>Obrigatório: registre uma foto do equipamento (upload ou câmera).</small>
-            </div>
-
-            <!-- Descrição -->
-            <div class="form-group form-group-full">
-              <label for="pat-descricao">Descrição</label>
-              <textarea id="pat-descricao" placeholder="Detalhes do equipamento, tamanho, marca, uso previsto etc."></textarea>
-            </div>
-
-            <!-- Observações -->
-            <div class="form-group form-group-full">
-              <label for="pat-observacoes">Observações</label>
-              <textarea id="pat-observacoes" placeholder="Informações adicionais relevantes (ex: vinculado a projeto específico, lote, nº de série)."></textarea>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary" id="btn-pat-salvar">
-              <i class="fas fa-save"></i> Salvar Patrimônio
-            </button>
-            <span id="pat-status-mensagem" class="status-mensagem"></span>
-          </div>
-        </form>
+      <!-- VIEW: Patrimônio -->
+      <section id="view-patrimonio" class="view active">
+        
+        None
       </section>
 
-      <!-- LISTAGEM DE PATRIMÔNIO -->
-      <section class="card">
-        <div class="card-header">
-          <h2>Patrimônio Cadastrado</h2>
-          <p>Visão geral dos itens cadastrados no inventário estrutural da Relevo.</p>
-        </div>
-
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Categoria</th>
-                <th>Nome</th>
-                <th>Qtde total</th>
-                <th>Foto</th>
-                <th>Criado em</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-patrimonio">
-              <!-- linhas via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </section>
-
-    <!-- =========================================
-         TAB 2 – MOVIMENTAÇÃO / CUSTÓDIA
-         ========================================= -->
-    <section id="tab-movimentacao" class="tab-content">
-      <!-- CARD DE MOVIMENTAÇÃO -->
-      <section class="card">
-        <div class="card-header">
-          <h2>Registrar Movimentação / Custódia</h2>
-          <p>Emprestar, devolver, colocar em manutenção, dar baixa ou ajustar quantidades de itens já cadastrados.</p>
-        </div>
-
-        <form id="form-movimentacao">
-          <div class="form-grid">
-            <!-- Item -->
-            <div class="form-group form-group-full">
-              <label for="mov-item">Item *</label>
-              <select id="mov-item" required>
-                <option value="">Selecione um item...</option>
-                <!-- opções via JS -->
-              </select>
-              <small id="mov-item-resumo" class="hint-line">
-                Selecione um item para ver o resumo de estoque.
-              </small>
-            </div>
-
-            <!-- Tipo de movimentação -->
-            <div class="form-group">
-              <label for="mov-tipo">Tipo de movimentação *</label>
-              <select id="mov-tipo" required>
-                <option value="">Selecione...</option>
-                <option value="emprestimo">Emprestar</option>
-                <option value="devolucao">Devolver</option>
-                <option value="manutencao">Enviar para manutenção</option>
-                <option value="retorno_manutencao">Retorno da manutenção</option>
-                <option value="perda">Baixa / Perda</option>
-                <option value="ajuste">Ajuste de estoque</option>
-              </select>
-            </div>
-
-            <!-- Quantidade -->
-            <div class="form-group">
-              <label for="mov-quantidade">Quantidade *</label>
-              <input id="mov-quantidade" type="number" min="1" step="1" required />
-            </div>
-
-            <!-- Responsável -->
-            <div class="form-group">
-              <label for="mov-responsavel">Responsável </label>
-              <input id="mov-responsavel" type="text" placeholder="Ex: Samuel, Equipe Campo 2" />
-            </div>
-
-            <!-- Destino / Projeto -->
-            <div class="form-group">
-              <label for="mov-destino">Destino / Projeto</label>
-              <input id="mov-destino" type="text" placeholder="Ex: Projeto Serra Dourada, Monitoramento Buraco do Inferno" />
-            </div>
-
-            <!-- Observações -->
-            <div class="form-group form-group-full">
-              <label for="mov-observacoes">Observações</label>
-              <textarea id="mov-observacoes" placeholder="Contexto da movimentação, condições do equipamento, etc."></textarea>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary" id="btn-mov-salvar">
-              <i class="fas fa-arrow-right-arrow-left"></i> Registrar Movimentação
-            </button>
-            <span id="mov-status-mensagem" class="status-mensagem"></span>
-          </div>
-        </form>
+      <!-- VIEW: Movimentação / Custódia -->
+      <section id="view-movimentacao" class="view">
+        None
       </section>
 
-      <!-- HISTÓRICO DE MOVIMENTAÇÕES RECENTES -->
-      <section class="card">
-        <div class="card-header">
-          <h2>Últimas Movimentações</h2>
-          <p>Visualize as últimas movimentações registradas no inventário.</p>
-        </div>
-
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Item</th>
-                <th>Tipo</th>
-                <th>Qtd.</th>
-                <th>Responsável</th>
-                <th>Destino</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-movimentacoes">
-              <!-- linhas via JS -->
-            </tbody>
-          </table>
-        </div>
+      <!-- VIEW: Operacional -->
+      <section id="view-operacional" class="view">
+        None
       </section>
-    </section>
-
-    <!-- =========================================
-         TAB 3 – INVENTÁRIO OPERACIONAL
-         ========================================= -->
-    <section id="tab-operacional" class="tab-content">
-      <section class="card">
-        <div class="card-header">
-          <h2>Inventário Operacional</h2>
-          <p>Visão consolidada da situação atual de cada item: disponível, emprestado, em manutenção, perdido e custódia.</p>
-        </div>
-
-        <!-- FILTROS -->
-        <div class="filters-card">
-          <div class="filters-grid">
-            <div class="form-group">
-              <label for="op-filtro-categoria">Filtrar por categoria</label>
-              <select id="op-filtro-categoria">
-                <option value="">Todas</option>
-                <option value="EPI e Segurança">EPI e Segurança</option>
-                <option value="Iluminação">Iluminação</option>
-                <option value="Espeleologia">Espeleologia</option>
-                <option value="Progressão Vertical">Progressão Vertical</option>
-                <option value="Topografia e Medição">Topografia e Medição</option>
-                <option value="Registro e Documentação">Registro e Documentação</option>
-                <option value="Coleta e Amostragem Ambiental">Coleta e Amostragem Ambiental</option>
-                <option value="Acessórios e Logística">Acessórios e Logística</option>
-                <option value="Comunicação">Comunicação</option>
-                <option value="Outros">Outros</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="op-filtro-status">Filtrar por situação</label>
-              <select id="op-filtro-status">
-                <option value="">Todas</option>
-                <option value="disponivel">Possui disponíveis</option>
-                <option value="emprestado">Possui emprestadas</option>
-                <option value="manutencao">Possui em manutenção</option>
-                <option value="perdido">Possui perdas</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="op-filtro-codigo">Filtrar por código</label>
-              <input id="op-filtro-codigo" type="text" placeholder="Ex: EPI-001, ILU-010..." />
-            </div>
-
-            <div class="form-group">
-              <label for="op-filtro-responsavel">Filtrar por responsável</label>
-              <input id="op-filtro-responsavel" type="text" placeholder="Ex: Samuel, Amanda..." />
-            </div>
-          </div>
-        </div>
-
-        <!-- TABELA OPERACIONAL -->
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Categoria</th>
-                <th>Nome</th>
-                <th>Qtde total</th>
-                <th>Disponível</th>
-                <th>Emprestado</th>
-                <th>Manutenção</th>
-                <th>Perdido</th>
-                <th>Responsáveis</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-operacional">
-              <!-- linhas via JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </section>
+    </main>
   </div>
 
-  <!-- LÓGICA DO INVENTÁRIO -->
+
   <script src="app.js"></script>
 </body>
 </html>

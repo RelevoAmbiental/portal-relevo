@@ -53,6 +53,7 @@ const tbodyPatrimonio = document.getElementById("tbody-patrimonio");
 const formMov = document.getElementById("form-movimentacao");
 const selectMovItem = document.getElementById("mov-item");
 const selectMovTipo = document.getElementById("mov-tipo");
+const selectMovStatusFiltro = document.getElementById("mov-status-filtro");
 const inputMovQuantidade = document.getElementById("mov-quantidade");
 const inputMovResponsavel = document.getElementById("mov-responsavel");
 const inputMovDestino = document.getElementById("mov-destino");
@@ -295,14 +296,32 @@ function renderPatrimonio() {
 // Render – Select de item (Movimentação)
 // -----------------------------
 function renderMovSelect() {
+  const filtro = (selectMovStatusFiltro && selectMovStatusFiltro.value) ? selectMovStatusFiltro.value : "";
   selectMovItem.innerHTML = '<option value="">Selecione um item...</option>';
 
-  itens.forEach((it) => {
+  const lista = (!filtro)
+    ? itens
+    : itens.filter((it) => {
+        const st = (it.estadoAtual || {});
+        const v = (k) => Number(st[k] || 0);
+        if (filtro === "disponivel") return v("disponivel") > 0;
+        if (filtro === "emprestado") return v("emprestado") > 0;
+        if (filtro === "manutencao") return v("manutencao") > 0;
+        if (filtro === "perdido") return v("perdido") > 0;
+        return true;
+      });
+
+  lista.forEach((it) => {
     const opt = document.createElement("option");
     opt.value = it.id;
     opt.textContent = `${it.codigoInterno || "SEM-COD"} — ${it.nome}`;
     selectMovItem.appendChild(opt);
   });
+
+  // Se o item selecionado não existir mais após filtro, reseta
+  if (selectMovItem.value && !lista.some(i => i.id === selectMovItem.value)) {
+    selectMovItem.value = "";
+  }
 
   atualizarResumoItemMov();
 }
@@ -323,6 +342,26 @@ function atualizarResumoItemMov() {
 }
 
 selectMovItem.addEventListener("change", atualizarResumoItemMov);
+
+if (selectMovStatusFiltro) {
+  selectMovStatusFiltro.addEventListener("change", () => {
+    renderMovSelect();
+  });
+}
+
+// Auto-filtro por tipo (ajuda na devolução/manutenção)
+selectMovTipo.addEventListener("change", () => {
+  if (!selectMovStatusFiltro) return;
+  const tipo = selectMovTipo.value;
+
+  // Heurística simples (você pode ajustar depois)
+  if (tipo === "devolucao") selectMovStatusFiltro.value = "emprestado";
+  else if (tipo === "retorno_manutencao") selectMovStatusFiltro.value = "manutencao";
+  else if (tipo === "emprestimo") selectMovStatusFiltro.value = "disponivel";
+  // perda/ajuste/manutencao: mantém o que o usuário escolheu
+
+  renderMovSelect();
+});
 
 // -----------------------------
 // Render – Inventário Operacional
@@ -811,3 +850,58 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("📦 Módulo Inventário carregado.");
   // Garante estado inicial das tabs (já definido no HTML)
 });
+
+
+// =========================================================
+// Layout Portal (sidebar + views) — sem framework
+// =========================================================
+(function initLayoutPortal(){
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+  const trigger = document.getElementById("menuTrigger");
+
+  function openMenu(){
+    if(sidebar) sidebar.classList.add("active");
+    if(overlay) overlay.classList.add("active");
+  }
+  function closeMenu(){
+    if(sidebar) sidebar.classList.remove("active");
+    if(overlay) overlay.classList.remove("active");
+  }
+
+  if(trigger) trigger.addEventListener("click", openMenu);
+  if(overlay) overlay.addEventListener("click", closeMenu);
+  window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
+
+  document.querySelectorAll("[data-view]").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const viewId = a.getAttribute("data-view");
+      if(!viewId) return;
+
+      // ativa item
+      document.querySelectorAll(".nav-item[data-view]").forEach(x => x.classList.remove("active"));
+      a.classList.add("active");
+
+      // troca view
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      const view = document.getElementById(viewId);
+      if(view) view.classList.add("active");
+
+      // fecha no mobile
+      if(window.matchMedia("(max-width: 900px)").matches) closeMenu();
+      // scroll topo
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  // Pill de usuário
+  try{
+    if(window.firebase && firebase.auth){
+      firebase.auth().onAuthStateChanged((u)=>{
+        const el = document.getElementById("userPill");
+        if(el) el.textContent = u?.email || u?.uid || "—";
+      });
+    }
+  }catch(e){}
+})();
