@@ -683,7 +683,7 @@ td {
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
-  background: var(--cinza-claro);
+  background: var(--relevo-gradient-soft);
   color: var(--texto);
 }
 
