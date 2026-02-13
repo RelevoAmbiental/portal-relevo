@@ -25,6 +25,6 @@ window.RELEVO_APPS = [
   titulo: "SST e Segurança",
   descricao: "Pasta de SST e Segurança (Drive)",
   url: "https://drive.google.com/drive/folders/12fEU0bPCOT8ThPQWYEZjt2opdXjJdOuG",
-  icon: "/assets/icons/SegurancaJuridica.png"
+  icon: "/styles/icons/SegurancaJuridica.png"
   }
 ];
