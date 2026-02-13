@@ -1,48 +1,109 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portal Relevo | Apps</title>
+(function () {
+  "use strict";
 
-  <meta name="theme-color" content="#0b2e1b" />
-  <link rel="manifest" href="./manifest.json" />
+  function $(sel){ return document.querySelector(sel); }
+  function setStatus(msg){
+    const el = $("#status");
+    if (el) el.textContent = msg || "";
+  }
+  function safeText(s){ return String(s || "").trim(); }
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  function escapeHtml(str){
+    return String(str || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+  function escapeAttr(str){ return escapeHtml(str).replace(/`/g, ""); }
 
-  <link rel="stylesheet" href="./styles/relevo-theme.css" />
-  <link rel="stylesheet" href="./styles.css" />
-</head>
+  function render(){
+    const grid = $("#appsGrid");
+    const apps = (window.RELEVO_APPS || []).filter(a => a && a.url);
 
-<body class="relevo-theme">
-  <header class="top">
-    <div class="brand">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Logo_atualizada_vertical.png" 
-           alt="Relevo" 
-           style="width: 100px; margin-bottom: 15px;">
-      <div class="title">Apps Relevo</div>
-      <div class="subtitle">Atalho rápido para os módulos operacionais</div>
-    </div>
-  </header>
+    if (!grid) return;
 
-  <main class="wrap">
-    <section class="grid" id="appsGrid">
-      </section>
+    if (!apps.length){
+      grid.innerHTML = '<div class="app-card"><div class="app-title">Nenhum app configurado</div><div class="app-desc">Edite apps.config.js e adicione seus módulos.</div></div>';
+      return;
+    }
 
-    <footer class="footer">
-      <span id="status"></span>
-      <div style="margin-top: 20px;">
-        <button class="btn btn-ghost" onclick="window.location.href='https://portal.relevo.eco.br/gestao.html'" style="font-size: 12px; opacity: 0.8;">
-          <i class="fas fa-arrow-left"></i> Painel de Gestão
-        </button>
-      </div>
-    </footer>
-  </main>
+    grid.innerHTML = apps.map(app => {
+      const titulo = safeText(app.titulo) || "App";
+      const desc = safeText(app.descricao) || "";
+      const url = safeText(app.url);
+      const icon = safeText(app.icon);
 
-  <script src="./apps.config.js"></script>
-  <script src="./app.js"></script>
-</body>
-</html>
+      const iconHtml = icon
+        ? `<img class="app-icon" src="${escapeAttr(icon)}" alt="" loading="lazy" />`
+        : "";
+
+      return `
+        <div class="app-card">
+          <div class="top">
+            ${iconHtml}
+            <div>
+              <div class="app-title">${escapeHtml(titulo)}</div>
+              <div class="app-desc">${escapeHtml(desc)}</div>
+            </div>
+          </div>
+          <div class="app-actions">
+            <button class="btn btn-primary" data-url="${escapeAttr(url)}" type="button">Abrir</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    grid.querySelectorAll("button[data-url]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const url = btn.getAttribute("data-url");
+        if (!url) return;
+        window.location.href = url;
+      });
+    });
+  }
+
+  function initMenu(){
+    const sidebar = $("#sidebar");
+    const overlay = $("#overlay");
+    const trigger = $("#menuTrigger");
+
+    function openMenu(){
+      if(sidebar) sidebar.classList.add("active");
+      if(overlay) overlay.classList.add("active");
+    }
+    function closeMenu(){
+      if(sidebar) sidebar.classList.remove("active");
+      if(overlay) overlay.classList.remove("active");
+    }
+
+    if(trigger) trigger.addEventListener("click", openMenu);
+    if(overlay) overlay.addEventListener("click", closeMenu);
+    window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
+    document.addEventListener("click", (e)=>{
+      const a = e.target.closest && e.target.closest("a");
+      if(a && window.matchMedia("(max-width: 900px)").matches) closeMenu();
+    });
+  }
+
+  function initPWA(){
+    if (!("serviceWorker" in navigator)) return;
+
+    navigator.serviceWorker.register("/apps/sw.js")
+      .then(() => setStatus("PWA pronto para uso."))
+      .catch(() => setStatus("PWA: SW não registrado (ok, segue o baile)."));
+  }
+
+  function boot(){
+    initMenu();
+    render();
+    initPWA();
+  }
+
+  if (document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();

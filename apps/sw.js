@@ -1,4 +1,4 @@
-const CACHE = "relevo-apps-launcher-v1";
+const CACHE = "relevo-apps-launcher-v2";
 const ASSETS = [
   "/apps/",
   "/apps/index.html",

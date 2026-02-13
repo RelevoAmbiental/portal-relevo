@@ -2,47 +2,95 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portal Relevo | Apps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apps | Portal Relevo</title>
 
-  <meta name="theme-color" content="#0b2e1b" />
-  <link rel="manifest" href="./manifest.json" />
+  <!-- Favicons / PWA (padrão do portal) -->
+  <link rel="icon" href="/assets/icons/favicon.ico">
+  <link rel="icon" sizes="32x32" href="/assets/icons/favicon-32.png">
+  <link rel="icon" sizes="16x16" href="/assets/icons/favicon-16.png">
+  <link rel="icon" sizes="192x192" href="/assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 
+  <!-- Manifest do launcher (mantém scope /apps/) -->
+  <link rel="manifest" href="/apps/manifest.json">
+  <meta name="theme-color" content="#0b2e1b">
+
+  <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="./styles/relevo-theme.css" />
-  <link rel="stylesheet" href="./styles.css" />
+  <!-- CSS global + tema -->
+  <link rel="stylesheet" href="/styles/global.css"/>
+  <link rel="stylesheet" href="/styles/relevo-theme.css"/>
+
+  <!-- CSS local (somente estrutura) -->
+  <link rel="stylesheet" href="/apps/styles.css"/>
 </head>
 
 <body class="relevo-theme">
-  <header class="top">
-    <div class="brand">
-      <img src="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/styles/icons/Logo_atualizada_vertical.png" 
-           alt="Relevo" 
-           style="width: 100px; margin-bottom: 15px;">
-      <div class="title">Apps Relevo</div>
-      <div class="subtitle">Atalho rápido para os módulos operacionais</div>
+
+  <!-- Header mobile (hamburger) -->
+  <header class="mobile-top-bar">
+    <div class="left">
+      <img src="/assets/icons/icon-192.png" alt="Relevo">
+      <div class="title">Apps</div>
     </div>
+
+    <button id="menuTrigger" class="icon-btn" type="button" aria-label="Abrir menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </button>
   </header>
 
-  <main class="wrap">
-    <section class="grid" id="appsGrid">
+  <div class="sidebar-overlay" id="overlay"></div>
+
+  <div class="dashboard-wrapper">
+    <!-- Sidebar (padrão portal) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="/styles/icons/Logo_atualizada_vertical.png" alt="Relevo">
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="/index.html">
+          <span class="dot"></span> Início
+        </a>
+        <a class="nav-item" href="/gestao.html">
+          <span class="dot"></span> Gestão
+        </a>
+        <a class="nav-item active" href="/apps/">
+          <span class="dot"></span> Apps
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div id="status" class="status">—</div>
+      </div>
+    </aside>
+
+    <!-- Conteúdo principal -->
+    <main class="main-content">
+      <div class="page-head">
+        <div>
+          <h1>Apps do Portal</h1>
+          <p class="muted" style="margin:0;">Atalho rápido para os módulos. Clique em <strong>Abrir</strong> para entrar.</p>
+        </div>
+      </div>
+
+      <section class="apps-grid" id="appsGrid">
+        <!-- cards gerados via apps.config.js + app.js -->
       </section>
 
-    <footer class="footer">
-      <span id="status"></span>
-      <div style="margin-top: 20px;">
-        <button class="btn btn-ghost" onclick="window.location.href='https://portal.relevo.eco.br/gestao.html'" style="font-size: 12px; opacity: 0.8;">
-          <i class="fas fa-arrow-left"></i> Painel de Gestão
-        </button>
-      </div>
-    </footer>
-  </main>
+      <p class="note" style="margin-top:14px;">
+        Dica: se estiver no celular, você pode “Adicionar à Tela Inicial” para abrir como app.
+      </p>
+    </main>
+  </div>
 
-  <script src="./apps.config.js"></script>
-  <script src="./app.js"></script>
+  <script src="/apps/apps.config.js"></script>
+  <script src="/apps/app.js"></script>
 </body>
 </html>

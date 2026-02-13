@@ -1,128 +1,195 @@
-/* Importa o tema global para usar as variáveis --relevo */
-@import url('relevo-theme.css');
-
-:root {
-  /* Mantemos as variáveis locais mas apontando para os tokens globais */
-  --bg-gradient: var(--relevo-gradient);
-  --card-glass: var(--relevo-surface);
-  --txt-main: var(--relevo-text);
-  --radius-pwa: var(--relevo-r-lg);
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: var(--relevo-font-sans);
-  /* Fundo gradiente oficial Relevo */
-  background: var(--relevo-gradient-soft); 
-  color: var(--txt-main);
+/* CSS LOCAL (somente estrutura/responsividade) — launcher /apps */
+.dashboard-wrapper{
+  display: grid;
+  grid-template-columns: 320px 1fr;
   min-height: 100vh;
 }
 
-/* Header estilizado como o portal */
-.top {
-  padding: 30px 20px 20px;
+/* Mobile header */
+.mobile-top-bar{
+  display:none;
   background: var(--relevo-green-900);
-  border-bottom: 3px solid var(--relevo-green-500);
-  text-align: center;
-}
-
-.title {
-  font-family: var(--relevo-font-title);
-  font-size: 22px;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.subtitle {
-  margin-top: 4px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.wrap {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px 16px;
-}
-
-/* Grid adaptável */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 720px) {
-  .grid { grid-template-columns: 1fr 1fr; }
-}
-
-/* Card com efeito Glassmorphism do Portal Relevo */
-.card {
-  background: var(--card-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--relevo-border);
-  border-radius: var(--radius-pwa);
-  padding: 20px;
-  display: flex;
-  align-items: center;
+  color:#fff;
+  padding: 12px 16px;
   justify-content: space-between;
-  gap: 15px;
-  box-shadow: var(--relevo-shadow);
-  transition: transform 0.2s ease;
+  align-items:center;
+  position: sticky;
+  top:0;
+  z-index: 1100;
 }
-
-.card:hover {
-  transform: translateY(-3px);
-  border-color: var(--relevo-green-500);
+.mobile-top-bar .left{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  min-width: 0;
 }
-
-.card-icon-img {
-  width: 44px !important;
-  height: 44px !important;
-  object-fit: contain;
-  background: rgba(15, 77, 46, 0.08);
-  border-radius: 10px;
-  padding: 6px;
-}
-
-.card-title {
+.mobile-top-bar .left img{ height: 26px; width:auto; display:block; }
+.mobile-top-bar .title{
   font-family: var(--relevo-font-title);
-  font-weight: 700;
-  font-size: 17px;
-  color: var(--relevo-green-900);
-}
-
-.card-desc {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--relevo-muted);
-  line-height: 1.4;
-}
-
-/* Botão seguindo o estilo do Portal de Gestão */
-.btn {
-  background: var(--relevo-gradient);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 18px;
   font-weight: 800;
   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.icon-btn{
+  background: transparent;
+  border: 0;
+  color: inherit;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.icon-btn:hover{ background: rgba(255,255,255,.12); }
+
+.sidebar-overlay{
+  display:none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 999;
+}
+
+/* Sidebar */
+.sidebar{
+  background: var(--relevo-surface-solid);
+  border-right: 1px solid var(--relevo-border);
+  padding: 18px 18px 16px;
+  display:flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y:auto;
+  z-index: 1000;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 8px 0 4px;
+}
+.brand img{ width: 120px; height:auto; display:block; }
+
+.nav{
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  color: var(--relevo-text);
+  text-decoration:none;
+  font-weight: 800;
+}
+.nav-item:hover{
+  background: rgba(38,192,76,.08);
+  border-color: rgba(0,0,0,.06);
+}
+.nav-item.active{
+  background: rgba(38,192,76,.14);
+  border-color: rgba(0,0,0,.08);
+}
+.dot{
+  width: 10px; height: 10px; border-radius: 999px;
+  background: var(--relevo-green-600);
+  display:inline-block;
   flex-shrink: 0;
-  transition: opacity 0.2s;
 }
 
-.btn:hover {
-  opacity: 0.9;
+.sidebar-footer{
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,.06);
 }
-
-.footer {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 11px;
+.status{
+  font-size: 12px;
   color: var(--relevo-muted);
+}
+
+/* Main */
+.main-content{
+  padding: 26px 26px 40px;
+  background: var(--relevo-gradient-soft);
+  min-width: 0;
+}
+.page-head{ margin-bottom: 14px; }
+
+.apps-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.app-card{
+  background: rgba(255,255,255,.85);
+  border: 1px solid var(--relevo-border);
+  border-radius: 16px;
+  padding: 14px 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.06);
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.app-card .top{
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+}
+.app-icon{
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fff;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.app-title{
+  font-family: var(--relevo-font-title);
+  font-weight: 900;
+  color: var(--relevo-text);
+  margin: 0;
+  font-size: 15px;
+}
+.app-desc{
+  margin: 6px 0 0;
+  color: var(--relevo-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.app-actions{
+  margin-top: auto;
+  display:flex;
+  justify-content: flex-end;
+}
+
+/* Responsivo */
+@media (max-width: 1100px){
+  .apps-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px){
+  .dashboard-wrapper{ grid-template-columns: 1fr; }
+  .mobile-top-bar{ display:flex; }
+  .sidebar{
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%);
+    width: 320px;
+    max-width: 90vw;
+    transition: transform .28s ease;
+    box-shadow: 12px 0 28px rgba(0,0,0,.12);
+  }
+  .sidebar.active{ transform: translateX(0); }
+  .sidebar-overlay.active{ display:block; }
+  .main-content{ padding: 18px 16px 40px; }
+  .apps-grid{ grid-template-columns: 1fr; }
 }
