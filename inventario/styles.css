@@ -122,6 +122,7 @@ body.relevo-theme{
 .main-content{
   padding: 26px 26px 40px;
   min-width: 0;
+   background: var(--relevo-gradient-soft);
 }
 
 /* Mantém compatibilidade: escondemos header/tabs antigos, mas o JS continua usando */
