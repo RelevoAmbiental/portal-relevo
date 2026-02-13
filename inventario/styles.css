@@ -122,7 +122,7 @@ body.relevo-theme{
 .main-content{
   padding: 26px 26px 40px;
   min-width: 0;
-   background: var(--relevo-gradient-soft);
+  background: var(--relevo-gradient-soft);
 }
 
 /* Mantém compatibilidade: escondemos header/tabs antigos, mas o JS continua usando */
@@ -173,7 +173,14 @@ body.relevo-theme{
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
+  background: var(--cinza-claro);
   color: var(--texto);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 30px auto 40px;
+  padding: 0 15px;
 }
 
 /* HEADER */
@@ -676,7 +683,7 @@ td {
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
-  background: var(--relevo-gradient-soft);
+  background: var(--cinza-claro);
   color: var(--texto);
 }
 
@@ -1051,7 +1058,4 @@ td {
   td {
     font-size: 0.8rem;
   }
-}
-html, body.relevo-theme, .dashboard-wrapper, .main-content{
-  background: var(--relevo-gradient-soft) !important;
 }
