@@ -173,7 +173,6 @@ body.relevo-theme{
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
-  background: var(--cinza-claro);
   color: var(--texto);
 }
 
