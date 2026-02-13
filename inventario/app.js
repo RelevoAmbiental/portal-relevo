@@ -52,8 +52,8 @@ const tbodyPatrimonio = document.getElementById("tbody-patrimonio");
 // Referências DOM – MOVIMENTAÇÃO
 const formMov = document.getElementById("form-movimentacao");
 const selectMovItem = document.getElementById("mov-item");
-const selectMovTipo = document.getElementById("mov-tipo");
 const selectMovStatusFiltro = document.getElementById("mov-status-filtro");
+const selectMovTipo = document.getElementById("mov-tipo");
 const inputMovQuantidade = document.getElementById("mov-quantidade");
 const inputMovResponsavel = document.getElementById("mov-responsavel");
 const inputMovDestino = document.getElementById("mov-destino");
@@ -296,6 +296,7 @@ function renderPatrimonio() {
 // Render – Select de item (Movimentação)
 // -----------------------------
 function renderMovSelect() {
+  if(!selectMovItem) return;
   const filtro = (selectMovStatusFiltro && selectMovStatusFiltro.value) ? selectMovStatusFiltro.value : "";
   selectMovItem.innerHTML = '<option value="">Selecione um item...</option>';
 
@@ -318,7 +319,6 @@ function renderMovSelect() {
     selectMovItem.appendChild(opt);
   });
 
-  // Se o item selecionado não existir mais após filtro, reseta
   if (selectMovItem.value && !lista.some(i => i.id === selectMovItem.value)) {
     selectMovItem.value = "";
   }
@@ -341,27 +341,8 @@ function atualizarResumoItemMov() {
     `Perdido: ${formatarNumero(it.estadoAtual.perdido)}`;
 }
 
-selectMovItem.addEventListener("change", atualizarResumoItemMov);
-
-if (selectMovStatusFiltro) {
-  selectMovStatusFiltro.addEventListener("change", () => {
-    renderMovSelect();
-  });
-}
-
-// Auto-filtro por tipo (ajuda na devolução/manutenção)
-selectMovTipo.addEventListener("change", () => {
-  if (!selectMovStatusFiltro) return;
-  const tipo = selectMovTipo.value;
-
-  // Heurística simples (você pode ajustar depois)
-  if (tipo === "devolucao") selectMovStatusFiltro.value = "emprestado";
-  else if (tipo === "retorno_manutencao") selectMovStatusFiltro.value = "manutencao";
-  else if (tipo === "emprestimo") selectMovStatusFiltro.value = "disponivel";
-  // perda/ajuste/manutencao: mantém o que o usuário escolheu
-
-  renderMovSelect();
-});
+if(selectMovItem) selectMovItem.addEventListener("change", atualizarResumoItemMov);
+if(selectMovStatusFiltro) selectMovStatusFiltro.addEventListener("change", renderMovSelect);
 
 // -----------------------------
 // Render – Inventário Operacional
@@ -853,9 +834,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // =========================================================
-// Layout Portal (sidebar + views) — sem framework
+// Sidebar Portal (Inventário) — controla menu mobile e troca de aba
 // =========================================================
-(function initLayoutPortal(){
+(function initSidebarPortalInventario(){
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
   const trigger = document.getElementById("menuTrigger");
@@ -873,29 +854,30 @@ document.addEventListener("DOMContentLoaded", () => {
   if(overlay) overlay.addEventListener("click", closeMenu);
   window.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeMenu(); });
 
-  document.querySelectorAll("[data-view]").forEach((a) => {
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      const viewId = a.getAttribute("data-view");
-      if(!viewId) return;
+  // Troca: sidebar -> dispara clique no botão original das abas (o app já sabe alternar)
+  const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
+  function activateTab(tabId){
+    const btn = tabButtons.find(b => b.getAttribute("data-tab") === tabId);
+    if(btn) btn.click();
+  }
 
-      // ativa item
-      document.querySelectorAll(".nav-item[data-view]").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll("[data-tab-target]").forEach((a)=>{
+    a.addEventListener("click", (e)=>{
+      e.preventDefault();
+      const tabId = a.getAttribute("data-tab-target");
+      if(!tabId) return;
+
+      document.querySelectorAll(".nav-item[data-tab-target]").forEach(x=>x.classList.remove("active"));
       a.classList.add("active");
 
-      // troca view
-      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-      const view = document.getElementById(viewId);
-      if(view) view.classList.add("active");
+      activateTab(tabId);
 
-      // fecha no mobile
       if(window.matchMedia("(max-width: 900px)").matches) closeMenu();
-      // scroll topo
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
 
-  // Pill de usuário
+  // Pill do usuário (opcional)
   try{
     if(window.firebase && firebase.auth){
       firebase.auth().onAuthStateChanged((u)=>{
@@ -903,5 +885,5 @@ document.addEventListener("DOMContentLoaded", () => {
         if(el) el.textContent = u?.email || u?.uid || "—";
       });
     }
-  }catch(e){}
+  }catch(err){}
 })();
