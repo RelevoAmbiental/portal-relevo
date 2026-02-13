@@ -1058,3 +1058,6 @@ td {
     font-size: 0.8rem;
   }
 }
+html, body.relevo-theme, .dashboard-wrapper, .main-content{
+  background: var(--relevo-gradient-soft) !important;
+}
