@@ -177,11 +177,12 @@ Error generating stack: `+o.message+`
         .crono-muted{ opacity:.75; }
         .crono-error{ margin: 10px 0; padding: 10px; border-radius: 10px; background: rgba(255,120,120,.18); border: 1px solid rgba(180,40,40,.25); }
         .crono-filters-row{
-          display:grid;
-          grid-template-columns: 220px 200px 260px 220px auto;
-          gap:10px;
-          align-items:center;
-          margin-bottom:10px;
+          display: flex;
+          gap: 10px;
+          flex-wrap: nowrap; /* Impede a quebra de linha */
+          align-items: center;
+          margin-bottom: 10px;
+          overflow-x: auto;
         }
         .crono-filter-hint{ justify-self:end; opacity:.85; }
         .crono-form-grid{
@@ -197,7 +198,7 @@ Error generating stack: `+o.message+`
         }
         .crono-field-label{ font-size: 13px; margin: 0 0 4px 2px; opacity:.85; }
         .crono-input{
-          font-size: 15px; /* +1 */
+          font-size: 15px;
           padding: 10px 12px;
           border-radius: 12px;
           width: 100%;
@@ -241,4 +242,4 @@ Error generating stack: `+o.message+`
           .crono-task-item{ flex-direction:column; }
           .crono-task-actions{ justify-content:flex-start; }
         }
-      `})]}):f.jsxs("div",{className:"crono-main",children:[f.jsx("h1",{className:"crono-page-title",children:"Tarefas"}),f.jsx("div",{className:"crono-card",children:f.jsx("p",{children:"Faça login no Portal para acessar as tarefas."})})]})}function Xn({title:i,children:s}){return f.jsx("div",{className:"cronograma-scope",children:f.jsxs("main",{className:"crono-main",children:[i?f.jsx("h1",{className:"crono-page-title",children:i}):null,f.jsx("div",{className:"crono-card",children:s})]})})}function ea({name:i}){return f.jsxs("div",{children:[f.jsxs("p",{children:[f.jsx("strong",{children:i})," (motor v2) — tela em construção."]}),f.jsx("p",{children:"Próximo passo: conectar Firebase (herdado do Portal), modelo de dados e permissões."})]})}function vm(){return f.jsx(em,{children:f.jsxs(Zp,{children:[f.jsx(tn,{path:"/",element:f.jsx(Xp,{to:"/dashboard",replace:!0})}),f.jsx(tn,{path:"/dashboard",element:f.jsx(Xn,{title:"Dashboard",children:f.jsx(ea,{name:"Dashboard"})})}),f.jsx(tn,{path:"/projetos",element:f.jsx(Xn,{title:"Projetos",children:f.jsx(im,{})})}),f.jsx(tn,{path:"/tarefas",element:f.jsx(Xn,{title:"Tarefas",children:f.jsx(hm,{})})}),f.jsx(tn,{path:"/importar",element:f.jsx(Xn,{title:"Importar",children:f.jsx(ea,{name:"Importar IA"})})}),f.jsx(tn,{path:"/calendario",element:f.jsx(Xn,{title:"Calendário",children:f.jsx(ea,{name:"Calendário"})})}),f.jsx(tn,{path:"*",element:f.jsx(Xn,{title:"404",children:f.jsx("p",{children:"Rota não encontrada."})})})]})})}function gm(){const i=window.__RELEVO_USER__||null;i?.email?console.log("✅ Sessão herdada do Portal:",i.email):console.log("ℹ️ Sem sessão exposta ainda (ok durante reset)."),window.__CRONOGRAMA_V2__={bootedAt:new Date().toISOString(),version:"v2-reset"}}gm();lp.createRoot(document.getElementById("root")).render(f.jsx(Ac.StrictMode,{children:f.jsx(vm,{})}));
+      `})]}):f.jsx("div",{className:"crono-main",children:f.jsx("div",{className:"crono-card",children:f.jsx("p",{children:"Faça login no Portal para acessar as tarefas."})})})}function Xn({title:i,children:s}){return f.jsx("div",{className:"cronograma-scope",children:f.jsxs("main",{className:"crono-main",children:[i?f.jsx("h1",{className:"crono-page-title",children:i}):null,f.jsx("div",{className:"crono-card",children:s})]})})}function ea({name:i}){return f.jsxs("div",{children:[f.jsxs("p",{children:[f.jsx("strong",{children:i})," (motor v2) — tela em construção."]}),f.jsx("p",{children:"Próximo passo: conectar Firebase (herdado do Portal), modelo de dados e permissões."})]})}function vm(){return f.jsx(em,{children:f.jsxs(Zp,{children:[f.jsx(tn,{path:"/",element:f.jsx(Xp,{to:"/dashboard",replace:!0})}),f.jsx(tn,{path:"/dashboard",element:f.jsx(Xn,{title:"Dashboard",children:f.jsx(ea,{name:"Dashboard"})})}),f.jsx(tn,{path:"/projetos",element:f.jsx(Xn,{title:"Projetos",children:f.jsx(im,{})})}),f.jsx(tn,{path:"/tarefas",element:f.jsx(Xn,{title:"Tarefas",children:f.jsx(hm,{})})}),f.jsx(tn,{path:"/importar",element:f.jsx(Xn,{title:"Importar",children:f.jsx(ea,{name:"Importar IA"})})}),f.jsx(tn,{path:"/calendario",element:f.jsx(Xn,{title:"Calendário",children:f.jsx(ea,{name:"Calendário"})})}),f.jsx(tn,{path:"*",element:f.jsx(Xn,{title:"404",children:f.jsx("p",{children:"Rota não encontrada."})})})]})})}function gm(){const i=window.__RELEVO_USER__||null;i?.email?console.log("✅ Sessão herdada do Portal:",i.email):console.log("ℹ️ Sem sessão exposta ainda (ok durante reset)."),window.__CRONOGRAMA_V2__={bootedAt:new Date().toISOString(),version:"v2-reset"}}gm();lp.createRoot(document.getElementById("root")).render(f.jsx(Ac.StrictMode,{children:f.jsx(vm,{})}));
