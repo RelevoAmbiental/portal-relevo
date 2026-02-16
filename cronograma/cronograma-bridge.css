@@ -1,39 +1,64 @@
 /* =========================================================
-   Cronograma (React) dentro do Portal Relevo
-   Bridge CSS: só layout/contraste/integração (sem paleta duplicada)
+   Portal Relevo — Cronograma (Bridge CSS)
+   Objetivo: integrar o app React ao tema do Portal
+   - Mantém o FUNDO do Portal (não aplica fundo no app)
+   - Força CONTRASTE legível no tema claro (texto escuro em cards claros)
+   - Não duplica paleta/tokens do Portal; só "cola" de compat
    ========================================================= */
 
-/* Fundo deve ficar no padrão do Portal (não do app React antigo) */
+/* 1) O app não define o fundo: quem manda é o Portal */
 .cronograma-scope{
   background: transparent !important;
-  color: var(--texto, #0b2e1b);
 }
 
-/* Wrapper interno do app: glass claro compatível com fundo do portal */
+/* 2) Conteúdo do app (cards) com glass claro e texto escuro */
+.cronograma-scope{
+  --crono-text: var(--texto-escuro, #0b2e1b);
+  --crono-muted: rgba(11, 46, 27, 0.65);
+  color: var(--crono-text) !important;
+}
+
+/* Evita “texto branco herdado” em qualquer canto do app */
+.cronograma-scope *{
+  color: inherit;
+}
+
+/* 3) Wrapper principal do app (Shell) */
+.cronograma-scope .crono-main{
+  width: 100%;
+  max-width: 1200px;
+}
+
+.cronograma-scope .crono-page-title{
+  margin: 0 0 14px 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: var(--crono-text) !important;
+}
+
+/* Card/container do app (fundo claro para contraste) */
 .cronograma-scope .crono-card{
-  background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.58) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
   border-radius: 18px;
   padding: 16px;
   box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+  color: var(--crono-text) !important;
 }
 
-/* Título (quando existir no Shell do app) */
-.cronograma-scope .crono-page-title{
-  margin: 0 0 14px 0;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  color: var(--texto, #0b2e1b);
+/* Qualquer texto dentro do card: força escuro */
+.cronograma-scope .crono-card *{
+  color: var(--crono-text) !important;
 }
 
-/* Inputs e selects com contraste no tema claro */
+/* 4) Inputs / selects / textarea (tema claro) */
 .cronograma-scope .crono-input,
 .cronograma-scope input,
 .cronograma-scope select,
 .cronograma-scope textarea{
-  color: var(--texto, #0b2e1b) !important;
-  background: rgba(255,255,255,0.75) !important;
+  color: var(--crono-text) !important;
+  background: rgba(255,255,255,0.82) !important;
   border: 1px solid rgba(0,0,0,0.10) !important;
 }
 
@@ -42,39 +67,61 @@
   color: rgba(11, 46, 27, 0.55) !important;
 }
 
-/* Botões */
-.cronograma-scope .crono-btn{
-  color: var(--texto, #0b2e1b) !important;
-  background: rgba(255,255,255,0.65) !important;
-  border: 1px solid rgba(0,0,0,0.10) !important;
-}
-.cronograma-scope .crono-btn:hover{
-  background: rgba(255,255,255,0.80) !important;
-}
-.cronograma-scope .crono-btn-danger{
-  border-color: rgba(180, 40, 40, 0.25) !important;
-  background: rgba(255,120,120,0.22) !important;
+/* 5) Botões */
+.cronograma-scope .crono-btn,
+.cronograma-scope button{
+  color: var(--crono-text) !important;
 }
 
-/* Modal */
-.cronograma-scope .crono-modal{
-  background: rgba(255,255,255,0.78) !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  color: var(--texto, #0b2e1b) !important;
+.cronograma-scope .crono-btn{
+  background: rgba(255,255,255,0.72) !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
 }
+
+.cronograma-scope .crono-btn:hover{
+  background: rgba(255,255,255,0.86) !important;
+}
+
+.cronograma-scope .crono-btn:disabled{
+  opacity: .55;
+}
+
+.cronograma-scope .crono-btn-danger{
+  border-color: rgba(180, 40, 40, 0.25) !important;
+  background: rgba(255,120,120,0.26) !important;
+}
+
+/* 6) Labels / textos auxiliares */
+.cronograma-scope label,
+.cronograma-scope small{
+  color: var(--crono-text) !important;
+}
+
+/* 7) Modal (claro) */
+.cronograma-scope .crono-modal{
+  background: rgba(255,255,255,0.86) !important;
+  border: 1px solid rgba(0,0,0,0.10) !important;
+  color: var(--crono-text) !important;
+  overflow: hidden;
+}
+
+.cronograma-scope .crono-modal *{
+  color: var(--crono-text) !important;
+}
+
 .cronograma-scope .crono-modal-overlay{
   background: rgba(0,0,0,0.35) !important;
 }
 
-/* Popover de cores: abre à esquerda (ancora na direita do botão) */
+/* 8) Popover de cores: abre para a ESQUERDA (ancora à direita) */
 .cronograma-scope .crono-colorpop{
   left: auto !important;
   right: 0 !important;
   background: rgba(10, 20, 16, 0.92) !important;
-  border: 1px solid rgba(255,255,255,0.14) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
 }
 
-/* Evita overflow em grids */
+/* 9) Segurança: evita overflow em grids */
 .cronograma-scope .crono-form-row > *,
 .cronograma-scope .crono-form-grid > *{
   min-width: 0;
