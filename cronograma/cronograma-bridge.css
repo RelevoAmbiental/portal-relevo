@@ -3,21 +3,13 @@
    Bridge CSS: só layout/contraste/integração (sem paleta duplicada)
    ========================================================= */
 
-/* Garante que o app herde o texto escuro do tema do Portal */
+/* Fundo deve ficar no padrão do Portal (não do app React antigo) */
 .cronograma-scope{
+  background: transparent !important;
   color: var(--texto, #0b2e1b);
 }
 
-/* Título padrão (quando existir no Shell do app) */
-.cronograma-scope .crono-page-title{
-  margin: 0 0 14px 0;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  color: var(--texto, #0b2e1b);
-}
-
-/* Card/wrapper interno do app: deixa "glass" claro compatível com fundo do portal */
+/* Wrapper interno do app: glass claro compatível com fundo do portal */
 .cronograma-scope .crono-card{
   background: rgba(255,255,255,0.55);
   border: 1px solid rgba(0,0,0,0.06);
@@ -26,7 +18,16 @@
   box-shadow: 0 14px 40px rgba(0,0,0,0.08);
 }
 
-/* Inputs e selects do app com contraste no tema claro */
+/* Título (quando existir no Shell do app) */
+.cronograma-scope .crono-page-title{
+  margin: 0 0 14px 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: var(--texto, #0b2e1b);
+}
+
+/* Inputs e selects com contraste no tema claro */
 .cronograma-scope .crono-input,
 .cronograma-scope input,
 .cronograma-scope select,
@@ -41,56 +42,40 @@
   color: rgba(11, 46, 27, 0.55) !important;
 }
 
-/* Botões com contraste */
-.cronograma-scope .crono-btn,
-.cronograma-scope button{
-  color: var(--texto, #0b2e1b);
-}
-
+/* Botões */
 .cronograma-scope .crono-btn{
+  color: var(--texto, #0b2e1b) !important;
   background: rgba(255,255,255,0.65) !important;
   border: 1px solid rgba(0,0,0,0.10) !important;
 }
-
 .cronograma-scope .crono-btn:hover{
   background: rgba(255,255,255,0.80) !important;
 }
-
-/* Botão danger: mantém destaque sem "sumir" */
 .cronograma-scope .crono-btn-danger{
   border-color: rgba(180, 40, 40, 0.25) !important;
   background: rgba(255,120,120,0.22) !important;
 }
 
-/* Checkbox label legível */
-.cronograma-scope label{
-  color: var(--texto, #0b2e1b);
-}
-
-/* Modal: texto e superfícies claras */
+/* Modal */
 .cronograma-scope .crono-modal{
   background: rgba(255,255,255,0.78) !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   color: var(--texto, #0b2e1b) !important;
 }
-
 .cronograma-scope .crono-modal-overlay{
   background: rgba(0,0,0,0.35) !important;
 }
 
-/* Popover de cores: pode ficar mais escuro para destacar as cores */
+/* Popover de cores: abre à esquerda (ancora na direita do botão) */
 .cronograma-scope .crono-colorpop{
+  left: auto !important;
+  right: 0 !important;
   background: rgba(10, 20, 16, 0.92) !important;
   border: 1px solid rgba(255,255,255,0.14) !important;
 }
 
-/* Evita qualquer overflow estranho em grids */
+/* Evita overflow em grids */
 .cronograma-scope .crono-form-row > *,
 .cronograma-scope .crono-form-grid > *{
   min-width: 0;
-}
-
-/* Ajuste: área principal mais confortável (se o portal já controla, isso só ajuda) */
-.cronograma-scope .crono-main{
-  max-width: 1200px;
 }
