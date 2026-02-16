@@ -2,245 +2,363 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cronograma | Relevo Consultoria Ambiental</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cronogramas | Portal Relevo</title>
 
+  <!-- Base href — necessário para navegação correta nos subpaths -->
   <base href="/cronograma/" />
 
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/assets/icons/icon-192.png">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0b2e1b" />
+  <link rel="icon" type="image/png" href="/assets/icons/icon-192.png" />
+
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- CSS global do Portal (tokens/tema) -->
-  <link rel="stylesheet" href="/styles/global.css">
-  <link rel="stylesheet" href="/styles/relevo-theme.css">
+  <!-- CSS Global do Portal -->
+  <link rel="stylesheet" href="/styles/global.css" />
+  <link rel="stylesheet" href="/styles/relevo-theme.css" />
 
-  <!-- Firebase compat herdado do Portal -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <!-- Bridge do Cronograma (somente layout/contraste) -->
+  <link rel="stylesheet" href="./cronograma-bridge.css" />
 
-  <!-- Guard + expose-session (Portal) -->
-  <script src="/scripts/firebase-init-guard.js"></script>
-  <script src="/scripts/expose-session.js"></script>
-
-  <!-- React (Vite build do cronogramas-relevo) -->
-  <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
-  <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css" />
-
-  <!-- Bridge: somente layout/compat (sem duplicar tokens) -->
-  <link rel="stylesheet" href="/cronograma/cronograma-bridge.css" />
+  <!-- CSS do build do Cronograma -->
+  <link rel="stylesheet" href="./assets/index.css" />
 
   <style>
-    /* Estrutura do padrão Gestão (sidebar fixa + drawer mobile) */
-    .dashboard-wrapper {
-      display: grid;
-      grid-template-columns: 280px 1fr;
+    /* =========================================================
+      CONTAINER DO PORTAL (padrão Gestão)
+      - Sidebar fixa no desktop
+      - Drawer no mobile (breakpoint 900px)
+      - Main mais largo
+    ========================================================= */
+
+    :root{
+      --sidebar-w: 270px;
+      --header-h: 64px;
+    }
+
+    body{
+      margin:0;
+      font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--relevo-gradient-soft, #e9f3ee);
+      color: var(--texto, #0b2e1b);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .portal-wrap{
+      display: flex;
       min-height: 100vh;
     }
 
-    .sidebar {
-      background: var(--relevo-surface-solid);
-      border-right: 1px solid var(--relevo-border);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      overflow-y: auto;
-      z-index: 1000;
-    }
-
-    .mobile-top-bar {
-      display: none;
-      background: var(--relevo-green-900);
-      color: white;
-      padding: 12px 20px;
-      justify-content: space-between;
-      align-items: center;
+    /* Sidebar (desktop) */
+    .portal-sidebar{
+      width: var(--sidebar-w);
+      flex: 0 0 var(--sidebar-w);
+      background: rgba(255,255,255,0.72);
+      border-right: 1px solid rgba(0,0,0,0.08);
+      padding: 18px 14px;
       position: sticky;
       top: 0;
-      z-index: 1100;
+      height: 100vh;
+      overflow: auto;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
-    }
-
-    .main-content {
-      padding: 40px;
-      background: var(--relevo-gradient-soft);
-      overflow-x: hidden; /* evita “vazamento” visual */
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
+    .brand{
+      display:flex;
+      align-items:center;
       gap: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--relevo-border);
+      padding: 6px 8px 16px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      margin-bottom: 14px;
     }
-
-    .brand img {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      object-fit: cover;
-      box-shadow: var(--relevo-shadow);
+    .brand img{
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
     }
-
-    .brand .title {
-      font-weight: 800;
-      line-height: 1.1;
-      color: var(--relevo-text);
-      font-family: Inter, Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
-
-    .brand .subtitle {
-      font-size: 12px;
-      opacity: 0.8;
-      margin-top: 2px;
-      color: var(--relevo-text);
-    }
-
-    .nav {
-      display: flex;
+    .brand .brand-text{
+      display:flex;
       flex-direction: column;
-      gap: 10px;
+      line-height: 1.1;
+    }
+    .brand .brand-text strong{
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--texto, #0b2e1b);
+    }
+    .brand .brand-text span{
+      font-size: 12px;
+      opacity: .65;
     }
 
-    .nav-item {
-      display: flex;
-      align-items: center;
+    .nav{
+      display: grid;
+      gap: 8px;
+      padding: 8px 4px;
+    }
+    .nav a{
+      display:flex;
+      align-items:center;
       gap: 10px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-radius: 14px;
-      border: 1px solid transparent;
-      color: var(--relevo-text);
       text-decoration: none;
-      background: rgba(255,255,255,0.06);
-      transition: 0.15s ease;
+      color: var(--texto, #0b2e1b);
+      border: 1px solid transparent;
+      background: transparent;
       font-weight: 600;
     }
-
-    .nav-item:hover {
-      background: rgba(255,255,255,0.10);
-      border-color: var(--relevo-border);
-      transform: translateY(-1px);
-    }
-
-    .nav-item i {
+    .nav a i{
       width: 18px;
       text-align: center;
-      opacity: 0.9;
+      opacity: .9;
+    }
+    .nav a:hover{
+      background: rgba(11, 46, 27, 0.06);
+      border-color: rgba(11, 46, 27, 0.08);
+    }
+    .nav a.is-active{
+      background: rgba(11, 46, 27, 0.08);
+      border-color: rgba(0, 160, 80, 0.45);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
 
-    .nav-divider {
+    .nav-sep{
       height: 1px;
-      background: var(--relevo-border);
-      margin: 6px 0;
+      background: rgba(0,0,0,0.08);
+      margin: 12px 8px;
     }
 
-    /* Mobile behavior */
-    @media (max-width: 900px) {
-      .dashboard-wrapper {
-        grid-template-columns: 1fr;
-      }
+    /* Main */
+    .portal-main{
+      flex: 1;
+      padding: 22px 26px;
+      display: flex;
+      justify-content: center;
+    }
+    .portal-main-inner{
+      width: min(1200px, 100%);
+    }
 
-      .sidebar {
-        position: fixed;
-        left: -320px;
-        top: 0;
-        width: 300px;
-        height: 100vh;
-        transition: left 0.2s ease;
-        box-shadow: var(--relevo-shadow);
-      }
+    /* Mobile header + drawer */
+    .mobile-topbar{
+      display:none;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: var(--header-h);
+      padding: 12px 12px;
+      background: rgba(255,255,255,0.72);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .mobile-topbar .left{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .mobile-topbar img{
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+    }
+    .mobile-title{
+      display:flex;
+      flex-direction: column;
+      line-height: 1.1;
+      min-width: 0;
+    }
+    .mobile-title strong{
+      font-weight: 800;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mobile-title span{
+      font-size: 12px;
+      opacity: .65;
+    }
 
-      .sidebar.active {
-        left: 0;
-      }
+    .hamburger{
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.6);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      display:grid;
+      place-items: center;
+      cursor:pointer;
+    }
 
-      .mobile-top-bar {
-        display: flex;
-      }
+    .drawer-overlay{
+      display:none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 80;
+    }
+    .drawer{
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: min(var(--sidebar-w), 86vw);
+      background: rgba(255,255,255,0.92);
+      border-right: 1px solid rgba(0,0,0,0.08);
+      padding: 18px 14px;
+      transform: translateX(-110%);
+      transition: transform .18s ease;
+      z-index: 90;
+      overflow: auto;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .drawer.open{
+      transform: translateX(0);
+    }
+    .drawer-overlay.open{
+      display:block;
+    }
 
-      .sidebar-overlay.active {
-        display: block;
-      }
-
-      .main-content {
-        padding: 18px;
-      }
+    /* Breakpoint */
+    @media (max-width: 900px){
+      .portal-sidebar{ display:none; }
+      .portal-wrap{ display:block; }
+      .mobile-topbar{ display:flex; }
+      .portal-main{ padding: 16px 14px; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Mobile Top Bar -->
-  <div class="mobile-top-bar">
-    <button id="menuTrigger" class="nav-item" style="padding:10px 12px; background: rgba(255,255,255,0.12); border:none;">
+  <!-- Topbar Mobile -->
+  <div class="mobile-topbar">
+    <div class="left">
+      <img src="/assets/icons/icon-192.png" alt="Relevo" />
+      <div class="mobile-title">
+        <strong>Portal Relevo</strong>
+        <span>Cronograma</span>
+      </div>
+    </div>
+    <button class="hamburger" id="menuTrigger" aria-label="Abrir menu">
       <i class="fa-solid fa-bars"></i>
-      Menu
     </button>
-    <div style="font-weight:800;">Cronograma</div>
   </div>
 
-  <div id="overlay" class="sidebar-overlay"></div>
+  <!-- Drawer Mobile -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="brand">
+      <img src="/assets/icons/icon-192.png" alt="Relevo" />
+      <div class="brand-text">
+        <strong>Portal Relevo</strong>
+        <span>Cronograma</span>
+      </div>
+    </div>
 
-  <div class="dashboard-wrapper">
-    <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar">
+    <nav class="nav" id="navDrawer">
+      <a href="./#/dashboard" data-route="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="./#/projetos" data-route="/projetos"><i class="fa-solid fa-folder-open"></i> Projetos</a>
+      <a href="./#/tarefas" data-route="/tarefas"><i class="fa-solid fa-list-check"></i> Tarefas</a>
+      <a href="./#/importar" data-route="/importar"><i class="fa-solid fa-wand-magic-sparkles"></i> Importar IA</a>
+      <a href="./#/calendario" data-route="/calendario"><i class="fa-solid fa-calendar-days"></i> Calendário</a>
+
+      <div class="nav-sep"></div>
+
+      <a href="/apps/" title="Abrir Apps do Portal"><i class="fa-solid fa-layer-group"></i> Apps</a>
+      <a href="/gestao.html" title="Voltar para Gestão"><i class="fa-solid fa-house"></i> Voltar para Gestão</a>
+    </nav>
+  </aside>
+
+  <div class="portal-wrap">
+    <!-- Sidebar Desktop -->
+    <aside class="portal-sidebar">
       <div class="brand">
-        <img src="/assets/logo-relevo.png" alt="Relevo" onerror="this.style.display='none'">
-        <div>
-          <div class="title">Portal Relevo</div>
-          <div class="subtitle">Cronograma</div>
+        <img src="/assets/icons/icon-192.png" alt="Relevo" />
+        <div class="brand-text">
+          <strong>Portal Relevo</strong>
+          <span>Cronograma</span>
         </div>
       </div>
 
-      <nav class="nav">
-        <a class="nav-item" href="./#/dashboard"><i class="fa-solid fa-gauge"></i>Dashboard</a>
-        <a class="nav-item" href="./#/projetos"><i class="fa-solid fa-folder-open"></i>Projetos</a>
-        <a class="nav-item" href="./#/tarefas"><i class="fa-solid fa-list-check"></i>Tarefas</a>
-        <a class="nav-item" href="./#/importar"><i class="fa-solid fa-wand-magic-sparkles"></i>Importar IA</a>
-        <a class="nav-item" href="./#/calendario"><i class="fa-solid fa-calendar-days"></i>Calendário</a>
+      <nav class="nav" id="navSidebar">
+        <a href="./#/dashboard" data-route="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="./#/projetos" data-route="/projetos"><i class="fa-solid fa-folder-open"></i> Projetos</a>
+        <a href="./#/tarefas" data-route="/tarefas"><i class="fa-solid fa-list-check"></i> Tarefas</a>
+        <a href="./#/importar" data-route="/importar"><i class="fa-solid fa-wand-magic-sparkles"></i> Importar IA</a>
+        <a href="./#/calendario" data-route="/calendario"><i class="fa-solid fa-calendar-days"></i> Calendário</a>
 
-        <div class="nav-divider"></div>
+        <div class="nav-sep"></div>
 
-        <a class="nav-item" href="/apps/"><i class="fa-solid fa-grid-2"></i>Apps</a>
-        <a class="nav-item" href="/gestao.html"><i class="fa-solid fa-house"></i>Voltar para Gestão</a>
+        <a href="/apps/" title="Abrir Apps do Portal"><i class="fa-solid fa-layer-group"></i> Apps</a>
+        <a href="/gestao.html" title="Voltar para Gestão"><i class="fa-solid fa-house"></i> Voltar para Gestão</a>
       </nav>
     </aside>
 
-    <!-- Main -->
-    <main class="main-content">
-      <div id="root"></div>
-    </main>
+    <!-- Conteúdo -->
+    <section class="portal-main">
+      <div class="portal-main-inner">
+        <div id="root"></div>
+      </div>
+    </section>
   </div>
 
-  <script>
-    const trigger = document.getElementById('menuTrigger');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
+  <!-- Firebase (mesmo padrão do Portal) -->
+  <script src="/scripts/firebase-compat.js"></script>
+  <script src="/scripts/firebase-init-guard.js"></script>
 
-    function toggleMenu() {
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
+  <script>
+    // Drawer toggle
+    const trigger = document.getElementById('menuTrigger');
+    const overlay = document.getElementById('drawerOverlay');
+    const drawer = document.getElementById('drawer');
+
+    function openDrawer(){
+      overlay.classList.add('open');
+      drawer.classList.add('open');
+    }
+    function closeDrawer(){
+      overlay.classList.remove('open');
+      drawer.classList.remove('open');
     }
 
-    if (trigger) trigger.addEventListener('click', toggleMenu);
-    if (overlay) overlay.addEventListener('click', toggleMenu);
+    trigger?.addEventListener('click', openDrawer);
+    overlay?.addEventListener('click', closeDrawer);
 
-    document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
-      if (window.innerWidth <= 900) {
-        // fecha somente se o clique foi em link (não no botão do topo)
-        if (n.getAttribute('href')) toggleMenu();
-      }
-    }));
+    // Active route highlight (sidebar + drawer)
+    function currentRoute(){
+      // HashRouter: "#/projetos"
+      const h = location.hash || "#/dashboard";
+      const route = h.replace(/^#/, "");
+      return route.startsWith("/") ? route : ("/" + route);
+    }
+
+    function updateActive(){
+      const r = currentRoute();
+      document.querySelectorAll('[data-route]').forEach(a => {
+        a.classList.toggle('is-active', a.getAttribute('data-route') === r);
+      });
+    }
+
+    window.addEventListener('hashchange', updateActive);
+    updateActive();
   </script>
+
+  <!-- App do Cronograma (Vite build) -->
+  <script type="module" src="./assets/index.js"></script>
 </body>
 </html>
