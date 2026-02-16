@@ -6,6 +6,11 @@
    - Não duplica paleta/tokens do Portal; só "cola" de compat
    ========================================================= */
 
+/* O container do React ocupa toda a largura útil do main do Portal */
+.portal-main #root{
+  width: 100%;
+}
+
 /* 1) O app não define o fundo: quem manda é o Portal */
 .cronograma-scope{
   background: transparent !important;
@@ -26,7 +31,7 @@
 /* 3) Wrapper principal do app (Shell) */
 .cronograma-scope .crono-main{
   width: 100%;
-  max-width: 1200px;
+  max-width: 1480px; /* antes 1200px */
 }
 
 .cronograma-scope .crono-page-title{
@@ -39,6 +44,7 @@
 
 /* Card/container do app (fundo claro para contraste) */
 .cronograma-scope .crono-card{
+  width: 100%;
   background: rgba(255,255,255,0.58) !important;
   border: 1px solid rgba(0,0,0,0.06) !important;
   border-radius: 18px;
