@@ -198,14 +198,14 @@ Error generating stack: `+o.message+`
         }
         .crono-field-label{ font-size: 13px; margin: 0 0 4px 2px; opacity:.85; }
         .crono-input{
-          font-size: 14px;
+          font-size: 13px;
           padding: 10px 12px;
           border-radius: 12px;
           width: 100%;
           box-sizing: border-box;
         }
         .crono-btn{
-          font-size: 15px;
+          font-size: 13px;
           padding: 10px 12px;
           border-radius: 12px;
           cursor:pointer;
