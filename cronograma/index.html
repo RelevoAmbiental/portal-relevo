@@ -1,40 +1,246 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cronogramas | Relevo Consultoria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cronograma | Relevo Consultoria Ambiental</title>
 
-  <!-- ============================================================= -->
-  <!-- Base href — necessário para navegação correta nos subpaths     -->
-  <!-- ============================================================= -->
   <base href="/cronograma/" />
 
-  <!-- ============================================================= -->
-  <!-- Firebase compat herdado do Portal                             -->
-  <!-- ============================================================= -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/RelevoAmbiental/portal-relevo/refs/heads/main/assets/icons/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- CSS global do Portal (tokens/tema) -->
+  <link rel="stylesheet" href="/styles/global.css">
+  <link rel="stylesheet" href="/styles/relevo-theme.css">
+
+  <!-- Firebase compat herdado do Portal -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 
-  <!-- ============================================================= -->
-  <!-- Scripts globais do Portal (Guard + expose-session)             -->
-  <!-- ============================================================= -->
+  <!-- Guard + expose-session (Portal) -->
   <script src="/scripts/firebase-init-guard.js"></script>
   <script src="/scripts/expose-session.js"></script>
 
-  <!-- ============================================================= -->
-  <!-- Bundle React (Vite build atual)                                -->
-  <!-- ATENÇÃO: Use os nomes exatos da pasta dist/assets do cronograma -->
-  <!-- ============================================================= -->
+  <!-- React (Vite build do cronogramas-relevo) -->
   <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
   <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css" />
+
+  <!-- Bridge: somente layout/compat (sem duplicar tokens) -->
+  <link rel="stylesheet" href="/cronograma/cronograma-bridge.css" />
+
+  <style>
+    /* Estrutura do padrão Gestão (sidebar fixa + drawer mobile) */
+    .dashboard-wrapper {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--relevo-surface-solid);
+      border-right: 1px solid var(--relevo-border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .mobile-top-bar {
+      display: none;
+      background: var(--relevo-green-900);
+      color: white;
+      padding: 12px 20px;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1100;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+
+    .main-content {
+      padding: 40px;
+      background: var(--relevo-gradient-soft);
+      overflow-x: hidden; /* evita “vazamento” visual */
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--relevo-border);
+    }
+
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: var(--relevo-shadow);
+    }
+
+    .brand .title {
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--relevo-text);
+      font-family: Inter, Montserrat, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+
+    .brand .subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 2px;
+      color: var(--relevo-text);
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      color: var(--relevo-text);
+      text-decoration: none;
+      background: rgba(255,255,255,0.06);
+      transition: 0.15s ease;
+      font-weight: 600;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: var(--relevo-border);
+      transform: translateY(-1px);
+    }
+
+    .nav-item i {
+      width: 18px;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .nav-divider {
+      height: 1px;
+      background: var(--relevo-border);
+      margin: 6px 0;
+    }
+
+    /* Mobile behavior */
+    @media (max-width: 900px) {
+      .dashboard-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -320px;
+        top: 0;
+        width: 300px;
+        height: 100vh;
+        transition: left 0.2s ease;
+        box-shadow: var(--relevo-shadow);
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .mobile-top-bar {
+        display: flex;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      .main-content {
+        padding: 18px;
+      }
+    }
+  </style>
 </head>
 
-<body style="margin:0; font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial;">
-  <div id="root"></div>
+<body>
+  <!-- Mobile Top Bar -->
+  <div class="mobile-top-bar">
+    <button id="menuTrigger" class="nav-item" style="padding:10px 12px; background: rgba(255,255,255,0.12); border:none;">
+      <i class="fa-solid fa-bars"></i>
+      Menu
+    </button>
+    <div style="font-weight:800;">Cronograma</div>
+  </div>
+
+  <div id="overlay" class="sidebar-overlay"></div>
+
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <img src="/assets/logo-relevo.png" alt="Relevo" onerror="this.style.display='none'">
+        <div>
+          <div class="title">Portal Relevo</div>
+          <div class="subtitle">Cronograma</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item" href="./#/dashboard"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        <a class="nav-item" href="./#/projetos"><i class="fa-solid fa-folder-open"></i>Projetos</a>
+        <a class="nav-item" href="./#/tarefas"><i class="fa-solid fa-list-check"></i>Tarefas</a>
+        <a class="nav-item" href="./#/importar"><i class="fa-solid fa-wand-magic-sparkles"></i>Importar IA</a>
+        <a class="nav-item" href="./#/calendario"><i class="fa-solid fa-calendar-days"></i>Calendário</a>
+
+        <div class="nav-divider"></div>
+
+        <a class="nav-item" href="/apps/"><i class="fa-solid fa-grid-2"></i>Apps</a>
+        <a class="nav-item" href="/gestao.html"><i class="fa-solid fa-house"></i>Voltar para Gestão</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <div id="root"></div>
+    </main>
+  </div>
+
+  <script>
+    const trigger = document.getElementById('menuTrigger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    function toggleMenu() {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    if (trigger) trigger.addEventListener('click', toggleMenu);
+    if (overlay) overlay.addEventListener('click', toggleMenu);
+
+    document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        // fecha somente se o clique foi em link (não no botão do topo)
+        if (n.getAttribute('href')) toggleMenu();
+      }
+    }));
+  </script>
 </body>
-
-
 </html>
