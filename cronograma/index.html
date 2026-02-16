@@ -5,360 +5,314 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cronogramas | Portal Relevo</title>
 
-  <!-- Base href — necessário para navegação correta nos subpaths -->
-  <base href="/cronograma/" />
-
   <meta name="theme-color" content="#0b2e1b" />
   <link rel="icon" type="image/png" href="/assets/icons/icon-192.png" />
 
-  <!-- Fontes -->
+  <!-- Fontes (Portal) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- CSS Global do Portal -->
+  <!-- CSS central do Portal (NÃO duplicar tokens no app) -->
   <link rel="stylesheet" href="/styles/global.css" />
   <link rel="stylesheet" href="/styles/relevo-theme.css" />
 
-  <!-- Bridge do Cronograma (somente layout/contraste) -->
-  <link rel="stylesheet" href="./cronograma-bridge.css" />
+  <!-- Bridge do Cronograma (layout/contraste/compat) -->
+  <link rel="stylesheet" href="/cronograma/cronograma-bridge.css" />
 
-  <!-- CSS do build do Cronograma -->
-  <link rel="stylesheet" href="./assets/index.css" />
+  <!-- Assets do build do Cronograma (React/Vite) -->
+  <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css" />
+</head>
+
+<body class="relevo-body">
+  <div class="portal-layout">
+    <!-- Sidebar (desktop) -->
+    <aside class="portal-sidebar" id="sidebar">
+      <div class="portal-brand">
+        <img class="portal-brand-logo" src="/assets/icons/icon-192.png" alt="Relevo" />
+        <div class="portal-brand-text">
+          <div class="portal-brand-title">Portal Relevo</div>
+          <div class="portal-brand-subtitle">Cronograma</div>
+        </div>
+      </div>
+
+      <nav class="portal-nav" aria-label="Navegação do cronograma">
+        <a class="portal-nav-item" href="./#/dashboard">
+          <span class="portal-nav-ico">⏱️</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="portal-nav-item" href="./#/projetos">
+          <span class="portal-nav-ico">📁</span>
+          <span>Projetos</span>
+        </a>
+        <a class="portal-nav-item" href="./#/tarefas">
+          <span class="portal-nav-ico">✅</span>
+          <span>Tarefas</span>
+        </a>
+        <a class="portal-nav-item" href="./#/importar">
+          <span class="portal-nav-ico">✨</span>
+          <span>Importar IA</span>
+        </a>
+        <a class="portal-nav-item" href="./#/calendario">
+          <span class="portal-nav-ico">📅</span>
+          <span>Calendário</span>
+        </a>
+
+        <div class="portal-nav-divider"></div>
+
+        <div class="portal-nav-section">Apps</div>
+        <a class="portal-nav-item" href="/apps/">
+          <span class="portal-nav-ico">🧩</span>
+          <span>Apps</span>
+        </a>
+        <a class="portal-nav-item" href="/gestao.html">
+          <span class="portal-nav-ico">🏠</span>
+          <span>Voltar para Gestão</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Topbar (mobile) -->
+    <header class="portal-topbar">
+      <button class="portal-hamburger" id="btnOpenSidebar" aria-label="Abrir menu">☰</button>
+      <div class="portal-topbar-title">
+        <strong>Portal Relevo</strong>
+        <span>Cronograma</span>
+      </div>
+    </header>
+
+    <!-- Drawer (mobile) -->
+    <div class="portal-drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+    <div class="portal-drawer" id="drawer" aria-hidden="true">
+      <div class="portal-drawer-head">
+        <div class="portal-brand">
+          <img class="portal-brand-logo" src="/assets/icons/icon-192.png" alt="Relevo" />
+          <div class="portal-brand-text">
+            <div class="portal-brand-title">Portal Relevo</div>
+            <div class="portal-brand-subtitle">Cronograma</div>
+          </div>
+        </div>
+        <button class="portal-drawer-close" id="btnCloseSidebar" aria-label="Fechar menu">✕</button>
+      </div>
+
+      <nav class="portal-nav" aria-label="Navegação do cronograma (mobile)">
+        <a class="portal-nav-item" href="./#/dashboard">⏱️ Dashboard</a>
+        <a class="portal-nav-item" href="./#/projetos">📁 Projetos</a>
+        <a class="portal-nav-item" href="./#/tarefas">✅ Tarefas</a>
+        <a class="portal-nav-item" href="./#/importar">✨ Importar IA</a>
+        <a class="portal-nav-item" href="./#/calendario">📅 Calendário</a>
+
+        <div class="portal-nav-divider"></div>
+
+        <a class="portal-nav-item" href="/apps/">🧩 Apps</a>
+        <a class="portal-nav-item" href="/gestao.html">🏠 Voltar para Gestão</a>
+      </nav>
+    </div>
+
+    <!-- Main -->
+    <main class="portal-main">
+      <!-- O React monta aqui -->
+      <div id="root"></div>
+    </main>
+  </div>
+
+  <!-- ===== Firebase compat (CORRETO) — precisa carregar ANTES do Guard ===== -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <!-- Guard do Portal (inicializa uma vez e expõe window.__RELEVO_FIREBASE__) -->
+  <script src="/scripts/firebase-init-guard.js"></script>
+
+  <!-- Script do build do Cronograma (React/Vite) -->
+  <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
+
+  <!-- Drawer behavior -->
+  <script>
+    (function () {
+      const btnOpen = document.getElementById("btnOpenSidebar");
+      const btnClose = document.getElementById("btnCloseSidebar");
+      const overlay = document.getElementById("drawerOverlay");
+      const drawer = document.getElementById("drawer");
+
+      function openDrawer() {
+        overlay.style.display = "block";
+        drawer.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        drawer.setAttribute("aria-hidden", "false");
+      }
+      function closeDrawer() {
+        drawer.classList.remove("is-open");
+        overlay.style.display = "none";
+        overlay.setAttribute("aria-hidden", "true");
+        drawer.setAttribute("aria-hidden", "true");
+      }
+
+      btnOpen && btnOpen.addEventListener("click", openDrawer);
+      btnClose && btnClose.addEventListener("click", closeDrawer);
+      overlay && overlay.addEventListener("click", closeDrawer);
+
+      // Fecha drawer quando clicar em um item
+      drawer && drawer.addEventListener("click", (e) => {
+        const a = e.target && e.target.closest && e.target.closest("a");
+        if (a) closeDrawer();
+      });
+    })();
+  </script>
 
   <style>
-    /* =========================================================
-      CONTAINER DO PORTAL (padrão Gestão)
-      - Sidebar fixa no desktop
-      - Drawer no mobile (breakpoint 900px)
-      - Main mais largo
-    ========================================================= */
-
-    :root{
-      --sidebar-w: 270px;
-      --header-h: 64px;
-    }
-
-    body{
-      margin:0;
-      font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: var(--relevo-gradient-soft, #e9f3ee);
-      color: var(--texto, #0b2e1b);
+    /* Layout base do container (sem depender de classes antigas) */
+    .portal-layout{
       min-height: 100vh;
-      overflow-x: hidden;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      background: var(--relevo-gradient-soft);
     }
-
-    .portal-wrap{
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* Sidebar (desktop) */
     .portal-sidebar{
-      width: var(--sidebar-w);
-      flex: 0 0 var(--sidebar-w);
-      background: rgba(255,255,255,0.72);
-      border-right: 1px solid rgba(0,0,0,0.08);
-      padding: 18px 14px;
       position: sticky;
       top: 0;
       height: 100vh;
-      overflow: auto;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.75);
+      border-right: 1px solid rgba(0,0,0,0.06);
+      padding: 14px 12px;
+      display: none;
     }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      padding: 6px 8px 16px 8px;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      margin-bottom: 14px;
-    }
-    .brand img{
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-    }
-    .brand .brand-text{
-      display:flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-    .brand .brand-text strong{
-      font-weight: 800;
-      font-size: 14px;
-      color: var(--texto, #0b2e1b);
-    }
-    .brand .brand-text span{
-      font-size: 12px;
-      opacity: .65;
-    }
-
-    .nav{
-      display: grid;
-      gap: 8px;
-      padding: 8px 4px;
-    }
-    .nav a{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      text-decoration: none;
-      color: var(--texto, #0b2e1b);
-      border: 1px solid transparent;
-      background: transparent;
-      font-weight: 600;
-    }
-    .nav a i{
-      width: 18px;
-      text-align: center;
-      opacity: .9;
-    }
-    .nav a:hover{
-      background: rgba(11, 46, 27, 0.06);
-      border-color: rgba(11, 46, 27, 0.08);
-    }
-    .nav a.is-active{
-      background: rgba(11, 46, 27, 0.08);
-      border-color: rgba(0, 160, 80, 0.45);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-    }
-
-    .nav-sep{
-      height: 1px;
-      background: rgba(0,0,0,0.08);
-      margin: 12px 8px;
-    }
-
-    /* Main */
     .portal-main{
-      flex: 1;
-      padding: 22px 26px;
+      padding: 28px 28px 44px 28px;
+      display: grid;
+      justify-items: center;
+      align-content: start;
+    }
+    .portal-topbar{
       display: flex;
-      justify-content: center;
-    }
-    .portal-main-inner{
-      width: min(1200px, 100%);
-    }
-
-    /* Mobile header + drawer */
-    .mobile-topbar{
-      display:none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.72);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
       position: sticky;
       top: 0;
       z-index: 50;
-      height: var(--header-h);
-      padding: 12px 12px;
-      background: rgba(255,255,255,0.72);
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+    }
+    .portal-hamburger{
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.75);
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .portal-topbar-title{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .portal-topbar-title strong{ font-weight: 800; }
+    .portal-topbar-title span{ opacity: .65; font-size: 12px; }
+
+    .portal-brand{
+      display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .mobile-topbar .left{
-      display:flex;
-      align-items:center;
       gap: 10px;
-      min-width: 0;
+      padding: 8px 10px 14px 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 10px;
     }
-    .mobile-topbar img{
+    .portal-brand-logo{
       width: 34px;
       height: 34px;
       object-fit: contain;
     }
-    .mobile-title{
-      display:flex;
+    .portal-brand-text{
+      display: flex;
       flex-direction: column;
       line-height: 1.1;
-      min-width: 0;
     }
-    .mobile-title strong{
-      font-weight: 800;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .portal-brand-title{ font-weight: 800; }
+    .portal-brand-subtitle{ opacity: .65; font-size: 12px; }
+
+    .portal-nav{
+      display: grid;
+      gap: 6px;
+      padding: 10px 6px;
     }
-    .mobile-title span{
-      font-size: 12px;
+    .portal-nav-item{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: var(--texto, #0b2e1b);
+      text-decoration: none;
+      border: 1px solid transparent;
+      background: transparent;
+    }
+    .portal-nav-item:hover{
+      background: rgba(255,255,255,0.60);
+      border-color: rgba(0,0,0,0.06);
+    }
+    .portal-nav-ico{ width: 18px; display: inline-flex; justify-content: center; }
+    .portal-nav-divider{
+      height: 1px;
+      background: rgba(0,0,0,0.06);
+      margin: 10px 8px;
+    }
+    .portal-nav-section{
+      padding: 6px 10px;
       opacity: .65;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .hamburger{
-      border: 1px solid rgba(0,0,0,0.10);
-      background: rgba(255,255,255,0.6);
-      border-radius: 12px;
-      width: 44px;
-      height: 44px;
-      display:grid;
-      place-items: center;
-      cursor:pointer;
-    }
-
-    .drawer-overlay{
-      display:none;
+    /* Drawer */
+    .portal-drawer-overlay{
+      display: none;
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.35);
       z-index: 80;
     }
-    .drawer{
+    .portal-drawer{
       position: fixed;
       top: 0;
       left: 0;
+      width: min(320px, 86vw);
       height: 100vh;
-      width: min(var(--sidebar-w), 86vw);
-      background: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.88);
       border-right: 1px solid rgba(0,0,0,0.08);
-      padding: 18px 14px;
       transform: translateX(-110%);
       transition: transform .18s ease;
       z-index: 90;
-      overflow: auto;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      padding: 14px 12px;
     }
-    .drawer.open{
-      transform: translateX(0);
+    .portal-drawer.is-open{ transform: translateX(0); }
+    .portal-drawer-head{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
-    .drawer-overlay.open{
-      display:block;
+    .portal-drawer-close{
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.10);
+      background: rgba(255,255,255,0.75);
+      cursor: pointer;
+      font-size: 18px;
     }
 
-    /* Breakpoint */
-    @media (max-width: 900px){
-      .portal-sidebar{ display:none; }
-      .portal-wrap{ display:block; }
-      .mobile-topbar{ display:flex; }
-      .portal-main{ padding: 16px 14px; }
+    /* Breakpoint 900px (padrão portal) */
+    @media (min-width: 900px){
+      .portal-sidebar{ display: block; }
+      .portal-topbar{ display: none; }
+      .portal-layout{ grid-template-columns: 280px 1fr; }
+      .portal-main{ padding: 34px 34px 52px 34px; }
+    }
+    @media (max-width: 899px){
+      .portal-layout{ grid-template-columns: 1fr; }
+      .portal-main{ padding: 18px 14px 42px 14px; }
     }
   </style>
-</head>
-
-<body>
-  <!-- Topbar Mobile -->
-  <div class="mobile-topbar">
-    <div class="left">
-      <img src="/assets/icons/icon-192.png" alt="Relevo" />
-      <div class="mobile-title">
-        <strong>Portal Relevo</strong>
-        <span>Cronograma</span>
-      </div>
-    </div>
-    <button class="hamburger" id="menuTrigger" aria-label="Abrir menu">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-  </div>
-
-  <!-- Drawer Mobile -->
-  <div class="drawer-overlay" id="drawerOverlay"></div>
-  <aside class="drawer" id="drawer">
-    <div class="brand">
-      <img src="/assets/icons/icon-192.png" alt="Relevo" />
-      <div class="brand-text">
-        <strong>Portal Relevo</strong>
-        <span>Cronograma</span>
-      </div>
-    </div>
-
-    <nav class="nav" id="navDrawer">
-      <a href="./#/dashboard" data-route="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-      <a href="./#/projetos" data-route="/projetos"><i class="fa-solid fa-folder-open"></i> Projetos</a>
-      <a href="./#/tarefas" data-route="/tarefas"><i class="fa-solid fa-list-check"></i> Tarefas</a>
-      <a href="./#/importar" data-route="/importar"><i class="fa-solid fa-wand-magic-sparkles"></i> Importar IA</a>
-      <a href="./#/calendario" data-route="/calendario"><i class="fa-solid fa-calendar-days"></i> Calendário</a>
-
-      <div class="nav-sep"></div>
-
-      <a href="/apps/" title="Abrir Apps do Portal"><i class="fa-solid fa-layer-group"></i> Apps</a>
-      <a href="/gestao.html" title="Voltar para Gestão"><i class="fa-solid fa-house"></i> Voltar para Gestão</a>
-    </nav>
-  </aside>
-
-  <div class="portal-wrap">
-    <!-- Sidebar Desktop -->
-    <aside class="portal-sidebar">
-      <div class="brand">
-        <img src="/assets/icons/icon-192.png" alt="Relevo" />
-        <div class="brand-text">
-          <strong>Portal Relevo</strong>
-          <span>Cronograma</span>
-        </div>
-      </div>
-
-      <nav class="nav" id="navSidebar">
-        <a href="./#/dashboard" data-route="/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-        <a href="./#/projetos" data-route="/projetos"><i class="fa-solid fa-folder-open"></i> Projetos</a>
-        <a href="./#/tarefas" data-route="/tarefas"><i class="fa-solid fa-list-check"></i> Tarefas</a>
-        <a href="./#/importar" data-route="/importar"><i class="fa-solid fa-wand-magic-sparkles"></i> Importar IA</a>
-        <a href="./#/calendario" data-route="/calendario"><i class="fa-solid fa-calendar-days"></i> Calendário</a>
-
-        <div class="nav-sep"></div>
-
-        <a href="/apps/" title="Abrir Apps do Portal"><i class="fa-solid fa-layer-group"></i> Apps</a>
-        <a href="/gestao.html" title="Voltar para Gestão"><i class="fa-solid fa-house"></i> Voltar para Gestão</a>
-      </nav>
-    </aside>
-
-    <!-- Conteúdo -->
-    <section class="portal-main">
-      <div class="portal-main-inner">
-        <div id="root"></div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Firebase (mesmo padrão do Portal) -->
-  <script src="/scripts/firebase-compat.js"></script>
-  <script src="/scripts/firebase-init-guard.js"></script>
-
-  <script>
-    // Drawer toggle
-    const trigger = document.getElementById('menuTrigger');
-    const overlay = document.getElementById('drawerOverlay');
-    const drawer = document.getElementById('drawer');
-
-    function openDrawer(){
-      overlay.classList.add('open');
-      drawer.classList.add('open');
-    }
-    function closeDrawer(){
-      overlay.classList.remove('open');
-      drawer.classList.remove('open');
-    }
-
-    trigger?.addEventListener('click', openDrawer);
-    overlay?.addEventListener('click', closeDrawer);
-
-    // Active route highlight (sidebar + drawer)
-    function currentRoute(){
-      // HashRouter: "#/projetos"
-      const h = location.hash || "#/dashboard";
-      const route = h.replace(/^#/, "");
-      return route.startsWith("/") ? route : ("/" + route);
-    }
-
-    function updateActive(){
-      const r = currentRoute();
-      document.querySelectorAll('[data-route]').forEach(a => {
-        a.classList.toggle('is-active', a.getAttribute('data-route') === r);
-      });
-    }
-
-    window.addEventListener('hashchange', updateActive);
-    updateActive();
-  </script>
-
-  <!-- App do Cronograma (Vite build) -->
-  <script type="module" src="./assets/index.js"></script>
 </body>
 </html>
