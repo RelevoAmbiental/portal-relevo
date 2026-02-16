@@ -9,9 +9,9 @@ Error generating stack: `+o.message+`
         .crono-input{
           padding:10px 12px;
           border-radius:12px;
-          border:1px solid rgba(255,255,255,0.22);
-          background: rgba(0,0,0,0.15);
-          color:#fff;
+          border:1px solid rgba(0,0,0,0.10);
+          background: rgba(255,255,255,0.75);
+          color: var(--texto, #0b2e1b);
           outline:none;
           min-height: 42px;
           width: 100%;
@@ -20,9 +20,9 @@ Error generating stack: `+o.message+`
         .crono-btn{
           padding:10px 12px;
           border-radius:12px;
-          border:1px solid rgba(255,255,255,0.22);
-          background: rgba(255,255,255,0.12);
-          color:#fff;
+          border:1px solid rgba(0,0,0,0.10);
+          background: rgba(255,255,255,0.65);
+          color: var(--texto, #0b2e1b);
           cursor:pointer;
           min-height: 42px;
           white-space: nowrap;
@@ -31,7 +31,7 @@ Error generating stack: `+o.message+`
 
         .crono-btn-danger{
           border-color: rgba(255,120,120,0.35);
-          background: rgba(255,120,120,0.16);
+          background: rgba(255,120,120,0.22);
         }
 
         /* ===== Cadastro/Modal em 2 linhas ===== */
@@ -96,7 +96,7 @@ Error generating stack: `+o.message+`
           width: min(980px, 100%);
           border-radius: 18px;
           border: 1px solid rgba(255,255,255,0.18);
-          background: rgba(12, 28, 22, 0.92);
+          background: rgba(10, 20, 16, 0.92);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           padding: 14px;
@@ -119,7 +119,7 @@ Error generating stack: `+o.message+`
           place-items: center;
           border-radius: 12px;
           border: 1px solid rgba(255,255,255,0.22);
-          background: rgba(255,255,255,0.10);
+          background: rgba(255,255,255,0.70);
           cursor: pointer;
           padding: 0;
         }
@@ -134,11 +134,12 @@ Error generating stack: `+o.message+`
         .crono-colorpop{
           position: absolute;
           top: calc(100% + 10px);
-          left: 0;
+          left: auto;
+          right: 0;
           z-index: 9999;
           border-radius: 16px;
           border: 1px solid rgba(255,255,255,0.18);
-          background: rgba(12, 28, 22, 0.92);
+          background: rgba(10, 20, 16, 0.92);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           padding: 10px;
