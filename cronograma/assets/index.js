@@ -177,10 +177,13 @@ Error generating stack: `+o.message+`
         .crono-muted{ opacity:.75; }
         .crono-error{ margin: 10px 0; padding: 10px; border-radius: 10px; background: rgba(255,120,120,.18); border: 1px solid rgba(180,40,40,.25); }
         .crono-filters-row{
-          display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+          display:grid;
+          grid-template-columns: 220px 200px 260px 220px auto;
+          gap:10px;
+          align-items:center;
           margin-bottom:10px;
         }
-        .crono-filter-hint{ margin-left:auto; opacity:.85; }
+        .crono-filter-hint{ justify-self:end; opacity:.85; }
         .crono-form-grid{
           display:grid;
           grid-template-columns: 2.2fr 1.2fr 1fr 1fr 1fr 1fr 140px;
@@ -232,8 +235,9 @@ Error generating stack: `+o.message+`
         .crono-modal-header{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 10px; }
         .crono-modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top: 12px; }
         @media (max-width: 980px){
+          .crono-filters-row{ grid-template-columns: 1fr; }
+          .crono-filter-hint{ justify-self:start; width: 100%; margin-top: 2px; }
           .crono-form-grid{ grid-template-columns: 1fr 1fr; }
-          .crono-filter-hint{ width: 100%; margin-left: 0; }
           .crono-task-item{ flex-direction:column; }
           .crono-task-actions{ justify-content:flex-start; }
         }
