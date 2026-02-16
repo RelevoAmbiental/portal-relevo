@@ -18,7 +18,7 @@ Error generating stack: `+o.message+`
         .crono-form-grid{
           display:grid;
           gap:10px;
-          grid-template-columns: 2fr 2fr 1.2fr 1.1fr 1.1fr 1.2fr 160px;
+          grid-template-columns: 2fr 2fr 1.2fr 180px 1.1fr 1.2fr 160px;
           align-items: center;
         }
         @media (max-width: 980px){
@@ -59,6 +59,33 @@ Error generating stack: `+o.message+`
           -webkit-backdrop-filter: blur(10px);
           padding: 14px;
           box-shadow: 0 14px 60px rgba(0,0,0,0.55);
+        }
+
+        /* ✅ Paleta clicável 3x4 */
+        .crono-colorpicker{
+          display: grid;
+          grid-template-columns: repeat(4, 34px);
+          gap: 10px;
+          align-items: center;
+          justify-content: start;
+          padding: 6px 2px;
+        }
+        .crono-color{
+          width: 34px;
+          height: 34px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.25);
+          cursor: pointer;
+          box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+          transition: transform .08s ease, box-shadow .08s ease, outline .08s ease;
+        }
+        .crono-color:hover{
+          transform: translateY(-1px);
+          box-shadow: 0 12px 26px rgba(0,0,0,0.32);
+        }
+        .crono-color.is-selected{
+          outline: 3px solid rgba(255,255,255,0.70);
+          outline-offset: 2px;
         }
       `})]})}function Xl(){const u=Fc();if(!u)throw new Error("Usuário não autenticado.");return u}const nu=()=>window.firebase.firestore.FieldValue.serverTimestamp(),au=["A fazer","Fazendo","Concluida"];function nh(u){const s={id:u.id,...u.data()};return typeof s.arquivado!="boolean"&&(s.arquivado=!1),au.includes(s.status)||(s.status==="todo"?s.status="A fazer":s.status==="doing"?s.status="Fazendo":s.status==="done"?s.status="Concluida":s.status="A fazer"),s.nome||(s.nome=s.titulo||"(sem nome)"),Number.isFinite(s.ordem)||(s.ordem=0),s}function rh(u,s){const a=(u.ordem??0)-(s.ordem??0);if(a!==0)return a;const f=u.updatedAt?.toMillis?.()??u.criadoEm?.toMillis?.()??0,h=s.updatedAt?.toMillis?.()??s.criadoEm?.toMillis?.()??0;return f-h}async function lh({nome:u,descricao:s="",status:a="A fazer",inicio:f=null,fim:h=null,ordem:y=0,projetoId:x}){const _=en(),E=Xl();if(!x)throw new Error("projetoId é obrigatório.");if(!au.includes(a))throw new Error("Status inválido.");return(await _.collection("tarefas").add({nome:(u||"").trim(),descricao:(s||"").trim(),status:a,inicio:f||null,fim:h||null,ordem:Number.isFinite(y)?y:0,projetoId:x,uid:E.uid,arquivado:a==="Concluida",criadoEm:nu(),updatedAt:nu(),createdByUid:E.uid,updatedByUid:E.uid})).id}async function Ql(u,s){const a=en(),f=Xl(),h={...s};if(h.status&&!au.includes(h.status))throw new Error("Status inválido.");h.status==="Concluida"&&(h.arquivado=!0),h.updatedAt=nu(),h.updatedByUid=f.uid,await a.collection("tarefas").doc(u).update(h)}async function oh(u){return Ql(u,{status:"Concluida",arquivado:!0})}async function ih(u){return Ql(u,{status:"A fazer",arquivado:!1})}async function uh(u){const s=en();Xl(),await s.collection("tarefas").doc(u).delete()}function ah({projetoId:u=null,incluirArquivadas:s=!1,onData:a,onError:f}){const h=en(),y=Xl();return h.collection("tarefas").where("uid","==",y.uid).onSnapshot(x=>{let _=x.docs.map(nh);u&&(_=_.filter(E=>E.projetoId===u)),s||(_=_.filter(E=>!E.arquivado)),_.sort(rh),a(_)},x=>f?.(x))}function sh(){const[u,s]=L.useState(null),[a,f]=L.useState(""),[h,y]=L.useState([]),[x,_]=L.useState(""),[E,O]=L.useState([]),[M,R]=L.useState(!1),[B,G]=L.useState({nome:"",inicio:"",fim:"",status:"A fazer"});L.useEffect(()=>{const k=Dc(I=>s(I||null));return()=>k?.()},[]),L.useEffect(()=>{if(f(""),!u)return;let k=null;try{k=Uc({incluirArquivados:!0,onData:I=>{y(I),!x&&I[0]?.id&&_(I[0].id)},onError:I=>f(String(I?.message||I))})}catch(I){f(String(I?.message||I))}return()=>k?.()},[u]),L.useEffect(()=>{if(f(""),!u||!x){O([]);return}let k=null;try{k=ah({projetoId:x,incluirArquivadas:M,onData:O,onError:I=>f(String(I?.message||I))})}catch(I){f(String(I?.message||I))}return()=>k?.()},[u,x,M]);const b=L.useMemo(()=>h.find(k=>k.id===x)||null,[h,x]);async function Q(){f("");try{await lh({projetoId:x,nome:B.nome,inicio:B.inicio||null,fim:B.fim||null,status:B.status,ordem:E.length}),G({nome:"",inicio:"",fim:"",status:"A fazer"})}catch(k){f(String(k?.message||k))}}return S.jsxs("div",{children:[S.jsxs("div",{style:{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap",alignItems:"center"},children:[S.jsx("div",{style:{opacity:.85},children:u?S.jsxs(S.Fragment,{children:["Logado: ",S.jsx("b",{children:u.email})]}):"Aguardando autenticação..."}),S.jsxs("div",{style:{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"},children:[S.jsx("select",{value:x,onChange:k=>_(k.target.value),className:"crono-input",children:h.map(k=>S.jsxs("option",{value:k.id,children:[k.nome||"(sem nome)",k.arquivado?" [ARQ]":""]},k.id))}),S.jsxs("label",{style:{display:"flex",gap:8,alignItems:"center"},children:[S.jsx("input",{type:"checkbox",checked:M,onChange:k=>R(k.target.checked)}),"Mostrar concluídas"]})]})]}),a&&S.jsxs("div",{style:{marginTop:12,padding:12,borderRadius:12,background:"rgba(220,60,60,0.18)",border:"1px solid rgba(220,60,60,0.35)"},children:[S.jsx("b",{children:"Erro:"})," ",a]}),S.jsxs("div",{style:{marginTop:14,opacity:.85},children:["Projeto: ",S.jsx("b",{children:b?.nome||"—"})]}),S.jsx("div",{style:{marginTop:14,display:"grid",gap:10},children:S.jsxs("div",{style:{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 180px 120px",gap:10},children:[S.jsx("input",{value:B.nome,onChange:k=>G(I=>({...I,nome:k.target.value})),placeholder:"Nome da tarefa",className:"crono-input"}),S.jsx("input",{value:B.inicio,onChange:k=>G(I=>({...I,inicio:k.target.value})),placeholder:"Início (YYYY-MM-DD)",className:"crono-input"}),S.jsx("input",{value:B.fim,onChange:k=>G(I=>({...I,fim:k.target.value})),placeholder:"Fim (YYYY-MM-DD)",className:"crono-input"}),S.jsxs("select",{value:B.status,onChange:k=>G(I=>({...I,status:k.target.value})),className:"crono-input",children:[S.jsx("option",{children:"A fazer"}),S.jsx("option",{children:"Fazendo"}),S.jsx("option",{children:"Concluida"})]}),S.jsx("button",{className:"crono-btn",onClick:Q,disabled:!u||!B.nome.trim()||!x,children:"Adicionar"})]})}),S.jsx("div",{style:{marginTop:16,display:"grid",gap:12},children:E.map(k=>S.jsx("div",{style:{padding:12,borderRadius:14,border:"1px solid rgba(255,255,255,0.18)",background:k.arquivado?"rgba(255,255,255,0.04)":"transparent"},children:S.jsxs("div",{style:{display:"flex",justifyContent:"space-between",gap:12,alignItems:"center"},children:[S.jsxs("div",{children:[S.jsx("div",{style:{fontWeight:800},children:k.nome||"(sem nome)"}),S.jsxs("div",{style:{opacity:.8,fontSize:12},children:[k.status||"A fazer"," · ",k.inicio||"—"," → ",k.fim||"—"]})]}),S.jsxs("div",{style:{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"flex-end"},children:[k.arquivado?S.jsx("button",{className:"crono-btn",onClick:()=>ih(k.id).catch(I=>f(String(I?.message||I))),children:"Reabrir"}):S.jsx("button",{className:"crono-btn",onClick:()=>oh(k.id).catch(I=>f(String(I?.message||I))),children:"Concluir"}),S.jsx("button",{className:"crono-btn",onClick:()=>{const I=prompt("Editar nome da tarefa:",k.nome||"");I!==null&&Ql(k.id,{nome:I}).catch(te=>f(String(te?.message||te)))},children:"Editar"}),S.jsx("button",{className:"crono-btn",onClick:()=>{const I=k.status==="A fazer"?"Fazendo":k.status==="Fazendo"?"Concluida":"A fazer";Ql(k.id,{status:I}).catch(te=>f(String(te?.message||te)))},children:"Status"}),S.jsx("button",{className:"crono-btn crono-btn-danger",onClick:()=>{confirm("Apagar tarefa?")&&uh(k.id).catch(I=>f(String(I?.message||I)))},children:"Apagar"})]})]})},k.id))}),S.jsx("style",{children:`
         .crono-input{
