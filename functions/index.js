@@ -7,12 +7,12 @@ if (!admin.apps.length) admin.initializeApp();
 
 const OPENAI_KEY = defineSecret("OPENAI_API_KEY");
 
-const { extrairArquivo, extrairTextoDeBuffer } = require("./src/ai-extrair");
+const { extrairTextoDeBuffer } = require("./src/ai-extrair");
 const { interpretarTexto } = require("./src/ai-interpretar");
 const { gerarCronograma } = require("./src/ai-cronograma");
 
 /* ============================================================
-   Middleware CORS genérico (mantido pro gerarCronograma HTTP)
+   Middleware CORS (mantido pro gerarCronograma HTTP)
    ============================================================ */
 function withCors(handler) {
   return (req, res) => {
@@ -22,25 +22,16 @@ function withCors(handler) {
       res.set("Access-Control-Allow-Headers", "Content-Type");
       res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
 
-      if (req.method === "OPTIONS") {
-        return res.status(204).send("");
-      }
-
+      if (req.method === "OPTIONS") return res.status(204).send("");
       return handler(req, res);
     });
   };
 }
 
 /* ============================================================
-   1) interpretarArquivo — ✅ Callable (Auth obrigatório)
-   Front chama via httpsCallable("interpretarArquivo")
+   interpretarArquivo — ✅ Callable (Auth obrigatório)
    Payload: { fileBase64, mimeType, fileName }
    ============================================================ */
-const admin = require("firebase-admin");
-if (!admin.apps.length) admin.initializeApp();
-
-const { extrairTextoDeBuffer } = require("./src/ai-extrair");
-
 exports.interpretarArquivo = functions
   .region("us-central1")
   .runWith({ secrets: [OPENAI_KEY] })
@@ -71,8 +62,8 @@ exports.interpretarArquivo = functions
 
     try {
       const buffer = Buffer.from(fileBase64, "base64");
-
       const textoExtraido = await extrairTextoDeBuffer(buffer, mimeType);
+
       if (!textoExtraido || textoExtraido.trim() === "") {
         throw new functions.https.HttpsError(
           "failed-precondition",
@@ -81,7 +72,6 @@ exports.interpretarArquivo = functions
       }
 
       const tarefas = await interpretarTexto(textoExtraido);
-
       return { texto: textoExtraido, tarefas };
     } catch (err) {
       console.error("Erro interpretarArquivo (callable):", err);
@@ -89,9 +79,8 @@ exports.interpretarArquivo = functions
     }
   });
 
-
 /* ============================================================
-   2) gerarCronograma — HTTP (mantido)
+   gerarCronograma — HTTP (mantido)
    ============================================================ */
 exports.gerarCronograma = functions
   .region("us-central1")
