@@ -34,7 +34,7 @@ function withCors(handler) {
    ============================================================ */
 exports.interpretarArquivo = functions
   .region("us-central1")
-  .runWith({ secrets: [OPENAI_KEY], invoker: "private" })
+  .runWith({ secrets: [OPENAI_KEY], invoker: "public" })
   .https.onCall(async (data, context) => {
     if (!context?.auth) {
       throw new functions.https.HttpsError("unauthenticated", "Usuário não autenticado.");
