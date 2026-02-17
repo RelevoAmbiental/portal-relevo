@@ -2,7 +2,7 @@
   "name": "portal-relevo-functions",
   "version": "1.0.0",
   "engines": {
-    "node": "22"
+    "node": "20"
   },
   "main": "index.js",
   "scripts": {
