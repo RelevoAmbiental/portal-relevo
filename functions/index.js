@@ -32,57 +32,40 @@ function withCors(handler) {
    interpretarArquivo — ✅ Callable (Auth obrigatório)
    Payload: { fileBase64, mimeType, fileName }
    ============================================================ */
-/* ============================================================
-   1) interpretarArquivo — Callable (Auth obrigatório)
-   ============================================================ */
-   exports.interpretarArquivo = functions
-     .region("us-central1")
-     .runWith({ secrets: [OPENAI_KEY], invoker: "private" })
-     .https.onCall(async (data, context) => {
-   
-       if (!context?.auth) {
-         throw new functions.https.HttpsError(
-           "unauthenticated",
-           "Usuário não autenticado."
-         );
-       }
-   
-       const fileBase64 = data?.fileBase64;
-       const mimeType = data?.mimeType || "application/octet-stream";
-   
-       if (!fileBase64) {
-         throw new functions.https.HttpsError(
-           "invalid-argument",
-           "Envie { fileBase64, mimeType }."
-         );
-       }
-   
-       try {
-         const buffer = Buffer.from(fileBase64, "base64");
-         const textoExtraido = await extrairTextoDeBuffer(buffer, mimeType);
-   
-         if (!textoExtraido || textoExtraido.trim() === "") {
-           throw new functions.https.HttpsError(
-             "failed-precondition",
-             "Nenhum texto extraído."
-           );
-         }
-   
-         const tarefas = await interpretarTexto(textoExtraido);
-   
-         return {
-           texto: textoExtraido,
-           tarefas,
-         };
-   
-       } catch (err) {
-         console.error("Erro interpretarArquivo:", err);
-         throw new functions.https.HttpsError(
-           "internal",
-           err?.message || "Erro interno"
-         );
-       }
-     });
+exports.interpretarArquivo = functions
+  .region("us-central1")
+  .runWith({ secrets: [OPENAI_KEY], invoker: "private" })
+  .https.onCall(async (data, context) => {
+    if (!context?.auth) {
+      throw new functions.https.HttpsError("unauthenticated", "Usuário não autenticado.");
+    }
+
+    const fileBase64 = data?.fileBase64;
+    const mimeType = data?.mimeType || "application/octet-stream";
+
+    if (!fileBase64 || typeof fileBase64 !== "string") {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Envie { fileBase64, mimeType }."
+      );
+    }
+
+    try {
+      const buffer = Buffer.from(fileBase64, "base64");
+      const textoExtraido = await extrairTextoDeBuffer(buffer, mimeType);
+
+      if (!textoExtraido || textoExtraido.trim() === "") {
+        throw new functions.https.HttpsError("failed-precondition", "Nenhum texto extraído.");
+      }
+
+      const tarefas = await interpretarTexto(textoExtraido);
+
+      return { texto: textoExtraido, tarefas };
+    } catch (err) {
+      console.error("Erro interpretarArquivo:", err);
+      throw new functions.https.HttpsError("internal", err?.message || "Erro interno");
+    }
+  });
 
 /* ============================================================
    gerarCronograma — HTTP (mantido)
