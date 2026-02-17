@@ -36,6 +36,11 @@ function withCors(handler) {
    Front chama via httpsCallable("interpretarArquivo")
    Payload: { fileBase64, mimeType, fileName }
    ============================================================ */
+const admin = require("firebase-admin");
+if (!admin.apps.length) admin.initializeApp();
+
+const { extrairTextoDeBuffer } = require("./src/ai-extrair");
+
 exports.interpretarArquivo = functions
   .region("us-central1")
   .runWith({ secrets: [OPENAI_KEY] })
@@ -57,7 +62,6 @@ exports.interpretarArquivo = functions
       );
     }
 
-    // hard stop: evita payload gigante no callable
     if (fileBase64.length > 9_000_000) {
       throw new functions.https.HttpsError(
         "invalid-argument",
@@ -78,18 +82,13 @@ exports.interpretarArquivo = functions
 
       const tarefas = await interpretarTexto(textoExtraido);
 
-      return {
-        texto: textoExtraido,
-        tarefas,
-      };
+      return { texto: textoExtraido, tarefas };
     } catch (err) {
       console.error("Erro interpretarArquivo (callable):", err);
-      throw new functions.https.HttpsError(
-        "internal",
-        err?.message || "Erro interno"
-      );
+      throw new functions.https.HttpsError("internal", err?.message || "Erro interno");
     }
   });
+
 
 /* ============================================================
    2) gerarCronograma — HTTP (mantido)
