@@ -50,7 +50,10 @@ app.post("/interpretarArquivo", async (req, res) => {
   try {
     const body = req.body || {};
 
-    // Aceita formato novo e legado (stub antigo)
+    // Diagnóstico rápido: quais chaves chegaram?
+    console.log("interpretarArquivo body keys:", Object.keys(body));
+
+    // Aceita formato novo e legado
     const fileBase64 = body.fileBase64 || body.contentBase64 || null;
     const mimeType =
       body.mimeType || body.contentType || "application/octet-stream";
@@ -64,7 +67,7 @@ app.post("/interpretarArquivo", async (req, res) => {
       return res.status(400).json({
         ok: false,
         error: "missing_payload",
-        message: "Envie 'fileBase64' (ou 'contentBase64') no corpo da requisição.",
+        message: "Envie 'fileBase64' (ou 'contentBase64' legado) no corpo da requisição.",
       });
     }
 
