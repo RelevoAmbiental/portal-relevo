@@ -1,7 +1,8 @@
 {
   "functions": [
     {
-      "source": "functions"
+      "source": "functions",
+      "invoker": "private"
     }
   ],
   "firestore": {
