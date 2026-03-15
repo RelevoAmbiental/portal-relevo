@@ -14,7 +14,8 @@
     "Gleysson",
     "Gerly",
     "Henever",
-    "Roberto Aquino"
+    "Roberto Aquino",
+    "Danilo"
   ];
 
   const PROJETOS = [
