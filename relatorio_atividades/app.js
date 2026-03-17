@@ -21,6 +21,7 @@
   const PROJETOS = [
     "ADM Geral",
     "LT Jacobina",
+    "EOL Santo Sé",
     "BR-135/BA"
   ];
 
