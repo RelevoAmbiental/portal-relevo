@@ -15,13 +15,15 @@
     "Gerly",
     "Henever",
     "Roberto Aquino",
+    "Daniel",
+    "Yuri",
     "Danilo"
   ];
 
   const PROJETOS = [
     "ADM Geral",
     "LT Jacobina",
-    "EOL Santo Sé",
+    "EOL Sento Sé",
     "BR-135/BA"
   ];
 
