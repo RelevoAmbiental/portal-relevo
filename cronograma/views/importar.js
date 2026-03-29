@@ -324,51 +324,49 @@ function renderResumoImportacao() {
 
   return `
     <aside class="cronograma-panel">
-      <div style="display:grid; gap:12px;">
-        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
-          <div>
-            <h3 style="margin:0;">Resumo do TXT</h3>
-            <p style="margin:6px 0 0; color:var(--cron-text-soft);">
-              ${
-                previewImportacao.length
-                  ? "Síntese das tarefas identificadas antes do salvamento."
-                  : "Valide o TXT para ver o resumo por fase."
-              }
-            </p>
-          </div>
-
-          <button
-            class="cronograma-btn cronograma-btn--ghost"
-            type="button"
-            id="btnBaixarPromptTxt"
-          >
-            Baixar prompt TXT
-          </button>
+      <div class="cronograma-import-summary-head">
+        <div>
+          <h3>Resumo do TXT</h3>
+          <p>
+            ${
+              previewImportacao.length
+                ? "Síntese das tarefas identificadas antes do salvamento."
+                : "Valide o TXT para visualizar o resumo por fase."
+            }
+          </p>
         </div>
 
-        ${
-          resumo.length
-            ? `
-              <div class="cronograma-mini-list">
-                ${resumo
-                  .map(
-                    (grupo) => `
-                      <div class="cronograma-mini-list__item">
-                        <strong>${grupo.quantidade} tarefa(s) de ${escapeHtml(grupo.fase)}</strong>
-                        <span>${escapeHtml(grupo.titulos.join(" • "))}</span>
-                      </div>
-                    `
-                  )
-                  .join("")}
-              </div>
-            `
-            : `
-              <div class="cronograma-empty-state">
-                Nenhuma tarefa resumida ainda.
-              </div>
-            `
-        }
+        <button
+          class="cronograma-btn cronograma-btn--ghost"
+          type="button"
+          id="btnBaixarPromptTxt"
+        >
+          Baixar prompt TXT
+        </button>
       </div>
+
+      ${
+        resumo.length
+          ? `
+            <div class="cronograma-mini-list">
+              ${resumo
+                .map(
+                  (grupo) => `
+                    <div class="cronograma-mini-list__item">
+                      <strong>${grupo.quantidade} tarefa(s) de ${escapeHtml(grupo.fase)}</strong>
+                      <span>${escapeHtml(grupo.titulos.join(", "))}</span>
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
+          `
+          : `
+            <div class="cronograma-empty-state">
+              Nenhuma tarefa resumida ainda.
+            </div>
+          `
+      }
     </aside>
   `;
 }
@@ -385,10 +383,10 @@ function getTemplate() {
         ${renderMensagem()}
 
         <div class="cronograma-import-stack">
-          <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+          <div class="cronograma-import-header-clean">
             <div>
-              <h2 style="margin:0 0 6px;">Importar tarefas por TXT</h2>
-              <p style="margin:0; color:var(--cron-text-soft);">
+              <h2>Importar tarefas por TXT</h2>
+              <p>
                 Cole o conteúdo, valide a prévia e grave as tarefas no cronograma.
               </p>
             </div>
@@ -414,7 +412,7 @@ function getTemplate() {
             <textarea
               id="importTxtInput"
               class="cronograma-import-textarea"
-              placeholder="[FASE] Campo&#10;- Prospecção espeleológica | 5d | alta | resp:Samuel&#10;&#10;[FASE] Gabinete&#10;- Relatório técnico | 6d | resp:joao@relevo.eco.br"
+              placeholder="[PROJETO] Exemplo de Projeto&#10;[RESPONSAVEL_PADRAO] Samuel&#10;[INICIO] 2026-04-01&#10;&#10;[FASE] Campo&#10;- Prospecção espeleológica | 5d | alta | resp:Samuel&#10;&#10;[FASE] Gabinete&#10;- Relatório técnico parcial | 6d | alta"
             >${escapeHtml(textoImportacao)}</textarea>
           </label>
 
@@ -477,4 +475,247 @@ function getTemplate() {
 }
 
 function enriquecerPreview(parsed) {
-  const users = getUsers
+  const users = getUsersDisponiveis();
+  const responsavelPadrao = getResponsavelSelecionado();
+
+  const itens = [];
+  const erros = [...parsed.erros];
+  const avisos = [...parsed.avisos];
+
+  parsed.itens.forEach((item) => {
+    const enriched = { ...item };
+
+    if (item.responsavelTexto) {
+      const found = resolveResponsavelByTexto(item.responsavelTexto, users);
+
+      if (found) {
+        enriched.responsavel = found.nome || "";
+        enriched.responsavelUid = found.uid || "";
+        enriched.responsavelEmail = found.email || "";
+        enriched.responsavelOrigem = "linha";
+      } else {
+        erros.push(`Linha ${item.linha}: responsável "${item.responsavelTexto}" não foi encontrado na coleção users.`);
+      }
+    } else if (responsavelPadrao?.uid) {
+      enriched.responsavel = responsavelPadrao.nome || "";
+      enriched.responsavelUid = responsavelPadrao.uid || "";
+      enriched.responsavelEmail = responsavelPadrao.email || "";
+      enriched.responsavelOrigem = "padrao";
+    } else if (metaImportacao.responsavelPadraoTexto) {
+      const foundMeta = resolveResponsavelByTexto(metaImportacao.responsavelPadraoTexto, users);
+
+      if (foundMeta) {
+        enriched.responsavel = foundMeta.nome || "";
+        enriched.responsavelUid = foundMeta.uid || "";
+        enriched.responsavelEmail = foundMeta.email || "";
+        enriched.responsavelOrigem = "padrao";
+      } else {
+        erros.push(`Responsável padrão "${metaImportacao.responsavelPadraoTexto}" não foi encontrado na coleção users.`);
+      }
+    } else {
+      avisos.push(`Linha ${item.linha}: sem responsável específico; selecione um responsável padrão para salvar.`);
+    }
+
+    itens.push(enriched);
+  });
+
+  return { itens, erros, avisos };
+}
+
+function validarImportacao() {
+  const parsed = parseTxtCronograma(textoImportacao);
+
+  metaImportacao = parsed.meta;
+  ensureDefaults();
+
+  const enriched = enriquecerPreview(parsed);
+
+  previewImportacao = enriched.itens;
+  errosImportacao = enriched.erros;
+  avisosImportacao = enriched.avisos;
+
+  if (!errosImportacao.length && previewImportacao.length) {
+    mensagemImportacao = `${previewImportacao.length} tarefa(s) validada(s) com sucesso.`;
+    mensagemTipo = "success";
+  } else if (errosImportacao.length) {
+    mensagemImportacao = "O TXT foi lido, mas há pendências a corrigir antes de salvar.";
+    mensagemTipo = "warning";
+  } else {
+    mensagemImportacao = "Nenhuma tarefa válida foi encontrada.";
+    mensagemTipo = "warning";
+  }
+
+  renderImportarView();
+}
+
+function limparImportacao() {
+  textoImportacao = "";
+  previewImportacao = [];
+  errosImportacao = [];
+  avisosImportacao = [];
+  metaImportacao = {
+    projetoNome: "",
+    responsavelPadraoTexto: "",
+    dataInicioBase: ""
+  };
+  mensagemImportacao = "";
+  mensagemTipo = "info";
+  renderImportarView();
+}
+
+async function salvarImportacao() {
+  try {
+    if (!previewImportacao.length) {
+      throw new Error("Valide um TXT antes de salvar.");
+    }
+
+    if (errosImportacao.length) {
+      throw new Error("Corrija os erros da validação antes de salvar.");
+    }
+
+    const projeto = getProjetoSelecionado();
+    const responsavel = getResponsavelSelecionado();
+
+    if (!projeto?.id) {
+      throw new Error("Selecione o projeto de destino.");
+    }
+
+    if (!responsavel?.uid) {
+      const existeItemSemResponsavel = previewImportacao.some((item) => !item.responsavelUid);
+      if (existeItemSemResponsavel) {
+        throw new Error("Selecione o responsável padrão ou defina responsável por linha para todas as tarefas.");
+      }
+    }
+
+    salvando = true;
+    mensagemImportacao = "";
+    renderImportarView();
+
+    const resultado = await salvarImportacaoLote({
+      itens: previewImportacao,
+      projeto,
+      responsavel
+    });
+
+    mensagemImportacao = `${resultado.quantidade} tarefa(s) importada(s) com sucesso no Firestore.`;
+    mensagemTipo = "success";
+
+    previewImportacao = [];
+    errosImportacao = [];
+    avisosImportacao = [];
+    textoImportacao = "";
+
+    renderImportarView();
+  } catch (error) {
+    console.error(error);
+    mensagemImportacao = error?.message || "Não foi possível salvar a importação.";
+    mensagemTipo = "error";
+    renderImportarView();
+  } finally {
+    salvando = false;
+  }
+}
+
+function ensureUsersListener() {
+  if (unsubscribeUsers) return;
+
+  unsubscribeUsers = listenUsers(
+    (items) => {
+      setUsers(items);
+
+      if (state.currentView === "importar") {
+        renderImportarView();
+      }
+    },
+    (error) => {
+      console.error(error);
+      mensagemImportacao = "Não foi possível carregar a coleção users.";
+      mensagemTipo = "error";
+
+      if (state.currentView === "importar") {
+        renderImportarView();
+      }
+    }
+  );
+}
+
+function mountEvents() {
+  const txtInput = document.getElementById("importTxtInput");
+  const fileInput = document.getElementById("importTxtFile");
+  const projetoSelect = document.getElementById("importProjetoSelect");
+  const responsavelSelect = document.getElementById("importResponsavelSelect");
+  const btnExample = document.getElementById("btnImportExample");
+  const btnClear = document.getElementById("btnImportClear");
+  const btnValidar = document.getElementById("btnValidarImportacao");
+  const btnSalvar = document.getElementById("btnSalvarImportacao");
+  const btnBaixarPromptTxt = document.getElementById("btnBaixarPromptTxt");
+
+  if (txtInput) {
+    txtInput.addEventListener("input", (event) => {
+      textoImportacao = event.target.value || "";
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      try {
+        textoImportacao = await file.text();
+        mensagemImportacao = `Arquivo "${file.name}" carregado para validação.`;
+        mensagemTipo = "info";
+        renderImportarView();
+      } catch (error) {
+        console.error(error);
+        mensagemImportacao = "Não foi possível ler o arquivo TXT.";
+        mensagemTipo = "error";
+        renderImportarView();
+      }
+    });
+  }
+
+  if (projetoSelect) {
+    projetoSelect.addEventListener("change", (event) => {
+      projetoSelecionadoId = event.target.value || "";
+    });
+  }
+
+  if (responsavelSelect) {
+    responsavelSelect.addEventListener("change", (event) => {
+      responsavelSelecionadoUid = event.target.value || "";
+    });
+  }
+
+  if (btnExample) {
+    btnExample.addEventListener("click", () => {
+      textoImportacao = getExemploTxt();
+      mensagemImportacao = "Exemplo carregado no editor.";
+      mensagemTipo = "info";
+      renderImportarView();
+    });
+  }
+
+  if (btnClear) {
+    btnClear.addEventListener("click", limparImportacao);
+  }
+
+  if (btnValidar) {
+    btnValidar.addEventListener("click", validarImportacao);
+  }
+
+  if (btnSalvar) {
+    btnSalvar.addEventListener("click", salvarImportacao);
+  }
+
+  if (btnBaixarPromptTxt) {
+    btnBaixarPromptTxt.addEventListener("click", baixarPromptGeracaoTxt);
+  }
+}
+
+export function renderImportarView() {
+  ensureProjetosListener();
+  ensureUsersListener();
+  renderIntoApp(getTemplate());
+  mountEvents();
+}
