@@ -13,7 +13,10 @@ export const state = {
   mostrarTarefasArquivadas: false,
   filtroProjetoTarefa: "todos",
   filtroStatusTarefa: "todos",
-  filtroResponsavelTarefa: "todos"
+  filtroResponsavelTarefa: "todos",
+
+  users: [],
+  usersLoaded: false
 };
 
 export function setView(view) {
@@ -60,4 +63,9 @@ export function setFiltroStatusTarefa(value) {
 
 export function setFiltroResponsavelTarefa(value) {
   state.filtroResponsavelTarefa = value || "todos";
+}
+
+export function setUsers(items) {
+  state.users = Array.isArray(items) ? items : [];
+  state.usersLoaded = true;
 }
