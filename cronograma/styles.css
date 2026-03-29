@@ -1,0 +1,365 @@
+:root {
+  --cron-bg: linear-gradient(180deg, #eef7f0 0%, #e6f2e8 100%);
+  --cron-card: rgba(255, 255, 255, 0.82);
+  --cron-card-border: rgba(11, 46, 27, 0.08);
+  --cron-text: #17301f;
+  --cron-text-soft: #4e6a58;
+  --cron-primary: #0b2e1b;
+  --cron-primary-2: #1f6b45;
+  --cron-shadow: 0 16px 40px rgba(15, 54, 30, 0.10);
+  --cron-radius-xl: 24px;
+  --cron-radius-lg: 18px;
+  --cron-radius-md: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body.relevo-body {
+  font-family: "Montserrat", sans-serif;
+  color: var(--cron-text);
+  background: var(--cron-bg);
+  min-height: 100vh;
+}
+
+.portal-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "sidebar topbar"
+    "sidebar main";
+}
+
+.portal-sidebar {
+  grid-area: sidebar;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 22px 18px;
+  background: linear-gradient(180deg, #0b2e1b 0%, #145232 100%);
+  color: #fff;
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.10);
+  z-index: 30;
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.portal-brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 6px;
+  object-fit: contain;
+}
+
+.portal-brand-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.portal-brand-subtitle {
+  font-size: 0.88rem;
+  opacity: 0.82;
+  margin-top: 2px;
+}
+
+.portal-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.portal-nav-item {
+  width: 100%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.portal-nav-item:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateX(2px);
+}
+
+.portal-nav-item.is-active {
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 700;
+}
+
+.portal-nav-ico {
+  width: 22px;
+  text-align: center;
+  flex: 0 0 22px;
+}
+
+.portal-nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 12px 0 6px;
+}
+
+.portal-nav-section {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin: 4px 4px 2px;
+}
+
+.portal-topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(11, 46, 27, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.portal-topbar-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.portal-topbar-title strong {
+  font-size: 1rem;
+}
+
+.portal-topbar-title span {
+  font-size: 0.9rem;
+  color: var(--cron-text-soft);
+}
+
+.portal-hamburger,
+.portal-drawer-close {
+  border: 0;
+  background: #fff;
+  color: var(--cron-primary);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.portal-main {
+  grid-area: main;
+  padding: 24px;
+}
+
+.cronograma-shell {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.cronograma-shell__header {
+  background: var(--cron-card);
+  border: 1px solid var(--cron-card-border);
+  border-radius: var(--cron-radius-xl);
+  padding: 26px 28px;
+  box-shadow: var(--cron-shadow);
+  backdrop-filter: blur(10px);
+}
+
+.cronograma-shell__eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cron-primary-2);
+}
+
+.cronograma-shell__header h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.cronograma-shell__header p {
+  margin: 10px 0 0;
+  max-width: 850px;
+  color: var(--cron-text-soft);
+  line-height: 1.6;
+}
+
+.cronograma-shell__content {
+  margin-top: 22px;
+}
+
+.cronograma-view-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+}
+
+.cronograma-placeholder-card,
+.cronograma-panel {
+  background: var(--cron-card);
+  border: 1px solid var(--cron-card-border);
+  border-radius: var(--cron-radius-xl);
+  padding: 24px;
+  box-shadow: var(--cron-shadow);
+  backdrop-filter: blur(10px);
+}
+
+.cronograma-placeholder-card h2,
+.cronograma-panel h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.cronograma-placeholder-card p,
+.cronograma-panel p {
+  color: var(--cron-text-soft);
+  line-height: 1.6;
+}
+
+.cronograma-checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cronograma-checklist__item {
+  border-radius: var(--cron-radius-md);
+  background: rgba(15, 93, 45, 0.08);
+  border: 1px solid rgba(15, 93, 45, 0.10);
+  padding: 14px 16px;
+  font-weight: 600;
+  color: var(--cron-primary);
+}
+
+.cronograma-mini-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cronograma-mini-list__item {
+  border-radius: var(--cron-radius-md);
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(11, 46, 27, 0.07);
+  padding: 14px 16px;
+}
+
+.cronograma-mini-list__item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cronograma-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cronograma-tag {
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  background: rgba(11, 46, 27, 0.08);
+  color: var(--cron-primary);
+}
+
+.portal-drawer,
+.portal-drawer-overlay {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .portal-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "topbar"
+      "main";
+  }
+
+  .portal-sidebar {
+    display: none;
+  }
+
+  .portal-main {
+    padding: 18px;
+  }
+
+  .cronograma-shell__header {
+    padding: 22px 20px;
+  }
+
+  .cronograma-shell__header h1 {
+    font-size: 1.65rem;
+  }
+
+  .cronograma-view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    z-index: 39;
+  }
+
+  .portal-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(88vw, 320px);
+    height: 100vh;
+    padding: 18px;
+    background: linear-gradient(180deg, #0b2e1b 0%, #145232 100%);
+    color: #fff;
+    z-index: 40;
+    box-shadow: 18px 0 40px rgba(0, 0, 0, 0.22);
+    overflow-y: auto;
+  }
+
+  .portal-drawer.is-open,
+  .portal-drawer-overlay.is-open {
+    display: block;
+  }
+
+  .portal-drawer-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+}
