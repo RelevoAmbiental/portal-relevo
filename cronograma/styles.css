@@ -1117,3 +1117,22 @@ body.relevo-body {
     flex-direction: column;
   }
 }
+.cronograma-import-cell-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.cronograma-import-cell-muted {
+  font-size: 0.78rem;
+  color: var(--cron-text-soft);
+}
+
+.cronograma-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cronograma-btn[disabled]:hover {
+  transform: none;
+}
