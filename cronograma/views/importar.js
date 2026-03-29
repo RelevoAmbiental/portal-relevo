@@ -98,6 +98,68 @@ function getExemploTxt() {
 - Entrega ao cliente | 1d | alta`;
 }
 
+function getPromptGeracaoTxt() {
+  return `Converta o escopo, cronograma ou orçamento abaixo em um TXT estruturado para importação de tarefas no Portal Relevo.
+
+Regras obrigatórias:
+1. Responda SOMENTE com o TXT final.
+2. Não escreva explicações antes ou depois.
+3. Use exatamente a estrutura abaixo.
+4. Organize as tarefas por fase.
+5. Cada tarefa deve ficar em uma linha iniciada por "-".
+6. Após o título, informe a duração estimada no formato "Xd".
+7. Quando fizer sentido, informe a prioridade: baixa, media ou alta.
+8. Metadados opcionais aceitos no topo:
+   [PROJETO] Nome do projeto
+   [RESPONSAVEL_PADRAO] Nome ou e-mail
+   [INICIO] AAAA-MM-DD
+9. Estrutura de fases preferenciais:
+   Planejamento
+   Campo
+   Gabinete
+   Entrega
+   Administrativo
+10. Não use tabelas, markdown, bullets diferentes ou numeração.
+
+Modelo:
+[PROJETO] Nome do Projeto
+[RESPONSAVEL_PADRAO] Nome do Responsável
+[INICIO] 2026-04-01
+
+[FASE] Planejamento
+- Alinhamento inicial | 1d | media
+- Organização logística | 2d | media
+
+[FASE] Campo
+- Prospecção espeleológica | 5d | alta
+- Caminhamento complementar | 2d | media
+
+[FASE] Gabinete
+- Organização de dados | 3d | media
+- Relatório técnico parcial | 6d | alta
+
+[FASE] Entrega
+- Revisão final | 2d | alta
+- Entrega ao cliente | 1d | alta
+
+Agora converta o conteúdo que eu enviar para esse formato exato.`;
+}
+
+function baixarPromptGeracaoTxt() {
+  const conteudo = getPromptGeracaoTxt();
+  const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "prompt-geracao-txt-cronograma-relevo.txt";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}
+
 function renderMensagem() {
   if (!mensagemImportacao) return "";
 
@@ -235,6 +297,82 @@ function renderPreview() {
   `;
 }
 
+function buildResumoPorFase() {
+  if (!previewImportacao.length) return [];
+
+  const grupos = new Map();
+
+  previewImportacao.forEach((item) => {
+    const chave = item.faseLabel || item.fase || "Outros";
+
+    if (!grupos.has(chave)) {
+      grupos.set(chave, []);
+    }
+
+    grupos.get(chave).push(item);
+  });
+
+  return Array.from(grupos.entries()).map(([fase, itens]) => ({
+    fase,
+    quantidade: itens.length,
+    titulos: itens.map((item) => item.titulo).filter(Boolean)
+  }));
+}
+
+function renderResumoImportacao() {
+  const resumo = buildResumoPorFase();
+
+  return `
+    <aside class="cronograma-panel">
+      <div style="display:grid; gap:12px;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+          <div>
+            <h3 style="margin:0;">Resumo do TXT</h3>
+            <p style="margin:6px 0 0; color:var(--cron-text-soft);">
+              ${
+                previewImportacao.length
+                  ? "Síntese das tarefas identificadas antes do salvamento."
+                  : "Valide o TXT para ver o resumo por fase."
+              }
+            </p>
+          </div>
+
+          <button
+            class="cronograma-btn cronograma-btn--ghost"
+            type="button"
+            id="btnBaixarPromptTxt"
+          >
+            Baixar prompt TXT
+          </button>
+        </div>
+
+        ${
+          resumo.length
+            ? `
+              <div class="cronograma-mini-list">
+                ${resumo
+                  .map(
+                    (grupo) => `
+                      <div class="cronograma-mini-list__item">
+                        <strong>${grupo.quantidade} tarefa(s) de ${escapeHtml(grupo.fase)}</strong>
+                        <span>${escapeHtml(grupo.titulos.join(" • "))}</span>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+            : `
+              <div class="cronograma-empty-state">
+                Nenhuma tarefa resumida ainda.
+              </div>
+            `
+        }
+      </div>
+    </aside>
+  `;
+}
+
 function getTemplate() {
   ensureDefaults();
 
@@ -244,25 +382,18 @@ function getTemplate() {
   return `
     <div class="cronograma-import-layout">
       <section class="cronograma-placeholder-card">
-        <div class="cronograma-import-head">
-          <div>
-            <h2>Importação por TXT estruturado</h2>
-            <p>
-              Nesta etapa, o TXT passa a irrigar o cronograma: você valida o texto, revisa a prévia e só depois grava as tarefas no Firestore.
-            </p>
-          </div>
-
-          <div class="cronograma-checklist">
-            <div class="cronograma-checklist__item">Sem gateway</div>
-            <div class="cronograma-checklist__item">Sem Cloud Functions</div>
-            <div class="cronograma-checklist__item">Sem OpenAI API</div>
-            <div class="cronograma-checklist__item">Parser local no frontend</div>
-          </div>
-        </div>
-
         ${renderMensagem()}
 
         <div class="cronograma-import-stack">
+          <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+            <div>
+              <h2 style="margin:0 0 6px;">Importar tarefas por TXT</h2>
+              <p style="margin:0; color:var(--cron-text-soft);">
+                Cole o conteúdo, valide a prévia e grave as tarefas no cronograma.
+              </p>
+            </div>
+          </div>
+
           <div class="cronograma-import-actions">
             <label class="cronograma-btn cronograma-btn--secondary cronograma-btn--file">
               Selecionar TXT
@@ -338,29 +469,7 @@ function getTemplate() {
         </div>
       </section>
 
-      <aside class="cronograma-panel">
-        <h3>Formato aceito nesta fase</h3>
-
-        <div class="cronograma-mini-list">
-          <div class="cronograma-mini-list__item">
-            <strong>[FASE] Campo</strong>
-            <span>- Prospecção espeleológica | 5d | alta | resp:Samuel</span>
-          </div>
-          <div class="cronograma-mini-list__item">
-            <strong>[FASE] Gabinete</strong>
-            <span>- Relatório técnico | 6d | media | resp:joao@relevo.eco.br | Consolidar dados</span>
-          </div>
-          <div class="cronograma-mini-list__item">
-            <strong>Metadados opcionais</strong>
-            <span>[PROJETO], [RESPONSAVEL_PADRAO], [INICIO]</span>
-          </div>
-        </div>
-
-        <p style="margin-top:16px;">
-          Agora o TXT já aceita responsável por linha e, se houver <strong>[INICIO]</strong>, gera a sequência básica de datas em cascata.
-        </p>
-      </aside>
-
+      ${renderResumoImportacao()}
       ${renderErrosAvisos()}
       ${renderPreview()}
     </div>
@@ -368,242 +477,4 @@ function getTemplate() {
 }
 
 function enriquecerPreview(parsed) {
-  const users = getUsersDisponiveis();
-  const responsavelPadrao = getResponsavelSelecionado();
-
-  const itens = [];
-  const erros = [...parsed.erros];
-  const avisos = [...parsed.avisos];
-
-  parsed.itens.forEach((item) => {
-    const enriched = { ...item };
-
-    if (item.responsavelTexto) {
-      const found = resolveResponsavelByTexto(item.responsavelTexto, users);
-
-      if (found) {
-        enriched.responsavel = found.nome || "";
-        enriched.responsavelUid = found.uid || "";
-        enriched.responsavelEmail = found.email || "";
-        enriched.responsavelOrigem = "linha";
-      } else {
-        erros.push(`Linha ${item.linha}: responsável "${item.responsavelTexto}" não foi encontrado na coleção users.`);
-      }
-    } else if (responsavelPadrao?.uid) {
-      enriched.responsavel = responsavelPadrao.nome || "";
-      enriched.responsavelUid = responsavelPadrao.uid || "";
-      enriched.responsavelEmail = responsavelPadrao.email || "";
-      enriched.responsavelOrigem = "padrao";
-    } else if (metaImportacao.responsavelPadraoTexto) {
-      const foundMeta = resolveResponsavelByTexto(metaImportacao.responsavelPadraoTexto, users);
-
-      if (foundMeta) {
-        enriched.responsavel = foundMeta.nome || "";
-        enriched.responsavelUid = foundMeta.uid || "";
-        enriched.responsavelEmail = foundMeta.email || "";
-        enriched.responsavelOrigem = "padrao";
-      } else {
-        erros.push(`Responsável padrão "${metaImportacao.responsavelPadraoTexto}" não foi encontrado na coleção users.`);
-      }
-    } else {
-      avisos.push(`Linha ${item.linha}: sem responsável específico; selecione um responsável padrão para salvar.`);
-    }
-
-    itens.push(enriched);
-  });
-
-  return { itens, erros, avisos };
-}
-
-function validarImportacao() {
-  const parsed = parseTxtCronograma(textoImportacao);
-
-  metaImportacao = parsed.meta;
-  ensureDefaults();
-
-  const enriched = enriquecerPreview(parsed);
-
-  previewImportacao = enriched.itens;
-  errosImportacao = enriched.erros;
-  avisosImportacao = enriched.avisos;
-
-  if (!errosImportacao.length && previewImportacao.length) {
-    mensagemImportacao = `${previewImportacao.length} tarefa(s) validada(s) com sucesso.`;
-    mensagemTipo = "success";
-  } else if (errosImportacao.length) {
-    mensagemImportacao = "O TXT foi lido, mas há pendências a corrigir antes de salvar.";
-    mensagemTipo = "warning";
-  } else {
-    mensagemImportacao = "Nenhuma tarefa válida foi encontrada.";
-    mensagemTipo = "warning";
-  }
-
-  renderImportarView();
-}
-
-function limparImportacao() {
-  textoImportacao = "";
-  previewImportacao = [];
-  errosImportacao = [];
-  avisosImportacao = [];
-  metaImportacao = {
-    projetoNome: "",
-    responsavelPadraoTexto: "",
-    dataInicioBase: ""
-  };
-  mensagemImportacao = "";
-  mensagemTipo = "info";
-  renderImportarView();
-}
-
-async function salvarImportacao() {
-  try {
-    if (!previewImportacao.length) {
-      throw new Error("Valide um TXT antes de salvar.");
-    }
-
-    if (errosImportacao.length) {
-      throw new Error("Corrija os erros da validação antes de salvar.");
-    }
-
-    const projeto = getProjetoSelecionado();
-    const responsavel = getResponsavelSelecionado();
-
-    if (!projeto?.id) {
-      throw new Error("Selecione o projeto de destino.");
-    }
-
-    if (!responsavel?.uid) {
-      const existeItemSemResponsavel = previewImportacao.some((item) => !item.responsavelUid);
-      if (existeItemSemResponsavel) {
-        throw new Error("Selecione o responsável padrão ou defina responsável por linha para todas as tarefas.");
-      }
-    }
-
-    salvando = true;
-    mensagemImportacao = "";
-    renderImportarView();
-
-    const resultado = await salvarImportacaoLote({
-      itens: previewImportacao,
-      projeto,
-      responsavel
-    });
-
-    mensagemImportacao = `${resultado.quantidade} tarefa(s) importada(s) com sucesso no Firestore.`;
-    mensagemTipo = "success";
-
-    previewImportacao = [];
-    errosImportacao = [];
-    avisosImportacao = [];
-    textoImportacao = "";
-
-    renderImportarView();
-  } catch (error) {
-    console.error(error);
-    mensagemImportacao = error?.message || "Não foi possível salvar a importação.";
-    mensagemTipo = "error";
-    renderImportarView();
-  } finally {
-    salvando = false;
-  }
-}
-
-function ensureUsersListener() {
-  if (unsubscribeUsers) return;
-
-  unsubscribeUsers = listenUsers(
-    (items) => {
-      setUsers(items);
-
-      if (state.currentView === "importar") {
-        renderImportarView();
-      }
-    },
-    (error) => {
-      console.error(error);
-      mensagemImportacao = "Não foi possível carregar a coleção users.";
-      mensagemTipo = "error";
-
-      if (state.currentView === "importar") {
-        renderImportarView();
-      }
-    }
-  );
-}
-
-function mountEvents() {
-  const txtInput = document.getElementById("importTxtInput");
-  const fileInput = document.getElementById("importTxtFile");
-  const projetoSelect = document.getElementById("importProjetoSelect");
-  const responsavelSelect = document.getElementById("importResponsavelSelect");
-  const btnExample = document.getElementById("btnImportExample");
-  const btnClear = document.getElementById("btnImportClear");
-  const btnValidar = document.getElementById("btnValidarImportacao");
-  const btnSalvar = document.getElementById("btnSalvarImportacao");
-
-  if (txtInput) {
-    txtInput.addEventListener("input", (event) => {
-      textoImportacao = event.target.value || "";
-    });
-  }
-
-  if (fileInput) {
-    fileInput.addEventListener("change", async (event) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-
-      try {
-        textoImportacao = await file.text();
-        mensagemImportacao = `Arquivo "${file.name}" carregado para validação.`;
-        mensagemTipo = "info";
-        renderImportarView();
-      } catch (error) {
-        console.error(error);
-        mensagemImportacao = "Não foi possível ler o arquivo TXT.";
-        mensagemTipo = "error";
-        renderImportarView();
-      }
-    });
-  }
-
-  if (projetoSelect) {
-    projetoSelect.addEventListener("change", (event) => {
-      projetoSelecionadoId = event.target.value || "";
-    });
-  }
-
-  if (responsavelSelect) {
-    responsavelSelect.addEventListener("change", (event) => {
-      responsavelSelecionadoUid = event.target.value || "";
-    });
-  }
-
-  if (btnExample) {
-    btnExample.addEventListener("click", () => {
-      textoImportacao = getExemploTxt();
-      mensagemImportacao = "Exemplo carregado no editor.";
-      mensagemTipo = "info";
-      renderImportarView();
-    });
-  }
-
-  if (btnClear) {
-    btnClear.addEventListener("click", limparImportacao);
-  }
-
-  if (btnValidar) {
-    btnValidar.addEventListener("click", validarImportacao);
-  }
-
-  if (btnSalvar) {
-    btnSalvar.addEventListener("click", salvarImportacao);
-  }
-}
-
-export function renderImportarView() {
-  ensureProjetosListener();
-  ensureUsersListener();
-  renderIntoApp(getTemplate());
-  mountEvents();
-}
+  const users = getUsers
