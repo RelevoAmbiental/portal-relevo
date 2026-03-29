@@ -738,3 +738,114 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
+.cronograma-tag--info {
+  background: rgba(29, 78, 216, 0.10);
+  color: #1d4ed8;
+}
+
+.cronograma-subtasks-builder {
+  display: grid;
+  gap: 12px;
+}
+
+.cronograma-subtasks-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.cronograma-subtasks-input-row input {
+  width: 100%;
+  border: 1px solid rgba(11, 46, 27, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--cron-text);
+  outline: none;
+}
+
+.cronograma-subtasks-input-row input:focus {
+  border-color: rgba(31, 107, 69, 0.55);
+  box-shadow: 0 0 0 4px rgba(31, 107, 69, 0.10);
+}
+
+.cronograma-subtasks-list {
+  display: grid;
+  gap: 8px;
+}
+
+.cronograma-subtasks-empty {
+  border: 1px dashed rgba(11, 46, 27, 0.14);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--cron-text-soft);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.cronograma-subtask-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(11, 46, 27, 0.08);
+}
+
+.cronograma-subtask-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cron-text);
+}
+
+.cronograma-subtask-label span.is-done,
+.cronograma-task-checklist__item span.is-done {
+  text-decoration: line-through;
+  opacity: 0.62;
+}
+
+.cronograma-btn--xs {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.cronograma-task-checklist {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.cronograma-task-checklist strong {
+  font-size: 0.92rem;
+  color: var(--cron-primary);
+}
+
+.cronograma-task-checklist__items {
+  display: grid;
+  gap: 8px;
+}
+
+.cronograma-task-checklist__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(11, 46, 27, 0.08);
+}
+
+@media (max-width: 760px) {
+  .cronograma-subtasks-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-subtask-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
