@@ -38,6 +38,14 @@ function normalizeText(value) {
     .trim();
 }
 
+function normalizeCompare(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 function slugifyFase(value) {
   const raw = String(value || "").trim().toLowerCase();
 
@@ -107,6 +115,15 @@ function parseIsoDateToken(token) {
   return value;
 }
 
+function parseResponsavelToken(token) {
+  const value = String(token || "").trim();
+
+  const match = value.match(/^(resp|responsavel|responsável)\s*:\s*(.+)$/i);
+  if (!match) return "";
+
+  return String(match[2] || "").trim();
+}
+
 function buildDescricaoImportada(item) {
   const partes = [];
 
@@ -119,6 +136,58 @@ function buildDescricaoImportada(item) {
   }
 
   return partes.join("\n\n").trim();
+}
+
+function addDaysIso(isoDate, daysToAdd) {
+  const [year, month, day] = String(isoDate).split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + Number(daysToAdd || 0));
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function applyCascadeDates(items, dataInicioBase) {
+  if (!dataInicioBase) return items;
+
+  let cursor = dataInicioBase;
+
+  return items.map((item) => {
+    const clone = { ...item };
+
+    if (!clone.dataInicio) {
+      clone.dataInicio = cursor;
+    }
+
+    if (!clone.dataVencimento && clone.duracaoDias) {
+      clone.dataVencimento = addDaysIso(clone.dataInicio, clone.duracaoDias - 1);
+    }
+
+    if (clone.duracaoDias) {
+      cursor = addDaysIso(clone.dataInicio, clone.duracaoDias);
+    } else if (clone.dataVencimento) {
+      cursor = addDaysIso(clone.dataVencimento, 1);
+    } else {
+      cursor = addDaysIso(clone.dataInicio, 1);
+    }
+
+    return clone;
+  });
+}
+
+export function resolveResponsavelByTexto(texto, users = []) {
+  const termo = normalizeCompare(texto);
+  if (!termo) return null;
+
+  return (
+    users.find((item) => {
+      const nome = normalizeCompare(item?.nome);
+      const email = normalizeCompare(item?.email);
+      const username = normalizeCompare(item?.username);
+      return nome === termo || email === termo || username === termo;
+    }) || null
+  );
 }
 
 export function parseTxtCronograma(texto) {
@@ -190,7 +259,11 @@ export function parseTxtCronograma(texto) {
       return;
     }
 
-    const partes = semMarcador.split("|").map((parte) => parte.trim()).filter(Boolean);
+    const partes = semMarcador
+      .split("|")
+      .map((parte) => parte.trim())
+      .filter(Boolean);
+
     const titulo = (partes.shift() || "").trim();
 
     if (!titulo) {
@@ -201,6 +274,7 @@ export function parseTxtCronograma(texto) {
     let duracaoDias = null;
     let prioridade = "media";
     let dataVencimento = "";
+    let responsavelTexto = "";
     const descricaoExtras = [];
 
     partes.forEach((parte) => {
@@ -222,6 +296,12 @@ export function parseTxtCronograma(texto) {
         return;
       }
 
+      const responsavelToken = parseResponsavelToken(parte);
+      if (responsavelToken) {
+        responsavelTexto = responsavelToken;
+        return;
+      }
+
       descricaoExtras.push(parte);
     });
 
@@ -232,11 +312,17 @@ export function parseTxtCronograma(texto) {
       faseLabel: getFaseLabel(faseAtual),
       prioridade,
       duracaoDias,
-      dataInicio: result.meta.dataInicioBase || "",
+      dataInicio: "",
       dataVencimento,
-      descricao: descricaoExtras.join(" | ").trim()
+      descricao: descricaoExtras.join(" | ").trim(),
+      responsavelTexto
     });
   });
+
+  if (result.meta.dataInicioBase) {
+    result.itens = applyCascadeDates(result.itens, result.meta.dataInicioBase);
+    result.avisos.push("Datas em cascata aplicadas a partir de [INICIO].");
+  }
 
   if (!result.itens.length && !result.erros.length) {
     result.erros.push("Nenhuma tarefa válida foi encontrada no TXT.");
@@ -263,11 +349,24 @@ export async function salvarImportacaoLote({ itens, projeto, responsavel }) {
   const batch = db.batch();
   const now = getServerTimestamp();
 
-  itens.forEach((item) => {
+  itens.forEach((item, index) => {
     const titulo = String(item?.titulo || "").trim();
 
     if (!titulo) {
       throw new Error("Uma das tarefas da prévia está sem título.");
+    }
+
+    const responsavelFinal =
+      item?.responsavelUid
+        ? {
+            uid: item.responsavelUid,
+            nome: item.responsavel || "",
+            email: item.responsavelEmail || ""
+          }
+        : responsavel;
+
+    if (!responsavelFinal?.uid) {
+      throw new Error(`A tarefa "${titulo}" está sem responsável válido.`);
     }
 
     const ref = db.collection("tarefas").doc();
@@ -277,18 +376,21 @@ export async function salvarImportacaoLote({ itens, projeto, responsavel }) {
       projetoId: projeto.id,
       projetoNome: projeto.nome || "",
       fase: item.fase || "planejamento",
-      responsavel: responsavel.nome || "",
-      responsavelUid: responsavel.uid,
-      responsavelEmail: responsavel.email || "",
+      responsavel: responsavelFinal.nome || "",
+      responsavelUid: responsavelFinal.uid,
+      responsavelEmail: responsavelFinal.email || "",
       dataInicio: item.dataInicio || "",
       dataVencimento: item.dataVencimento || "",
       status: "a_fazer",
       prioridade: item.prioridade || "media",
       descricao: buildDescricaoImportada(item),
+      duracaoEstimadaDias: item.duracaoDias || null,
       subtarefas: [],
       arquivada: false,
       uid: user.uid,
       ownerEmail: user.email || "",
+      origemCadastro: "importacao_txt",
+      ordemImportacao: index + 1,
       criadoEm: now,
       updatedAt: now
     });
