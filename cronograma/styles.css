@@ -650,3 +650,91 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
+.cronograma-view-grid--tasks {
+  grid-template-columns: minmax(380px, 470px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.cronograma-filter-row--wide {
+  align-items: end;
+}
+
+.cronograma-task-list {
+  display: grid;
+  gap: 14px;
+}
+
+.cronograma-task-card {
+  border-radius: 18px;
+  border: 1px solid rgba(11, 46, 27, 0.08);
+  background: rgba(255, 255, 255, 0.74);
+  padding: 18px;
+}
+
+.cronograma-task-card.is-archived {
+  opacity: 0.82;
+}
+
+.cronograma-task-card__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.cronograma-task-card__head h3 {
+  margin: 0;
+  font-size: 1.06rem;
+}
+
+.cronograma-task-card__head p {
+  margin: 4px 0 0;
+  color: var(--cron-text-soft);
+}
+
+.cronograma-task-card__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 0.92rem;
+}
+
+.cronograma-task-card__desc {
+  margin-top: 14px;
+  line-height: 1.6;
+}
+
+.cronograma-task-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cronograma-tag--danger {
+  background: rgba(190, 24, 93, 0.12);
+  color: #9f1239;
+}
+
+.cronograma-tag--warning {
+  background: rgba(234, 88, 12, 0.12);
+  color: #c2410c;
+}
+
+@media (max-width: 1180px) {
+  .cronograma-view-grid--tasks {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .cronograma-task-card__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cronograma-task-card__meta {
+    grid-template-columns: 1fr;
+  }
+}
