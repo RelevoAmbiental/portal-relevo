@@ -24,14 +24,15 @@ const STATUS_OPTIONS = [
 ];
 
 const CORES = [
-  "#0b2e1b",
-  "#145232",
-  "#1f6b45",
-  "#2d8a57",
-  "#5c7c3a",
-  "#8b6f3d",
-  "#6a4c93",
-  "#7a2f4a"
+  "#0B6E4F", // verde escuro
+  "#1D4ED8", // azul
+  "#7C3AED", // roxo
+  "#C026D3", // magenta
+  "#BE123C", // vinho
+  "#EA580C", // laranja
+  "#CA8A04", // mostarda
+  "#4D7C0F", // oliva
+  "#374151"  // grafite
 ];
 
 function getProjetoInicial() {
