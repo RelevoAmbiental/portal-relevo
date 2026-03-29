@@ -23,6 +23,14 @@ function ensureDb() {
   return db;
 }
 
+function ensureUser() {
+  const user = getUser();
+  if (!user?.uid) {
+    throw new Error("Usuário não autenticado.");
+  }
+  return user;
+}
+
 function sanitizeProjeto(payload) {
   return {
     nome: (payload.nome || "").trim(),
@@ -76,22 +84,26 @@ function sortProjetos(items) {
 
 export function listenProjetos(onChange, onError) {
   const db = ensureDb();
+  const user = ensureUser();
 
-  return db.collection("projetos").onSnapshot(
-    (snapshot) => {
-      const items = snapshot.docs.map(normalizeProjeto);
-      onChange(sortProjetos(items));
-    },
-    (error) => {
-      console.error("Erro ao ouvir projetos:", error);
-      if (typeof onError === "function") onError(error);
-    }
-  );
+  return db
+    .collection("projetos")
+    .where("uid", "==", user.uid)
+    .onSnapshot(
+      (snapshot) => {
+        const items = snapshot.docs.map(normalizeProjeto);
+        onChange(sortProjetos(items));
+      },
+      (error) => {
+        console.error("Erro ao ouvir projetos:", error);
+        if (typeof onError === "function") onError(error);
+      }
+    );
 }
 
 export async function criarProjeto(payload) {
   const db = ensureDb();
-  const user = getUser();
+  const user = ensureUser();
   const data = sanitizeProjeto(payload);
   validateProjeto(data);
 
@@ -99,8 +111,8 @@ export async function criarProjeto(payload) {
 
   await db.collection("projetos").add({
     ...data,
-    uid: user?.uid || "",
-    ownerEmail: user?.email || "",
+    uid: user.uid,
+    ownerEmail: user.email || "",
     criadoEm: now,
     updatedAt: now
   });
@@ -110,11 +122,14 @@ export async function atualizarProjeto(id, payload) {
   if (!id) throw new Error("Projeto inválido para atualização.");
 
   const db = ensureDb();
+  const user = ensureUser();
   const data = sanitizeProjeto(payload);
   validateProjeto(data);
 
   await db.collection("projetos").doc(id).update({
     ...data,
+    uid: user.uid,
+    ownerEmail: user.email || "",
     updatedAt: getServerTimestamp()
   });
 }
