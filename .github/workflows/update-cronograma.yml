@@ -1,68 +1,13 @@
-name: Atualizar Cronograma no Portal
+name: cronograma-legado-desativado
 
 on:
-  repository_dispatch:
-    types: [cronograma-atualizado]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  actions: write
-
 jobs:
-  update-cronograma:
+  aviso:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 🧬 Checkout do portal-relevo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT_RELEVO_AUTODEPLOY }}
-
-      - name: 🧬 Checkout do cronogramas-relevo
-        uses: actions/checkout@v4
-        with:
-          repository: RelevoAmbiental/cronogramas-relevo
-          token: ${{ secrets.PAT_RELEVO_AUTODEPLOY }}
-          path: cronogramas-src
-
-      - name: 🔧 Configurar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: |
-            cronogramas-src/package.json
-            cronogramas-src/package-lock.json
-
-      - name: 📦 Instalar dependências do cronograma
-        working-directory: cronogramas-src
-        run: npm ci
-
-      - name: 🏗️ Build do cronograma (Vite)
-        working-directory: cronogramas-src
-        run: npm run build
-
-      - name: 🧹 Limpar assets antigos
+      - name: Aviso
         run: |
-          rm -rf cronograma/assets
-          mkdir -p cronograma/assets
-
-      - name: 📁 Copiar novos assets
-        run: |
-          cp -R cronogramas-src/dist/assets/* cronograma/assets/
-
-      - name: 💾 Commit e Push das alterações
-        run: |
-          git config --local user.email "bot@relevo.eco.br"
-          git config --local user.name "RelevoBot"
-
-          git add cronograma/assets/
-
-          if git diff --cached --quiet; then
-            echo "Nenhuma alteração para commitar."
-            exit 0
-          fi
-
-          git commit -m "Atualização automática do Cronograma (assets atualizados)"
-          git push
+          echo "Workflow legado do Cronograma desativado."
+          echo "O Cronograma agora será reconstruído diretamente dentro do Portal."
