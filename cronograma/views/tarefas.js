@@ -227,33 +227,66 @@ function renderChecklistCard(item) {
 }
 
 function renderTarefaCard(item) {
+  const statusLabel = formatStatus(item.status);
+  const prioridadeLabel = formatPrioridade(item.prioridade);
+  const faseLabel = formatFase(item.fase);
+  const dataInicioLabel = formatDate(item.dataInicio);
+  const dataVencimentoLabel = formatDate(item.dataVencimento);
+
+  const isAtrasada =
+    item.dataVencimento &&
+    item.status !== "concluida" &&
+    !item.arquivada &&
+    new Date(`${item.dataVencimento}T00:00:00`) <
+      new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
   return `
-    <article class="cronograma-task-card ${item.arquivada ? "is-archived" : ""}">
-      <div class="cronograma-task-card__head">
-        <div>
-          <h3>${escapeHtml(item.titulo)}</h3>
-          <p>${escapeHtml(item.projetoNome || "Projeto não informado")}</p>
+    <article class="cronograma-task-card ${item.arquivada ? "is-archived" : ""} ${isAtrasada ? "is-overdue" : ""}">
+      <div class="cronograma-task-card__topline">
+        <div class="cronograma-task-card__project">
+          <span class="cronograma-task-card__project-label">Projeto</span>
+          <strong>${escapeHtml(item.projetoNome || "Projeto não informado")}</strong>
         </div>
 
         <div class="cronograma-tag-row cronograma-tag-row--tight">
-          <span class="cronograma-tag">${escapeHtml(formatFase(item.fase))}</span>
-          <span class="cronograma-tag">${escapeHtml(formatStatus(item.status))}</span>
-          <span class="cronograma-tag">${escapeHtml(formatPrioridade(item.prioridade))}</span>
+          <span class="cronograma-tag">${escapeHtml(faseLabel)}</span>
+          <span class="cronograma-tag">${escapeHtml(statusLabel)}</span>
+          <span class="cronograma-tag">${escapeHtml(prioridadeLabel)}</span>
           ${getChecklistResumo(item)}
           ${getPrazoBadge(item)}
           ${item.arquivada ? '<span class="cronograma-tag cronograma-tag--muted">Arquivada</span>' : ""}
         </div>
       </div>
 
-      <div class="cronograma-task-card__meta">
-        <div><strong>Responsável:</strong> ${escapeHtml(item.responsavel || "—")}</div>
-        <div><strong>Início:</strong> ${escapeHtml(formatDate(item.dataInicio))}</div>
-        <div><strong>Vencimento:</strong> ${escapeHtml(formatDate(item.dataVencimento))}</div>
+      <div class="cronograma-task-card__head">
+        <div>
+          <h3>${escapeHtml(item.titulo)}</h3>
+        </div>
+      </div>
+
+      <div class="cronograma-task-card__meta cronograma-task-card__meta--grid">
+        <div class="cronograma-task-meta-box">
+          <span class="cronograma-task-meta-box__label">Responsável</span>
+          <strong>${escapeHtml(item.responsavel || "—")}</strong>
+        </div>
+
+        <div class="cronograma-task-meta-box">
+          <span class="cronograma-task-meta-box__label">Início</span>
+          <strong>${escapeHtml(dataInicioLabel)}</strong>
+        </div>
+
+        <div class="cronograma-task-meta-box">
+          <span class="cronograma-task-meta-box__label">Vencimento</span>
+          <strong>${escapeHtml(dataVencimentoLabel)}</strong>
+        </div>
       </div>
 
       ${
         item.descricao
-          ? `<p class="cronograma-task-card__desc">${escapeHtml(item.descricao)}</p>`
+          ? `<div class="cronograma-task-card__description-block">
+              <span class="cronograma-task-card__section-label">Descrição</span>
+              <p class="cronograma-task-card__desc">${escapeHtml(item.descricao)}</p>
+            </div>`
           : ""
       }
 
