@@ -287,71 +287,34 @@ body.relevo-body {
   display: none;
 }
 
+@media (max-width: 1200px) {
+  .cronograma-import-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-import-layout > aside.cronograma-panel {
+    width: 100%;
+    max-width: 100%;
+    position: static;
+  }
+
+  .cronograma-import-feedback-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 980px) {
-  .portal-topbar {
-    display: flex;
-  }
-  
-  .portal-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "topbar"
-      "main";
-  }
-
-  .portal-sidebar {
-    display: none;
-  }
-
-  .portal-main {
-    padding: 18px;
-  }
-
-  .cronograma-shell__header {
-    padding: 22px 20px;
-  }
-
-  .cronograma-shell__header h1 {
-    font-size: 1.65rem;
-  }
-
-  .cronograma-view-grid {
+  .cronograma-import-config-grid {
     grid-template-columns: 1fr;
   }
 
-  .portal-drawer-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.38);
-    z-index: 39;
+  .cronograma-import-preview-head {
+    flex-direction: column;
   }
 
-  .portal-drawer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: min(88vw, 320px);
-    height: 100vh;
-    padding: 18px;
-    background: linear-gradient(180deg, #0b2e1b 0%, #145232 100%);
-    color: #fff;
-    z-index: 40;
-    box-shadow: 18px 0 40px rgba(0, 0, 0, 0.22);
-    overflow-y: auto;
-  }
-
-  .portal-drawer.is-open,
-  .portal-drawer-overlay.is-open {
-    display: block;
-  }
-
-  .portal-drawer-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
+  .cronograma-import-summary-head {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 .cronograma-view-grid--projects {
