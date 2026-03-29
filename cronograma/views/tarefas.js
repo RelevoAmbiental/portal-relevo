@@ -15,6 +15,7 @@ import {
   arquivarTarefa,
   desarquivarTarefa
 } from "../services/firestore-tarefas.js";
+import { ensureProjetosListener } from "./projetos.js";
 
 let unsubscribeTarefas = null;
 
