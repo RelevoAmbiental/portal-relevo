@@ -38,7 +38,7 @@ const CORES = [
 function getProjetoInicial() {
   return {
     nome: "",
-    cliente: "Relevo Consultoria Ambiental",
+    cliente: "",
     propostaNumero: "",
     responsavel: "",
     dataInicio: "",
