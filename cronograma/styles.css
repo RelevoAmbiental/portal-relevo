@@ -953,3 +953,167 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
+.cronograma-import-layout {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 20px;
+}
+
+.cronograma-import-head {
+  display: grid;
+  gap: 16px;
+}
+
+.cronograma-import-stack {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.cronograma-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cronograma-btn--file {
+  position: relative;
+  overflow: hidden;
+}
+
+.cronograma-import-textarea {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid rgba(11, 46, 27, 0.12);
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--cron-text);
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+  outline: none;
+}
+
+.cronograma-import-textarea:focus,
+.cronograma-input:focus {
+  border-color: rgba(31, 107, 69, 0.35);
+  box-shadow: 0 0 0 4px rgba(31, 107, 69, 0.08);
+}
+
+.cronograma-import-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.cronograma-import-message {
+  margin-top: 16px;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-weight: 600;
+}
+
+.cronograma-import-message--info {
+  background: rgba(29, 78, 216, 0.08);
+  color: #1d4ed8;
+}
+
+.cronograma-import-message--success {
+  background: rgba(15, 93, 45, 0.10);
+  color: #166534;
+}
+
+.cronograma-import-message--warning {
+  background: rgba(234, 88, 12, 0.10);
+  color: #c2410c;
+}
+
+.cronograma-import-message--error {
+  background: rgba(190, 24, 60, 0.10);
+  color: #be123c;
+}
+
+.cronograma-import-feedback-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.cronograma-import-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cronograma-import-list__item {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(11, 46, 27, 0.08);
+}
+
+.cronograma-import-list--error .cronograma-import-list__item {
+  border-color: rgba(190, 24, 60, 0.18);
+  background: rgba(190, 24, 60, 0.05);
+}
+
+.cronograma-import-list--warning .cronograma-import-list__item {
+  border-color: rgba(234, 88, 12, 0.18);
+  background: rgba(234, 88, 12, 0.05);
+}
+
+.cronograma-import-preview-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.cronograma-import-preview-head h3 {
+  margin: 0 0 6px;
+}
+
+.cronograma-import-preview-head p {
+  margin: 0;
+  color: var(--cron-text-soft);
+}
+
+.cronograma-import-table-wrap {
+  overflow-x: auto;
+}
+
+.cronograma-import-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.cronograma-import-table th,
+.cronograma-import-table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(11, 46, 27, 0.08);
+  vertical-align: top;
+}
+
+.cronograma-import-table th {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cron-text-soft);
+}
+
+@media (max-width: 980px) {
+  .cronograma-import-layout,
+  .cronograma-import-feedback-grid,
+  .cronograma-import-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-import-preview-head {
+    flex-direction: column;
+  }
+}
