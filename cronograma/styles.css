@@ -948,8 +948,9 @@ body.relevo-body {
 
 .cronograma-import-stack {
   display: grid;
-  gap: 16px;
-  margin-top: 18px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+  align-items: start;
 }
 
 .cronograma-import-actions {
@@ -1065,12 +1066,13 @@ body.relevo-body {
 
 .cronograma-import-table-wrap {
   overflow-x: auto;
+  width: 100%;
 }
 
 .cronograma-import-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 860px;
+  min-width: 960px;
 }
 
 .cronograma-import-table th,
@@ -1144,4 +1146,29 @@ body.relevo-body {
 .cronograma-import-summary-head p {
   margin: 6px 0 0;
   color: var(--cron-text-soft);
+}
+.cronograma-import-feedback-grid,
+.cronograma-panel:has(.cronograma-import-preview-head),
+.cronograma-import-preview-section {
+  grid-column: 1 / -1;
+}
+.cronograma-import-feedback-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.cronograma-import-feedback-grid > .cronograma-panel {
+  min-width: 0;
+}
+.cronograma-import-layout > .cronograma-panel:last-child {
+  grid-column: 1 / -1;
+}
+.cronograma-import-layout > aside.cronograma-panel {
+  min-width: 0;
+  width: 320px;
+  max-width: 320px;
+  position: sticky;
+  top: 24px;
 }
