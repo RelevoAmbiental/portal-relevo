@@ -508,6 +508,7 @@ function ensureTarefasListener() {
 }
 
 export function renderTarefasView() {
+  ensureProjetosListener();
   ensureTarefasListener();
   renderIntoApp(getTarefasTemplate());
   mountTarefasEvents();
