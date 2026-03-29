@@ -132,7 +132,7 @@ body.relevo-body {
 
 .portal-topbar {
   grid-area: topbar;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 14px;
   padding: 18px 24px;
@@ -301,6 +301,10 @@ body.relevo-body {
 }
 
 @media (max-width: 980px) {
+  portal-topbar {
+    display: flex;
+  }
+  
   .portal-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
