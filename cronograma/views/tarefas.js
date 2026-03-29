@@ -7,6 +7,7 @@ import {
   setFiltroProjetoTarefa,
   setFiltroStatusTarefa,
   setFiltroResponsavelTarefa,
+  setFiltroFaseTarefa,
   setUsers
 } from "../core/state.js";
 import {
@@ -36,11 +37,20 @@ const PRIORIDADE_OPTIONS = [
   { value: "critica", label: "Crítica" }
 ];
 
+const FASE_OPTIONS = [
+  { value: "planejamento", label: "Planejamento" },
+  { value: "campo", label: "Campo" },
+  { value: "gabinete", label: "Gabinete" },
+  { value: "entrega", label: "Entrega" },
+  { value: "administrativo", label: "Administrativo" }
+];
+
 function getTarefaInicial() {
   return {
     titulo: "",
     projetoId: "",
     projetoNome: "",
+    fase: "planejamento",
     responsavel: "",
     responsavelUid: "",
     responsavelEmail: "",
@@ -67,6 +77,10 @@ function formatStatus(status) {
 
 function formatPrioridade(prioridade) {
   return PRIORIDADE_OPTIONS.find((item) => item.value === prioridade)?.label || "Sem prioridade";
+}
+
+function formatFase(fase) {
+  return FASE_OPTIONS.find((item) => item.value === fase)?.label || "Sem fase";
 }
 
 function formatDate(value) {
@@ -99,6 +113,7 @@ function getTarefasFiltradas() {
     if (!state.mostrarTarefasArquivadas && item.arquivada) return false;
     if (state.filtroProjetoTarefa !== "todos" && item.projetoId !== state.filtroProjetoTarefa) return false;
     if (state.filtroStatusTarefa !== "todos" && item.status !== state.filtroStatusTarefa) return false;
+    if (state.filtroFaseTarefa !== "todos" && item.fase !== state.filtroFaseTarefa) return false;
     if (
       state.filtroResponsavelTarefa !== "todos" &&
       (item.responsavel || "").trim() !== state.filtroResponsavelTarefa
@@ -138,6 +153,7 @@ function renderTarefaCard(item) {
         </div>
 
         <div class="cronograma-tag-row cronograma-tag-row--tight">
+          <span class="cronograma-tag">${escapeHtml(formatFase(item.fase))}</span>
           <span class="cronograma-tag">${escapeHtml(formatStatus(item.status))}</span>
           <span class="cronograma-tag">${escapeHtml(formatPrioridade(item.prioridade))}</span>
           ${getPrazoBadge(item)}
@@ -224,6 +240,19 @@ function getTarefasTemplate() {
                                   `
                                 )
                                 .join("")}
+                            </select>
+                          </label>
+
+                          <label class="cronograma-field">
+                            <span>Fase</span>
+                            <select name="fase">
+                              ${FASE_OPTIONS.map(
+                                (opt) => `
+                                  <option value="${opt.value}" ${tarefaBase.fase === opt.value ? "selected" : ""}>
+                                    ${opt.label}
+                                  </option>
+                                `
+                              ).join("")}
                             </select>
                           </label>
 
@@ -326,6 +355,20 @@ function getTarefasTemplate() {
               </label>
 
               <label class="cronograma-field cronograma-field--compact">
+                <span>Fase</span>
+                <select id="filtroFaseTarefa">
+                  <option value="todos" ${state.filtroFaseTarefa === "todos" ? "selected" : ""}>Todas</option>
+                  ${FASE_OPTIONS.map(
+                    (opt) => `
+                      <option value="${opt.value}" ${state.filtroFaseTarefa === opt.value ? "selected" : ""}>
+                        ${opt.label}
+                      </option>
+                    `
+                  ).join("")}
+                </select>
+              </label>
+
+              <label class="cronograma-field cronograma-field--compact">
                 <span>Status</span>
                 <select id="filtroStatusTarefa">
                   <option value="todos" ${state.filtroStatusTarefa === "todos" ? "selected" : ""}>Todos</option>
@@ -378,6 +421,7 @@ function mountTarefasEvents() {
   const feedback = document.getElementById("tarefaFormFeedback");
   const btnCancelar = document.getElementById("btnCancelarEdicaoTarefa");
   const filtroProjeto = document.getElementById("filtroProjetoTarefa");
+  const filtroFase = document.getElementById("filtroFaseTarefa");
   const filtroStatus = document.getElementById("filtroStatusTarefa");
   const filtroResponsavel = document.getElementById("filtroResponsavelTarefa");
   const mostrarArquivadas = document.getElementById("mostrarTarefasArquivadas");
@@ -392,6 +436,13 @@ function mountTarefasEvents() {
   if (filtroProjeto) {
     filtroProjeto.addEventListener("change", (event) => {
       setFiltroProjetoTarefa(event.target.value);
+      renderTarefasView();
+    });
+  }
+
+  if (filtroFase) {
+    filtroFase.addEventListener("change", (event) => {
+      setFiltroFaseTarefa(event.target.value);
       renderTarefasView();
     });
   }
@@ -464,6 +515,7 @@ function mountTarefasEvents() {
         titulo: formData.get("titulo"),
         projetoId,
         projetoNome: projeto?.nome || "",
+        fase: formData.get("fase"),
         responsavel: responsavelUser?.nome || "",
         responsavelUid: responsavelUser?.uid || "",
         responsavelEmail: responsavelUser?.email || "",
