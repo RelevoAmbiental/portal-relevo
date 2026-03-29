@@ -3,30 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cronogramas | Portal Relevo</title>
+  <title>Cronograma | Portal Relevo</title>
 
   <meta name="theme-color" content="#0b2e1b" />
   <link rel="icon" type="image/png" href="/assets/icons/icon-192.png" />
 
-  <!-- Fontes (Portal) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- CSS central do Portal (NÃO duplicar tokens no app) -->
   <link rel="stylesheet" href="/styles/global.css" />
   <link rel="stylesheet" href="/styles/relevo-theme.css" />
-
-  <!-- Bridge do Cronograma (layout/contraste/compat) -->
-  <link rel="stylesheet" href="/cronograma/cronograma-bridge.css" />
-
-  <!-- Assets do build do Cronograma (React/Vite) -->
-  <link rel="stylesheet" crossorigin href="/cronograma/assets/index.css" />
+  <link rel="stylesheet" href="/cronograma/styles.css" />
 </head>
 
 <body class="relevo-body">
   <div class="portal-layout">
-    <!-- Sidebar (desktop) -->
     <aside class="portal-sidebar" id="sidebar">
       <div class="portal-brand">
         <img class="portal-brand-logo" src="/assets/icons/icon-192.png" alt="Relevo" />
@@ -37,26 +29,30 @@
       </div>
 
       <nav class="portal-nav" aria-label="Navegação do cronograma">
-        <a class="portal-nav-item" href="./#/dashboard">
+        <button class="portal-nav-item is-active" data-view="dashboard" type="button">
           <span class="portal-nav-ico">⏱️</span>
           <span>Dashboard</span>
-        </a>
-        <a class="portal-nav-item" href="./#/projetos">
+        </button>
+        <button class="portal-nav-item" data-view="projetos" type="button">
           <span class="portal-nav-ico">📁</span>
           <span>Projetos</span>
-        </a>
-        <a class="portal-nav-item" href="./#/tarefas">
+        </button>
+        <button class="portal-nav-item" data-view="tarefas" type="button">
           <span class="portal-nav-ico">✅</span>
           <span>Tarefas</span>
-        </a>
-        <a class="portal-nav-item" href="./#/importar">
-          <span class="portal-nav-ico">✨</span>
-          <span>Importar IA</span>
-        </a>
-        <a class="portal-nav-item" href="./#/calendario">
+        </button>
+        <button class="portal-nav-item" data-view="calendario" type="button">
           <span class="portal-nav-ico">📅</span>
           <span>Calendário</span>
-        </a>
+        </button>
+        <button class="portal-nav-item" data-view="gestao" type="button">
+          <span class="portal-nav-ico">🧭</span>
+          <span>Gestão</span>
+        </button>
+        <button class="portal-nav-item" data-view="importar" type="button">
+          <span class="portal-nav-ico">📥</span>
+          <span>Importar Tarefas</span>
+        </button>
 
         <div class="portal-nav-divider"></div>
 
@@ -72,7 +68,6 @@
       </nav>
     </aside>
 
-    <!-- Topbar (mobile) -->
     <header class="portal-topbar">
       <button class="portal-hamburger" id="btnOpenSidebar" aria-label="Abrir menu">☰</button>
       <div class="portal-topbar-title">
@@ -81,8 +76,8 @@
       </div>
     </header>
 
-    <!-- Drawer (mobile) -->
     <div class="portal-drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+
     <div class="portal-drawer" id="drawer" aria-hidden="true">
       <div class="portal-drawer-head">
         <div class="portal-brand">
@@ -96,11 +91,12 @@
       </div>
 
       <nav class="portal-nav" aria-label="Navegação do cronograma (mobile)">
-        <a class="portal-nav-item" href="./#/dashboard">⏱️ Dashboard</a>
-        <a class="portal-nav-item" href="./#/projetos">📁 Projetos</a>
-        <a class="portal-nav-item" href="./#/tarefas">✅ Tarefas</a>
-        <a class="portal-nav-item" href="./#/importar">✨ Importar IA</a>
-        <a class="portal-nav-item" href="./#/calendario">📅 Calendário</a>
+        <button class="portal-nav-item is-active" data-view="dashboard" type="button">⏱️ Dashboard</button>
+        <button class="portal-nav-item" data-view="projetos" type="button">📁 Projetos</button>
+        <button class="portal-nav-item" data-view="tarefas" type="button">✅ Tarefas</button>
+        <button class="portal-nav-item" data-view="calendario" type="button">📅 Calendário</button>
+        <button class="portal-nav-item" data-view="gestao" type="button">🧭 Gestão</button>
+        <button class="portal-nav-item" data-view="importar" type="button">📥 Importar Tarefas</button>
 
         <div class="portal-nav-divider"></div>
 
@@ -109,210 +105,43 @@
       </nav>
     </div>
 
-    <!-- Main -->
     <main class="portal-main">
-      <!-- O React monta aqui -->
-      <div id="root"></div>
+      <section class="cronograma-shell">
+        <header class="cronograma-shell__header">
+          <div>
+            <p class="cronograma-shell__eyebrow">Módulo interno</p>
+            <h1 id="pageTitle">Cronograma</h1>
+            <p id="pageDescription">
+              Estrutura nativa do Portal preparada para a reconstrução do cronograma em HTML, CSS e JavaScript puro.
+            </p>
+          </div>
+        </header>
+
+        <section class="cronograma-shell__content" id="appView">
+          <div class="cronograma-placeholder-card">
+            <h2>Base limpa e pronta</h2>
+            <p>
+              O container antigo em React/Vite foi desativado. A partir daqui, o cronograma passa a ser reconstruído
+              como módulo nativo do Portal Relevo.
+            </p>
+
+            <div class="cronograma-checklist">
+              <div class="cronograma-checklist__item">✅ Sem React/Vite</div>
+              <div class="cronograma-checklist__item">✅ Sem assets do build antigo</div>
+              <div class="cronograma-checklist__item">✅ Sem Firebase Functions no container</div>
+              <div class="cronograma-checklist__item">✅ Sem “Importar IA”</div>
+            </div>
+          </div>
+        </section>
+      </section>
     </main>
   </div>
 
-  <!-- ===== Firebase compat (CORRETO) — precisa carregar ANTES do Guard ===== -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-functions-compat.js"></script>
   <script src="/scripts/firebase-init-guard.js"></script>
-
-  <!-- Script do build do Cronograma (React/Vite) -->
-  <script type="module" crossorigin src="/cronograma/assets/index.js"></script>
-
-  <!-- Drawer behavior -->
-  <script>
-    (function () {
-      const btnOpen = document.getElementById("btnOpenSidebar");
-      const btnClose = document.getElementById("btnCloseSidebar");
-      const overlay = document.getElementById("drawerOverlay");
-      const drawer = document.getElementById("drawer");
-
-      function openDrawer() {
-        overlay.style.display = "block";
-        drawer.classList.add("is-open");
-        overlay.setAttribute("aria-hidden", "false");
-        drawer.setAttribute("aria-hidden", "false");
-      }
-      function closeDrawer() {
-        drawer.classList.remove("is-open");
-        overlay.style.display = "none";
-        overlay.setAttribute("aria-hidden", "true");
-        drawer.setAttribute("aria-hidden", "true");
-      }
-
-      btnOpen && btnOpen.addEventListener("click", openDrawer);
-      btnClose && btnClose.addEventListener("click", closeDrawer);
-      overlay && overlay.addEventListener("click", closeDrawer);
-
-      // Fecha drawer quando clicar em um item
-      drawer && drawer.addEventListener("click", (e) => {
-        const a = e.target && e.target.closest && e.target.closest("a");
-        if (a) closeDrawer();
-      });
-    })();
-  </script>
-
-  <style>
-    /* Layout base do container (sem depender de classes antigas) */
-    .portal-layout{
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      background: var(--relevo-gradient-soft);
-    }
-    .portal-sidebar{
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      background: rgba(255,255,255,0.75);
-      border-right: 1px solid rgba(0,0,0,0.06);
-      padding: 14px 12px;
-      display: none;
-    }
-    .portal-main{
-      padding: 28px 28px 44px 28px;
-      display: grid;
-      justify-items: center;
-      align-content: start;
-    }
-    .portal-topbar{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      background: rgba(255,255,255,0.72);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .portal-hamburger{
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,0.10);
-      background: rgba(255,255,255,0.75);
-      cursor: pointer;
-      font-size: 18px;
-    }
-    .portal-topbar-title{
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-    .portal-topbar-title strong{ font-weight: 800; }
-    .portal-topbar-title span{ opacity: .65; font-size: 12px; }
-
-    .portal-brand{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px 14px 10px;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      margin-bottom: 10px;
-    }
-    .portal-brand-logo{
-      width: 34px;
-      height: 34px;
-      object-fit: contain;
-    }
-    .portal-brand-text{
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-    .portal-brand-title{ font-weight: 800; }
-    .portal-brand-subtitle{ opacity: .65; font-size: 12px; }
-
-    .portal-nav{
-      display: grid;
-      gap: 6px;
-      padding: 10px 6px;
-    }
-    .portal-nav-item{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      color: var(--texto, #0b2e1b);
-      text-decoration: none;
-      border: 1px solid transparent;
-      background: transparent;
-    }
-    .portal-nav-item:hover{
-      background: rgba(255,255,255,0.60);
-      border-color: rgba(0,0,0,0.06);
-    }
-    .portal-nav-ico{ width: 18px; display: inline-flex; justify-content: center; }
-    .portal-nav-divider{
-      height: 1px;
-      background: rgba(0,0,0,0.06);
-      margin: 10px 8px;
-    }
-    .portal-nav-section{
-      padding: 6px 10px;
-      opacity: .65;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    /* Drawer */
-    .portal-drawer-overlay{
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      z-index: 80;
-    }
-    .portal-drawer{
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: min(320px, 86vw);
-      height: 100vh;
-      background: rgba(255,255,255,0.88);
-      border-right: 1px solid rgba(0,0,0,0.08);
-      transform: translateX(-110%);
-      transition: transform .18s ease;
-      z-index: 90;
-      padding: 14px 12px;
-    }
-    .portal-drawer.is-open{ transform: translateX(0); }
-    .portal-drawer-head{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .portal-drawer-close{
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,0.10);
-      background: rgba(255,255,255,0.75);
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    /* Breakpoint 900px (padrão portal) */
-    @media (min-width: 900px){
-      .portal-sidebar{ display: block; }
-      .portal-topbar{ display: none; }
-      .portal-layout{ grid-template-columns: 280px 1fr; }
-      .portal-main{ padding: 34px 34px 52px 34px; }
-    }
-    @media (max-width: 899px){
-      .portal-layout{ grid-template-columns: 1fr; }
-      .portal-main{ padding: 18px 14px 42px 14px; }
-    }
-  </style>
+  <script src="/scripts/expose-session.js"></script>
+  <script src="/cronograma/app.js"></script>
 </body>
 </html>
