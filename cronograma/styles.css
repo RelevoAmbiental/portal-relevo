@@ -301,7 +301,7 @@ body.relevo-body {
 }
 
 @media (max-width: 980px) {
-  portal-topbar {
+  .portal-topbar {
     display: flex;
   }
   
