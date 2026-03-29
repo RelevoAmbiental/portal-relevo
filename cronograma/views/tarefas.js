@@ -15,13 +15,15 @@ import {
   criarTarefa,
   atualizarTarefa,
   arquivarTarefa,
-  desarquivarTarefa
+  desarquivarTarefa,
+  alternarSubtarefa
 } from "../services/firestore-tarefas.js";
 import { listenUsers } from "../services/firestore-users.js";
 import { ensureProjetosListener } from "./projetos.js";
 
 let unsubscribeTarefas = null;
 let unsubscribeUsers = null;
+let draftSubtarefas = [];
 
 const STATUS_OPTIONS = [
   { value: "a_fazer", label: "A fazer" },
@@ -58,8 +60,25 @@ function getTarefaInicial() {
     dataVencimento: "",
     status: "a_fazer",
     prioridade: "media",
-    descricao: ""
+    descricao: "",
+    subtarefas: []
   };
+}
+
+function ensureDraftSubtarefas() {
+  const tarefaEditando = state.tarefaEditandoId ? getTarefaById(state.tarefaEditandoId) : null;
+
+  if (tarefaEditando) {
+    draftSubtarefas = Array.isArray(tarefaEditando.subtarefas)
+      ? tarefaEditando.subtarefas.map((item) => ({
+          texto: item?.texto || "",
+          concluida: Boolean(item?.concluida)
+        }))
+      : [];
+    return;
+  }
+
+  draftSubtarefas = [];
 }
 
 function escapeHtml(value) {
@@ -143,6 +162,70 @@ function getPrazoBadge(item) {
   return "";
 }
 
+function getChecklistResumo(item) {
+  const total = Array.isArray(item.subtarefas) ? item.subtarefas.length : 0;
+  const concluidas = total
+    ? item.subtarefas.filter((sub) => sub?.concluida).length
+    : 0;
+
+  if (!total) return "";
+  return `<span class="cronograma-tag cronograma-tag--info">Checklist ${concluidas}/${total}</span>`;
+}
+
+function renderChecklistDraft() {
+  if (!draftSubtarefas.length) {
+    return `<div class="cronograma-subtasks-empty">Nenhuma subtarefa adicionada.</div>`;
+  }
+
+  return `
+    <div class="cronograma-subtasks-list">
+      ${draftSubtarefas
+        .map(
+          (item, index) => `
+            <div class="cronograma-subtask-row">
+              <label class="cronograma-subtask-label">
+                <input type="checkbox" data-action="toggle-draft-subtarefa" data-index="${index}" ${item.concluida ? "checked" : ""} />
+                <span class="${item.concluida ? "is-done" : ""}">${escapeHtml(item.texto)}</span>
+              </label>
+              <button class="cronograma-btn cronograma-btn--ghost cronograma-btn--xs" type="button" data-action="remove-draft-subtarefa" data-index="${index}">
+                Remover
+              </button>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderChecklistCard(item) {
+  if (!Array.isArray(item.subtarefas) || !item.subtarefas.length) return "";
+
+  return `
+    <div class="cronograma-task-checklist">
+      <strong>Checklist</strong>
+      <div class="cronograma-task-checklist__items">
+        ${item.subtarefas
+          .map(
+            (sub, index) => `
+              <label class="cronograma-task-checklist__item">
+                <input
+                  type="checkbox"
+                  data-action="toggle-subtarefa-card"
+                  data-task-id="${item.id}"
+                  data-index="${index}"
+                  ${sub?.concluida ? "checked" : ""}
+                />
+                <span class="${sub?.concluida ? "is-done" : ""}">${escapeHtml(sub?.texto || "")}</span>
+              </label>
+            `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
 function renderTarefaCard(item) {
   return `
     <article class="cronograma-task-card ${item.arquivada ? "is-archived" : ""}">
@@ -156,6 +239,7 @@ function renderTarefaCard(item) {
           <span class="cronograma-tag">${escapeHtml(formatFase(item.fase))}</span>
           <span class="cronograma-tag">${escapeHtml(formatStatus(item.status))}</span>
           <span class="cronograma-tag">${escapeHtml(formatPrioridade(item.prioridade))}</span>
+          ${getChecklistResumo(item)}
           ${getPrazoBadge(item)}
           ${item.arquivada ? '<span class="cronograma-tag cronograma-tag--muted">Arquivada</span>' : ""}
         </div>
@@ -172,6 +256,8 @@ function renderTarefaCard(item) {
           ? `<p class="cronograma-task-card__desc">${escapeHtml(item.descricao)}</p>`
           : ""
       }
+
+      ${renderChecklistCard(item)}
 
       <div class="cronograma-task-card__actions">
         <button class="cronograma-btn cronograma-btn--ghost" type="button" data-action="editar-tarefa" data-id="${item.id}">
@@ -312,6 +398,21 @@ function getTarefasTemplate() {
                           <textarea name="descricao" rows="5">${escapeHtml(tarefaBase.descricao)}</textarea>
                         </label>
 
+                        <div class="cronograma-field">
+                          <span>Checklist / subtarefas</span>
+                          <div class="cronograma-subtasks-builder">
+                            <div class="cronograma-subtasks-input-row">
+                              <input type="text" id="novaSubtarefaTexto" placeholder="Ex.: Solicitar acesso à área" />
+                              <button class="cronograma-btn cronograma-btn--secondary" type="button" id="btnAdicionarSubtarefa">
+                                Adicionar
+                              </button>
+                            </div>
+                            <div id="subtarefasDraftContainer">
+                              ${renderChecklistDraft()}
+                            </div>
+                          </div>
+                        </div>
+
                         <div class="cronograma-form-actions">
                           <button class="cronograma-btn cronograma-btn--primary" type="submit">
                             ${tarefaEditando ? "Salvar alterações" : "Cadastrar tarefa"}
@@ -416,6 +517,51 @@ function getTarefasTemplate() {
   `;
 }
 
+function rerenderDraftChecklist() {
+  const container = document.getElementById("subtarefasDraftContainer");
+  if (container) {
+    container.innerHTML = renderChecklistDraft();
+    bindDraftChecklistEvents();
+  }
+}
+
+function bindDraftChecklistEvents() {
+  document.querySelectorAll('[data-action="toggle-draft-subtarefa"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      const index = Number(input.dataset.index);
+      if (Number.isNaN(index) || !draftSubtarefas[index]) return;
+      draftSubtarefas[index].concluida = input.checked;
+      rerenderDraftChecklist();
+    });
+  });
+
+  document.querySelectorAll('[data-action="remove-draft-subtarefa"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.index);
+      if (Number.isNaN(index)) return;
+      draftSubtarefas.splice(index, 1);
+      rerenderDraftChecklist();
+    });
+  });
+}
+
+async function toggleChecklistCard(taskId, index, checked) {
+  const tarefa = getTarefaById(taskId);
+  if (!tarefa || !Array.isArray(tarefa.subtarefas) || !tarefa.subtarefas[index]) return;
+
+  const novasSubtarefas = tarefa.subtarefas.map((item, idx) => ({
+    texto: item?.texto || "",
+    concluida: idx === index ? checked : Boolean(item?.concluida)
+  }));
+
+  try {
+    await alternarSubtarefa(taskId, novasSubtarefas);
+  } catch (error) {
+    console.error(error);
+    window.alert(error.message || "Não foi possível atualizar o checklist.");
+  }
+}
+
 function mountTarefasEvents() {
   const form = document.getElementById("tarefaForm");
   const feedback = document.getElementById("tarefaFormFeedback");
@@ -425,10 +571,13 @@ function mountTarefasEvents() {
   const filtroStatus = document.getElementById("filtroStatusTarefa");
   const filtroResponsavel = document.getElementById("filtroResponsavelTarefa");
   const mostrarArquivadas = document.getElementById("mostrarTarefasArquivadas");
+  const btnAdicionarSubtarefa = document.getElementById("btnAdicionarSubtarefa");
+  const inputNovaSubtarefa = document.getElementById("novaSubtarefaTexto");
 
   if (btnCancelar) {
     btnCancelar.addEventListener("click", () => {
       setTarefaEditandoId(null);
+      draftSubtarefas = [];
       renderTarefasView();
     });
   }
@@ -468,9 +617,41 @@ function mountTarefasEvents() {
     });
   }
 
+  if (btnAdicionarSubtarefa && inputNovaSubtarefa) {
+    btnAdicionarSubtarefa.addEventListener("click", () => {
+      const texto = (inputNovaSubtarefa.value || "").trim();
+      if (!texto) return;
+
+      draftSubtarefas.push({
+        texto,
+        concluida: false
+      });
+
+      inputNovaSubtarefa.value = "";
+      rerenderDraftChecklist();
+      inputNovaSubtarefa.focus();
+    });
+
+    inputNovaSubtarefa.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        btnAdicionarSubtarefa.click();
+      }
+    });
+  }
+
+  bindDraftChecklistEvents();
+
+  document.querySelectorAll('[data-action="toggle-subtarefa-card"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      toggleChecklistCard(input.dataset.taskId, Number(input.dataset.index), input.checked);
+    });
+  });
+
   document.querySelectorAll('[data-action="editar-tarefa"]').forEach((btn) => {
     btn.addEventListener("click", () => {
       setTarefaEditandoId(btn.dataset.id);
+      ensureDraftSubtarefas();
       renderTarefasView();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
@@ -523,7 +704,8 @@ function mountTarefasEvents() {
         dataVencimento: formData.get("dataVencimento"),
         status: formData.get("status"),
         prioridade: formData.get("prioridade"),
-        descricao: formData.get("descricao")
+        descricao: formData.get("descricao"),
+        subtarefas: draftSubtarefas
       };
 
       if (feedback) {
@@ -535,6 +717,7 @@ function mountTarefasEvents() {
         if (state.tarefaEditandoId) {
           await atualizarTarefa(state.tarefaEditandoId, payload);
           setTarefaEditandoId(null);
+          draftSubtarefas = [];
           if (feedback) {
             feedback.textContent = "Tarefa atualizada com sucesso.";
             feedback.classList.add("is-success");
@@ -542,6 +725,8 @@ function mountTarefasEvents() {
         } else {
           await criarTarefa(payload);
           form.reset();
+          draftSubtarefas = [];
+          rerenderDraftChecklist();
           if (feedback) {
             feedback.textContent = "Tarefa cadastrada com sucesso.";
             feedback.classList.add("is-success");
@@ -616,6 +801,9 @@ export function renderTarefasView() {
   ensureProjetosListener();
   ensureUsersListener();
   ensureTarefasListener();
+  if (!state.tarefaEditandoId && !draftSubtarefas.length) {
+    ensureDraftSubtarefas();
+  }
   renderIntoApp(getTarefasTemplate());
   mountTarefasEvents();
 }
