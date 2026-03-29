@@ -2,7 +2,11 @@ import { renderIntoApp } from "../ui/layout.js";
 import { state, setUsers } from "../core/state.js";
 import { listenUsers } from "../services/firestore-users.js";
 import { ensureProjetosListener } from "./projetos.js";
-import { parseTxtCronograma, salvarImportacaoLote } from "../services/importar-txt.js";
+import {
+  parseTxtCronograma,
+  resolveResponsavelByTexto,
+  salvarImportacaoLote
+} from "../services/importar-txt.js";
 
 let unsubscribeUsers = null;
 
@@ -69,15 +73,7 @@ function ensureDefaults() {
   }
 
   if (!responsavelSelecionadoUid && metaImportacao.responsavelPadraoTexto) {
-    const termo = metaImportacao.responsavelPadraoTexto.trim().toLowerCase();
-
-    const found = users.find((item) => {
-      const nome = (item.nome || "").trim().toLowerCase();
-      const email = (item.email || "").trim().toLowerCase();
-      const username = (item.username || "").trim().toLowerCase();
-      return nome === termo || email === termo || username === termo;
-    });
-
+    const found = resolveResponsavelByTexto(metaImportacao.responsavelPadraoTexto, users);
     if (found) {
       responsavelSelecionadoUid = found.uid;
     }
@@ -90,11 +86,11 @@ function getExemploTxt() {
 [INICIO] 2026-04-01
 
 [FASE] Campo
-- Prospecção espeleológica | 5d | alta
+- Prospecção espeleológica | 5d | alta | resp:Samuel
 - Caminhamento complementar | 2d | media | Revisar pontos de drenagem e acessos
 
 [FASE] Gabinete
-- Organização de dados | 3d
+- Organização de dados | 3d | resp:joao@relevo.eco.br
 - Relatório técnico parcial | 6d | alta
 
 [FASE] Entrega
@@ -154,6 +150,9 @@ function renderPreview() {
     `;
   }
 
+  const totalComResponsavelLinha = previewImportacao.filter((item) => item.responsavelOrigem === "linha").length;
+  const totalComCascata = previewImportacao.filter((item) => item.dataInicio || item.dataVencimento).length;
+
   return `
     <section class="cronograma-panel">
       <div class="cronograma-import-preview-head">
@@ -163,6 +162,8 @@ function renderPreview() {
         </div>
 
         <div class="cronograma-tag-row cronograma-tag-row--tight">
+          <span class="cronograma-tag">Overrides por linha: ${totalComResponsavelLinha}</span>
+          <span class="cronograma-tag">Com datas: ${totalComCascata}</span>
           ${
             metaImportacao.projetoNome
               ? `<span class="cronograma-tag">Projeto no TXT: ${escapeHtml(metaImportacao.projetoNome)}</span>`
@@ -188,9 +189,11 @@ function renderPreview() {
               <th>#</th>
               <th>Tarefa</th>
               <th>Fase</th>
+              <th>Responsável</th>
+              <th>Início</th>
               <th>Duração</th>
-              <th>Prioridade</th>
               <th>Vencimento</th>
+              <th>Prioridade</th>
               <th>Descrição</th>
             </tr>
           </thead>
@@ -202,9 +205,24 @@ function renderPreview() {
                     <td>${index + 1}</td>
                     <td>${escapeHtml(item.titulo)}</td>
                     <td>${escapeHtml(item.faseLabel || item.fase)}</td>
+                    <td>
+                      <div class="cronograma-import-cell-stack">
+                        <strong>${escapeHtml(item.responsavel || "—")}</strong>
+                        ${
+                          item.responsavelOrigem === "linha"
+                            ? `<span class="cronograma-import-cell-muted">definido na linha</span>`
+                            : item.responsavelOrigem === "padrao"
+                            ? `<span class="cronograma-import-cell-muted">responsável padrão</span>`
+                            : item.responsavelTexto
+                            ? `<span class="cronograma-import-cell-muted">não encontrado: ${escapeHtml(item.responsavelTexto)}</span>`
+                            : `<span class="cronograma-import-cell-muted">—</span>`
+                        }
+                      </div>
+                    </td>
+                    <td>${escapeHtml(item.dataInicio || "—")}</td>
                     <td>${item.duracaoDias ? `${item.duracaoDias}d` : "—"}</td>
-                    <td>${escapeHtml(item.prioridade || "media")}</td>
                     <td>${escapeHtml(item.dataVencimento || "—")}</td>
+                    <td>${escapeHtml(item.prioridade || "media")}</td>
                     <td>${escapeHtml(item.descricao || "—")}</td>
                   </tr>
                 `
@@ -265,7 +283,7 @@ function getTemplate() {
             <textarea
               id="importTxtInput"
               class="cronograma-import-textarea"
-              placeholder="[FASE] Campo&#10;- Prospecção espeleológica | 5d&#10;&#10;[FASE] Gabinete&#10;- Relatório técnico | 6d"
+              placeholder="[FASE] Campo&#10;- Prospecção espeleológica | 5d | alta | resp:Samuel&#10;&#10;[FASE] Gabinete&#10;- Relatório técnico | 6d | resp:joao@relevo.eco.br"
             >${escapeHtml(textoImportacao)}</textarea>
           </label>
 
@@ -304,7 +322,7 @@ function getTemplate() {
           </div>
 
           <div class="cronograma-import-actions">
-            <button class="cronograma-btn" type="button" id="btnValidarImportacao">
+            <button class="cronograma-btn cronograma-btn--primary" type="button" id="btnValidarImportacao">
               Validar TXT
             </button>
 
@@ -326,11 +344,11 @@ function getTemplate() {
         <div class="cronograma-mini-list">
           <div class="cronograma-mini-list__item">
             <strong>[FASE] Campo</strong>
-            <span>- Prospecção espeleológica | 5d | alta</span>
+            <span>- Prospecção espeleológica | 5d | alta | resp:Samuel</span>
           </div>
           <div class="cronograma-mini-list__item">
             <strong>[FASE] Gabinete</strong>
-            <span>- Relatório técnico | 6d | media | Consolidar dados</span>
+            <span>- Relatório técnico | 6d | media | resp:joao@relevo.eco.br | Consolidar dados</span>
           </div>
           <div class="cronograma-mini-list__item">
             <strong>Metadados opcionais</strong>
@@ -339,7 +357,7 @@ function getTemplate() {
         </div>
 
         <p style="margin-top:16px;">
-          Nesta rodada, o foco é robustez: ler bem, revisar bem e gravar limpo. Primeiro a água chega; depois a gente faz a irrigação por gotejamento.
+          Agora o TXT já aceita responsável por linha e, se houver <strong>[INICIO]</strong>, gera a sequência básica de datas em cascata.
         </p>
       </aside>
 
@@ -349,18 +367,70 @@ function getTemplate() {
   `;
 }
 
+function enriquecerPreview(parsed) {
+  const users = getUsersDisponiveis();
+  const responsavelPadrao = getResponsavelSelecionado();
+
+  const itens = [];
+  const erros = [...parsed.erros];
+  const avisos = [...parsed.avisos];
+
+  parsed.itens.forEach((item) => {
+    const enriched = { ...item };
+
+    if (item.responsavelTexto) {
+      const found = resolveResponsavelByTexto(item.responsavelTexto, users);
+
+      if (found) {
+        enriched.responsavel = found.nome || "";
+        enriched.responsavelUid = found.uid || "";
+        enriched.responsavelEmail = found.email || "";
+        enriched.responsavelOrigem = "linha";
+      } else {
+        erros.push(`Linha ${item.linha}: responsável "${item.responsavelTexto}" não foi encontrado na coleção users.`);
+      }
+    } else if (responsavelPadrao?.uid) {
+      enriched.responsavel = responsavelPadrao.nome || "";
+      enriched.responsavelUid = responsavelPadrao.uid || "";
+      enriched.responsavelEmail = responsavelPadrao.email || "";
+      enriched.responsavelOrigem = "padrao";
+    } else if (metaImportacao.responsavelPadraoTexto) {
+      const foundMeta = resolveResponsavelByTexto(metaImportacao.responsavelPadraoTexto, users);
+
+      if (foundMeta) {
+        enriched.responsavel = foundMeta.nome || "";
+        enriched.responsavelUid = foundMeta.uid || "";
+        enriched.responsavelEmail = foundMeta.email || "";
+        enriched.responsavelOrigem = "padrao";
+      } else {
+        erros.push(`Responsável padrão "${metaImportacao.responsavelPadraoTexto}" não foi encontrado na coleção users.`);
+      }
+    } else {
+      avisos.push(`Linha ${item.linha}: sem responsável específico; selecione um responsável padrão para salvar.`);
+    }
+
+    itens.push(enriched);
+  });
+
+  return { itens, erros, avisos };
+}
+
 function validarImportacao() {
   const parsed = parseTxtCronograma(textoImportacao);
 
   metaImportacao = parsed.meta;
-  previewImportacao = parsed.itens;
-  errosImportacao = parsed.erros;
-  avisosImportacao = parsed.avisos;
+  ensureDefaults();
 
-  if (!parsed.erros.length && parsed.itens.length) {
-    mensagemImportacao = `${parsed.itens.length} tarefa(s) validada(s) com sucesso.`;
+  const enriched = enriquecerPreview(parsed);
+
+  previewImportacao = enriched.itens;
+  errosImportacao = enriched.erros;
+  avisosImportacao = enriched.avisos;
+
+  if (!errosImportacao.length && previewImportacao.length) {
+    mensagemImportacao = `${previewImportacao.length} tarefa(s) validada(s) com sucesso.`;
     mensagemTipo = "success";
-  } else if (parsed.erros.length) {
+  } else if (errosImportacao.length) {
     mensagemImportacao = "O TXT foi lido, mas há pendências a corrigir antes de salvar.";
     mensagemTipo = "warning";
   } else {
@@ -404,7 +474,10 @@ async function salvarImportacao() {
     }
 
     if (!responsavel?.uid) {
-      throw new Error("Selecione o responsável padrão.");
+      const existeItemSemResponsavel = previewImportacao.some((item) => !item.responsavelUid);
+      if (existeItemSemResponsavel) {
+        throw new Error("Selecione o responsável padrão ou defina responsável por linha para todas as tarefas.");
+      }
     }
 
     salvando = true;
