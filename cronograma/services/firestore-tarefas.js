@@ -37,6 +37,8 @@ function sanitizeTarefa(payload) {
     projetoId: (payload.projetoId || "").trim(),
     projetoNome: (payload.projetoNome || "").trim(),
     responsavel: (payload.responsavel || "").trim(),
+    responsavelUid: (payload.responsavelUid || "").trim(),
+    responsavelEmail: (payload.responsavelEmail || "").trim(),
     dataInicio: payload.dataInicio || "",
     dataVencimento: payload.dataVencimento || "",
     status: payload.status || "a_fazer",
@@ -54,6 +56,10 @@ function validateTarefa(payload) {
   if (!payload.projetoId) {
     throw new Error("Selecione um projeto.");
   }
+
+  if (!payload.responsavelUid) {
+    throw new Error("Selecione um responsável.");
+  }
 }
 
 function normalizeTarefa(doc) {
@@ -65,6 +71,8 @@ function normalizeTarefa(doc) {
     projetoId: data.projetoId || "",
     projetoNome: data.projetoNome || "",
     responsavel: data.responsavel || "",
+    responsavelUid: data.responsavelUid || "",
+    responsavelEmail: data.responsavelEmail || "",
     dataInicio: data.dataInicio || "",
     dataVencimento: data.dataVencimento || "",
     status: data.status || "a_fazer",
