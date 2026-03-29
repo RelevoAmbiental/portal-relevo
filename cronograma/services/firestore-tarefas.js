@@ -31,6 +31,17 @@ function ensureUser() {
   return user;
 }
 
+function sanitizeSubtarefas(items) {
+  if (!Array.isArray(items)) return [];
+
+  return items
+    .map((item) => ({
+      texto: (item?.texto || "").trim(),
+      concluida: Boolean(item?.concluida)
+    }))
+    .filter((item) => item.texto);
+}
+
 function sanitizeTarefa(payload) {
   return {
     titulo: (payload.titulo || "").trim(),
@@ -45,6 +56,7 @@ function sanitizeTarefa(payload) {
     status: payload.status || "a_fazer",
     prioridade: payload.prioridade || "media",
     descricao: (payload.descricao || "").trim(),
+    subtarefas: sanitizeSubtarefas(payload.subtarefas),
     arquivada: Boolean(payload.arquivada)
   };
 }
@@ -80,6 +92,12 @@ function normalizeTarefa(doc) {
     status: data.status || "a_fazer",
     prioridade: data.prioridade || "media",
     descricao: data.descricao || "",
+    subtarefas: Array.isArray(data.subtarefas)
+      ? data.subtarefas.map((item) => ({
+          texto: item?.texto || "",
+          concluida: Boolean(item?.concluida)
+        }))
+      : [],
     arquivada: Boolean(data.arquivada),
     uid: data.uid || "",
     ownerEmail: data.ownerEmail || "",
@@ -168,6 +186,16 @@ export async function desarquivarTarefa(id) {
   const db = ensureDb();
   await db.collection("tarefas").doc(id).update({
     arquivada: false,
+    updatedAt: getServerTimestamp()
+  });
+}
+
+export async function alternarSubtarefa(id, subtarefas) {
+  if (!id) throw new Error("Tarefa inválida para atualização de checklist.");
+
+  const db = ensureDb();
+  await db.collection("tarefas").doc(id).update({
+    subtarefas: sanitizeSubtarefas(subtarefas),
     updatedAt: getServerTimestamp()
   });
 }
