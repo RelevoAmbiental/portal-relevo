@@ -130,19 +130,6 @@ body.relevo-body {
   margin: 4px 4px 2px;
 }
 
-.portal-topbar {
-  grid-area: topbar;
-  display: none;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 24px;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(11, 46, 27, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
 
 .portal-topbar-title {
   display: flex;
@@ -959,11 +946,6 @@ body.relevo-body {
   gap: 20px;
 }
 
-.cronograma-import-head {
-  display: grid;
-  gap: 16px;
-}
-
 .cronograma-import-stack {
   display: grid;
   gap: 16px;
@@ -1135,4 +1117,31 @@ body.relevo-body {
 
 .cronograma-btn[disabled]:hover {
   transform: none;
+}
+
+
+.cronograma-import-header-clean h2 {
+  margin: 0 0 6px;
+}
+
+.cronograma-import-header-clean p {
+  margin: 0;
+  color: var(--cron-text-soft);
+}
+
+.cronograma-import-summary-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cronograma-import-summary-head h3 {
+  margin: 0;
+}
+
+.cronograma-import-summary-head p {
+  margin: 6px 0 0;
+  color: var(--cron-text-soft);
 }
