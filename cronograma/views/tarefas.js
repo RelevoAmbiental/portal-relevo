@@ -6,7 +6,8 @@ import {
   setMostrarTarefasArquivadas,
   setFiltroProjetoTarefa,
   setFiltroStatusTarefa,
-  setFiltroResponsavelTarefa
+  setFiltroResponsavelTarefa,
+  setUsers
 } from "../core/state.js";
 import {
   listenTarefas,
@@ -15,9 +16,11 @@ import {
   arquivarTarefa,
   desarquivarTarefa
 } from "../services/firestore-tarefas.js";
+import { listenUsers } from "../services/firestore-users.js";
 import { ensureProjetosListener } from "./projetos.js";
 
 let unsubscribeTarefas = null;
+let unsubscribeUsers = null;
 
 const STATUS_OPTIONS = [
   { value: "a_fazer", label: "A fazer" },
@@ -39,6 +42,8 @@ function getTarefaInicial() {
     projetoId: "",
     projetoNome: "",
     responsavel: "",
+    responsavelUid: "",
+    responsavelEmail: "",
     dataInicio: "",
     dataVencimento: "",
     status: "a_fazer",
@@ -75,6 +80,10 @@ function getProjetoById(id) {
 
 function getTarefaById(id) {
   return state.tarefas.find((item) => item.id === id) || null;
+}
+
+function getUserById(id) {
+  return state.users.find((item) => item.id === id) || null;
 }
 
 function getResponsaveisDisponiveis() {
@@ -189,95 +198,108 @@ function getTarefasTemplate() {
               ? `<div class="cronograma-empty-state">Carregando projetos para vinculação...</div>`
               : !state.projetos.length
                 ? `<div class="cronograma-empty-state">Cadastre ao menos um projeto antes de criar tarefas.</div>`
-                : `
-                  <form id="tarefaForm" class="cronograma-form">
-                    <div class="cronograma-form-grid">
-                      <label class="cronograma-field">
-                        <span>Título da tarefa *</span>
-                        <input type="text" name="titulo" value="${escapeHtml(tarefaBase.titulo)}" required />
-                      </label>
+                : !state.usersLoaded
+                  ? `<div class="cronograma-empty-state">Carregando usuários para seleção do responsável...</div>`
+                  : !state.users.length
+                    ? `<div class="cronograma-empty-state">Nenhum usuário disponível na coleção users.</div>`
+                    : `
+                      <form id="tarefaForm" class="cronograma-form">
+                        <div class="cronograma-form-grid">
+                          <label class="cronograma-field">
+                            <span>Título da tarefa *</span>
+                            <input type="text" name="titulo" value="${escapeHtml(tarefaBase.titulo)}" required />
+                          </label>
 
-                      <label class="cronograma-field">
-                        <span>Projeto *</span>
-                        <select name="projetoId" required>
-                          <option value="">Selecione</option>
-                          ${state.projetos
-                            .filter((item) => !item.arquivado)
-                            .map(
-                              (item) => `
-                                <option value="${item.id}" ${tarefaBase.projetoId === item.id ? "selected" : ""}>
-                                  ${escapeHtml(item.nome)}
-                                </option>
-                              `
-                            )
-                            .join("")}
-                        </select>
-                      </label>
+                          <label class="cronograma-field">
+                            <span>Projeto *</span>
+                            <select name="projetoId" required>
+                              <option value="">Selecione</option>
+                              ${state.projetos
+                                .filter((item) => !item.arquivado)
+                                .map(
+                                  (item) => `
+                                    <option value="${item.id}" ${tarefaBase.projetoId === item.id ? "selected" : ""}>
+                                      ${escapeHtml(item.nome)}
+                                    </option>
+                                  `
+                                )
+                                .join("")}
+                            </select>
+                          </label>
 
-                      <label class="cronograma-field">
-                        <span>Responsável</span>
-                        <input type="text" name="responsavel" value="${escapeHtml(tarefaBase.responsavel)}" />
-                      </label>
+                          <label class="cronograma-field">
+                            <span>Responsável *</span>
+                            <select name="responsavelUid" required>
+                              <option value="">Selecione</option>
+                              ${state.users.map(
+                                (item) => `
+                                  <option value="${item.id}" ${tarefaBase.responsavelUid === item.id ? "selected" : ""}>
+                                    ${escapeHtml(item.nome)}${item.email ? ` — ${escapeHtml(item.email)}` : ""}
+                                  </option>
+                                `
+                              ).join("")}
+                            </select>
+                          </label>
 
-                      <label class="cronograma-field">
-                        <span>Status</span>
-                        <select name="status">
-                          ${STATUS_OPTIONS.map(
-                            (opt) => `
-                              <option value="${opt.value}" ${tarefaBase.status === opt.value ? "selected" : ""}>
-                                ${opt.label}
-                              </option>
-                            `
-                          ).join("")}
-                        </select>
-                      </label>
+                          <label class="cronograma-field">
+                            <span>Status</span>
+                            <select name="status">
+                              ${STATUS_OPTIONS.map(
+                                (opt) => `
+                                  <option value="${opt.value}" ${tarefaBase.status === opt.value ? "selected" : ""}>
+                                    ${opt.label}
+                                  </option>
+                                `
+                              ).join("")}
+                            </select>
+                          </label>
 
-                      <label class="cronograma-field">
-                        <span>Prioridade</span>
-                        <select name="prioridade">
-                          ${PRIORIDADE_OPTIONS.map(
-                            (opt) => `
-                              <option value="${opt.value}" ${tarefaBase.prioridade === opt.value ? "selected" : ""}>
-                                ${opt.label}
-                              </option>
-                            `
-                          ).join("")}
-                        </select>
-                      </label>
+                          <label class="cronograma-field">
+                            <span>Prioridade</span>
+                            <select name="prioridade">
+                              ${PRIORIDADE_OPTIONS.map(
+                                (opt) => `
+                                  <option value="${opt.value}" ${tarefaBase.prioridade === opt.value ? "selected" : ""}>
+                                    ${opt.label}
+                                  </option>
+                                `
+                              ).join("")}
+                            </select>
+                          </label>
 
-                      <label class="cronograma-field">
-                        <span>Data de início</span>
-                        <input type="date" name="dataInicio" value="${escapeHtml(tarefaBase.dataInicio)}" />
-                      </label>
+                          <label class="cronograma-field">
+                            <span>Data de início</span>
+                            <input type="date" name="dataInicio" value="${escapeHtml(tarefaBase.dataInicio)}" />
+                          </label>
 
-                      <label class="cronograma-field">
-                        <span>Data de vencimento</span>
-                        <input type="date" name="dataVencimento" value="${escapeHtml(tarefaBase.dataVencimento)}" />
-                      </label>
-                    </div>
+                          <label class="cronograma-field">
+                            <span>Data de vencimento</span>
+                            <input type="date" name="dataVencimento" value="${escapeHtml(tarefaBase.dataVencimento)}" />
+                          </label>
+                        </div>
 
-                    <label class="cronograma-field">
-                      <span>Descrição</span>
-                      <textarea name="descricao" rows="5">${escapeHtml(tarefaBase.descricao)}</textarea>
-                    </label>
+                        <label class="cronograma-field">
+                          <span>Descrição</span>
+                          <textarea name="descricao" rows="5">${escapeHtml(tarefaBase.descricao)}</textarea>
+                        </label>
 
-                    <div class="cronograma-form-actions">
-                      <button class="cronograma-btn cronograma-btn--primary" type="submit">
-                        ${tarefaEditando ? "Salvar alterações" : "Cadastrar tarefa"}
-                      </button>
+                        <div class="cronograma-form-actions">
+                          <button class="cronograma-btn cronograma-btn--primary" type="submit">
+                            ${tarefaEditando ? "Salvar alterações" : "Cadastrar tarefa"}
+                          </button>
 
-                      ${
-                        tarefaEditando
-                          ? `<button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnCancelarEdicaoTarefa">
-                              Cancelar edição
-                            </button>`
-                          : ""
-                      }
-                    </div>
+                          ${
+                            tarefaEditando
+                              ? `<button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnCancelarEdicaoTarefa">
+                                  Cancelar edição
+                                </button>`
+                              : ""
+                          }
+                        </div>
 
-                    <p class="cronograma-form-feedback" id="tarefaFormFeedback"></p>
-                  </form>
-                `
+                        <p class="cronograma-form-feedback" id="tarefaFormFeedback"></p>
+                      </form>
+                    `
           }
         </section>
 
@@ -435,12 +457,16 @@ function mountTarefasEvents() {
       const formData = new FormData(form);
       const projetoId = formData.get("projetoId");
       const projeto = getProjetoById(projetoId);
+      const responsavelUid = formData.get("responsavelUid");
+      const responsavelUser = getUserById(responsavelUid);
 
       const payload = {
         titulo: formData.get("titulo"),
         projetoId,
         projetoNome: projeto?.nome || "",
-        responsavel: formData.get("responsavel"),
+        responsavel: responsavelUser?.nome || "",
+        responsavelUid: responsavelUser?.uid || "",
+        responsavelEmail: responsavelUser?.email || "",
         dataInicio: formData.get("dataInicio"),
         dataVencimento: formData.get("dataVencimento"),
         status: formData.get("status"),
@@ -507,8 +533,36 @@ function ensureTarefasListener() {
   );
 }
 
+function ensureUsersListener() {
+  if (unsubscribeUsers) return;
+
+  unsubscribeUsers = listenUsers(
+    (items) => {
+      setUsers(items);
+
+      if (state.currentView === "tarefas") {
+        renderTarefasView();
+      }
+    },
+    (error) => {
+      console.error(error);
+      setUsers([]);
+      if (state.currentView === "tarefas") {
+        renderIntoApp(`
+          <section class="cronograma-panel">
+            <div class="cronograma-empty-state cronograma-empty-state--error">
+              Não foi possível carregar os usuários no Firestore.
+            </div>
+          </section>
+        `);
+      }
+    }
+  );
+}
+
 export function renderTarefasView() {
   ensureProjetosListener();
+  ensureUsersListener();
   ensureTarefasListener();
   renderIntoApp(getTarefasTemplate());
   mountTarefasEvents();
