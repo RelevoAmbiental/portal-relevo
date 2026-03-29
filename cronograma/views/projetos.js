@@ -396,7 +396,7 @@ function mountProjetosEvents() {
   }
 }
 
-function ensureProjetosListener() {
+export function ensureProjetosListener() {
   if (unsubscribeProjetos) return;
 
   unsubscribeProjetos = listenProjetos(
