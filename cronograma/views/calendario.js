@@ -257,20 +257,21 @@ function renderDayCell(day, tasks, isSelected) {
 
   return `
     <article
-      class="cronograma-calendar-day ${day.isCurrentMonth ? "" : "is-muted"} ${day.isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""}"
+      class="cronograma-calendar-day ${day.isCurrentMonth ? "" : "is-outside"} ${day.isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""}"
       data-action="select-date"
       data-date="${day.key}"
       aria-pressed="${isSelected ? "true" : "false"}"
       role="button"
       tabindex="0"
     >
-      <div class="cronograma-calendar-day__top">
+      <header class="cronograma-calendar-day__header">
         <span class="cronograma-calendar-day__number">${day.dayNumber}</span>
-        ${tasks.length ? `<span class="cronograma-calendar-day__count">${tasks.length}</span>` : ""}
-      </div>
-      <div class="cronograma-calendar-day__events">
+        ${tasks.length ? `<span class="cronograma-calendar-day__badge">${tasks.length}</span>` : ""}
+      </header>
+
+      <div class="cronograma-calendar-day__body">
         ${visibleTasks.map((task) => renderEventPill(task, day.key)).join("")}
-        ${hiddenCount ? `<span class="cronograma-calendar-day__more">+${hiddenCount} adicionais</span>` : ""}
+        ${hiddenCount ? `<button type="button" class="cronograma-calendar-day__more" data-action="select-date" data-date="${day.key}">+${hiddenCount} mais</button>` : ""}
       </div>
     </article>
   `;
@@ -339,7 +340,11 @@ function getCalendarioTemplate() {
   const monthRange = getMonthRange(monthAnchor);
   const calendarMatrix = buildMonthMatrix(monthAnchor);
   const filteredTasks = getFilteredTasks();
-  const dayIndex = buildDayIndex(filteredTasks, calendarMatrix[0][0].key, calendarMatrix[calendarMatrix.length - 1][6].key);
+  const dayIndex = buildDayIndex(
+    filteredTasks,
+    calendarMatrix[0][0].key,
+    calendarMatrix[calendarMatrix.length - 1][6].key
+  );
   const metrics = getCalendarMetrics(filteredTasks, monthRange);
   const selectedDateKey = getSelectedDateKey();
   const selectedDayTasks = filteredTasks.filter((task) => taskIntersectsDate(task, selectedDateKey));
@@ -348,38 +353,38 @@ function getCalendarioTemplate() {
   const responsavelOptions = getResponsavelOptions();
   const faseOptions = getFaseOptions();
 
+  const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+
   return `
     <div class="cronograma-calendar-shell">
-      <section class="cronograma-calendar-hero">
-        <div>
+      <section class="cronograma-calendar-toolbar cronograma-panel">
+        <div class="cronograma-calendar-toolbar__main">
           <p class="cronograma-shell__eyebrow">Calendário operacional</p>
-          <h2>${escapeHtml(monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1))}</h2>
-          <p>
-            Visão mensal pronta para produção, com base de dados e interação já preparadas para a etapa 2
-            (semanal, diária e linha do tempo) sem trocar o motor no meio da ponte.
-          </p>
+          <h2>${escapeHtml(monthTitle)}</h2>
+          <p>Visão mensal consolidada para leitura rápida, seleção por dia e operação contínua.</p>
         </div>
-        <div class="cronograma-calendar-hero__actions">
+
+        <div class="cronograma-calendar-toolbar__actions">
+          <button class="cronograma-btn cronograma-btn--ghost" type="button" data-action="shift-month" data-offset="-1">← Anterior</button>
           <button class="cronograma-btn cronograma-btn--ghost" type="button" data-action="go-today">Hoje</button>
-          <button class="cronograma-btn cronograma-btn--ghost" type="button" data-action="shift-month" data-offset="-1">← Mês anterior</button>
-          <button class="cronograma-btn" type="button" data-action="shift-month" data-offset="1">Próximo mês →</button>
+          <button class="cronograma-btn" type="button" data-action="shift-month" data-offset="1">Próximo →</button>
         </div>
       </section>
 
       ${renderViewSwitch()}
 
       <section class="cronograma-calendar-kpis">
-        ${renderCalendarMetricCard("Tarefas no mês", String(metrics.visibleInMonth.length), "Itens com janela ativa no período")}
-        ${renderCalendarMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas ainda abertas", metrics.overdue ? "danger" : "")}
-        ${renderCalendarMetricCard("Próximas 7 dias", String(metrics.upcoming), "Radar operacional de curto prazo", metrics.upcoming ? "warning" : "")}
-        ${renderCalendarMetricCard("Responsáveis", String(metrics.responsaveis), "Pessoas com carga no período")}
+        ${renderCalendarMetricCard("Tarefas no mês", String(metrics.visibleInMonth.length), "Itens com janela ativa")}
+        ${renderCalendarMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
+        ${renderCalendarMetricCard("Próximas 7 dias", String(metrics.upcoming), "Radar de curto prazo", metrics.upcoming ? "warning" : "")}
+        ${renderCalendarMetricCard("Responsáveis", String(metrics.responsaveis), "Carga distribuída")}
       </section>
 
       <section class="cronograma-panel cronograma-calendar-filters">
         <div class="cronograma-section-head cronograma-section-head--stack-mobile">
           <div>
-            <h3>Leitura do calendário</h3>
-            <p>Filtros enxutos agora, arquitetura expansível depois. O famoso crescer sem virar bambolê.</p>
+            <h3>Filtros</h3>
+            <p>Refine a leitura por projeto, responsável e fase sem desmontar a visão do mês.</p>
           </div>
           <label class="cronograma-toggle">
             <input type="checkbox" data-action="toggle-archived-calendar" ${state.calendarioMostrarArquivadas ? "checked" : ""} />
@@ -414,23 +419,32 @@ function getCalendarioTemplate() {
         </div>
       </section>
 
-      <div class="cronograma-view-grid cronograma-view-grid--calendar">
+      <div class="cronograma-calendar-layout">
         <section class="cronograma-panel cronograma-calendar-main">
-          <div class="cronograma-calendar-legend">
-            ${getFaseOptions().map((item) => `
-              <span class="cronograma-calendar-legend__item">
-                <span class="cronograma-calendar-legend__dot cronograma-calendar-legend__dot--${FASE_META[item.value]?.tone || "planejamento"}"></span>
-                ${escapeHtml(item.label)}
-              </span>
-            `).join("")}
+          <div class="cronograma-calendar-main__top">
+            <div class="cronograma-calendar-legend">
+              ${getFaseOptions().map((item) => `
+                <span class="cronograma-calendar-legend__item">
+                  <span class="cronograma-calendar-legend__dot cronograma-calendar-legend__dot--${FASE_META[item.value]?.tone || "planejamento"}"></span>
+                  ${escapeHtml(item.label)}
+                </span>
+              `).join("")}
+            </div>
           </div>
 
           <div class="cronograma-calendar-grid-wrap">
             <div class="cronograma-calendar-grid-head">
-              ${weekdayLabels.map((label) => `<div class="cronograma-calendar-grid-head__cell">${escapeHtml(label)}</div>`).join("")}
+              ${weekdayLabels.map((label) => `
+                <div class="cronograma-calendar-grid-head__cell">${escapeHtml(label)}</div>
+              `).join("")}
             </div>
+
             <div class="cronograma-calendar-grid">
-              ${calendarMatrix.map((week) => week.map((day) => renderDayCell(day, dayIndex.get(day.key) || [], day.key === selectedDateKey)).join("")).join("")}
+              ${calendarMatrix.map((week) =>
+                week.map((day) =>
+                  renderDayCell(day, dayIndex.get(day.key) || [], day.key === selectedDateKey)
+                ).join("")
+              ).join("")}
             </div>
           </div>
         </section>
@@ -443,27 +457,16 @@ function getCalendarioTemplate() {
               <h3>Projetos mais presentes</h3>
               <span class="cronograma-tag cronograma-tag--muted">Top 4</span>
             </div>
+
             <div class="cronograma-mini-list">
               ${metrics.projetos.length
                 ? metrics.projetos.map((item) => `
                     <div class="cronograma-mini-list__item">
                       <strong>${escapeHtml(item.projetoNome || "Sem projeto")}</strong>
-                      <span>${item.total} tarefa${item.total > 1 ? "s" : ""} no mês.</span>
+                      <span>${item.total} tarefa${item.total > 1 ? "s" : ""} no mês</span>
                     </div>
                   `).join("")
                 : '<div class="cronograma-empty-state">Sem tarefas no período filtrado.</div>'}
-            </div>
-          </section>
-
-          <section class="cronograma-panel cronograma-calendar-side-card">
-            <div class="cronograma-calendar-side-card__head">
-              <h3>Etapa 2 já preparada</h3>
-              <span class="cronograma-tag cronograma-tag--info">Escala refinada</span>
-            </div>
-            <div class="cronograma-mini-list">
-              <div class="cronograma-mini-list__item"><strong>Mesmo motor de datas</strong><span>O índice diário já suporta visão semanal e diária.</span></div>
-              <div class="cronograma-mini-list__item"><strong>Mesmo conjunto de filtros</strong><span>Não precisará duplicar regra de negócio quando subir de nível.</span></div>
-              <div class="cronograma-mini-list__item"><strong>Camada pronta para timeline</strong><span>Eventos já entram com intervalo contínuo, não só por vencimento.</span></div>
             </div>
           </section>
         </aside>
