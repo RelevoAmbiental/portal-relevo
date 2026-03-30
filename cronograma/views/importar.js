@@ -14,6 +14,8 @@ let textoImportacao = "";
 let previewImportacao = [];
 let errosImportacao = [];
 let avisosImportacao = [];
+let errosBaseImportacao = [];
+let avisosBaseImportacao = [];
 let metaImportacao = {
   projetoNome: "",
   responsavelPadraoTexto: "",
@@ -25,6 +27,22 @@ let responsavelSelecionadoUid = "";
 let mensagemImportacao = "";
 let mensagemTipo = "info";
 let salvando = false;
+let faseLoteSelecionada = "";
+
+const FASE_OPTIONS = [
+  { value: "planejamento", label: "Planejamento" },
+  { value: "campo", label: "Campo" },
+  { value: "gabinete", label: "Gabinete" },
+  { value: "entrega", label: "Entrega" },
+  { value: "administrativo", label: "Administrativo" }
+];
+
+const PRIORIDADE_OPTIONS = [
+  { value: "baixa", label: "Baixa" },
+  { value: "media", label: "Média" },
+  { value: "alta", label: "Alta" },
+  { value: "critica", label: "Crítica" }
+];
 
 function escapeHtml(value) {
   return String(value || "")
@@ -33,6 +51,25 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function slugifyFase(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_");
+}
+
+function getFaseLabel(value) {
+  const key = String(value || "").trim().toLowerCase();
+  const found = FASE_OPTIONS.find((item) => item.value === key);
+  if (found) return found.label;
+  if (!key) return "Planejamento";
+  return key
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function getProjetosAtivos() {
@@ -49,6 +86,10 @@ function getProjetoSelecionado() {
 
 function getResponsavelSelecionado() {
   return state.users.find((item) => item.uid === responsavelSelecionadoUid || item.id === responsavelSelecionadoUid) || null;
+}
+
+function getUserByUid(uid) {
+  return state.users.find((item) => item.uid === uid || item.id === uid) || null;
 }
 
 function ensureDefaults() {
@@ -119,8 +160,7 @@ Regras obrigatórias:
    Gabinete
    Entrega
    Administrativo
-10. Considere a emissão da nota fiscal como uma atividade que acontece 10 dias depois da entrega do produto final e que o faturamento desta nota aconteça 30 dias depois da emissão da nota.
-11. Não use tabelas, markdown, bullets diferentes ou numeração.
+10. Não use tabelas, markdown, bullets diferentes ou numeração.
 
 Modelo:
 [PROJETO] Nome do Projeto
@@ -129,23 +169,19 @@ Modelo:
 
 [FASE] Planejamento
 - Alinhamento inicial | 1d | media
-- Organização logística | 4d | media
+- Organização logística | 2d | media
 
 [FASE] Campo
-- Prospecção espeleológica | 10d | alta
+- Prospecção espeleológica | 5d | alta
 - Caminhamento complementar | 2d | media
 
 [FASE] Gabinete
 - Organização de dados | 3d | media
-- Relatório técnico parcial | 10d | alta
+- Relatório técnico parcial | 6d | alta
 
 [FASE] Entrega
 - Revisão final | 2d | alta
 - Entrega ao cliente | 1d | alta
-
-[FASE] Adminstrativo
-- Emissão de Nota fiscal | 1d | alta
-- Faturamento da Nota fiscal | 30d | alta
 
 Agora converta o conteúdo que eu enviar para esse formato exato.`;
 }
@@ -163,6 +199,48 @@ function baixarPromptGeracaoTxt() {
   link.remove();
 
   URL.revokeObjectURL(url);
+}
+
+function addDaysIso(isoDate, daysToAdd) {
+  const [year, month, day] = String(isoDate || "").split("-").map(Number);
+  if (!year || !month || !day) return "";
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + Number(daysToAdd || 0));
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function normalizeDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return "";
+}
+
+function normalizeDuracao(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return null;
+  return Math.round(number);
+}
+
+function getFaseOptionsDinamicas() {
+  const dynamic = previewImportacao
+    .map((item) => ({
+      value: String(item.fase || "").trim().toLowerCase(),
+      label: item.faseLabel || getFaseLabel(item.fase)
+    }))
+    .filter((item) => item.value);
+
+  const map = new Map();
+  [...FASE_OPTIONS, ...dynamic].forEach((item) => {
+    if (!map.has(item.value)) {
+      map.set(item.value, item);
+    }
+  });
+
+  return Array.from(map.values());
 }
 
 function renderMensagem() {
@@ -205,10 +283,50 @@ function renderErrosAvisos() {
   `;
 }
 
+function renderResponsavelOptions(selectedUid) {
+  const users = getUsersDisponiveis();
+
+  return `
+    <option value="">Selecione...</option>
+    ${users
+      .map(
+        (item) => `
+          <option value="${escapeHtml(item.uid)}" ${item.uid === selectedUid ? "selected" : ""}>
+            ${escapeHtml(item.nome)}${item.email ? ` — ${escapeHtml(item.email)}` : ""}
+          </option>
+        `
+      )
+      .join("")}
+  `;
+}
+
+function renderFaseOptions(selectedValue) {
+  return getFaseOptionsDinamicas()
+    .map(
+      (item) => `
+        <option value="${escapeHtml(item.value)}" ${item.value === selectedValue ? "selected" : ""}>
+          ${escapeHtml(item.label)}
+        </option>
+      `
+    )
+    .join("");
+}
+
+function renderPrioridadeOptions(selectedValue) {
+  return PRIORIDADE_OPTIONS
+    .map(
+      (item) => `
+        <option value="${escapeHtml(item.value)}" ${item.value === selectedValue ? "selected" : ""}>
+          ${escapeHtml(item.label)}
+        </option>
+      `
+    )
+    .join("");
+}
 function renderPreview() {
   if (!previewImportacao.length) {
     return `
-      <section class="cronograma-panel">
+      <section class="cronograma-panel cronograma-import-preview-section">
         <h3>Prévia da importação</h3>
         <div class="cronograma-empty-state">
           Valide um TXT para visualizar as tarefas antes de gravar.
@@ -221,7 +339,7 @@ function renderPreview() {
   const totalComCascata = previewImportacao.filter((item) => item.dataInicio || item.dataVencimento).length;
 
   return `
-    <section class="cronograma-panel">
+    <section class="cronograma-panel cronograma-import-preview-section">
       <div class="cronograma-import-preview-head">
         <div>
           <h3>Prévia da importação</h3>
@@ -249,6 +367,35 @@ function renderPreview() {
         </div>
       </div>
 
+      <div class="cronograma-import-bulk-actions">
+        <div class="cronograma-import-actions">
+          <button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnRecalcularDatasImportacao">
+            Recalcular datas em cascata
+          </button>
+
+          <button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnAplicarResponsavelPadrao">
+            Aplicar responsável padrão a todas
+          </button>
+        </div>
+
+        <div class="cronograma-import-config-grid">
+          <label class="cronograma-field">
+            <span>Fase em lote</span>
+            <select id="importFaseLoteSelect" class="cronograma-input">
+              <option value="">Selecione...</option>
+              ${renderFaseOptions(faseLoteSelecionada)}
+            </select>
+          </label>
+
+          <div class="cronograma-field" style="justify-content:end;">
+            <span>&nbsp;</span>
+            <button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnAplicarFaseLote">
+              Aplicar fase a todas
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="cronograma-import-table-wrap">
         <table class="cronograma-import-table">
           <thead>
@@ -262,6 +409,7 @@ function renderPreview() {
               <th>Vencimento</th>
               <th>Prioridade</th>
               <th>Descrição</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -270,11 +418,33 @@ function renderPreview() {
                 (item, index) => `
                   <tr>
                     <td>${index + 1}</td>
-                    <td>${escapeHtml(item.titulo)}</td>
-                    <td>${escapeHtml(item.faseLabel || item.fase)}</td>
+                    <td>
+                      <input
+                        class="cronograma-input"
+                        type="text"
+                        value="${escapeHtml(item.titulo || "")}"
+                        data-preview-index="${index}"
+                        data-preview-field="titulo"
+                      />
+                    </td>
+                    <td>
+                      <select
+                        class="cronograma-input"
+                        data-preview-index="${index}"
+                        data-preview-field="fase"
+                      >
+                        ${renderFaseOptions(item.fase)}
+                      </select>
+                    </td>
                     <td>
                       <div class="cronograma-import-cell-stack">
-                        <strong>${escapeHtml(item.responsavel || "—")}</strong>
+                        <select
+                          class="cronograma-input"
+                          data-preview-index="${index}"
+                          data-preview-field="responsavelUid"
+                        >
+                          ${renderResponsavelOptions(item.responsavelUid || "")}
+                        </select>
                         ${
                           item.responsavelOrigem === "linha"
                             ? `<span class="cronograma-import-cell-muted">definido na linha</span>`
@@ -286,11 +456,60 @@ function renderPreview() {
                         }
                       </div>
                     </td>
-                    <td>${escapeHtml(item.dataInicio || "—")}</td>
-                    <td>${item.duracaoDias ? `${item.duracaoDias}d` : "—"}</td>
-                    <td>${escapeHtml(item.dataVencimento || "—")}</td>
-                    <td>${escapeHtml(item.prioridade || "media")}</td>
-                    <td>${escapeHtml(item.descricao || "—")}</td>
+                    <td>
+                      <input
+                        class="cronograma-input"
+                        type="date"
+                        value="${escapeHtml(item.dataInicio || "")}"
+                        data-preview-index="${index}"
+                        data-preview-field="dataInicio"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        class="cronograma-input"
+                        type="number"
+                        min="1"
+                        value="${item.duracaoDias || ""}"
+                        data-preview-index="${index}"
+                        data-preview-field="duracaoDias"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        class="cronograma-input"
+                        type="date"
+                        value="${escapeHtml(item.dataVencimento || "")}"
+                        data-preview-index="${index}"
+                        data-preview-field="dataVencimento"
+                      />
+                    </td>
+                    <td>
+                      <select
+                        class="cronograma-input"
+                        data-preview-index="${index}"
+                        data-preview-field="prioridade"
+                      >
+                        ${renderPrioridadeOptions(item.prioridade || "media")}
+                      </select>
+                    </td>
+                    <td>
+                      <textarea
+                        class="cronograma-import-inline-textarea"
+                        rows="2"
+                        data-preview-index="${index}"
+                        data-preview-field="descricao"
+                      >${escapeHtml(item.descricao || "")}</textarea>
+                    </td>
+                    <td>
+                      <button
+                        class="cronograma-btn cronograma-btn--ghost"
+                        type="button"
+                        data-remove-preview-index="${index}"
+                      >
+                        Remover
+                      </button>
+                    </td>
                   </tr>
                 `
               )
@@ -392,7 +611,7 @@ function getTemplate() {
             <div>
               <h2>Importar tarefas por TXT</h2>
               <p>
-                Cole o conteúdo, valide a prévia e grave as tarefas no cronograma.
+                Cole o conteúdo, valide a prévia, ajuste os itens se necessário e grave as tarefas no cronograma.
               </p>
             </div>
           </div>
@@ -478,17 +697,74 @@ function getTemplate() {
     </div>
   `;
 }
+function enrichItemResponsavel(item, uid, origem = "manual") {
+  const user = uid ? getUserByUid(uid) : null;
+
+  if (user) {
+    item.responsavel = user.nome || "";
+    item.responsavelUid = user.uid || "";
+    item.responsavelEmail = user.email || "";
+    item.responsavelOrigem = origem;
+    item.responsavelTexto = "";
+    return;
+  }
+
+  item.responsavel = "";
+  item.responsavelUid = "";
+  item.responsavelEmail = "";
+  item.responsavelOrigem = "";
+}
+
+function normalizePreviewItem(item) {
+  const normalized = { ...item };
+
+  normalized.titulo = String(normalized.titulo || "").trim();
+  normalized.fase = slugifyFase(normalized.fase || "planejamento") || "planejamento";
+  normalized.faseLabel = getFaseLabel(normalized.fase);
+  normalized.prioridade = PRIORIDADE_OPTIONS.some((option) => option.value === normalized.prioridade)
+    ? normalized.prioridade
+    : "media";
+  normalized.duracaoDias = normalizeDuracao(normalized.duracaoDias);
+  normalized.dataInicio = normalizeDate(normalized.dataInicio);
+  normalized.dataVencimento = normalizeDate(normalized.dataVencimento);
+  normalized.descricao = String(normalized.descricao || "").trim();
+
+  return normalized;
+}
+
+function recomputePreviewFeedback() {
+  const erros = [...errosBaseImportacao];
+  const avisos = [...avisosBaseImportacao];
+  const responsavelPadrao = getResponsavelSelecionado();
+
+  previewImportacao = previewImportacao.map((item) => normalizePreviewItem(item));
+
+  previewImportacao.forEach((item, index) => {
+    if (!item.titulo) {
+      erros.push(`Linha ${index + 1}: a tarefa está sem título.`);
+    }
+
+    if (item.dataInicio && item.dataVencimento && item.dataInicio > item.dataVencimento) {
+      erros.push(`Linha ${index + 1}: a data de início está depois do vencimento.`);
+    }
+
+    if (item.responsavelTexto && !item.responsavelUid) {
+      erros.push(`Linha ${index + 1}: responsável "${item.responsavelTexto}" ainda não foi resolvido.`);
+    } else if (!item.responsavelUid && !responsavelPadrao?.uid) {
+      avisos.push(`Linha ${index + 1}: sem responsável definido; selecione um responsável padrão ou ajuste a linha.`);
+    }
+  });
+
+  errosImportacao = erros;
+  avisosImportacao = avisos;
+}
 
 function enriquecerPreview(parsed) {
   const users = getUsersDisponiveis();
   const responsavelPadrao = getResponsavelSelecionado();
 
-  const itens = [];
-  const erros = [...parsed.erros];
-  const avisos = [...parsed.avisos];
-
-  parsed.itens.forEach((item) => {
-    const enriched = { ...item };
+  const itens = parsed.itens.map((item) => {
+    const enriched = normalizePreviewItem(item);
 
     if (item.responsavelTexto) {
       const found = resolveResponsavelByTexto(item.responsavelTexto, users);
@@ -498,14 +774,19 @@ function enriquecerPreview(parsed) {
         enriched.responsavelUid = found.uid || "";
         enriched.responsavelEmail = found.email || "";
         enriched.responsavelOrigem = "linha";
+        enriched.responsavelTexto = "";
       } else {
-        erros.push(`Linha ${item.linha}: responsável "${item.responsavelTexto}" não foi encontrado na coleção users.`);
+        enriched.responsavel = "";
+        enriched.responsavelUid = "";
+        enriched.responsavelEmail = "";
+        enriched.responsavelOrigem = "";
       }
     } else if (responsavelPadrao?.uid) {
       enriched.responsavel = responsavelPadrao.nome || "";
       enriched.responsavelUid = responsavelPadrao.uid || "";
       enriched.responsavelEmail = responsavelPadrao.email || "";
       enriched.responsavelOrigem = "padrao";
+      enriched.responsavelTexto = "";
     } else if (metaImportacao.responsavelPadraoTexto) {
       const foundMeta = resolveResponsavelByTexto(metaImportacao.responsavelPadraoTexto, users);
 
@@ -514,17 +795,14 @@ function enriquecerPreview(parsed) {
         enriched.responsavelUid = foundMeta.uid || "";
         enriched.responsavelEmail = foundMeta.email || "";
         enriched.responsavelOrigem = "padrao";
-      } else {
-        erros.push(`Responsável padrão "${metaImportacao.responsavelPadraoTexto}" não foi encontrado na coleção users.`);
+        enriched.responsavelTexto = "";
       }
-    } else {
-      avisos.push(`Linha ${item.linha}: sem responsável específico; selecione um responsável padrão para salvar.`);
     }
 
-    itens.push(enriched);
+    return enriched;
   });
 
-  return { itens, erros, avisos };
+  return { itens };
 }
 
 function validarImportacao() {
@@ -536,8 +814,10 @@ function validarImportacao() {
   const enriched = enriquecerPreview(parsed);
 
   previewImportacao = enriched.itens;
-  errosImportacao = enriched.erros;
-  avisosImportacao = enriched.avisos;
+  errosBaseImportacao = [...parsed.erros];
+  avisosBaseImportacao = [...parsed.avisos];
+
+  recomputePreviewFeedback();
 
   if (!errosImportacao.length && previewImportacao.length) {
     mensagemImportacao = `${previewImportacao.length} tarefa(s) validada(s) com sucesso.`;
@@ -558,6 +838,8 @@ function limparImportacao() {
   previewImportacao = [];
   errosImportacao = [];
   avisosImportacao = [];
+  errosBaseImportacao = [];
+  avisosBaseImportacao = [];
   metaImportacao = {
     projetoNome: "",
     responsavelPadraoTexto: "",
@@ -565,14 +847,152 @@ function limparImportacao() {
   };
   mensagemImportacao = "";
   mensagemTipo = "info";
+  faseLoteSelecionada = "";
   renderImportarView();
 }
 
+function updatePreviewField(index, field, rawValue) {
+  const item = previewImportacao[index];
+  if (!item) return;
+
+  if (field === "titulo") {
+    item.titulo = String(rawValue || "").trim();
+  }
+
+  if (field === "fase") {
+    item.fase = slugifyFase(rawValue || "planejamento") || "planejamento";
+    item.faseLabel = getFaseLabel(item.fase);
+  }
+
+  if (field === "prioridade") {
+    item.prioridade = String(rawValue || "media").trim().toLowerCase() || "media";
+  }
+
+  if (field === "duracaoDias") {
+    item.duracaoDias = normalizeDuracao(rawValue);
+  }
+
+  if (field === "dataInicio") {
+    item.dataInicio = normalizeDate(rawValue);
+  }
+
+  if (field === "dataVencimento") {
+    item.dataVencimento = normalizeDate(rawValue);
+  }
+
+  if (field === "descricao") {
+    item.descricao = String(rawValue || "").trim();
+  }
+
+  if (field === "responsavelUid") {
+    enrichItemResponsavel(item, rawValue, "manual");
+  }
+
+  previewImportacao[index] = normalizePreviewItem(item);
+  recomputePreviewFeedback();
+}
+
+function removerPreviewItem(index) {
+  previewImportacao.splice(index, 1);
+  recomputePreviewFeedback();
+
+  if (!previewImportacao.length) {
+    mensagemImportacao = "Todas as tarefas foram removidas da prévia.";
+    mensagemTipo = "info";
+  }
+}
+
+function recalcularDatasEmCascata() {
+  if (!previewImportacao.length) return;
+
+  const base =
+    metaImportacao.dataInicioBase ||
+    previewImportacao.find((item) => item.dataInicio)?.dataInicio ||
+    "";
+
+  if (!base) {
+    mensagemImportacao = "Defina [INICIO] no TXT ou preencha a data inicial da primeira tarefa para recalcular.";
+    mensagemTipo = "warning";
+    renderImportarView();
+    return;
+  }
+
+  let cursor = base;
+
+  previewImportacao = previewImportacao.map((item) => {
+    const clone = { ...item };
+
+    clone.dataInicio = cursor;
+
+    if (clone.duracaoDias) {
+      clone.dataVencimento = addDaysIso(cursor, clone.duracaoDias - 1);
+      cursor = addDaysIso(cursor, clone.duracaoDias);
+    } else if (clone.dataVencimento) {
+      cursor = addDaysIso(clone.dataVencimento, 1);
+    } else {
+      clone.dataVencimento = "";
+      cursor = addDaysIso(cursor, 1);
+    }
+
+    return normalizePreviewItem(clone);
+  });
+
+  mensagemImportacao = "Datas recalculadas em cascata com sucesso.";
+  mensagemTipo = "success";
+  recomputePreviewFeedback();
+  renderImportarView();
+}
+
+function aplicarResponsavelPadraoEmTodas() {
+  const responsavel = getResponsavelSelecionado();
+
+  if (!responsavel?.uid) {
+    mensagemImportacao = "Selecione um responsável padrão antes de aplicar em lote.";
+    mensagemTipo = "warning";
+    renderImportarView();
+    return;
+  }
+
+  previewImportacao = previewImportacao.map((item) => {
+    const clone = { ...item };
+    enrichItemResponsavel(clone, responsavel.uid, "padrao");
+    return normalizePreviewItem(clone);
+  });
+
+  mensagemImportacao = "Responsável padrão aplicado a todas as tarefas da prévia.";
+  mensagemTipo = "success";
+  recomputePreviewFeedback();
+  renderImportarView();
+}
+
+function aplicarFaseEmTodas() {
+  if (!faseLoteSelecionada) {
+    mensagemImportacao = "Selecione uma fase antes de aplicar em lote.";
+    mensagemTipo = "warning";
+    renderImportarView();
+    return;
+  }
+
+  previewImportacao = previewImportacao.map((item) =>
+    normalizePreviewItem({
+      ...item,
+      fase: faseLoteSelecionada,
+      faseLabel: getFaseLabel(faseLoteSelecionada)
+    })
+  );
+
+  mensagemImportacao = `Fase "${getFaseLabel(faseLoteSelecionada)}" aplicada a toda a prévia.`;
+  mensagemTipo = "success";
+  recomputePreviewFeedback();
+  renderImportarView();
+}
 async function salvarImportacao() {
   try {
     if (!previewImportacao.length) {
       throw new Error("Valide um TXT antes de salvar.");
     }
+
+    recomputePreviewFeedback();
 
     if (errosImportacao.length) {
       throw new Error("Corrija os erros da validação antes de salvar.");
@@ -597,7 +1017,7 @@ async function salvarImportacao() {
     renderImportarView();
 
     const resultado = await salvarImportacaoLote({
-      itens: previewImportacao,
+      itens: previewImportacao.map((item) => normalizePreviewItem(item)),
       projeto,
       responsavel
     });
@@ -608,7 +1028,10 @@ async function salvarImportacao() {
     previewImportacao = [];
     errosImportacao = [];
     avisosImportacao = [];
+    errosBaseImportacao = [];
+    avisosBaseImportacao = [];
     textoImportacao = "";
+    faseLoteSelecionada = "";
 
     renderImportarView();
   } catch (error) {
@@ -629,6 +1052,7 @@ function ensureUsersListener() {
       setUsers(items);
 
       if (state.currentView === "importar") {
+        recomputePreviewFeedback();
         renderImportarView();
       }
     },
@@ -654,6 +1078,10 @@ function mountEvents() {
   const btnValidar = document.getElementById("btnValidarImportacao");
   const btnSalvar = document.getElementById("btnSalvarImportacao");
   const btnBaixarPromptTxt = document.getElementById("btnBaixarPromptTxt");
+  const btnRecalcularDatas = document.getElementById("btnRecalcularDatasImportacao");
+  const btnAplicarResponsavelPadrao = document.getElementById("btnAplicarResponsavelPadrao");
+  const btnAplicarFaseLote = document.getElementById("btnAplicarFaseLote");
+  const faseLoteSelect = document.getElementById("importFaseLoteSelect");
 
   if (txtInput) {
     txtInput.addEventListener("input", (event) => {
@@ -683,12 +1111,20 @@ function mountEvents() {
   if (projetoSelect) {
     projetoSelect.addEventListener("change", (event) => {
       projetoSelecionadoId = event.target.value || "";
+      recomputePreviewFeedback();
     });
   }
 
   if (responsavelSelect) {
     responsavelSelect.addEventListener("change", (event) => {
       responsavelSelecionadoUid = event.target.value || "";
+      recomputePreviewFeedback();
+    });
+  }
+
+  if (faseLoteSelect) {
+    faseLoteSelect.addEventListener("change", (event) => {
+      faseLoteSelecionada = event.target.value || "";
     });
   }
 
@@ -716,6 +1152,35 @@ function mountEvents() {
   if (btnBaixarPromptTxt) {
     btnBaixarPromptTxt.addEventListener("click", baixarPromptGeracaoTxt);
   }
+
+  if (btnRecalcularDatas) {
+    btnRecalcularDatas.addEventListener("click", recalcularDatasEmCascata);
+  }
+
+  if (btnAplicarResponsavelPadrao) {
+    btnAplicarResponsavelPadrao.addEventListener("click", aplicarResponsavelPadraoEmTodas);
+  }
+
+  if (btnAplicarFaseLote) {
+    btnAplicarFaseLote.addEventListener("click", aplicarFaseEmTodas);
+  }
+
+  document.querySelectorAll("[data-preview-field]").forEach((element) => {
+    element.addEventListener("change", (event) => {
+      const index = Number(event.target.dataset.previewIndex);
+      const field = event.target.dataset.previewField;
+      updatePreviewField(index, field, event.target.value);
+      renderImportarView();
+    });
+  });
+
+  document.querySelectorAll("[data-remove-preview-index]").forEach((element) => {
+    element.addEventListener("click", (event) => {
+      const index = Number(event.currentTarget.dataset.removePreviewIndex);
+      removerPreviewItem(index);
+      renderImportarView();
+    });
+  });
 }
 
 export function renderImportarView() {
