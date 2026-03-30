@@ -2266,3 +2266,20 @@ body.relevo-body {
     min-width: 900px;
   }
 }
+/* ===== CALENDÁRIO — COR DO PROJETO NA TAREFA ===== */
+
+.cronograma-calendar-pill {
+  position: relative;
+  padding-left: 14px;
+  overflow: hidden;
+}
+
+.cronograma-calendar-pill__project-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--project-accent, #cfd8d3);
+  border-radius: 12px 0 0 12px;
+}
