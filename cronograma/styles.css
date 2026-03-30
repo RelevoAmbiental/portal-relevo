@@ -2405,4 +2405,132 @@ body.relevo-body {
   .cronograma-calendar-day-card {
     padding: 16px 16px 16px 20px;
   }
+  /* =========================
+   CALENDÁRIO — VISÃO DIÁRIA (REFINAMENTO UX)
+   ========================= */
+
+.cronograma-calendar-day-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* CARD BASE */
+.cronograma-calendar-day-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  padding: 16px 18px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+  backdrop-filter: blur(6px);
+}
+
+/* Hover = deixa claro que é clicável */
+.cronograma-calendar-day-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.1);
+}
+
+/* foco teclado */
+.cronograma-calendar-day-card:focus {
+  outline: 2px solid #2e7d32;
+  outline-offset: 2px;
+}
+
+/* barra lateral do projeto */
+.cronograma-calendar-day-card__project-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 16px 0 0 16px;
+  background: var(--project-accent, #4caf50);
+}
+
+/* HEADER */
+.cronograma-calendar-day-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* título */
+.cronograma-calendar-day-card__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1b1b1b;
+}
+
+/* projeto */
+.cronograma-calendar-day-card__head p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* tags */
+.cronograma-tag-row {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* meta */
+.cronograma-calendar-day-card__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+/* descrição */
+.cronograma-calendar-day-card__desc {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+/* =========================
+   ESTADOS IMPORTANTES
+   ========================= */
+
+/* tarefa atrasada */
+.cronograma-calendar-day-card .cronograma-tag--danger {
+  font-weight: 600;
+}
+
+/* destaque visual sutil para cards com atraso */
+.cronograma-calendar-day-card:has(.cronograma-tag--danger) {
+  border-left: 4px solid #d32f2f;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 768px) {
+  .cronograma-calendar-day-card {
+    padding: 14px;
+  }
+
+  .cronograma-calendar-day-card__meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cronograma-calendar-day-card__head {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
 }
