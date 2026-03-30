@@ -145,19 +145,46 @@ function getFaseOptions() {
 }
 
 function getFilteredTasks() {
+  const projetosMap = new Map(
+    (state.projetos || []).map((projeto) => [
+      projeto.id || projeto.nome,
+      projeto
+    ])
+  );
+
   return sortCalendarTasks(
-    state.tarefas.filter((task) => {
-      if (!state.calendarioMostrarArquivadas && task.arquivada) return false;
-      if (state.calendarioFiltroProjeto !== "todos") {
+    state.tarefas
+      .filter((task) => {
+        if (!state.calendarioMostrarArquivadas && task.arquivada) return false;
+
+        if (state.calendarioFiltroProjeto !== "todos") {
+          const projectKey = task.projetoId || task.projetoNome;
+          if (projectKey !== state.calendarioFiltroProjeto) return false;
+        }
+
+        if (
+          state.calendarioFiltroResponsavel !== "todos" &&
+          formatResponsavel(task) !== state.calendarioFiltroResponsavel
+        ) {
+          return false;
+        }
+
+        if (
+          state.calendarioFiltroFase !== "todos" &&
+          task.fase !== state.calendarioFiltroFase
+        ) return false;
+
+        return Boolean(getDateRangeForTask(task));
+      })
+      .map((task) => {
         const projectKey = task.projetoId || task.projetoNome;
-        if (projectKey !== state.calendarioFiltroProjeto) return false;
-      }
-      if (state.calendarioFiltroResponsavel !== "todos" && formatResponsavel(task) !== state.calendarioFiltroResponsavel) {
-        return false;
-      }
-      if (state.calendarioFiltroFase !== "todos" && task.fase !== state.calendarioFiltroFase) return false;
-      return Boolean(getDateRangeForTask(task));
-    })
+        const projeto = projetosMap.get(projectKey);
+
+        return {
+          ...task,
+          projetoCor: task.projetoCor || projeto?.cor || "#cfd8d3"
+        };
+      })
   );
 }
 
