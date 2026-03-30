@@ -674,6 +674,59 @@ function getCalendarioTemplate() {
   `;
 }
 
+function openTaskModal(taskId) {
+  if (!taskId) return;
+
+  // cria container
+  const overlay = document.createElement("div");
+  overlay.className = "cronograma-modal-overlay";
+
+  overlay.innerHTML = `
+    <div class="cronograma-modal">
+      <div class="cronograma-modal__header">
+        <h3>Editar tarefa</h3>
+        <button class="cronograma-btn cronograma-btn--ghost" data-action="close-modal">
+          ✕
+        </button>
+      </div>
+
+      <div class="cronograma-modal__content" id="modalTaskContent">
+        <div class="cronograma-empty-state">Carregando...</div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // fecha modal
+  overlay.addEventListener("click", (e) => {
+    if (
+      e.target.classList.contains("cronograma-modal-overlay") ||
+      e.target.closest('[data-action="close-modal"]')
+    ) {
+      overlay.remove();
+    }
+  });
+
+  // renderiza tarefa dentro do modal
+  setTimeout(() => {
+    const container = document.getElementById("modalTaskContent");
+    if (!container) return;
+
+    // renderiza view de tarefas em memória
+    openTarefaEditor(taskId, { scrollToTop: false });
+
+    // captura HTML gerado
+    const app = document.getElementById("app");
+    if (!app) return;
+
+    container.innerHTML = app.innerHTML;
+
+    // remove scroll externo
+    window.scrollTo({ top: 0 });
+  }, 0);
+}
+
 function openTaskFromCalendar(taskId) {
   if (!taskId) return;
 
@@ -724,7 +777,7 @@ function handleCalendarClick(event) {
 
   if (action === "open-task") {
     const taskId = actionEl.dataset.taskId;
-    openTaskFromCalendar(taskId);
+    openTaskModal(taskId);
     return;
   }
   
