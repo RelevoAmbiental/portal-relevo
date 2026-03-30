@@ -17,7 +17,7 @@ const viewMeta = {
   calendario: {
     title: "Calendário",
     description:
-      "Visualização diária, semanal, mensal e anual das tarefas, destacando vencimentos, atrasos e prazos próximos."
+      "Visualização mensal das tarefas já em produção, com arquitetura preparada para evolução futura para escalas semanal, diária e linha do tempo."
   },
   gestao: {
     title: "Gestão",
