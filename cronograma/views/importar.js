@@ -160,7 +160,8 @@ Regras obrigatórias:
    Gabinete
    Entrega
    Administrativo
-10. Não use tabelas, markdown, bullets diferentes ou numeração.
+10. Considere a emissão da nota fiscal como uma atividade que acontece 10 dias depois da entrega do produto final e que o faturamento desta nota aconteça 30 dias depois da emissão da nota.
+11. Não use tabelas, markdown, bullets diferentes ou numeração.
 
 Modelo:
 [PROJETO] Nome do Projeto
@@ -169,19 +170,23 @@ Modelo:
 
 [FASE] Planejamento
 - Alinhamento inicial | 1d | media
-- Organização logística | 2d | media
+- Organização logística | 4d | media
 
 [FASE] Campo
-- Prospecção espeleológica | 5d | alta
+- Prospecção espeleológica | 10d | alta
 - Caminhamento complementar | 2d | media
 
 [FASE] Gabinete
 - Organização de dados | 3d | media
-- Relatório técnico parcial | 6d | alta
+- Relatório técnico parcial | 10d | alta
 
 [FASE] Entrega
 - Revisão final | 2d | alta
 - Entrega ao cliente | 1d | alta
+
+[FASE] Adminstrativo
+- Emissão de Nota fiscal | 1d | alta
+- Faturamento da Nota fiscal | 30d | alta
 
 Agora converta o conteúdo que eu enviar para esse formato exato.`;
 }
