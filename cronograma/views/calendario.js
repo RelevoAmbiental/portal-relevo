@@ -1,3 +1,5 @@
+import { listenProjetos } from "../services/firestore-projetos.js";
+import { setProjetos } from "../core/state.js";
 import { renderIntoApp } from "../ui/layout.js";
 import {
   state,
@@ -36,6 +38,7 @@ import {
 
 let unsubscribeTarefas = null;
 let unsubscribeUsers = null;
+let unsubscribeProjetos = null;
 
 const FASE_META = {
   planejamento: { label: "Planejamento", tone: "planejamento" },
@@ -65,6 +68,21 @@ const CALENDAR_VIEW_OPTIONS = [
   { value: "day", label: "Diária", enabled: true },
   { value: "timeline", label: "Linha do tempo", enabled: false }
 ];
+
+function ensureProjetosListener() {
+  if (unsubscribeProjetos) return;
+
+  unsubscribeProjetos = listenProjetos(
+    (items) => {
+      setProjetos(items);
+      if (state.currentView === "calendario") renderCalendarioView();
+    },
+    (error) => {
+      console.error(error);
+      setProjetos([]);
+    }
+  );
+}
 
 function escapeHtml(value) {
   return String(value || "")
@@ -795,6 +813,7 @@ function ensureUsersListener() {
 export function renderCalendarioView() {
   ensureTarefasListener();
   ensureUsersListener();
+  ensureProjetosListener();
 
   if (!["month", "day"].includes(state.calendarioModo)) {
     setCalendarioModo("month");
