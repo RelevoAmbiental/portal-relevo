@@ -2231,3 +2231,38 @@ body.relevo-body {
     min-width: 840px;
   }
 }
+/* ===== CALENDÁRIO — VISÃO MENSAL SEM COLUNA LATERAL ===== */
+
+.cronograma-calendar-main--full {
+  width: 100%;
+  padding: 20px;
+}
+
+.cronograma-calendar-main--full .cronograma-calendar-grid-wrap {
+  width: 100%;
+}
+
+.cronograma-calendar-main--full .cronograma-calendar-grid-head,
+.cronograma-calendar-main--full .cronograma-calendar-grid {
+  grid-template-columns: repeat(7, minmax(135px, 1fr));
+  min-width: 980px;
+}
+
+.cronograma-calendar-main--full .cronograma-calendar-day {
+  min-height: 170px;
+}
+
+.cronograma-calendar-main--full .cronograma-calendar-main__top {
+  margin-bottom: 4px;
+}
+
+.cronograma-calendar-main--full .cronograma-calendar-legend {
+  gap: 10px 16px;
+}
+
+@media (max-width: 900px) {
+  .cronograma-calendar-main--full .cronograma-calendar-grid-head,
+  .cronograma-calendar-main--full .cronograma-calendar-grid {
+    min-width: 900px;
+  }
+}
