@@ -62,7 +62,7 @@ const STATUS_META = {
 const CALENDAR_VIEW_OPTIONS = [
   { value: "month", label: "Mensal", enabled: true },
   { value: "week", label: "Semanal", enabled: false },
-  { value: "day", label: "Diária", enabled: false },
+  { value: "day", label: "Diária", enabled: true },
   { value: "timeline", label: "Linha do tempo", enabled: false }
 ];
 
@@ -218,7 +218,6 @@ function renderSelectOptions(items, selectedValue) {
     )
     .join("");
 }
-
 function renderCalendarMetricCard(label, value, hint, tone = "") {
   return `
     <div class="cronograma-calendar-kpi ${tone ? `cronograma-calendar-kpi--${tone}` : ""}">
@@ -368,6 +367,168 @@ function renderSelectedDatePanel(tasks, selectedDateKey) {
         }).join("")}
       </div>
     </section>
+  `;
+}
+
+function getTasksForSelectedDate() {
+  const selectedDateKey = getSelectedDateKey();
+  return getFilteredTasks().filter((task) => taskIntersectsDate(task, selectedDateKey));
+}
+
+function renderDayTaskCard(task, selectedDateKey) {
+  const range = getDateRangeForTask(task);
+  const startKey = range ? toDateKey(range.start) : "";
+  const endKey = range ? toDateKey(range.end) : "";
+  const startsToday = startKey === selectedDateKey;
+  const endsToday = endKey === selectedDateKey;
+  const duration = getTaskDurationDays(task);
+  const phaseTone = FASE_META[task.fase]?.tone || "planejamento";
+  const projetoCor =
+    task.projetoCor ||
+    task.corProjeto ||
+    task.projeto?.cor ||
+    task.projeto?.color ||
+    "#cfd8d3";
+
+  return `
+    <article
+      class="cronograma-calendar-day-card cronograma-calendar-day-card--${phaseTone}"
+      style="--project-accent: ${escapeHtml(projetoCor)};"
+    >
+      <span class="cronograma-calendar-day-card__project-bar" aria-hidden="true"></span>
+
+      <div class="cronograma-calendar-day-card__head">
+        <div>
+          <h3>${escapeHtml(task.titulo || "Tarefa")}</h3>
+          <p>${escapeHtml(formatProjeto(task))}</p>
+        </div>
+        <span class="cronograma-tag cronograma-tag--muted">
+          ${duration} dia${duration > 1 ? "s" : ""}
+        </span>
+      </div>
+            <div class="cronograma-tag-row cronograma-tag-row--tight">
+        <span class="cronograma-tag">${escapeHtml(formatFase(task.fase))}</span>
+        <span class="cronograma-tag cronograma-tag--info">${escapeHtml(formatPrioridade(task.prioridade))}</span>
+        <span class="cronograma-tag cronograma-tag--muted">${escapeHtml(formatStatus(task.status))}</span>
+        ${startsToday ? '<span class="cronograma-tag cronograma-tag--info">Início</span>' : ""}
+        ${endsToday && startKey !== endKey ? '<span class="cronograma-tag cronograma-tag--warning">Entrega</span>' : ""}
+        ${isTaskOverdue(task) ? '<span class="cronograma-tag cronograma-tag--danger">Atrasada</span>' : ""}
+      </div>
+
+      <div class="cronograma-calendar-day-card__meta">
+        <span><strong>Responsável:</strong> ${escapeHtml(formatResponsavel(task))}</span>
+        <span><strong>Janela:</strong> ${escapeHtml(formatDate(task.dataInicio))} → ${escapeHtml(formatDate(task.dataVencimento))}</span>
+      </div>
+
+      ${task.descricao ? `<p class="cronograma-calendar-day-card__desc">${escapeHtml(task.descricao)}</p>` : ""}
+    </article>
+  `;
+}
+
+function getCalendarioDayTemplate() {
+  const selectedDateKey = getSelectedDateKey();
+  const tasks = getTasksForSelectedDate();
+  const dateLabel = formatDateLong(selectedDateKey);
+  const previousDate = parseDateKey(selectedDateKey);
+  const nextDate = parseDateKey(selectedDateKey);
+
+  if (previousDate) previousDate.setDate(previousDate.getDate() - 1);
+  if (nextDate) nextDate.setDate(nextDate.getDate() + 1);
+
+  return `
+    <div class="cronograma-calendar-shell">
+      <section class="cronograma-calendar-toolbar cronograma-panel">
+        <div class="cronograma-calendar-toolbar__main">
+          <p class="cronograma-shell__eyebrow">Calendário operacional</p>
+          <h2>Visão diária</h2>
+          <p>${escapeHtml(dateLabel)}</p>
+        </div>
+
+        <div class="cronograma-calendar-toolbar__actions">
+          <button
+            class="cronograma-btn cronograma-btn--ghost"
+            type="button"
+            data-action="select-date"
+            data-date="${previousDate ? toDateKey(previousDate) : selectedDateKey}"
+          >
+            ← Dia anterior
+          </button>
+          <button class="cronograma-btn cronograma-btn--ghost" type="button" data-action="go-today">
+            Hoje
+          </button>
+          <button
+            class="cronograma-btn"
+            type="button"
+            data-action="select-date"
+            data-date="${nextDate ? toDateKey(nextDate) : selectedDateKey}"
+          >
+            Próximo dia →
+          </button>
+        </div>
+      </section>
+
+      ${renderViewSwitch()}
+
+      <section class="cronograma-calendar-kpis">
+        ${renderCalendarMetricCard("Tarefas no dia", String(tasks.length), "Itens que cruzam a data selecionada")}
+        ${renderCalendarMetricCard("Atrasadas", String(tasks.filter((task) => isTaskOverdue(task)).length), "Pendências vencidas", tasks.some((task) => isTaskOverdue(task)) ? "danger" : "")}
+        ${renderCalendarMetricCard("Responsáveis", String(countUniqueResponsaveis(tasks)), "Carga distribuída")}
+        ${renderCalendarMetricCard("Projetos", String(new Set(tasks.map((task) => formatProjeto(task))).size), "Frentes ativas")}
+      </section>
+
+      <section class="cronograma-panel cronograma-calendar-filters">
+        <div class="cronograma-section-head cronograma-section-head--stack-mobile">
+          <div>
+            <h3>Filtros</h3>
+            <p>Refine a leitura do dia por projeto, responsável e fase.</p>
+          </div>
+          <label class="cronograma-toggle">
+            <input type="checkbox" data-action="toggle-archived-calendar" ${state.calendarioMostrarArquivadas ? "checked" : ""} />
+            <span>Mostrar arquivadas</span>
+          </label>
+        </div>
+
+        <div class="cronograma-filter-row cronograma-filter-row--wide">
+          <label class="cronograma-field">
+            <span>Projeto</span>
+            <select data-action="filter-calendar-projeto">
+              <option value="todos">Todos</option>
+              ${renderSelectOptions(getProjetoOptions(), state.calendarioFiltroProjeto)}
+            </select>
+          </label>
+
+          <label class="cronograma-field">
+            <span>Responsável</span>
+            <select data-action="filter-calendar-responsavel">
+              <option value="todos">Todos</option>
+              ${renderSelectOptions(getResponsavelOptions(), state.calendarioFiltroResponsavel)}
+            </select>
+          </label>
+
+          <label class="cronograma-field">
+            <span>Fase</span>
+            <select data-action="filter-calendar-fase">
+              <option value="todos">Todas</option>
+              ${renderSelectOptions(getFaseOptions(), state.calendarioFiltroFase)}
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="cronograma-calendar-day-view">
+        ${
+          tasks.length
+            ? tasks.map((task) => renderDayTaskCard(task, selectedDateKey)).join("")
+            : `
+              <section class="cronograma-panel">
+                <div class="cronograma-empty-state">
+                  Nenhuma tarefa cruza esta data. Um dia manso, quase suspeito.
+                </div>
+              </section>
+            `
+        }
+      </section>
+    </div>
   `;
 }
 
@@ -526,9 +687,10 @@ function handleCalendarClick(event) {
 
   if (action === "set-calendar-mode") {
     const mode = actionEl.dataset.mode || "month";
-    if (mode !== "month") return;
+    if (!["month", "day"].includes(mode)) return;
     setCalendarioModo(mode);
     renderCalendarioView();
+    return;
   }
 }
 
@@ -559,7 +721,6 @@ function handleCalendarChange(event) {
   renderCalendarioView();
 }
 
-
 function handleCalendarKeydown(event) {
   const actionEl = event.target.closest('[data-action="select-date"]');
   if (!actionEl) return;
@@ -567,6 +728,7 @@ function handleCalendarKeydown(event) {
   event.preventDefault();
   actionEl.click();
 }
+
 function mountCalendarioEvents() {
   const root = document.querySelector(".cronograma-calendar-shell");
   if (!root) return;
@@ -620,7 +782,7 @@ export function renderCalendarioView() {
   ensureTarefasListener();
   ensureUsersListener();
 
-  if (state.calendarioModo !== "month") {
+  if (!["month", "day"].includes(state.calendarioModo)) {
     setCalendarioModo("month");
   }
 
@@ -632,6 +794,11 @@ export function renderCalendarioView() {
     setCalendarioDataSelecionada(getTodayKey());
   }
 
-  renderIntoApp(getCalendarioTemplate());
+  const template =
+    state.calendarioModo === "day"
+      ? getCalendarioDayTemplate()
+      : getCalendarioTemplate();
+
+  renderIntoApp(template);
   mountCalendarioEvents();
-}
+}        
