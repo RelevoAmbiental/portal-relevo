@@ -17,7 +17,15 @@ export const state = {
   filtroFaseTarefa: "todos",
 
   users: [],
-  usersLoaded: false
+  usersLoaded: false,
+
+  calendarioMesReferencia: new Date().toISOString().slice(0, 7) + "-01",
+  calendarioDataSelecionada: new Date().toISOString().slice(0, 10),
+  calendarioModo: "month",
+  calendarioFiltroProjeto: "todos",
+  calendarioFiltroResponsavel: "todos",
+  calendarioFiltroFase: "todos",
+  calendarioMostrarArquivadas: false
 };
 
 export function setView(view) {
@@ -73,4 +81,33 @@ export function setFiltroFaseTarefa(value) {
 export function setUsers(items) {
   state.users = Array.isArray(items) ? items : [];
   state.usersLoaded = true;
+}
+
+
+export function setCalendarioMesReferencia(value) {
+  state.calendarioMesReferencia = value || new Date().toISOString().slice(0, 7) + "-01";
+}
+
+export function setCalendarioDataSelecionada(value) {
+  state.calendarioDataSelecionada = value || new Date().toISOString().slice(0, 10);
+}
+
+export function setCalendarioModo(value) {
+  state.calendarioModo = value || "month";
+}
+
+export function setCalendarioFiltroProjeto(value) {
+  state.calendarioFiltroProjeto = value || "todos";
+}
+
+export function setCalendarioFiltroResponsavel(value) {
+  state.calendarioFiltroResponsavel = value || "todos";
+}
+
+export function setCalendarioFiltroFase(value) {
+  state.calendarioFiltroFase = value || "todos";
+}
+
+export function setCalendarioMostrarArquivadas(value) {
+  state.calendarioMostrarArquivadas = Boolean(value);
 }
