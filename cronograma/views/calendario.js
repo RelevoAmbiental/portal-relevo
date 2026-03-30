@@ -1,8 +1,9 @@
 import { listenProjetos } from "../services/firestore-projetos.js";
-import { setProjetos } from "../core/state.js";
-import { renderIntoApp } from "../ui/layout.js";
+import { renderIntoApp, updateActiveNav } from "../ui/layout.js";
 import {
   state,
+  setView,
+  setProjetos,
   setTarefas,
   setUsers,
   setCalendarioMesReferencia,
@@ -15,6 +16,7 @@ import {
 } from "../core/state.js";
 import { listenTarefas } from "../services/firestore-tarefas.js";
 import { listenUsers } from "../services/firestore-users.js";
+import { openTarefaEditor } from "./tarefas.js";
 import {
   buildDayIndex,
   buildMonthMatrix,
@@ -412,6 +414,11 @@ function renderDayTaskCard(task, selectedDateKey) {
     <article
       class="cronograma-calendar-day-card cronograma-calendar-day-card--${phaseTone}"
       style="--project-accent: ${escapeHtml(projetoCor)};"
+      data-action="open-task"
+      data-task-id="${escapeHtml(task.id || "")}"
+      role="button"
+      tabindex="0"
+      aria-label="Abrir tarefa ${escapeHtml(task.titulo || "Tarefa")}"
     >
       <span class="cronograma-calendar-day-card__project-bar" aria-hidden="true"></span>
 
@@ -424,7 +431,8 @@ function renderDayTaskCard(task, selectedDateKey) {
           ${duration} dia${duration > 1 ? "s" : ""}
         </span>
       </div>
-            <div class="cronograma-tag-row cronograma-tag-row--tight">
+
+      <div class="cronograma-tag-row cronograma-tag-row--tight">
         <span class="cronograma-tag">${escapeHtml(formatFase(task.fase))}</span>
         <span class="cronograma-tag cronograma-tag--info">${escapeHtml(formatPrioridade(task.prioridade))}</span>
         <span class="cronograma-tag cronograma-tag--muted">${escapeHtml(formatStatus(task.status))}</span>
@@ -666,6 +674,16 @@ function getCalendarioTemplate() {
   `;
 }
 
+function openTaskFromCalendar(taskId) {
+  if (!taskId) return;
+
+  setView("tarefas");
+  updateActiveNav("tarefas");
+  setTimeout(() => {
+    openTarefaEditor(taskId, { scrollToTop: true });
+  }, 0);
+}
+
 function handleCalendarClick(event) {
   const actionEl = event.target.closest("[data-action]");
   if (!actionEl) return;
@@ -701,6 +719,12 @@ function handleCalendarClick(event) {
       setCalendarioModo("day");
       renderCalendarioView();
     }
+    return;
+  }
+
+  if (action === "open-task") {
+    const taskId = actionEl.dataset.taskId;
+    openTaskFromCalendar(taskId);
     return;
   }
   
@@ -754,7 +778,9 @@ function handleCalendarChange(event) {
 }
 
 function handleCalendarKeydown(event) {
-  const actionEl = event.target.closest('[data-action="select-date"], [data-action="open-day"]');
+  const actionEl = event.target.closest(
+    '[data-action="select-date"], [data-action="open-day"], [data-action="open-task"]'
+  );
   if (!actionEl) return;
   if (event.key !== "Enter" && event.key !== " ") return;
   event.preventDefault();
