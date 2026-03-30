@@ -275,7 +275,7 @@ function renderEventPill(task, selectedDateKey) {
     <button
       class="cronograma-calendar-pill cronograma-calendar-pill--${phaseTone}"
       type="button"
-      data-action="select-date"
+      data-action="open-day"
       data-date="${selectedDateKey}"
       title="${escapeHtml(task.titulo || "Tarefa")}"
       style="--project-accent: ${escapeHtml(projetoCor)};"
@@ -294,7 +294,7 @@ function renderDayCell(day, tasks, isSelected) {
   return `
     <article
       class="cronograma-calendar-day ${day.isCurrentMonth ? "" : "is-outside"} ${day.isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""}"
-      data-action="select-date"
+      data-action="open-day"
       data-date="${day.key}"
       aria-pressed="${isSelected ? "true" : "false"}"
       role="button"
@@ -307,7 +307,7 @@ function renderDayCell(day, tasks, isSelected) {
 
       <div class="cronograma-calendar-day__body">
         ${visibleTasks.map((task) => renderEventPill(task, day.key)).join("")}
-        ${hiddenCount ? `<button type="button" class="cronograma-calendar-day__more" data-action="select-date" data-date="${day.key}">+${hiddenCount} mais</button>` : ""}
+        ${hiddenCount ? `<button type="button" class="cronograma-calendar-day__more" data-action="open-day" data-date="${day.key}">+${hiddenCount} mais</button>` : ""}
       </div>
     </article>
   `;
@@ -672,6 +672,20 @@ function handleCalendarClick(event) {
     return;
   }
 
+  if (action === "open-day") {
+    const { date } = actionEl.dataset;
+    if (date) {
+      setCalendarioDataSelecionada(date);
+      const selected = parseDateKey(date);
+      if (selected) {
+        setCalendarioMesReferencia(toDateKey(new Date(selected.getFullYear(), selected.getMonth(), 1)));
+      }
+      setCalendarioModo("day");
+      renderCalendarioView();
+    }
+    return;
+  }
+  
   if (action === "select-date") {
     const { date } = actionEl.dataset;
     if (date) {
@@ -722,7 +736,7 @@ function handleCalendarChange(event) {
 }
 
 function handleCalendarKeydown(event) {
-  const actionEl = event.target.closest('[data-action="select-date"]');
+  const actionEl = event.target.closest('[data-action="select-date"], [data-action="open-day"]');
   if (!actionEl) return;
   if (event.key !== "Enter" && event.key !== " ") return;
   event.preventDefault();
