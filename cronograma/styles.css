@@ -1190,7 +1190,7 @@ body.relevo-body {
   min-width: 0;
   align-self: start;
 }
-/* ===== IMPORTAR TAREFAS — AJUSTE FINO DA PRÉVIA EDITÁVEL ===== */
+/* ===== IMPORTAR TAREFAS — PRÉVIA EDITÁVEL COMPACTA ===== */
 
 .cronograma-import-preview-section {
   overflow: hidden;
@@ -1198,50 +1198,48 @@ body.relevo-body {
 
 .cronograma-import-bulk-actions {
   display: grid;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .cronograma-import-bulk-actions .cronograma-import-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .cronograma-import-bulk-actions .cronograma-import-config-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 12px;
   align-items: end;
 }
 
 .cronograma-import-table-wrap {
   width: 100%;
-  overflow-x: auto;
-  border-radius: 18px;
+  overflow-x: visible;
+  border-radius: 16px;
   border: 1px solid rgba(11, 46, 27, 0.08);
   background: rgba(255, 255, 255, 0.82);
 }
 
 .cronograma-import-table {
   width: 100%;
-  min-width: 1500px;
+  min-width: 0;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   background: transparent;
 }
 
 .cronograma-import-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
   background: #2fc34a;
   color: #143522;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 700;
-  padding: 16px 14px;
+  padding: 12px 10px;
   border-bottom: 1px solid rgba(11, 46, 27, 0.08);
   white-space: nowrap;
 }
@@ -1255,7 +1253,7 @@ body.relevo-body {
 }
 
 .cronograma-import-table tbody td {
-  padding: 14px;
+  padding: 10px 10px 8px;
   vertical-align: top;
   border-bottom: 1px solid rgba(11, 46, 27, 0.06);
   background: rgba(255, 255, 255, 0.72);
@@ -1270,68 +1268,68 @@ body.relevo-body {
 }
 
 .cronograma-import-table td:first-child {
-  width: 52px;
-  min-width: 52px;
+  width: 42px;
   text-align: center;
   font-weight: 700;
   color: var(--cron-text-soft);
 }
 
 .cronograma-import-table td:nth-child(2) {
-  min-width: 230px;
+  width: 18%;
 }
 
 .cronograma-import-table td:nth-child(3) {
-  min-width: 150px;
+  width: 12%;
 }
 
 .cronograma-import-table td:nth-child(4) {
-  min-width: 290px;
+  width: 22%;
 }
 
 .cronograma-import-table td:nth-child(5),
 .cronograma-import-table td:nth-child(7) {
-  min-width: 165px;
+  width: 12%;
 }
 
 .cronograma-import-table td:nth-child(6) {
-  min-width: 120px;
+  width: 8%;
 }
 
 .cronograma-import-table td:nth-child(8) {
-  min-width: 150px;
+  width: 10%;
 }
 
 .cronograma-import-table td:nth-child(9) {
-  min-width: 260px;
+  width: 18%;
 }
 
 .cronograma-import-table td:nth-child(10) {
-  min-width: 120px;
+  width: 8%;
 }
 
 .cronograma-import-table .cronograma-input,
 .cronograma-import-inline-textarea {
   width: 100%;
   min-width: 0;
+  max-width: 100%;
   border: 1px solid rgba(11, 46, 27, 0.14);
-  border-radius: 12px;
+  border-radius: 10px;
   background: #fff;
   color: var(--cron-text);
   font: inherit;
-  line-height: 1.35;
+  line-height: 1.25;
   box-sizing: border-box;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .cronograma-import-table .cronograma-input {
-  min-height: 42px;
-  padding: 10px 12px;
+  min-height: 38px;
+  padding: 8px 10px;
 }
 
 .cronograma-import-inline-textarea {
-  min-height: 74px;
-  padding: 10px 12px;
+  min-height: 58px;
+  padding: 8px 10px;
   resize: vertical;
 }
 
@@ -1349,18 +1347,20 @@ body.relevo-body {
 
 .cronograma-import-cell-stack {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .cronograma-import-cell-muted {
-  font-size: 0.8rem;
-  line-height: 1.35;
+  font-size: 0.76rem;
+  line-height: 1.25;
   color: var(--cron-text-soft);
   padding-left: 2px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .cronograma-import-table .cronograma-btn {
-  min-height: 40px;
+  min-height: 38px;
   white-space: nowrap;
 }
 
@@ -1368,12 +1368,12 @@ body.relevo-body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 18px;
-  margin-bottom: 18px;
+  gap: 16px;
+  margin-bottom: 14px;
 }
 
 .cronograma-import-preview-head h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .cronograma-import-preview-head p {
@@ -1381,9 +1381,40 @@ body.relevo-body {
   color: var(--cron-text-soft);
 }
 
+/* quebra de linha em conteúdo textual */
+.cronograma-import-table td,
+.cronograma-import-table th {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.cronograma-import-table input[type="text"],
+.cronograma-import-table textarea,
+.cronograma-import-table select {
+  white-space: normal;
+}
+
+/* campos compactos por tipo */
+.cronograma-import-table input[type="date"] {
+  min-width: 0;
+}
+
+.cronograma-import-table input[type="number"] {
+  min-width: 0;
+  text-align: center;
+}
+
 @media (max-width: 1200px) {
   .cronograma-import-bulk-actions .cronograma-import-config-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cronograma-import-table {
+    table-layout: auto;
+  }
+
+  .cronograma-import-table-wrap {
+    overflow-x: auto;
   }
 }
 
@@ -1397,6 +1428,7 @@ body.relevo-body {
   }
 
   .cronograma-import-table {
-    min-width: 1300px;
+    min-width: 1100px;
   }
 }
+
