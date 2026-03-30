@@ -347,7 +347,6 @@ function getCalendarioTemplate() {
   );
   const metrics = getCalendarMetrics(filteredTasks, monthRange);
   const selectedDateKey = getSelectedDateKey();
-  const selectedDayTasks = filteredTasks.filter((task) => taskIntersectsDate(task, selectedDateKey));
   const weekdayLabels = getWeekdayLabels();
   const projetoOptions = getProjetoOptions();
   const responsavelOptions = getResponsavelOptions();
@@ -419,58 +418,34 @@ function getCalendarioTemplate() {
         </div>
       </section>
 
-      <div class="cronograma-calendar-layout">
-        <section class="cronograma-panel cronograma-calendar-main">
-          <div class="cronograma-calendar-main__top">
-            <div class="cronograma-calendar-legend">
-              ${getFaseOptions().map((item) => `
-                <span class="cronograma-calendar-legend__item">
-                  <span class="cronograma-calendar-legend__dot cronograma-calendar-legend__dot--${FASE_META[item.value]?.tone || "planejamento"}"></span>
-                  ${escapeHtml(item.label)}
-                </span>
-              `).join("")}
-            </div>
+      <section class="cronograma-panel cronograma-calendar-main cronograma-calendar-main--full">
+        <div class="cronograma-calendar-main__top">
+          <div class="cronograma-calendar-legend">
+            ${getFaseOptions().map((item) => `
+              <span class="cronograma-calendar-legend__item">
+                <span class="cronograma-calendar-legend__dot cronograma-calendar-legend__dot--${FASE_META[item.value]?.tone || "planejamento"}"></span>
+                ${escapeHtml(item.label)}
+              </span>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="cronograma-calendar-grid-wrap">
+          <div class="cronograma-calendar-grid-head">
+            ${weekdayLabels.map((label) => `
+              <div class="cronograma-calendar-grid-head__cell">${escapeHtml(label)}</div>
+            `).join("")}
           </div>
 
-          <div class="cronograma-calendar-grid-wrap">
-            <div class="cronograma-calendar-grid-head">
-              ${weekdayLabels.map((label) => `
-                <div class="cronograma-calendar-grid-head__cell">${escapeHtml(label)}</div>
-              `).join("")}
-            </div>
-
-            <div class="cronograma-calendar-grid">
-              ${calendarMatrix.map((week) =>
-                week.map((day) =>
-                  renderDayCell(day, dayIndex.get(day.key) || [], day.key === selectedDateKey)
-                ).join("")
-              ).join("")}
-            </div>
+          <div class="cronograma-calendar-grid">
+            ${calendarMatrix.map((week) =>
+              week.map((day) =>
+                renderDayCell(day, dayIndex.get(day.key) || [], day.key === selectedDateKey)
+              ).join("")
+            ).join("")}
           </div>
-        </section>
-
-        <aside class="cronograma-calendar-side">
-          ${renderSelectedDatePanel(selectedDayTasks, selectedDateKey)}
-
-          <section class="cronograma-panel cronograma-calendar-side-card">
-            <div class="cronograma-calendar-side-card__head">
-              <h3>Projetos mais presentes</h3>
-              <span class="cronograma-tag cronograma-tag--muted">Top 4</span>
-            </div>
-
-            <div class="cronograma-mini-list">
-              ${metrics.projetos.length
-                ? metrics.projetos.map((item) => `
-                    <div class="cronograma-mini-list__item">
-                      <strong>${escapeHtml(item.projetoNome || "Sem projeto")}</strong>
-                      <span>${item.total} tarefa${item.total > 1 ? "s" : ""} no mês</span>
-                    </div>
-                  `).join("")
-                : '<div class="cronograma-empty-state">Sem tarefas no período filtrado.</div>'}
-            </div>
-          </section>
-        </aside>
-      </div>
+        </div>
+      </section>
     </div>
   `;
 }
