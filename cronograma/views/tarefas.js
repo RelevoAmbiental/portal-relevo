@@ -239,7 +239,6 @@ function renderChecklistCard(item) {
     </div>
   `;
 }
-
 function renderTarefaCard(item) {
   const statusLabel = formatStatus(item.status);
   const prioridadeLabel = formatPrioridade(item.prioridade);
@@ -325,6 +324,158 @@ function renderTarefaCard(item) {
   `;
 }
 
+function getTarefaFormPanel(tarefaEditando, tarefaBase, options = {}) {
+  const { modal = false } = options;
+
+  return `
+    <section class="cronograma-panel">
+      <div class="cronograma-section-head">
+        <div>
+          <p class="cronograma-section-head__eyebrow">${modal ? "Edição" : "Cadastro"}</p>
+          <h2>${tarefaEditando ? "Editar tarefa" : "Nova tarefa"}</h2>
+        </div>
+      </div>
+
+      ${
+        !state.projetosLoaded
+          ? `<div class="cronograma-empty-state">Carregando projetos para vinculação...</div>`
+          : !state.projetos.length
+            ? `<div class="cronograma-empty-state">Cadastre ao menos um projeto antes de criar tarefas.</div>`
+            : !state.usersLoaded
+              ? `<div class="cronograma-empty-state">Carregando usuários para seleção do responsável...</div>`
+              : !state.users.length
+                ? `<div class="cronograma-empty-state">Nenhum usuário disponível na coleção users.</div>`
+                : `
+                  <form id="tarefaForm" class="cronograma-form">
+                    <div class="cronograma-form-grid">
+                      <label class="cronograma-field">
+                        <span>Título da tarefa *</span>
+                        <input type="text" name="titulo" value="${escapeHtml(tarefaBase.titulo)}" required />
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Projeto *</span>
+                        <select name="projetoId" required>
+                          <option value="">Selecione</option>
+                          ${state.projetos
+                            .filter((item) => !item.arquivado)
+                            .map(
+                              (item) => `
+                                <option value="${item.id}" ${tarefaBase.projetoId === item.id ? "selected" : ""}>
+                                  ${escapeHtml(item.nome)}
+                                </option>
+                              `
+                            )
+                            .join("")}
+                        </select>
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Fase</span>
+                        <select name="fase">
+                          ${FASE_OPTIONS.map(
+                            (opt) => `
+                              <option value="${opt.value}" ${tarefaBase.fase === opt.value ? "selected" : ""}>
+                                ${opt.label}
+                              </option>
+                            `
+                          ).join("")}
+                        </select>
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Responsável *</span>
+                        <select name="responsavelUid" required>
+                          <option value="">Selecione</option>
+                          ${state.users.map(
+                            (item) => `
+                              <option value="${item.id}" ${tarefaBase.responsavelUid === item.id ? "selected" : ""}>
+                                ${escapeHtml(item.nome)}${item.email ? ` — ${escapeHtml(item.email)}` : ""}
+                              </option>
+                            `
+                          ).join("")}
+                        </select>
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Status</span>
+                        <select name="status">
+                          ${STATUS_OPTIONS.map(
+                            (opt) => `
+                              <option value="${opt.value}" ${tarefaBase.status === opt.value ? "selected" : ""}>
+                                ${opt.label}
+                              </option>
+                            `
+                          ).join("")}
+                        </select>
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Prioridade</span>
+                        <select name="prioridade">
+                          ${PRIORIDADE_OPTIONS.map(
+                            (opt) => `
+                              <option value="${opt.value}" ${tarefaBase.prioridade === opt.value ? "selected" : ""}>
+                                ${opt.label}
+                              </option>
+                            `
+                          ).join("")}
+                        </select>
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Data de início</span>
+                        <input type="date" name="dataInicio" value="${escapeHtml(tarefaBase.dataInicio)}" />
+                      </label>
+
+                      <label class="cronograma-field">
+                        <span>Data de vencimento</span>
+                        <input type="date" name="dataVencimento" value="${escapeHtml(tarefaBase.dataVencimento)}" />
+                      </label>
+                    </div>
+
+                    <label class="cronograma-field">
+                      <span>Descrição</span>
+                      <textarea name="descricao" rows="5">${escapeHtml(tarefaBase.descricao)}</textarea>
+                    </label>
+
+                    <div class="cronograma-field">
+                      <span>Checklist / subtarefas</span>
+                      <div class="cronograma-subtasks-builder">
+                        <div class="cronograma-subtasks-input-row">
+                          <input type="text" id="novaSubtarefaTexto" placeholder="Ex.: Solicitar acesso à área" />
+                          <button class="cronograma-btn cronograma-btn--secondary" type="button" id="btnAdicionarSubtarefa">
+                            Adicionar
+                          </button>
+                        </div>
+                        <div id="subtarefasDraftContainer">
+                          ${renderChecklistDraft()}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="cronograma-form-actions">
+                      <button class="cronograma-btn cronograma-btn--primary" type="submit">
+                        ${tarefaEditando ? "Salvar alterações" : "Cadastrar tarefa"}
+                      </button>
+
+                      ${
+                        tarefaEditando
+                          ? `<button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnCancelarEdicaoTarefa">
+                              ${modal ? "Fechar" : "Cancelar edição"}
+                            </button>`
+                          : ""
+                      }
+                    </div>
+
+                    <p class="cronograma-form-feedback" id="tarefaFormFeedback"></p>
+                  </form>
+                `
+      }
+    </section>
+  `;
+}
+
 function getTarefasTemplate() {
   const tarefas = getTarefasFiltradas();
   const responsaveis = getResponsaveisDisponiveis();
@@ -334,151 +485,7 @@ function getTarefasTemplate() {
   return `
     <section class="cronograma-tarefas-page">
       <div class="cronograma-view-grid cronograma-view-grid--tasks">
-        <section class="cronograma-panel">
-          <div class="cronograma-section-head">
-            <div>
-              <p class="cronograma-section-head__eyebrow">Cadastro</p>
-              <h2>${tarefaEditando ? "Editar tarefa" : "Nova tarefa"}</h2>
-            </div>
-          </div>
-
-          ${
-            !state.projetosLoaded
-              ? `<div class="cronograma-empty-state">Carregando projetos para vinculação...</div>`
-              : !state.projetos.length
-                ? `<div class="cronograma-empty-state">Cadastre ao menos um projeto antes de criar tarefas.</div>`
-                : !state.usersLoaded
-                  ? `<div class="cronograma-empty-state">Carregando usuários para seleção do responsável...</div>`
-                  : !state.users.length
-                    ? `<div class="cronograma-empty-state">Nenhum usuário disponível na coleção users.</div>`
-                    : `
-                      <form id="tarefaForm" class="cronograma-form">
-                        <div class="cronograma-form-grid">
-                          <label class="cronograma-field">
-                            <span>Título da tarefa *</span>
-                            <input type="text" name="titulo" value="${escapeHtml(tarefaBase.titulo)}" required />
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Projeto *</span>
-                            <select name="projetoId" required>
-                              <option value="">Selecione</option>
-                              ${state.projetos
-                                .filter((item) => !item.arquivado)
-                                .map(
-                                  (item) => `
-                                    <option value="${item.id}" ${tarefaBase.projetoId === item.id ? "selected" : ""}>
-                                      ${escapeHtml(item.nome)}
-                                    </option>
-                                  `
-                                )
-                                .join("")}
-                            </select>
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Fase</span>
-                            <select name="fase">
-                              ${FASE_OPTIONS.map(
-                                (opt) => `
-                                  <option value="${opt.value}" ${tarefaBase.fase === opt.value ? "selected" : ""}>
-                                    ${opt.label}
-                                  </option>
-                                `
-                              ).join("")}
-                            </select>
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Responsável *</span>
-                            <select name="responsavelUid" required>
-                              <option value="">Selecione</option>
-                              ${state.users.map(
-                                (item) => `
-                                  <option value="${item.id}" ${tarefaBase.responsavelUid === item.id ? "selected" : ""}>
-                                    ${escapeHtml(item.nome)}${item.email ? ` — ${escapeHtml(item.email)}` : ""}
-                                  </option>
-                                `
-                              ).join("")}
-                            </select>
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Status</span>
-                            <select name="status">
-                              ${STATUS_OPTIONS.map(
-                                (opt) => `
-                                  <option value="${opt.value}" ${tarefaBase.status === opt.value ? "selected" : ""}>
-                                    ${opt.label}
-                                  </option>
-                                `
-                              ).join("")}
-                            </select>
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Prioridade</span>
-                            <select name="prioridade">
-                              ${PRIORIDADE_OPTIONS.map(
-                                (opt) => `
-                                  <option value="${opt.value}" ${tarefaBase.prioridade === opt.value ? "selected" : ""}>
-                                    ${opt.label}
-                                  </option>
-                                `
-                              ).join("")}
-                            </select>
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Data de início</span>
-                            <input type="date" name="dataInicio" value="${escapeHtml(tarefaBase.dataInicio)}" />
-                          </label>
-
-                          <label class="cronograma-field">
-                            <span>Data de vencimento</span>
-                            <input type="date" name="dataVencimento" value="${escapeHtml(tarefaBase.dataVencimento)}" />
-                          </label>
-                        </div>
-
-                        <label class="cronograma-field">
-                          <span>Descrição</span>
-                          <textarea name="descricao" rows="5">${escapeHtml(tarefaBase.descricao)}</textarea>
-                        </label>
-
-                        <div class="cronograma-field">
-                          <span>Checklist / subtarefas</span>
-                          <div class="cronograma-subtasks-builder">
-                            <div class="cronograma-subtasks-input-row">
-                              <input type="text" id="novaSubtarefaTexto" placeholder="Ex.: Solicitar acesso à área" />
-                              <button class="cronograma-btn cronograma-btn--secondary" type="button" id="btnAdicionarSubtarefa">
-                                Adicionar
-                              </button>
-                            </div>
-                            <div id="subtarefasDraftContainer">
-                              ${renderChecklistDraft()}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="cronograma-form-actions">
-                          <button class="cronograma-btn cronograma-btn--primary" type="submit">
-                            ${tarefaEditando ? "Salvar alterações" : "Cadastrar tarefa"}
-                          </button>
-
-                          ${
-                            tarefaEditando
-                              ? `<button class="cronograma-btn cronograma-btn--ghost" type="button" id="btnCancelarEdicaoTarefa">
-                                  Cancelar edição
-                                </button>`
-                              : ""
-                          }
-                        </div>
-
-                        <p class="cronograma-form-feedback" id="tarefaFormFeedback"></p>
-                      </form>
-                    `
-          }
-        </section>
+        ${getTarefaFormPanel(tarefaEditando, tarefaBase)}
 
         <section class="cronograma-panel">
           <div class="cronograma-section-head cronograma-section-head--stack-mobile">
@@ -564,30 +571,42 @@ function getTarefasTemplate() {
   `;
 }
 
-function rerenderDraftChecklist() {
-  const container = document.getElementById("subtarefasDraftContainer");
+function getTarefaEditorTemplate() {
+  const tarefaEditando = state.tarefaEditandoId ? getTarefaById(state.tarefaEditandoId) : null;
+  const tarefaBase = tarefaEditando || getTarefaInicial();
+
+  return `
+    <section class="cronograma-tarefas-page cronograma-tarefas-page--modal">
+      <div class="cronograma-view-grid">
+        ${getTarefaFormPanel(tarefaEditando, tarefaBase, { modal: true })}
+      </div>
+    </section>
+  `;
+}
+function rerenderDraftChecklist(root = document) {
+  const container = root.querySelector("#subtarefasDraftContainer");
   if (container) {
     container.innerHTML = renderChecklistDraft();
-    bindDraftChecklistEvents();
+    bindDraftChecklistEvents(root);
   }
 }
 
-function bindDraftChecklistEvents() {
-  document.querySelectorAll('[data-action="toggle-draft-subtarefa"]').forEach((input) => {
+function bindDraftChecklistEvents(root = document) {
+  root.querySelectorAll('[data-action="toggle-draft-subtarefa"]').forEach((input) => {
     input.addEventListener("change", () => {
       const index = Number(input.dataset.index);
       if (Number.isNaN(index) || !draftSubtarefas[index]) return;
       draftSubtarefas[index].concluida = input.checked;
-      rerenderDraftChecklist();
+      rerenderDraftChecklist(root);
     });
   });
 
-  document.querySelectorAll('[data-action="remove-draft-subtarefa"]').forEach((btn) => {
+  root.querySelectorAll('[data-action="remove-draft-subtarefa"]').forEach((btn) => {
     btn.addEventListener("click", () => {
       const index = Number(btn.dataset.index);
       if (Number.isNaN(index)) return;
       draftSubtarefas.splice(index, 1);
-      rerenderDraftChecklist();
+      rerenderDraftChecklist(root);
     });
   });
 }
@@ -609,20 +628,31 @@ async function toggleChecklistCard(taskId, index, checked) {
   }
 }
 
-function mountTarefasEvents() {
-  const form = document.getElementById("tarefaForm");
-  const feedback = document.getElementById("tarefaFormFeedback");
-  const btnCancelar = document.getElementById("btnCancelarEdicaoTarefa");
-  const filtroProjeto = document.getElementById("filtroProjetoTarefa");
-  const filtroFase = document.getElementById("filtroFaseTarefa");
-  const filtroStatus = document.getElementById("filtroStatusTarefa");
-  const filtroResponsavel = document.getElementById("filtroResponsavelTarefa");
-  const mostrarArquivadas = document.getElementById("mostrarTarefasArquivadas");
-  const btnAdicionarSubtarefa = document.getElementById("btnAdicionarSubtarefa");
-  const inputNovaSubtarefa = document.getElementById("novaSubtarefaTexto");
+function mountTarefasEvents(root = document, options = {}) {
+  const {
+    preserveEditStateAfterSave = false,
+    onAfterSave = null,
+    onCancelEdit = null
+  } = options;
+
+  const form = root.querySelector("#tarefaForm");
+  const feedback = root.querySelector("#tarefaFormFeedback");
+  const btnCancelar = root.querySelector("#btnCancelarEdicaoTarefa");
+  const filtroProjeto = root.querySelector("#filtroProjetoTarefa");
+  const filtroFase = root.querySelector("#filtroFaseTarefa");
+  const filtroStatus = root.querySelector("#filtroStatusTarefa");
+  const filtroResponsavel = root.querySelector("#filtroResponsavelTarefa");
+  const mostrarArquivadas = root.querySelector("#mostrarTarefasArquivadas");
+  const btnAdicionarSubtarefa = root.querySelector("#btnAdicionarSubtarefa");
+  const inputNovaSubtarefa = root.querySelector("#novaSubtarefaTexto");
 
   if (btnCancelar) {
     btnCancelar.addEventListener("click", () => {
+      if (typeof onCancelEdit === "function") {
+        onCancelEdit();
+        return;
+      }
+
       setTarefaEditandoId(null);
       draftSubtarefas = [];
       renderTarefasView();
@@ -675,7 +705,7 @@ function mountTarefasEvents() {
       });
 
       inputNovaSubtarefa.value = "";
-      rerenderDraftChecklist();
+      rerenderDraftChecklist(root);
       inputNovaSubtarefa.focus();
     });
 
@@ -687,21 +717,21 @@ function mountTarefasEvents() {
     });
   }
 
-  bindDraftChecklistEvents();
+  bindDraftChecklistEvents(root);
 
-  document.querySelectorAll('[data-action="toggle-subtarefa-card"]').forEach((input) => {
+  root.querySelectorAll('[data-action="toggle-subtarefa-card"]').forEach((input) => {
     input.addEventListener("change", () => {
       toggleChecklistCard(input.dataset.taskId, Number(input.dataset.index), input.checked);
     });
   });
 
-  document.querySelectorAll('[data-action="editar-tarefa"]').forEach((btn) => {
+  root.querySelectorAll('[data-action="editar-tarefa"]').forEach((btn) => {
     btn.addEventListener("click", () => {
       openTarefaEditor(btn.dataset.id);
     });
   });
 
-  document.querySelectorAll('[data-action="arquivar-tarefa"]').forEach((btn) => {
+  root.querySelectorAll('[data-action="arquivar-tarefa"]').forEach((btn) => {
     btn.addEventListener("click", async () => {
       const ok = window.confirm("Arquivar esta tarefa? Ela continuará disponível para consulta.");
       if (!ok) return;
@@ -715,7 +745,7 @@ function mountTarefasEvents() {
     });
   });
 
-  document.querySelectorAll('[data-action="desarquivar-tarefa"]').forEach((btn) => {
+  root.querySelectorAll('[data-action="desarquivar-tarefa"]').forEach((btn) => {
     btn.addEventListener("click", async () => {
       try {
         await desarquivarTarefa(btn.dataset.id);
@@ -742,7 +772,7 @@ function mountTarefasEvents() {
         projetoNome: projeto?.nome || "",
         fase: formData.get("fase"),
         responsavel: responsavelUser?.nome || "",
-        responsavelUid: responsavelUser?.uid || "",
+        responsavelUid: responsavelUser?.id || "",
         responsavelEmail: responsavelUser?.email || "",
         dataInicio: formData.get("dataInicio"),
         dataVencimento: formData.get("dataVencimento"),
@@ -759,21 +789,39 @@ function mountTarefasEvents() {
 
       try {
         if (state.tarefaEditandoId) {
-          await atualizarTarefa(state.tarefaEditandoId, payload);
-          setTarefaEditandoId(null);
-          draftSubtarefas = [];
+          const editedTaskId = state.tarefaEditandoId;
+          await atualizarTarefa(editedTaskId, payload);
+
+          if (!preserveEditStateAfterSave) {
+            setTarefaEditandoId(null);
+            draftSubtarefas = [];
+          }
+
           if (feedback) {
             feedback.textContent = "Tarefa atualizada com sucesso.";
             feedback.classList.add("is-success");
+          }
+
+          if (typeof onAfterSave === "function") {
+            onAfterSave({ taskId: editedTaskId, mode: "edit" });
+          }
+
+          if (!preserveEditStateAfterSave && root === document) {
+            renderTarefasView();
           }
         } else {
           await criarTarefa(payload);
           form.reset();
           draftSubtarefas = [];
-          rerenderDraftChecklist();
+          rerenderDraftChecklist(root);
+
           if (feedback) {
             feedback.textContent = "Tarefa cadastrada com sucesso.";
             feedback.classList.add("is-success");
+          }
+
+          if (typeof onAfterSave === "function") {
+            onAfterSave({ taskId: null, mode: "create" });
           }
         }
       } catch (error) {
@@ -840,14 +888,34 @@ function ensureUsersListener() {
     }
   );
 }
+export function renderTarefaEditorInContainer(container, taskId, options = {}) {
+  if (!container) return;
+
+  ensureProjetosListener();
+  ensureUsersListener();
+  ensureTarefasListener();
+
+  setTarefaEditandoId(taskId);
+  ensureDraftSubtarefas();
+
+  container.innerHTML = getTarefaEditorTemplate();
+
+  mountTarefasEvents(container, {
+    preserveEditStateAfterSave: true,
+    onAfterSave: options.onAfterSave || null,
+    onCancelEdit: options.onCancelEdit || null
+  });
+}
 
 export function renderTarefasView() {
   ensureProjetosListener();
   ensureUsersListener();
   ensureTarefasListener();
+
   if (!state.tarefaEditandoId && !draftSubtarefas.length) {
     ensureDraftSubtarefas();
   }
+
   renderIntoApp(getTarefasTemplate());
-  mountTarefasEvents();
+  mountTarefasEvents(document);
 }
