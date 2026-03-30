@@ -81,6 +81,20 @@ function ensureDraftSubtarefas() {
   draftSubtarefas = [];
 }
 
+export function openTarefaEditor(taskId, options = {}) {
+  const { scrollToTop = true } = options;
+
+  if (!taskId) return;
+
+  setTarefaEditandoId(taskId);
+  ensureDraftSubtarefas();
+  renderTarefasView();
+
+  if (scrollToTop) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -683,10 +697,7 @@ function mountTarefasEvents() {
 
   document.querySelectorAll('[data-action="editar-tarefa"]').forEach((btn) => {
     btn.addEventListener("click", () => {
-      setTarefaEditandoId(btn.dataset.id);
-      ensureDraftSubtarefas();
-      renderTarefasView();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      openTarefaEditor(btn.dataset.id);
     });
   });
 
