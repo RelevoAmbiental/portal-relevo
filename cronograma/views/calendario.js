@@ -6,6 +6,7 @@ import {
   setProjetos,
   setTarefas,
   setUsers,
+  setTarefaEditandoId,
   setCalendarioMesReferencia,
   setCalendarioDataSelecionada,
   setCalendarioModo,
@@ -16,7 +17,7 @@ import {
 } from "../core/state.js";
 import { listenTarefas } from "../services/firestore-tarefas.js";
 import { listenUsers } from "../services/firestore-users.js";
-import { openTarefaEditor } from "./tarefas.js";
+import { openTarefaEditor, renderTarefaEditorInContainer } from "./tarefas.js";
 import {
   buildDayIndex,
   buildMonthMatrix,
@@ -163,7 +164,6 @@ function getResponsavelOptions() {
 function getFaseOptions() {
   return Object.entries(FASE_META).map(([value, meta]) => ({ value, label: meta.label }));
 }
-
 function getFilteredTasks() {
   const projetosMap = new Map(
     (state.projetos || []).map((projeto) => [
@@ -221,14 +221,12 @@ function getCalendarMetrics(tasks, monthRange) {
   const overdue = visibleInMonth.filter((task) => isTaskOverdue(task, todayKey)).length;
   const upcoming = visibleInMonth.filter((task) => isTaskUpcoming(task, todayKey, 7)).length;
   const responsaveis = countUniqueResponsaveis(visibleInMonth);
-  const projetos = groupTasksByProjeto(visibleInMonth).slice(0, 4);
 
-  return { visibleInMonth, overdue, upcoming, responsaveis, projetos };
+  return { visibleInMonth, overdue, upcoming, responsaveis };
 }
 
 function getSelectedDateKey() {
-  const fallback = state.calendarioDataSelecionada || getTodayKey();
-  return fallback;
+  return state.calendarioDataSelecionada || getTodayKey();
 }
 
 function renderSelectOptions(items, selectedValue) {
@@ -238,6 +236,7 @@ function renderSelectOptions(items, selectedValue) {
     )
     .join("");
 }
+
 function renderCalendarMetricCard(label, value, hint, tone = "") {
   return `
     <div class="cronograma-calendar-kpi ${tone ? `cronograma-calendar-kpi--${tone}` : ""}">
@@ -333,63 +332,6 @@ function renderDayCell(day, tasks, isSelected) {
   `;
 }
 
-function renderSelectedDatePanel(tasks, selectedDateKey) {
-  const dateLabel = formatDateLong(selectedDateKey);
-
-  if (!tasks.length) {
-    return `
-      <section class="cronograma-panel cronograma-calendar-side-card">
-        <div class="cronograma-calendar-side-card__head">
-          <h3>${escapeHtml(dateLabel)}</h3>
-          <span class="cronograma-tag cronograma-tag--muted">0 tarefas</span>
-        </div>
-        <div class="cronograma-empty-state">
-          Nenhuma tarefa cruza esta data. O calendário está limpo — um raro animal em cativeiro.
-        </div>
-      </section>
-    `;
-  }
-
-  return `
-    <section class="cronograma-panel cronograma-calendar-side-card">
-      <div class="cronograma-calendar-side-card__head">
-        <h3>${escapeHtml(dateLabel)}</h3>
-        <span class="cronograma-tag">${tasks.length} tarefa${tasks.length > 1 ? "s" : ""}</span>
-      </div>
-
-      <div class="cronograma-calendar-agenda-list">
-        ${tasks.map((task) => {
-          const phaseTone = FASE_META[task.fase]?.tone || "planejamento";
-          const duration = getTaskDurationDays(task);
-          return `
-            <article class="cronograma-calendar-agenda-item cronograma-calendar-agenda-item--${phaseTone}">
-              <div class="cronograma-calendar-agenda-item__head">
-                <div>
-                  <h4>${escapeHtml(task.titulo || "Tarefa")}</h4>
-                  <p>${escapeHtml(formatProjeto(task))}</p>
-                </div>
-                <span class="cronograma-tag cronograma-tag--muted">${duration} dia${duration > 1 ? "s" : ""}</span>
-              </div>
-              <div class="cronograma-tag-row cronograma-tag-row--tight">
-                <span class="cronograma-tag">${escapeHtml(formatFase(task.fase))}</span>
-                <span class="cronograma-tag cronograma-tag--info">${escapeHtml(formatPrioridade(task.prioridade))}</span>
-                ${isTaskOverdue(task) ? '<span class="cronograma-tag cronograma-tag--danger">Atrasada</span>' : ""}
-                ${isTaskUpcoming(task) ? '<span class="cronograma-tag cronograma-tag--warning">Próxima</span>' : ""}
-              </div>
-              <div class="cronograma-calendar-agenda-item__meta">
-                <span><strong>Status:</strong> ${escapeHtml(formatStatus(task.status))}</span>
-                <span><strong>Responsável:</strong> ${escapeHtml(formatResponsavel(task))}</span>
-                <span><strong>Janela:</strong> ${escapeHtml(formatDate(task.dataInicio))} → ${escapeHtml(formatDate(task.dataVencimento))}</span>
-              </div>
-              ${task.descricao ? `<p class="cronograma-calendar-agenda-item__desc">${escapeHtml(task.descricao)}</p>` : ""}
-            </article>
-          `;
-        }).join("")}
-      </div>
-    </section>
-  `;
-}
-
 function getTasksForSelectedDate() {
   const selectedDateKey = getSelectedDateKey();
   return getFilteredTasks().filter((task) => taskIntersectsDate(task, selectedDateKey));
@@ -450,7 +392,6 @@ function renderDayTaskCard(task, selectedDateKey) {
     </article>
   `;
 }
-
 function getCalendarioDayTemplate() {
   const selectedDateKey = getSelectedDateKey();
   const tasks = getTasksForSelectedDate();
@@ -673,19 +614,46 @@ function getCalendarioTemplate() {
     </div>
   `;
 }
+function closeTaskModal() {
+  const overlay = document.querySelector(".cronograma-modal-overlay");
+  if (!overlay) return;
+
+  overlay.remove();
+  setTarefaEditandoId(null);
+}
+
+function renderTaskModalContent(overlay) {
+  if (!overlay) return;
+
+  const taskId = overlay.dataset.taskId;
+  const container = overlay.querySelector("#modalTaskContent");
+  if (!taskId || !container) return;
+
+  renderTarefaEditorInContainer(container, taskId, {
+    onAfterSave: () => {
+      // o listener do Firestore vai refletir os dados novos
+      // aqui só mantemos o modal vivo e o calendário no contexto certo
+    },
+    onCancelEdit: () => {
+      closeTaskModal();
+    }
+  });
+}
 
 function openTaskModal(taskId) {
   if (!taskId) return;
 
-  // cria container
+  closeTaskModal();
+
   const overlay = document.createElement("div");
   overlay.className = "cronograma-modal-overlay";
+  overlay.dataset.taskId = taskId;
 
   overlay.innerHTML = `
     <div class="cronograma-modal">
       <div class="cronograma-modal__header">
         <h3>Editar tarefa</h3>
-        <button class="cronograma-btn cronograma-btn--ghost" data-action="close-modal">
+        <button class="cronograma-btn cronograma-btn--ghost" type="button" data-action="close-modal">
           ✕
         </button>
       </div>
@@ -698,40 +666,25 @@ function openTaskModal(taskId) {
 
   document.body.appendChild(overlay);
 
-  // fecha modal
-  overlay.addEventListener("click", (e) => {
+  overlay.addEventListener("click", (event) => {
     if (
-      e.target.classList.contains("cronograma-modal-overlay") ||
-      e.target.closest('[data-action="close-modal"]')
+      event.target.classList.contains("cronograma-modal-overlay") ||
+      event.target.closest('[data-action="close-modal"]')
     ) {
-      overlay.remove();
+      closeTaskModal();
     }
   });
 
-  // renderiza tarefa dentro do modal
-  setTimeout(() => {
-    const container = document.getElementById("modalTaskContent");
-    if (!container) return;
-
-    // renderiza view de tarefas em memória
-    openTarefaEditor(taskId, { scrollToTop: false });
-
-    // captura HTML gerado
-    const app = document.getElementById("app");
-    if (!app) return;
-
-    container.innerHTML = app.innerHTML;
-
-    // remove scroll externo
-    window.scrollTo({ top: 0 });
-  }, 0);
+  renderTaskModalContent(overlay);
 }
+
 
 function openTaskFromCalendar(taskId) {
   if (!taskId) return;
 
   setView("tarefas");
   updateActiveNav("tarefas");
+
   setTimeout(() => {
     openTarefaEditor(taskId, { scrollToTop: true });
   }, 0);
@@ -780,7 +733,7 @@ function handleCalendarClick(event) {
     openTaskModal(taskId);
     return;
   }
-  
+
   if (action === "select-date") {
     const { date } = actionEl.dataset;
     if (date) {
@@ -799,7 +752,6 @@ function handleCalendarClick(event) {
     if (!["month", "day"].includes(mode)) return;
     setCalendarioModo(mode);
     renderCalendarioView();
-    return;
   }
 }
 
@@ -825,8 +777,7 @@ function handleCalendarChange(event) {
     setCalendarioMostrarArquivadas(actionEl.checked);
   }
 
-  const selectedDate = getSelectedDateKey();
-  setCalendarioDataSelecionada(selectedDate);
+  setCalendarioDataSelecionada(getSelectedDateKey());
   renderCalendarioView();
 }
 
@@ -855,7 +806,10 @@ function ensureTarefasListener() {
   unsubscribeTarefas = listenTarefas(
     (items) => {
       setTarefas(items);
-      if (state.currentView === "calendario") renderCalendarioView();
+
+      if (state.currentView === "calendario") {
+        renderCalendarioView();
+      }
     },
     (error) => {
       console.error(error);
@@ -913,4 +867,4 @@ export function renderCalendarioView() {
 
   renderIntoApp(template);
   mountCalendarioEvents();
-}        
+}
