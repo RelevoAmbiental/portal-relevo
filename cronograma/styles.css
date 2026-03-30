@@ -2291,3 +2291,118 @@ body.relevo-body {
   position: relative;
   z-index: 2;
 }
+/* ===== CALENDÁRIO — VISÃO DIÁRIA ===== */
+
+.cronograma-calendar-day-view {
+  display: grid;
+  gap: 16px;
+}
+
+.cronograma-calendar-day-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(11, 46, 27, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 28px rgba(15, 54, 30, 0.06);
+  padding: 18px 20px 18px 24px;
+  display: grid;
+  gap: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.cronograma-calendar-day-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(15, 54, 30, 0.08);
+  border-color: rgba(31, 107, 69, 0.18);
+}
+
+.cronograma-calendar-day-card__project-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: var(--project-accent, #cfd8d3);
+}
+
+.cronograma-calendar-day-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.cronograma-calendar-day-card__head h3 {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  color: var(--cron-text-strong);
+}
+
+.cronograma-calendar-day-card__head p {
+  margin: 0;
+  color: var(--cron-text-soft);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cronograma-calendar-day-card__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 10px 18px;
+  font-size: 0.96rem;
+  color: var(--cron-text-soft);
+}
+
+.cronograma-calendar-day-card__meta strong {
+  color: var(--cron-text-strong);
+}
+
+.cronograma-calendar-day-card__desc {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(11, 46, 27, 0.04);
+  color: var(--cron-text-soft);
+  line-height: 1.5;
+}
+
+.cronograma-calendar-day-card .cronograma-tag-row {
+  margin-top: -2px;
+}
+
+.cronograma-calendar-day-card--planejamento {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,250,248,0.96) 100%);
+}
+
+.cronograma-calendar-day-card--campo {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,246,239,0.96) 100%);
+}
+
+.cronograma-calendar-day-card--gabinete {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,243,252,0.96) 100%);
+}
+
+.cronograma-calendar-day-card--entrega {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(252,244,239,0.96) 100%);
+}
+
+@media (max-width: 860px) {
+  .cronograma-calendar-day-card__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cronograma-calendar-day-card__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-calendar-day-card {
+    padding: 16px 16px 16px 20px;
+  }
+}
