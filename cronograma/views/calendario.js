@@ -231,6 +231,14 @@ function renderEventPill(task, selectedDateKey) {
   const startsToday = startKey === selectedDateKey;
   const endsToday = endKey === selectedDateKey;
   const phaseTone = FASE_META[task.fase]?.tone || "planejamento";
+
+  const projetoCor =
+    task.projetoCor ||
+    task.corProjeto ||
+    task.projeto?.cor ||
+    task.projeto?.color ||
+    "#cfd8d3";
+
   const markers = [
     startsToday ? '<span class="cronograma-calendar-pill__flag">Início</span>' : "",
     endsToday && startKey !== endKey ? '<span class="cronograma-calendar-pill__flag">Entrega</span>' : "",
@@ -243,8 +251,10 @@ function renderEventPill(task, selectedDateKey) {
       type="button"
       data-action="select-date"
       data-date="${selectedDateKey}"
-      title="${escapeHtml(task.titulo || "Tarefa")}" 
+      title="${escapeHtml(task.titulo || "Tarefa")}"
+      style="--project-accent: ${escapeHtml(projetoCor)};"
     >
+      <span class="cronograma-calendar-pill__project-bar" aria-hidden="true"></span>
       <span class="cronograma-calendar-pill__title">${escapeHtml(task.titulo || "Tarefa")}</span>
       ${markers ? `<span class="cronograma-calendar-pill__meta">${markers}</span>` : ""}
     </button>
