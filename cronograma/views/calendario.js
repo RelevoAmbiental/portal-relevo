@@ -69,7 +69,7 @@ const CALENDAR_VIEW_OPTIONS = [
   { value: "month", label: "Mensal", enabled: true },
   { value: "week", label: "Semanal", enabled: true },
   { value: "day", label: "Diária", enabled: true },
-  { value: "timeline", label: "Linha do tempo", enabled: false }
+  { value: "timeline", label: "Linha do tempo", enabled: true }
 ];
 
 function ensureProjetosListener() {
@@ -282,6 +282,28 @@ function shiftWeek(dateKey, offset) {
   const shifted = new Date(base);
   shifted.setDate(base.getDate() + (offset * 7));
   return toDateKey(shifted);
+}
+
+function getTimelineRange() {
+  const today = parseDateKey(getSelectedDateKey()) || new Date();
+
+  const start = new Date(today);
+  start.setDate(start.getDate() - 3);
+
+  const end = new Date(today);
+  end.setDate(end.getDate() + 10);
+
+  return {
+    start,
+    end,
+    startKey: toDateKey(start),
+    endKey: toDateKey(end),
+    totalDays: Math.ceil((end - start) / (1000 * 60 * 60 * 24))
+  };
+}
+
+function diffDays(a, b) {
+  return Math.floor((b - a) / (1000 * 60 * 60 * 24));
 }
 
 function renderSelectOptions(items, selectedValue) {
@@ -510,6 +532,57 @@ function renderWeekDayColumn(day, tasks) {
   `;
 }
 
+function renderTimelineBar(task, timelineStart) {
+  const range = getDateRangeForTask(task);
+  if (!range) return "";
+
+  const start = range.start;
+  const end = range.end;
+
+  const offset = diffDays(timelineStart, start);
+  const duration = Math.max(1, diffDays(start, end) + 1);
+
+  const left = offset * 60;
+  const width = duration * 60;
+
+  const projetoCor =
+    task.projetoCor ||
+    task.projeto?.cor ||
+    "#cfd8d3";
+
+  return `
+    <div
+      class="cronograma-timeline-bar"
+      style="
+        left: ${left}px;
+        width: ${width}px;
+        --project-accent: ${projetoCor};
+      "
+      title="${escapeHtml(task.titulo)}"
+      data-action="open-task"
+      data-task-id="${escapeHtml(task.id || "")}"
+    >
+      <span>${escapeHtml(task.titulo)}</span>
+    </div>
+  `;
+}
+
+function groupTasksForTimeline(tasks) {
+  const groups = new Map();
+
+  tasks.forEach((task) => {
+    const key = task.projetoNome || "Sem projeto";
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+
+    groups.get(key).push(task);
+  });
+
+  return [...groups.entries()];
+}
+
 function classifyDayTasks(tasks, selectedDateKey) {
   const today = selectedDateKey;
 
@@ -656,6 +729,56 @@ function getCalendarioWeekTemplate() {
 
       <section class="cronograma-calendar-week">
         ${weekDays.map((day) => renderWeekDayColumn(day, tasksByDay.get(day.key) || [])).join("")}
+      </section>
+    </div>
+  `;
+}
+
+function getCalendarioTimelineTemplate() {
+  const tasks = getFilteredTasks();
+  const timeline = getTimelineRange();
+  const groups = groupTasksForTimeline(tasks);
+
+  return `
+    <div class="cronograma-calendar-shell">
+
+      <section class="cronograma-calendar-toolbar cronograma-panel">
+        <div>
+          <p class="cronograma-shell__eyebrow">Planejamento</p>
+          <h2>Linha do tempo</h2>
+        </div>
+      </section>
+
+      ${renderViewSwitch()}
+
+      <section class="cronograma-timeline">
+
+        <div class="cronograma-timeline-grid">
+          ${Array.from({ length: timeline.totalDays }).map((_, i) => {
+            const d = new Date(timeline.start);
+            d.setDate(d.getDate() + i);
+
+            return `<div class="cronograma-timeline-day">
+              ${d.getDate()}
+            </div>`;
+          }).join("")}
+        </div>
+
+        ${groups.map(([project, projectTasks]) => `
+          <div class="cronograma-timeline-row">
+            <div class="cronograma-timeline-row__label">
+              ${escapeHtml(project)}
+            </div>
+
+            <div class="cronograma-timeline-row__bars">
+              ${projectTasks
+                .filter(t => getDateRangeForTask(t))
+                .map(t => renderTimelineBar(t, timeline.start))
+                .join("")}
+            </div>
+          </div>
+        `).join("")}
+
       </section>
     </div>
   `;
@@ -1057,7 +1180,7 @@ function handleCalendarClick(event) {
 
   if (action === "set-calendar-mode") {
     const mode = actionEl.dataset.mode || "month";
-    if (!["month", "week", "day"].includes(mode)) return;
+    if (!["month", "week", "day", "timeline"].includes(mode)) return;
     setCalendarioModo(mode);
     renderCalendarioView();
   }
@@ -1156,7 +1279,7 @@ export function renderCalendarioView() {
   ensureUsersListener();
   ensureProjetosListener();
 
-  if (!["month", "week", "day"].includes(state.calendarioModo)) {
+  if (!["month", "week", "day", "timeline"].includes(state.calendarioModo)) {
     setCalendarioModo("month");
   }
 
@@ -1173,8 +1296,11 @@ export function renderCalendarioView() {
       ? getCalendarioDayTemplate()
       : state.calendarioModo === "week"
         ? getCalendarioWeekTemplate()
-        : getCalendarioTemplate();
+        : state.calendarioModo === "timeline"
+          ? getCalendarioTimelineTemplate()
+          : getCalendarioTemplate();
 
+  
   renderIntoApp(template);
   mountCalendarioEvents();
 }
