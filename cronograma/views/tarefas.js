@@ -751,7 +751,10 @@ function mountTarefasEvents(root = document, options = {}) {
       const proximo = ordem[(atualIndex + 1) % ordem.length];
   
       try {
-        await atualizarTarefa(tarefa.id, { status: proximo });
+        await atualizarTarefa(tarefa.id, {
+          ...tarefa,
+          status: proximo
+        });
       } catch (err) {
         console.error(err);
         alert("Erro ao atualizar status");
@@ -769,7 +772,10 @@ function mountTarefasEvents(root = document, options = {}) {
       const proximo = ordem[(atualIndex + 1) % ordem.length];
   
       try {
-        await atualizarTarefa(tarefa.id, { prioridade: proximo });
+        await atualizarTarefa(tarefa.id, {
+          ...tarefa,
+          prioridade: proximo
+        });
       } catch (err) {
         console.error(err);
         alert("Erro ao atualizar prioridade");
