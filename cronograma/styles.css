@@ -1493,40 +1493,45 @@ body.relevo-body {
   align-items: start;
 }
 
+
+/* ========================================================================== 
+   CALENDÁRIO
+   ========================================================================== */
+
 .cronograma-calendar-shell {
   display: grid;
   gap: 18px;
 }
 
-.cronograma-calendar-hero {
+.cronograma-calendar-toolbar {
   display: flex;
   justify-content: space-between;
-  gap: 18px;
   align-items: flex-start;
-  background: var(--cron-card);
-  border: 1px solid var(--cron-card-border);
-  border-radius: var(--cron-radius-xl);
-  padding: 24px;
-  box-shadow: var(--cron-shadow);
+  gap: 18px;
 }
 
-.cronograma-calendar-hero h2 {
+.cronograma-calendar-toolbar__main {
+  display: grid;
+  gap: 6px;
+}
+
+.cronograma-calendar-toolbar__main h2 {
   margin: 0;
   font-size: 1.85rem;
+  line-height: 1.08;
 }
 
-.cronograma-calendar-hero p {
-  margin: 10px 0 0;
-  max-width: 780px;
+.cronograma-calendar-toolbar__main p {
+  margin: 0;
   color: var(--cron-text-soft);
   line-height: 1.6;
 }
 
-.cronograma-calendar-hero__actions {
+.cronograma-calendar-toolbar__actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 10px;
+  justify-content: flex-end;
 }
 
 .cronograma-calendar-view-switch {
@@ -1536,7 +1541,7 @@ body.relevo-body {
 }
 
 .cronograma-calendar-view-chip {
-  border: 1px solid rgba(11, 46, 27, 0.1);
+  border: 1px solid rgba(11, 46, 27, 0.10);
   background: rgba(255, 255, 255, 0.78);
   color: var(--cron-text);
   border-radius: 999px;
@@ -1547,16 +1552,21 @@ body.relevo-body {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.cronograma-calendar-view-chip:hover:not(.is-disabled) {
+  transform: translateY(-1px);
 }
 
 .cronograma-calendar-view-chip.is-active {
   background: rgba(31, 107, 69, 0.12);
   color: var(--cron-primary);
-  border-color: rgba(31, 107, 69, 0.2);
+  border-color: rgba(31, 107, 69, 0.22);
 }
 
 .cronograma-calendar-view-chip.is-disabled {
-  opacity: 0.75;
+  opacity: 0.72;
   cursor: not-allowed;
 }
 
@@ -1565,7 +1575,7 @@ body.relevo-body {
   align-items: center;
   border-radius: 999px;
   padding: 3px 8px;
-  background: rgba(29, 78, 216, 0.1);
+  background: rgba(29, 78, 216, 0.10);
   color: #1d4ed8;
   font-size: 0.72rem;
   font-weight: 800;
@@ -1617,17 +1627,28 @@ body.relevo-body {
   gap: 18px;
 }
 
-.cronograma-calendar-main,
-.cronograma-calendar-side {
+.cronograma-calendar-main {
   display: grid;
   gap: 16px;
+}
+
+.cronograma-calendar-main--full {
+  width: 100%;
+  padding: 20px;
+}
+
+.cronograma-calendar-main__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
 .cronograma-calendar-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
-  margin-bottom: 16px;
+  gap: 10px 16px;
 }
 
 .cronograma-calendar-legend__item {
@@ -1676,15 +1697,16 @@ body.relevo-body {
 }
 
 .cronograma-calendar-grid-wrap {
+  width: 100%;
   overflow-x: auto;
   padding-bottom: 6px;
 }
 
 .cronograma-calendar-grid-head,
 .cronograma-calendar-grid {
-  min-width: 900px;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(135px, 1fr));
+  min-width: 980px;
   gap: 10px;
 }
 
@@ -1702,7 +1724,7 @@ body.relevo-body {
 }
 
 .cronograma-calendar-day {
-  min-height: 168px;
+  min-height: 170px;
   border-radius: 20px;
   border: 1px solid rgba(11, 46, 27, 0.08);
   background: rgba(255, 255, 255, 0.78);
@@ -1710,7 +1732,7 @@ body.relevo-body {
   display: grid;
   gap: 10px;
   box-shadow: 0 10px 26px rgba(15, 54, 30, 0.05);
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   cursor: pointer;
 }
 
@@ -1720,9 +1742,9 @@ body.relevo-body {
   box-shadow: 0 12px 30px rgba(15, 54, 30, 0.08);
 }
 
-.cronograma-calendar-day.is-muted {
-  background: rgba(255, 255, 255, 0.46);
-  opacity: 0.78;
+.cronograma-calendar-day.is-outside {
+  background: rgba(255, 255, 255, 0.48);
+  opacity: 0.76;
 }
 
 .cronograma-calendar-day.is-today {
@@ -1736,543 +1758,68 @@ body.relevo-body {
   box-shadow: inset 0 0 0 2px rgba(31, 107, 69, 0.12);
 }
 
-.cronograma-calendar-day__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-.cronograma-calendar-day__number {
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.cronograma-calendar-day__count {
-  min-width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: rgba(11, 46, 27, 0.08);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.cronograma-calendar-day__events {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-}
-
-.cronograma-calendar-pill {
-  width: 100%;
-  border: 0;
-  border-radius: 14px;
-  padding: 10px 11px;
-  text-align: left;
-  display: grid;
-  gap: 6px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.cronograma-calendar-pill__title {
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.cronograma-calendar-pill__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.cronograma-calendar-pill__flag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.6);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.cronograma-calendar-pill__flag--danger {
-  background: rgba(190, 24, 93, 0.12);
-  color: #9f1239;
-}
-
-.cronograma-calendar-day__more {
-  color: var(--cron-text-soft);
-  font-size: 0.84rem;
-  font-weight: 700;
-}
-
-.cronograma-calendar-side-card {
-  display: grid;
-  gap: 14px;
-}
-
-.cronograma-calendar-side-card__head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.cronograma-calendar-side-card__head h3 {
-  margin: 0;
-  font-size: 1.04rem;
-}
-
-.cronograma-calendar-agenda-list {
-  display: grid;
-  gap: 12px;
-}
-
-.cronograma-calendar-agenda-item {
-  border-radius: 18px;
-  padding: 16px;
-  border: 1px solid rgba(11, 46, 27, 0.08);
-  background: rgba(255, 255, 255, 0.76);
-  display: grid;
-  gap: 12px;
-}
-
-.cronograma-calendar-agenda-item--planejamento {
-  box-shadow: inset 3px 0 0 #64748b;
-}
-
-.cronograma-calendar-agenda-item--campo {
-  box-shadow: inset 3px 0 0 #2563eb;
-}
-
-.cronograma-calendar-agenda-item--gabinete {
-  box-shadow: inset 3px 0 0 #d97706;
-}
-
-.cronograma-calendar-agenda-item--entrega {
-  box-shadow: inset 3px 0 0 #16a34a;
-}
-
-.cronograma-calendar-agenda-item--administrativo {
-  box-shadow: inset 3px 0 0 #9333ea;
-}
-
-.cronograma-calendar-agenda-item__head {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.cronograma-calendar-agenda-item__head h4 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.cronograma-calendar-agenda-item__head p,
-.cronograma-calendar-agenda-item__desc {
-  margin: 4px 0 0;
-  color: var(--cron-text-soft);
-  line-height: 1.55;
-}
-
-.cronograma-calendar-agenda-item__meta {
-  display: grid;
-  gap: 8px;
-  color: var(--cron-text-soft);
-  font-size: 0.92rem;
-}
-
-@media (max-width: 1180px) {
-  .cronograma-view-grid--calendar,
-  .cronograma-calendar-kpis {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .cronograma-view-grid--calendar {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 860px) {
-  .cronograma-calendar-hero,
-  .cronograma-calendar-side-card__head,
-  .cronograma-calendar-agenda-item__head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .cronograma-calendar-kpis {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .cronograma-calendar-kpis {
-    grid-template-columns: 1fr;
-  }
-
-  .cronograma-calendar-grid-head,
-  .cronograma-calendar-grid {
-    min-width: 740px;
-  }
-
-  .cronograma-calendar-day {
-    min-height: 150px;
-  }
-}
-/* ===== CALENDÁRIO — REORGANIZAÇÃO VISUAL ===== */
-
-.cronograma-calendar-shell {
-  display: grid;
-  gap: 18px;
-}
-
-.cronograma-calendar-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-  padding: 22px 24px;
-}
-
-.cronograma-calendar-toolbar__main h2 {
-  margin: 0 0 8px;
-  font-size: 2rem;
-  line-height: 1.05;
-}
-
-.cronograma-calendar-toolbar__main p {
-  margin: 0;
-  color: var(--cron-text-soft);
-  max-width: 720px;
-}
-
-.cronograma-calendar-toolbar__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.cronograma-calendar-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.85fr);
-  gap: 20px;
-  align-items: start;
-}
-
-.cronograma-calendar-main {
-  display: grid;
-  gap: 14px;
-  padding: 20px;
-}
-
-.cronograma-calendar-main__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.cronograma-calendar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin: 0;
-}
-
-.cronograma-calendar-legend__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.88rem;
-  color: var(--cron-text-soft);
-  white-space: nowrap;
-}
-
-.cronograma-calendar-grid-wrap {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.cronograma-calendar-grid-head,
-.cronograma-calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(120px, 1fr));
-  gap: 10px;
-  min-width: 910px;
-}
-
-.cronograma-calendar-grid-head {
-  margin-bottom: 10px;
-}
-
-.cronograma-calendar-grid-head__cell {
-  text-align: center;
-  padding: 10px 8px;
-  border-radius: 12px;
-  background: rgba(11, 46, 27, 0.06);
-  font-size: 0.84rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--cron-text-soft);
-}
-
-.cronograma-calendar-day {
-  min-height: 158px;
-  border-radius: 18px;
-  border: 1px solid rgba(11, 46, 27, 0.08);
-  background: rgba(255, 255, 255, 0.88);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 8px 24px rgba(15, 54, 30, 0.05);
-  cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.cronograma-calendar-day:hover {
-  transform: translateY(-1px);
-  border-color: rgba(31, 107, 69, 0.22);
-}
-
-.cronograma-calendar-day.is-outside {
-  opacity: 0.55;
-  background: rgba(255, 255, 255, 0.56);
-}
-
-.cronograma-calendar-day.is-today {
-  border-color: rgba(31, 107, 69, 0.32);
-  box-shadow: inset 0 0 0 1px rgba(31, 107, 69, 0.14);
-}
-
-.cronograma-calendar-day.is-selected {
-  border-color: rgba(31, 107, 69, 0.42);
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: inset 0 0 0 2px rgba(31, 107, 69, 0.10);
-}
-
 .cronograma-calendar-day__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 28px;
+  gap: 8px;
 }
 
 .cronograma-calendar-day__number {
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 1rem;
   font-weight: 800;
-  font-size: 0.92rem;
-  background: rgba(11, 46, 27, 0.06);
-  color: var(--cron-primary);
-}
-
-.cronograma-calendar-day.is-today .cronograma-calendar-day__number {
-  background: rgba(31, 107, 69, 0.14);
-  color: var(--cron-primary);
 }
 
 .cronograma-calendar-day__badge {
-  min-width: 26px;
-  height: 26px;
-  border-radius: 999px;
+  min-width: 28px;
+  height: 28px;
   padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(11, 46, 27, 0.08);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(11, 46, 27, 0.08);
+  font-size: 0.84rem;
+  font-weight: 700;
   color: var(--cron-primary);
-  font-size: 0.76rem;
-  font-weight: 800;
 }
 
 .cronograma-calendar-day__body {
   display: grid;
   align-content: start;
   gap: 8px;
-  min-height: 0;
-}
-
-.cronograma-calendar-pill {
-  width: 100%;
-  border: 0;
-  border-radius: 12px;
-  padding: 8px 10px;
-  text-align: left;
-  display: grid;
-  gap: 4px;
-  font: inherit;
-  cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-}
-
-.cronograma-calendar-pill__title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.25;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.cronograma-calendar-pill__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.cronograma-calendar-pill__flag {
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 0.66rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.7);
 }
 
 .cronograma-calendar-day__more {
   border: 0;
-  background: transparent;
-  padding: 0;
+  border-radius: 12px;
+  background: rgba(11, 46, 27, 0.06);
+  color: var(--cron-primary);
+  padding: 8px 10px;
   text-align: left;
-  color: var(--cron-primary-2);
+  font: inherit;
+  font-size: 0.84rem;
   font-weight: 700;
-  font-size: 0.82rem;
   cursor: pointer;
 }
 
-.cronograma-calendar-side {
-  display: grid;
-  gap: 16px;
-}
-
-.cronograma-calendar-side-card {
-  padding: 20px;
-}
-
-.cronograma-calendar-side-card__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.cronograma-calendar-side-card__head h3 {
-  margin: 0;
-  font-size: 1.5rem;
-  line-height: 1.1;
-}
-
-.cronograma-calendar-agenda-list {
-  display: grid;
-  gap: 12px;
-}
-
-.cronograma-calendar-agenda-item {
-  border-radius: 16px;
-  padding: 14px 15px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(11, 46, 27, 0.08);
-  display: grid;
-  gap: 10px;
-}
-
-.cronograma-calendar-agenda-item__meta {
-  display: grid;
-  gap: 6px;
-  font-size: 0.92rem;
-}
-
-@media (max-width: 1180px) {
-  .cronograma-calendar-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 860px) {
-  .cronograma-calendar-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .cronograma-calendar-toolbar__actions {
-    justify-content: flex-start;
-  }
-
-  .cronograma-calendar-kpis {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .cronograma-calendar-kpis {
-    grid-template-columns: 1fr;
-  }
-
-  .cronograma-calendar-grid-head,
-  .cronograma-calendar-grid {
-    min-width: 840px;
-  }
-}
-/* ===== CALENDÁRIO — VISÃO MENSAL SEM COLUNA LATERAL ===== */
-
-.cronograma-calendar-main--full {
-  width: 100%;
-  padding: 20px;
-}
-
-.cronograma-calendar-main--full .cronograma-calendar-grid-wrap {
-  width: 100%;
-}
-
-.cronograma-calendar-main--full .cronograma-calendar-grid-head,
-.cronograma-calendar-main--full .cronograma-calendar-grid {
-  grid-template-columns: repeat(7, minmax(135px, 1fr));
-  min-width: 980px;
-}
-
-.cronograma-calendar-main--full .cronograma-calendar-day {
-  min-height: 170px;
-}
-
-.cronograma-calendar-main--full .cronograma-calendar-main__top {
-  margin-bottom: 4px;
-}
-
-.cronograma-calendar-main--full .cronograma-calendar-legend {
-  gap: 10px 16px;
-}
-
-@media (max-width: 900px) {
-  .cronograma-calendar-main--full .cronograma-calendar-grid-head,
-  .cronograma-calendar-main--full .cronograma-calendar-grid {
-    min-width: 900px;
-  }
-}
-/* ===== CALENDÁRIO — COR DO PROJETO NA TAREFA ===== */
-/* ===== CALENDÁRIO — BARRA DE COR DO PROJETO NO MENSAL ===== */
-
 .cronograma-calendar-pill {
   position: relative;
-  padding-left: 14px;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 10px 10px 10px 14px;
   overflow: hidden;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  box-shadow: inset 0 0 0 1px rgba(11, 46, 27, 0.06);
+  cursor: pointer;
+}
+
+.cronograma-calendar-pill:hover {
+  box-shadow: inset 0 0 0 1px rgba(31, 107, 69, 0.15);
 }
 
 .cronograma-calendar-pill__project-bar {
@@ -2291,24 +1838,74 @@ body.relevo-body {
   position: relative;
   z-index: 2;
 }
-/* ===== CALENDÁRIO — VISÃO DIÁRIA ===== */
+
+.cronograma-calendar-pill__title {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: inherit;
+}
+
+.cronograma-calendar-pill__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cronograma-calendar-pill__flag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(11, 46, 27, 0.08);
+  color: var(--cron-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.cronograma-calendar-pill__flag--danger {
+  background: rgba(190, 24, 93, 0.12);
+  color: #9f1239;
+}
 
 .cronograma-calendar-day-view {
-  display: grid;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cronograma-day-group {
+  margin-bottom: 8px;
+}
+
+.cronograma-day-group__title {
+  margin: 0 0 10px;
+  padding: 0 4px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--cron-text-soft);
+}
+
+.cronograma-day-group__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .cronograma-calendar-day-card {
   position: relative;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 18px;
   border: 1px solid rgba(11, 46, 27, 0.08);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 12px 28px rgba(15, 54, 30, 0.06);
-  padding: 18px 20px 18px 24px;
+  padding: 16px 18px 16px 20px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
 }
 
 .cronograma-calendar-day-card:hover {
@@ -2317,130 +1914,11 @@ body.relevo-body {
   border-color: rgba(31, 107, 69, 0.18);
 }
 
-.cronograma-calendar-day-card__project-bar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 6px;
-  background: var(--project-accent, #cfd8d3);
-}
-
-.cronograma-calendar-day-card__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.cronograma-calendar-day-card__head h3 {
-  margin: 0 0 4px;
-  font-size: 1.5rem;
-  line-height: 1.1;
-  color: var(--cron-text-strong);
-}
-
-.cronograma-calendar-day-card__head p {
-  margin: 0;
-  color: var(--cron-text-soft);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.cronograma-calendar-day-card__meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 10px 18px;
-  font-size: 0.96rem;
-  color: var(--cron-text-soft);
-}
-
-.cronograma-calendar-day-card__meta strong {
-  color: var(--cron-text-strong);
-}
-
-.cronograma-calendar-day-card__desc {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(11, 46, 27, 0.04);
-  color: var(--cron-text-soft);
-  line-height: 1.5;
-}
-
-.cronograma-calendar-day-card .cronograma-tag-row {
-  margin-top: -2px;
-}
-
-.cronograma-calendar-day-card--planejamento {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,250,248,0.96) 100%);
-}
-
-.cronograma-calendar-day-card--campo {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,246,239,0.96) 100%);
-}
-
-.cronograma-calendar-day-card--gabinete {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,243,252,0.96) 100%);
-}
-
-.cronograma-calendar-day-card--entrega {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(252,244,239,0.96) 100%);
-}
-
-@media (max-width: 860px) {
-  .cronograma-calendar-day-card__head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .cronograma-calendar-day-card__meta {
-    grid-template-columns: 1fr;
-  }
-
-  .cronograma-calendar-day-card {
-    padding: 16px 16px 16px 20px;
-  }
-  /* =========================
-   CALENDÁRIO — VISÃO DIÁRIA (REFINAMENTO UX)
-   ========================= */
-
-.cronograma-calendar-day-view {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* CARD BASE */
-.cronograma-calendar-day-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 16px;
-  padding: 16px 18px;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(0,0,0,0.05);
-  backdrop-filter: blur(6px);
-}
-
-/* Hover = deixa claro que é clicável */
-.cronograma-calendar-day-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-  border-color: rgba(0,0,0,0.1);
-}
-
-/* foco teclado */
 .cronograma-calendar-day-card:focus {
   outline: 2px solid #2e7d32;
   outline-offset: 2px;
 }
 
-/* barra lateral do projeto */
 .cronograma-calendar-day-card__project-bar {
   position: absolute;
   left: 0;
@@ -2451,7 +1929,6 @@ body.relevo-body {
   background: var(--project-accent, #4caf50);
 }
 
-/* HEADER */
 .cronograma-calendar-day-card__head {
   display: flex;
   justify-content: space-between;
@@ -2459,130 +1936,115 @@ body.relevo-body {
   gap: 12px;
 }
 
-/* título */
 .cronograma-calendar-day-card__head h3 {
   margin: 0;
   font-size: 1.05rem;
-  font-weight: 600;
-  color: #1b1b1b;
+  font-weight: 700;
+  color: var(--cron-text);
+  line-height: 1.25;
 }
 
-/* projeto */
 .cronograma-calendar-day-card__head p {
-  margin: 2px 0 0;
-  font-size: 0.85rem;
-  color: #6b7280;
+  margin: 3px 0 0;
+  font-size: 0.86rem;
+  color: var(--cron-text-soft);
 }
 
-/* tags */
-.cronograma-tag-row {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
+.cronograma-calendar-day-card .cronograma-tag-row {
+  margin-top: -2px;
   gap: 6px;
 }
 
-/* meta */
 .cronograma-calendar-day-card__meta {
-  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: #444;
 }
 
-/* descrição */
+.cronograma-calendar-day-card__meta strong {
+  color: var(--cron-text);
+}
+
 .cronograma-calendar-day-card__desc {
-  margin-top: 10px;
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 0.92rem;
   color: #333;
-  line-height: 1.4;
+  line-height: 1.45;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(11, 46, 27, 0.04);
 }
 
-/* =========================
-   ESTADOS IMPORTANTES
-   ========================= */
-
-/* tarefa atrasada */
-.cronograma-calendar-day-card .cronograma-tag--danger {
-  font-weight: 600;
+.cronograma-calendar-day-card--planejamento {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,250,248,0.96) 100%);
 }
 
-/* destaque visual sutil para cards com atraso */
+.cronograma-calendar-day-card--campo {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(251,246,239,0.96) 100%);
+}
+
+.cronograma-calendar-day-card--gabinete {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,243,252,0.96) 100%);
+}
+
+.cronograma-calendar-day-card--entrega {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(252,244,239,0.96) 100%);
+}
+
+.cronograma-calendar-day-card--administrativo {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,242,253,0.96) 100%);
+}
+
 .cronograma-calendar-day-card:has(.cronograma-tag--danger) {
   border-left: 4px solid #d32f2f;
 }
 
-/* =========================
-   MOBILE
-   ========================= */
-
-@media (max-width: 768px) {
-  .cronograma-calendar-day-card {
-    padding: 14px;
-  }
-
-  .cronograma-calendar-day-card__meta {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .cronograma-calendar-day-card__head {
-    flex-direction: column;
-    gap: 6px;
-  }
-}
-}
-/* =========================
+/* ========================================================================== 
    MODAL DE TAREFA
-   ========================= */
+   ========================================================================== */
 
 .cronograma-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(10, 20, 14, 0.44);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
   padding: 20px;
+  z-index: 1000;
 }
 
 .cronograma-modal {
-  background: #fff;
-  width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  width: min(980px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  background: #f8fbf9;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
 }
 
-/* header */
 .cronograma-modal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  gap: 12px;
+  padding: 20px 20px 0;
 }
 
-/* conteúdo */
+.cronograma-modal__header h3 {
+  margin: 0;
+}
+
 .cronograma-modal__content {
-  overflow-y: auto;
   padding: 20px;
 }
 
-/* mobile */
-@media (max-width: 768px) {
-  .cronograma-modal {
-    max-height: 100vh;
-    border-radius: 0;
-  }
-}
+/* ========================================================================== 
+   AJUSTES DE TAGS E RESPONSIVIDADE
+   ========================================================================== */
+
 .cronograma-tag--clickable {
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -2590,26 +2052,68 @@ body.relevo-body {
 
 .cronograma-tag--clickable:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
+
 .cronograma-tag--success {
   background: rgba(34, 197, 94, 0.16);
   color: #166534;
   border: 1px solid rgba(34, 197, 94, 0.28);
 }
-.cronograma-day-group {
-  margin-bottom: 24px;
+
+@media (max-width: 1180px) {
+  .cronograma-calendar-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-.cronograma-day-group__title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  opacity: 0.8;
+@media (max-width: 980px) {
+  .cronograma-calendar-grid-head,
+  .cronograma-calendar-grid {
+    min-width: 900px;
+  }
 }
 
-.cronograma-day-group__list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+@media (max-width: 860px) {
+  .cronograma-calendar-toolbar,
+  .cronograma-calendar-day-card__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cronograma-calendar-toolbar__actions {
+    justify-content: flex-start;
+  }
+
+  .cronograma-calendar-day-card {
+    padding: 16px;
+  }
 }
+
+@media (max-width: 768px) {
+  .cronograma-modal {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .cronograma-calendar-day-card__meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cronograma-calendar-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-calendar-grid-head,
+  .cronograma-calendar-grid {
+    min-width: 840px;
+  }
+
+  .cronograma-calendar-day {
+    min-height: 150px;
+  }
+}
+
