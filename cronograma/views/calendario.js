@@ -72,6 +72,9 @@ const CALENDAR_VIEW_OPTIONS = [
   { value: "timeline", label: "Linha do tempo", enabled: true }
 ];
 
+const TIMELINE_RANGE_OPTIONS = [15, 30, 45];
+let timelineRangeDays = 15;
+
 function ensureProjetosListener() {
   if (unsubscribeProjetos) return;
 
@@ -286,19 +289,21 @@ function shiftWeek(dateKey, offset) {
 
 function getTimelineRange() {
   const today = parseDateKey(getSelectedDateKey()) || new Date();
+  const totalDays = Number(timelineRangeDays) || 15;
 
   const start = new Date(today);
-  start.setDate(start.getDate() - 3);
+  start.setHours(0, 0, 0, 0);
 
-  const end = new Date(today);
-  end.setDate(end.getDate() + 10);
+  const end = new Date(start);
+  end.setDate(start.getDate() + totalDays - 1);
+  end.setHours(0, 0, 0, 0);
 
   return {
     start,
     end,
     startKey: toDateKey(start),
     endKey: toDateKey(end),
-    totalDays: Math.ceil((end - start) / (1000 * 60 * 60 * 24))
+    totalDays
   };
 }
 
@@ -322,6 +327,14 @@ function renderCalendarMetricCard(label, value, hint, tone = "") {
       <small>${escapeHtml(hint)}</small>
     </div>
   `;
+}
+
+function renderTimelineRangeOptions(selectedValue) {
+  return TIMELINE_RANGE_OPTIONS.map((value) => `
+    <option value="${value}" ${Number(selectedValue) === Number(value) ? "selected" : ""}>
+      ${value} dias
+    </option>
+  `).join("");
 }
 
 function renderViewSwitch() {
@@ -742,12 +755,22 @@ function getCalendarioTimelineTemplate() {
   return `
     <div class="cronograma-calendar-shell">
 
-      <section class="cronograma-calendar-toolbar cronograma-panel">
-        <div>
-          <p class="cronograma-shell__eyebrow">Planejamento</p>
-          <h2>Linha do tempo</h2>
-        </div>
-      </section>
+  <section class="cronograma-calendar-toolbar cronograma-panel">
+    <div class="cronograma-calendar-toolbar__main">
+      <p class="cronograma-shell__eyebrow">Planejamento</p>
+      <h2>Linha do tempo</h2>
+      <p>Visualização temporal das tarefas por projeto, com janela configurável.</p>
+    </div>
+  
+    <div class="cronograma-calendar-toolbar__actions">
+      <label class="cronograma-field cronograma-field--timeline-range">
+        <span>Intervalo</span>
+        <select data-action="timeline-range">
+          ${renderTimelineRangeOptions(timelineRangeDays)}
+        </select>
+      </label>
+    </div>
+  </section>
 
       ${renderViewSwitch()}
 
@@ -1191,7 +1214,10 @@ function handleCalendarChange(event) {
   if (!actionEl) return;
 
   const { action } = actionEl.dataset;
-
+  
+  if (action === "timeline-range") {
+    timelineRangeDays = Number(actionEl.value) || 15;
+  }
   if (action === "filter-calendar-projeto") {
     setCalendarioFiltroProjeto(actionEl.value);
   }
