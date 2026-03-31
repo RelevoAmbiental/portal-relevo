@@ -2592,3 +2592,8 @@ body.relevo-body {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
+.cronograma-tag--success {
+  background: rgba(34, 197, 94, 0.16);
+  color: #166534;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
