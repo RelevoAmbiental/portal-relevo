@@ -392,6 +392,51 @@ function renderDayTaskCard(task, selectedDateKey) {
     </article>
   `;
 }
+
+function classifyDayTasks(tasks, selectedDateKey) {
+  const today = selectedDateKey;
+
+  const groups = {
+    overdue: [],
+    dueToday: [],
+    startingToday: [],
+    highPriority: [],
+    others: []
+  };
+
+  tasks.forEach((task) => {
+    const range = getDateRangeForTask(task);
+    if (!range) return;
+
+    const startKey = toDateKey(range.start);
+    const endKey = toDateKey(range.end);
+
+    if (isTaskOverdue(task)) {
+      groups.overdue.push(task);
+      return;
+    }
+
+    if (endKey === today) {
+      groups.dueToday.push(task);
+      return;
+    }
+
+    if (startKey === today) {
+      groups.startingToday.push(task);
+      return;
+    }
+
+    if (["alta", "critica"].includes(task.prioridade)) {
+      groups.highPriority.push(task);
+      return;
+    }
+
+    groups.others.push(task);
+  });
+
+  return groups;
+}
+
 function getCalendarioDayTemplate() {
   const selectedDateKey = getSelectedDateKey();
   const tasks = getTasksForSelectedDate();
@@ -485,7 +530,17 @@ function getCalendarioDayTemplate() {
       <section class="cronograma-calendar-day-view">
         ${
           tasks.length
-            ? tasks.map((task) => renderDayTaskCard(task, selectedDateKey)).join("")
+            ? (() => {
+                const groups = classifyDayTasks(tasks, selectedDateKey);
+      
+                return `
+                  ${renderTaskGroup("🔥 Em atraso", groups.overdue, selectedDateKey)}
+                  ${renderTaskGroup("📦 Entregas de hoje", groups.dueToday, selectedDateKey)}
+                  ${renderTaskGroup("🚀 Começando hoje", groups.startingToday, selectedDateKey)}
+                  ${renderTaskGroup("⚡ Alta prioridade", groups.highPriority, selectedDateKey)}
+                  ${renderTaskGroup("📋 Demais tarefas", groups.others, selectedDateKey)}
+                `;
+              })()
             : `
               <section class="cronograma-panel">
                 <div class="cronograma-empty-state">
@@ -495,6 +550,19 @@ function getCalendarioDayTemplate() {
             `
         }
       </section>
+    </div>
+  `;
+}
+
+function renderTaskGroup(title, tasks, selectedDateKey) {
+  if (!tasks.length) return "";
+
+  return `
+    <div class="cronograma-day-group">
+      <h3 class="cronograma-day-group__title">${escapeHtml(title)}</h3>
+      <div class="cronograma-day-group__list">
+        ${tasks.map((task) => renderDayTaskCard(task, selectedDateKey)).join("")}
+      </div>
     </div>
   `;
 }
