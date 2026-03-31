@@ -116,6 +116,36 @@ function formatFase(fase) {
   return FASE_OPTIONS.find((item) => item.value === fase)?.label || "Sem fase";
 }
 
+function getPrioridadeClass(prioridade) {
+  switch (prioridade) {
+    case "baixa":
+      return "cronograma-tag--muted";
+    case "media":
+      return "cronograma-tag--info";
+    case "alta":
+      return "cronograma-tag--warning";
+    case "critica":
+      return "cronograma-tag--danger";
+    default:
+      return "";
+  }
+}
+
+function getStatusClass(status) {
+  switch (status) {
+    case "a_fazer":
+      return "cronograma-tag--muted";
+    case "andamento":
+      return "cronograma-tag--info";
+    case "acompanhando":
+      return "cronograma-tag--warning";
+    case "concluida":
+      return "cronograma-tag--success";
+    default:
+      return "";
+  }
+}
+
 function formatDate(value) {
   if (!value) return "Não informado";
   return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
@@ -264,7 +294,7 @@ function renderTarefaCard(item) {
         <div class="cronograma-tag-row cronograma-tag-row--tight">
           <span class="cronograma-tag">${escapeHtml(faseLabel)}</span>
           <button
-            class="cronograma-tag cronograma-tag--clickable"
+            class="cronograma-tag cronograma-tag--clickable ${getStatusClass(item.status)}"
             data-action="cycle-status"
             data-id="${item.id}"
           >
@@ -272,7 +302,7 @@ function renderTarefaCard(item) {
           </button>
           
           <button
-            class="cronograma-tag cronograma-tag--clickable"
+            class="cronograma-tag cronograma-tag--clickable ${getPrioridadeClass(item.prioridade)}"
             data-action="cycle-prioridade"
             data-id="${item.id}"
           >
@@ -830,7 +860,7 @@ function mountTarefasEvents(root = document, options = {}) {
         projetoNome: projeto?.nome || "",
         fase: formData.get("fase"),
         responsavel: responsavelUser?.nome || "",
-        responsavelUid: responsavelUser?.uid || "",
+        responsavelUid: responsavelUser?.id || "",
         responsavelEmail: responsavelUser?.email || "",
         dataInicio: formData.get("dataInicio"),
         dataVencimento: formData.get("dataVencimento"),
