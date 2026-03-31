@@ -263,8 +263,21 @@ function renderTarefaCard(item) {
 
         <div class="cronograma-tag-row cronograma-tag-row--tight">
           <span class="cronograma-tag">${escapeHtml(faseLabel)}</span>
-          <span class="cronograma-tag">${escapeHtml(statusLabel)}</span>
-          <span class="cronograma-tag">${escapeHtml(prioridadeLabel)}</span>
+          <button
+            class="cronograma-tag cronograma-tag--clickable"
+            data-action="cycle-status"
+            data-id="${item.id}"
+          >
+            ${escapeHtml(statusLabel)}
+          </button>
+          
+          <button
+            class="cronograma-tag cronograma-tag--clickable"
+            data-action="cycle-prioridade"
+            data-id="${item.id}"
+          >
+            ${escapeHtml(prioridadeLabel)}
+          </button>
           ${getChecklistResumo(item)}
           ${getPrazoBadge(item)}
           ${item.arquivada ? '<span class="cronograma-tag cronograma-tag--muted">Arquivada</span>' : ""}
@@ -718,13 +731,52 @@ function mountTarefasEvents(root = document, options = {}) {
   }
 
   bindDraftChecklistEvents(root);
-
+  
   root.querySelectorAll('[data-action="toggle-subtarefa-card"]').forEach((input) => {
     input.addEventListener("change", () => {
       toggleChecklistCard(input.dataset.taskId, Number(input.dataset.index), input.checked);
     });
   });
 
+  const clickRoot = root.querySelector(".cronograma-tarefas-page") || root;
+  
+  clickRoot.addEventListener("click", async (e) => {
+    const statusBtn = e.target.closest('[data-action="cycle-status"]');
+    if (statusBtn && clickRoot.contains(statusBtn)) {
+      const tarefa = getTarefaById(statusBtn.dataset.id);
+      if (!tarefa) return;
+  
+      const ordem = ["a_fazer", "andamento", "acompanhando", "concluida"];
+      const atualIndex = ordem.indexOf(tarefa.status);
+      const proximo = ordem[(atualIndex + 1) % ordem.length];
+  
+      try {
+        await atualizarTarefa(tarefa.id, { status: proximo });
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao atualizar status");
+      }
+      return;
+    }
+  
+    const prioridadeBtn = e.target.closest('[data-action="cycle-prioridade"]');
+    if (prioridadeBtn && clickRoot.contains(prioridadeBtn)) {
+      const tarefa = getTarefaById(prioridadeBtn.dataset.id);
+      if (!tarefa) return;
+  
+      const ordem = ["baixa", "media", "alta", "critica"];
+      const atualIndex = ordem.indexOf(tarefa.prioridade);
+      const proximo = ordem[(atualIndex + 1) % ordem.length];
+  
+      try {
+        await atualizarTarefa(tarefa.id, { prioridade: proximo });
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao atualizar prioridade");
+      }
+    }
+  });
+  
   root.querySelectorAll('[data-action="editar-tarefa"]').forEach((btn) => {
     btn.addEventListener("click", () => {
       openTarefaEditor(btn.dataset.id);
@@ -772,7 +824,7 @@ function mountTarefasEvents(root = document, options = {}) {
         projetoNome: projeto?.nome || "",
         fase: formData.get("fase"),
         responsavel: responsavelUser?.nome || "",
-        responsavelUid: responsavelUser?.id || "",
+        responsavelUid: responsavelUser?.uid || "",
         responsavelEmail: responsavelUser?.email || "",
         dataInicio: formData.get("dataInicio"),
         dataVencimento: formData.get("dataVencimento"),
