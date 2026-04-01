@@ -596,21 +596,55 @@ function renderTimelineBar(task, timelineStart) {
   `;
 }
 
+  function renderTimelineResponsavelRow(responsavel, tasks, timelineStart) {
+    return `
+      <div class="cronograma-timeline-responsavel-row">
+        <div class="cronograma-timeline-responsavel-row__label">
+          ${escapeHtml(responsavel)}
+        </div>
+  
+        <div class="cronograma-timeline-responsavel-row__bars">
+          ${tasks
+            .filter((task) => getDateRangeForTask(task))
+            .map((task) => renderTimelineBar(task, timelineStart))
+            .join("")}
+        </div>
+      </div>
+    `;
+  }
+
 function groupTasksForTimeline(tasks) {
-  const groups = new Map();
-
-  tasks.forEach((task) => {
-    const key = task.projetoNome || "Sem projeto";
-
-    if (!groups.has(key)) {
-      groups.set(key, []);
-    }
-
-    groups.get(key).push(task);
-  });
-
-  return [...groups.entries()];
-}
+    const projectGroups = new Map();
+  
+    tasks.forEach((task) => {
+      const projectKey = (task.projetoNome || "Sem projeto").trim() || "Sem projeto";
+      const responsavelKey = formatResponsavel(task);
+  
+      if (!projectGroups.has(projectKey)) {
+        projectGroups.set(projectKey, new Map());
+      }
+  
+      const responsavelMap = projectGroups.get(projectKey);
+  
+      if (!responsavelMap.has(responsavelKey)) {
+        responsavelMap.set(responsavelKey, []);
+      }
+  
+      responsavelMap.get(responsavelKey).push(task);
+    });
+  
+    return [...projectGroups.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0], "pt-BR"))
+      .map(([projectName, responsavelMap]) => ({
+        projectName,
+        responsaveis: [...responsavelMap.entries()]
+          .sort((a, b) => a[0].localeCompare(b[0], "pt-BR"))
+          .map(([responsavel, responsavelTasks]) => ({
+            responsavel,
+            tasks: responsavelTasks
+          }))
+      }));
+  }
 
 function classifyDayTasks(tasks, selectedDateKey) {
   const today = selectedDateKey;
@@ -834,20 +868,19 @@ function getCalendarioTimelineTemplate() {
           }).join("")}
         </div>
 
-        ${groups.map(([project, projectTasks]) => `
-          <div class="cronograma-timeline-row">
-            <div class="cronograma-timeline-row__label">
-              ${escapeHtml(project)}
+          ${groups.map((group) => `
+            <div class="cronograma-timeline-row">
+              <div class="cronograma-timeline-row__label">
+                ${escapeHtml(group.projectName)}
+              </div>
+          
+              <div class="cronograma-timeline-row__content">
+                ${group.responsaveis.map((item) =>
+                  renderTimelineResponsavelRow(item.responsavel, item.tasks, timeline.start)
+                ).join("")}
+              </div>
             </div>
-
-            <div class="cronograma-timeline-row__bars">
-              ${projectTasks
-                .filter(t => getDateRangeForTask(t))
-                .map(t => renderTimelineBar(t, timeline.start))
-                .join("")}
-            </div>
-          </div>
-        `).join("")}
+          `).join("")}
 
       </section>
     </div>
