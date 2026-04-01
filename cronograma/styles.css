@@ -2536,3 +2536,93 @@ body.relevo-body {
 .cronograma-field--timeline-range select {
   min-width: 150px;
 }
+/* =========================================
+   TIMELINE — SUBLINHAS POR RESPONSÁVEL
+========================================= */
+
+.cronograma-timeline-row__content {
+  display: flex;
+  flex-direction: column;
+  min-width: calc(var(--timeline-days, 15) * 60px);
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(15, 23, 42, 0.04) 0,
+      rgba(15, 23, 42, 0.04) 1px,
+      transparent 1px,
+      transparent 60px
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.cronograma-timeline-responsavel-row {
+  display: grid;
+  grid-template-columns: 180px auto;
+  min-height: 64px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cronograma-timeline-responsavel-row:first-child {
+  border-top: 0;
+}
+
+.cronograma-timeline-responsavel-row__label {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.72);
+  background: rgba(248, 250, 252, 0.82);
+  border-right: 1px solid rgba(15, 23, 42, 0.06);
+  word-break: break-word;
+  position: relative;
+  z-index: 2;
+}
+
+.cronograma-timeline-responsavel-row__bars {
+  position: relative;
+  min-height: 64px;
+  min-width: calc(var(--timeline-days, 15) * 60px);
+  overflow: hidden;
+}
+
+.cronograma-timeline-responsavel-row__bars .cronograma-timeline-bar {
+  top: 12px;
+}
+
+@media (max-width: 760px) {
+  .cronograma-timeline-row__content {
+    min-width: calc(var(--timeline-days, 15) * 56px);
+    background:
+      repeating-linear-gradient(
+        to right,
+        rgba(15, 23, 42, 0.04) 0,
+        rgba(15, 23, 42, 0.04) 1px,
+        transparent 1px,
+        transparent 56px
+      ),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  }
+
+  .cronograma-timeline-responsavel-row {
+    grid-template-columns: 140px auto;
+  }
+
+  .cronograma-timeline-responsavel-row__label {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .cronograma-timeline-responsavel-row__bars {
+    min-width: calc(var(--timeline-days, 15) * 56px);
+    min-height: 60px;
+  }
+
+  .cronograma-timeline-responsavel-row__bars .cronograma-timeline-bar {
+    top: 11px;
+  }
+}
