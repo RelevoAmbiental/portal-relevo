@@ -311,6 +311,14 @@ function diffDays(a, b) {
   return Math.floor((b - a) / (1000 * 60 * 60 * 24));
 }
 
+function shiftTimeline(dateKey, offsetDays) {
+  const base = parseDateKey(dateKey) || parseDateKey(getTodayKey()) || new Date();
+  const shifted = new Date(base);
+  shifted.setDate(base.getDate() + offsetDays);
+  shifted.setHours(0, 0, 0, 0);
+  return toDateKey(shifted);
+}
+
 function renderSelectOptions(items, selectedValue) {
   return items
     .map(
@@ -335,6 +343,14 @@ function renderTimelineRangeOptions(selectedValue) {
       ${value} dias
     </option>
   `).join("");
+}
+
+function getTimelineStepDays() {
+  const days = Number(timelineRangeDays) || 15;
+
+  if (days <= 15) return 3;
+  if (days <= 30) return 10;
+  return 15;
 }
 
 function renderViewSwitch() {
@@ -750,27 +766,55 @@ function getCalendarioWeekTemplate() {
 function getCalendarioTimelineTemplate() {
   const tasks = getFilteredTasks();
   const timeline = getTimelineRange();
+  const startLabel = timeline.start.toLocaleDateString("pt-BR");
+  const endLabel = timeline.end.toLocaleDateString("pt-BR");
   const groups = groupTasksForTimeline(tasks);
 
   return `
     <div class="cronograma-calendar-shell">
 
-  <section class="cronograma-calendar-toolbar cronograma-panel">
-    <div class="cronograma-calendar-toolbar__main">
-      <p class="cronograma-shell__eyebrow">Planejamento</p>
-      <h2>Linha do tempo</h2>
-      <p>Visualização temporal das tarefas por projeto, com janela configurável.</p>
-    </div>
-  
-    <div class="cronograma-calendar-toolbar__actions">
-      <label class="cronograma-field cronograma-field--timeline-range">
-        <span>Intervalo</span>
-        <select data-action="timeline-range">
-          ${renderTimelineRangeOptions(timelineRangeDays)}
-        </select>
-      </label>
-    </div>
-  </section>
+    <section class="cronograma-calendar-toolbar cronograma-panel">
+      <div class="cronograma-calendar-toolbar__main">
+        <p class="cronograma-shell__eyebrow">Planejamento</p>
+        <h2>Linha do tempo</h2>
+        <p>Período exibido: ${escapeHtml(startLabel)} → ${escapeHtml(endLabel)}</p>
+      </div>
+    
+      <div class="cronograma-calendar-toolbar__actions">
+        <button
+          class="cronograma-btn cronograma-btn--ghost"
+          type="button"
+          data-action="shift-timeline"
+          data-offset="-1"
+        >
+          ← Anterior
+        </button>
+    
+        <button
+          class="cronograma-btn cronograma-btn--ghost"
+          type="button"
+          data-action="go-today"
+        >
+          Hoje
+        </button>
+    
+        <button
+          class="cronograma-btn"
+          type="button"
+          data-action="shift-timeline"
+          data-offset="1"
+        >
+          Próximo →
+        </button>
+    
+        <label class="cronograma-field cronograma-field--timeline-range">
+          <span>Intervalo</span>
+          <select data-action="timeline-range">
+            ${renderTimelineRangeOptions(timelineRangeDays)}
+          </select>
+        </label>
+      </div>
+    </section>
 
       ${renderViewSwitch()}
 
@@ -1162,6 +1206,23 @@ function handleCalendarClick(event) {
   return;
   }
 
+  if (action === "shift-timeline") {
+    const direction = Number(actionEl.dataset.offset || 0);
+    const step = getTimelineStepDays();
+    const nextDate = shiftTimeline(getSelectedDateKey(), direction * step);
+  
+    setCalendarioDataSelecionada(nextDate);
+  
+    const selected = parseDateKey(nextDate);
+    if (selected) {
+      setCalendarioMesReferencia(
+        toDateKey(new Date(selected.getFullYear(), selected.getMonth(), 1))
+      );
+    }
+  
+    renderCalendarioView();
+    return;
+  }
   
   if (action === "go-today") {
     const today = getTodayKey();
