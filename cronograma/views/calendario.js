@@ -774,7 +774,10 @@ function getCalendarioTimelineTemplate() {
 
       ${renderViewSwitch()}
 
-      <section class="cronograma-timeline">
+      <section
+        class="cronograma-timeline"
+        style="--timeline-days: ${timeline.totalDays};"
+      >
 
         <div class="cronograma-timeline-grid">
           ${Array.from({ length: timeline.totalDays }).map((_, i) => {
