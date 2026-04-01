@@ -2353,8 +2353,11 @@ body.relevo-body {
 
 .cronograma-timeline-grid {
   display: grid;
-  grid-template-columns: 220px repeat(13, 60px);
-  min-width: 1000px;
+  grid-auto-flow: column;
+  grid-auto-columns: 60px;
+  grid-template-columns: 220px;
+  width: max-content;
+  min-width: 100%;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 18px;
   overflow: hidden;
@@ -2383,13 +2386,15 @@ body.relevo-body {
 
 .cronograma-timeline-row {
   display: grid;
-  grid-template-columns: 220px 780px;
-  min-width: 1000px;
+  grid-template-columns: 220px auto;
+  width: max-content;
+  min-width: 100%;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 18px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+  position: relative;
 }
 
 .cronograma-timeline-row__label {
@@ -2403,11 +2408,16 @@ body.relevo-body {
   align-items: center;
   line-height: 1.35;
   word-break: break-word;
+  position: relative;
+  z-index: 3;
 }
 
 .cronograma-timeline-row__bars {
   position: relative;
   min-height: 72px;
+  min-width: calc(var(--timeline-days, 15) * 60px);
+  overflow: hidden;
+  z-index: 1;
   background:
     repeating-linear-gradient(
       to right,
@@ -2437,6 +2447,7 @@ body.relevo-body {
     transform 0.18s ease,
     box-shadow 0.18s ease,
     border-color 0.18s ease;
+  z-index: 1;
 }
 
 .cronograma-timeline-bar:hover {
@@ -2467,13 +2478,12 @@ body.relevo-body {
 
 @media (max-width: 1100px) {
   .cronograma-timeline-grid {
-    grid-template-columns: 180px repeat(13, 60px);
-    min-width: 960px;
+    grid-template-columns: 180px;
+    grid-auto-columns: 60px;
   }
 
   .cronograma-timeline-row {
-    grid-template-columns: 180px 780px;
-    min-width: 960px;
+    grid-template-columns: 180px auto;
   }
 
   .cronograma-timeline-row__label {
@@ -2488,17 +2498,17 @@ body.relevo-body {
   }
 
   .cronograma-timeline-grid {
-    grid-template-columns: 150px repeat(13, 56px);
-    min-width: 878px;
+    grid-template-columns: 150px;
+    grid-auto-columns: 56px;
   }
 
   .cronograma-timeline-row {
-    grid-template-columns: 150px 728px;
-    min-width: 878px;
+    grid-template-columns: 150px auto;
   }
 
   .cronograma-timeline-row__bars {
     min-height: 68px;
+    min-width: calc(var(--timeline-days, 15) * 56px);
     background:
       repeating-linear-gradient(
         to right,
@@ -2518,4 +2528,11 @@ body.relevo-body {
   .cronograma-timeline-bar span {
     font-size: 0.82rem;
   }
+}
+.cronograma-field--timeline-range {
+  min-width: 150px;
+}
+
+.cronograma-field--timeline-range select {
+  min-width: 150px;
 }
