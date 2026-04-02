@@ -597,6 +597,8 @@ function renderTimelineBar(task, timelineStart) {
 }
 
   function renderTimelineResponsavelRow(responsavel, tasks, timelineStart) {
+    const taskRows = splitTasksIntoRows(tasks);
+  
     return `
       <div class="cronograma-timeline-responsavel-row">
         <div class="cronograma-timeline-responsavel-row__label">
@@ -604,10 +606,11 @@ function renderTimelineBar(task, timelineStart) {
         </div>
   
         <div class="cronograma-timeline-responsavel-row__bars">
-          ${tasks
-            .filter((task) => getDateRangeForTask(task))
-            .map((task) => renderTimelineBar(task, timelineStart))
-            .join("")}
+          ${taskRows.map(row => `
+            <div class="cronograma-timeline-subrow">
+              ${row.map(task => renderTimelineBar(task, timelineStart)).join("")}
+            </div>
+          `).join("")}
         </div>
       </div>
     `;
@@ -646,49 +649,87 @@ function groupTasksForTimeline(tasks) {
       }));
   }
 
-function classifyDayTasks(tasks, selectedDateKey) {
-  const today = selectedDateKey;
+  function splitTasksIntoRows(tasks) {
+    const rows = [];
+  
+    tasks
+      .filter((t) => getDateRangeForTask(t))
+      .sort((a, b) => {
+        const ra = getDateRangeForTask(a);
+        const rb = getDateRangeForTask(b);
+        return ra.start - rb.start;
+      })
+      .forEach((task) => {
+        const range = getDateRangeForTask(task);
+        const start = range.start;
+        const end = range.end;
+  
+        let placed = false;
+  
+        for (const row of rows) {
+          const conflict = row.some((existing) => {
+            const r = getDateRangeForTask(existing);
+            return !(end <= r.start || start >= r.end);
+          });
+  
+          if (!conflict) {
+            row.push(task);
+            placed = true;
+            break;
+          }
+        }
+  
+        if (!placed) {
+          rows.push([task]);
+        }
+      });
+  
+    return rows;
+  }
 
-  const groups = {
-    overdue: [],
-    dueToday: [],
-    startingToday: [],
-    highPriority: [],
-    others: []
-  };
-
-  tasks.forEach((task) => {
-    const range = getDateRangeForTask(task);
-    if (!range) return;
-
-    const startKey = toDateKey(range.start);
-    const endKey = toDateKey(range.end);
-
-    if (isTaskOverdue(task)) {
-      groups.overdue.push(task);
-      return;
-    }
-
-    if (endKey === today) {
-      groups.dueToday.push(task);
-      return;
-    }
-
-    if (startKey === today) {
-      groups.startingToday.push(task);
-      return;
-    }
-
-    if (["alta", "critica"].includes(task.prioridade)) {
-      groups.highPriority.push(task);
-      return;
-    }
-
-    groups.others.push(task);
-  });
-
-  return groups;
-}
+  function classifyDayTasks(tasks, selectedDateKey) {
+    const today = selectedDateKey;
+  
+    const groups = {
+      overdue: [],
+      dueToday: [],
+      startingToday: [],
+      highPriority: [],
+      others: []
+    };
+  
+    tasks.forEach((task) => {
+      const range = getDateRangeForTask(task);
+      if (!range) return;
+  
+      const startKey = toDateKey(range.start);
+      const endKey = toDateKey(range.end);
+  
+      if (isTaskOverdue(task)) {
+        groups.overdue.push(task);
+        return;
+      }
+  
+      if (endKey === today) {
+        groups.dueToday.push(task);
+        return;
+      }
+  
+      if (startKey === today) {
+        groups.startingToday.push(task);
+        return;
+      }
+  
+      if (["alta", "critica"].includes(task.prioridade)) {
+        groups.highPriority.push(task);
+        return;
+      }
+  
+      groups.others.push(task);
+    });
+  
+    return groups;
+  }
 
 function getCalendarioWeekTemplate() {
   const selectedDateKey = getSelectedDateKey();
