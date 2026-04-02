@@ -666,18 +666,34 @@ function renderTimelineBar(task, timelineStart) {
 }
 
   function renderTimelineResponsavelRow(responsavel, tasks, timelineStart) {
-    const taskRows = splitTasksIntoRows(tasks);
+    const stats = getResponsavelTimelineStats(tasks);
   
     return `
-      <div class="cronograma-timeline-responsavel-row">
+      <div class="cronograma-timeline-responsavel-row ${stats.hasConflict ? `has-conflict is-${stats.conflictLevel}` : ""}">
         <div class="cronograma-timeline-responsavel-row__label">
-          ${escapeHtml(responsavel)}
+          <span class="cronograma-timeline-responsavel-row__name">
+            ${escapeHtml(responsavel)}
+          </span>
+  
+          <span class="cronograma-timeline-responsavel-row__badges">
+            <span class="cronograma-timeline-badge">
+              ${stats.totalTasks} tarefa${stats.totalTasks !== 1 ? "s" : ""}
+            </span>
+  
+            ${
+              stats.concurrentFronts > 1
+                ? `<span class="cronograma-timeline-badge cronograma-timeline-badge--warning">
+                    ${stats.concurrentFronts} frentes
+                  </span>`
+                : ""
+            }
+          </span>
         </div>
   
         <div class="cronograma-timeline-responsavel-row__bars">
-          ${taskRows.map(row => `
+          ${stats.taskRows.map((row) => `
             <div class="cronograma-timeline-subrow">
-              ${row.map(task => renderTimelineBar(task, timelineStart)).join("")}
+              ${row.map((task) => renderTimelineBar(task, timelineStart)).join("")}
             </div>
           `).join("")}
         </div>
@@ -754,6 +770,28 @@ function groupTasksForTimeline(tasks) {
       });
   
     return rows;
+  }
+
+  function getResponsavelTimelineStats(tasks) {
+    const taskRows = splitTasksIntoRows(tasks);
+    const totalTasks = tasks.filter((task) => getDateRangeForTask(task)).length;
+    const concurrentFronts = taskRows.length;
+    const hasConflict = concurrentFronts > 1;
+  
+    let conflictLevel = "none";
+    if (concurrentFronts >= 3) {
+      conflictLevel = "high";
+    } else if (concurrentFronts === 2) {
+      conflictLevel = "medium";
+    }
+  
+    return {
+      taskRows,
+      totalTasks,
+      concurrentFronts,
+      hasConflict,
+      conflictLevel
+    };
   }
 
   function classifyDayTasks(tasks, selectedDateKey) {
@@ -907,12 +945,35 @@ function getCalendarioWeekTemplate() {
   `;
 }
 
+function getTimelineMetrics(tasks) {
+  const overdue = tasks.filter((task) => isTaskOverdue(task)).length;
+  const responsaveis = countUniqueResponsaveis(tasks);
+  const projetos = new Set(tasks.map((task) => formatProjeto(task))).size;
+
+  const grouped = groupTasksForTimeline(tasks);
+  const responsaveisComConflito = grouped.reduce((acc, group) => {
+    return acc + group.responsaveis.filter((item) => {
+      const stats = getResponsavelTimelineStats(item.tasks);
+      return stats.hasConflict;
+    }).length;
+  }, 0);
+
+  return {
+    totalTasks: tasks.length,
+    overdue,
+    responsaveis,
+    projetos,
+    responsaveisComConflito
+  };
+}
+
 function getCalendarioTimelineTemplate() {
   const tasks = getFilteredTasks();
   const timeline = getTimelineRange();
   const startLabel = timeline.start.toLocaleDateString("pt-BR");
   const endLabel = timeline.end.toLocaleDateString("pt-BR");
   const groups = groupTasksForTimeline(tasks);
+  const metrics = getTimelineMetrics(tasks);
 
   return `
     <div class="cronograma-calendar-shell">
@@ -962,8 +1023,15 @@ function getCalendarioTimelineTemplate() {
 
       ${renderViewSwitch()}
 
-        <section
-          class="cronograma-timeline"
+      <section class="cronograma-calendar-kpis">
+        ${renderCalendarMetricCard("Tarefas visíveis", String(metrics.totalTasks), "Itens no horizonte atual")}
+        ${renderCalendarMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
+        ${renderCalendarMetricCard("Responsáveis", String(metrics.responsaveis), "Recursos ativos")}
+        ${renderCalendarMetricCard("Conflitos", String(metrics.responsaveisComConflito), "Responsáveis com frentes simultâneas", metrics.responsaveisComConflito ? "warning" : "")}
+      </section>
+
+      <section
+        class="cronograma-timeline"
           style="--timeline-days: ${timeline.totalDays};"
         >
 
