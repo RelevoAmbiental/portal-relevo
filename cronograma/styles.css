@@ -2626,3 +2626,14 @@ body.relevo-body {
     top: 11px;
   }
 }
+.cronograma-timeline-subrow {
+  position: relative;
+  height: 28px;
+  margin-bottom: 6px;
+}
+
+.cronograma-timeline-responsavel-row__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
