@@ -2951,3 +2951,36 @@ body.relevo-body {
     align-items: flex-start;
   }
 }
+.cronograma-mini-list__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cronograma-mini-list__group + .cronograma-mini-list__group {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.cronograma-mini-list__group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cronograma-gestao-badge--danger {
+  background: rgba(220, 38, 38, 0.14);
+  color: #991b1b;
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.18);
+}
+
+.cronograma-mini-list__item span + span {
+  margin-top: 2px;
+}
+
+.cronograma-empty-state--compact {
+  padding: 12px 14px;
+  font-size: 0.9rem;
+}
