@@ -14,12 +14,19 @@ import {
   getTodayKey,
   isTaskOverdue,
   isTaskUpcoming,
-  sortCalendarTasks
+  sortCalendarTasks,
+  parseDateKey
 } from "../core/calendar-utils.js";
 
 let unsubscribeTarefas = null;
 let unsubscribeUsers = null;
 let unsubscribeProjetos = null;
+
+const gestaoUiState = {
+  filterType: "all",
+  filterValue: "",
+  sortMode: "risk"
+};
 
 function escapeHtml(value) {
   return String(value || "")
@@ -60,6 +67,57 @@ function formatStatus(value) {
   return map[value] || "Sem status";
 }
 
+function getPriorityWeight(value) {
+  const map = {
+    critica: 4,
+    alta: 3,
+    media: 2,
+    baixa: 1
+  };
+
+  return map[value] || 0;
+}
+
+function getDaysDiff(fromKey, toKey) {
+  const from = parseDateKey(fromKey);
+  const to = parseDateKey(toKey);
+
+  if (!from || !to) return null;
+
+  const a = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const b = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+
+  return Math.round((b - a) / 86400000);
+}
+
+function getTaskRiskScore(task, today = getTodayKey()) {
+  let score = 0;
+
+  score += getPriorityWeight(task.prioridade) * 3;
+
+  if (isTaskOverdue(task, today)) {
+    const overdueDays = Math.abs(getDaysDiff(task.dataVencimento, today) || 0);
+    score += 15 + Math.min(overdueDays, 10);
+  } else if (isTaskUpcoming(task, today, 7)) {
+    const daysLeft = getDaysDiff(today, task.dataVencimento);
+    score += 8 - Math.min(Math.max(daysLeft ?? 7, 0), 7);
+  }
+
+  if (formatResponsavel(task) === "Sem responsável") {
+    score += 4;
+  }
+
+  if (task.status === "andamento") {
+    score += 2;
+  }
+
+  if (task.status === "acompanhando") {
+    score += 1;
+  }
+
+  return score;
+}
+
 function getFilteredGestaoTasks() {
   const projetosMap = new Map(
     (state.projetos || []).map((projeto) => [
@@ -72,6 +130,7 @@ function getFilteredGestaoTasks() {
     (state.tarefas || [])
       .filter((task) => {
         if (task.arquivada) return false;
+        if (task.status === "concluida") return false;
         return Boolean(getDateRangeForTask(task));
       })
       .map((task) => {
@@ -168,6 +227,7 @@ function getGestaoMetrics(tasks) {
   const responsaveis = [...responsavelMap.entries()]
     .map(([nome, responsavelTasks]) => {
       const stats = getResponsavelTimelineStats(responsavelTasks);
+      const riskScore = responsavelTasks.reduce((sum, task) => sum + getTaskRiskScore(task, today), 0);
 
       return {
         nome,
@@ -176,11 +236,13 @@ function getGestaoMetrics(tasks) {
         upcoming: responsavelTasks.filter((task) => isTaskUpcoming(task, today, 7)).length,
         fronts: stats.concurrentFronts,
         hasConflict: stats.hasConflict,
-        conflictLevel: stats.conflictLevel
+        conflictLevel: stats.conflictLevel,
+        riskScore
       };
     })
     .sort((a, b) =>
       b.overdue - a.overdue ||
+      b.riskScore - a.riskScore ||
       b.fronts - a.fronts ||
       b.total - a.total ||
       a.nome.localeCompare(b.nome, "pt-BR")
@@ -204,6 +266,7 @@ function getGestaoMetrics(tasks) {
       const highCount = projetoTasks.filter((task) => ["alta", "critica"].includes(task.prioridade)).length;
       const upcomingCount = projetoTasks.filter((task) => isTaskUpcoming(task, today, 7)).length;
       const responsaveis = countUniqueResponsaveis(projetoTasks);
+      const riskScore = projetoTasks.reduce((sum, task) => sum + getTaskRiskScore(task, today), 0);
 
       return {
         nome,
@@ -211,11 +274,13 @@ function getGestaoMetrics(tasks) {
         overdue: overdueCount,
         high: highCount,
         upcoming: upcomingCount,
-        responsaveis
+        responsaveis,
+        riskScore
       };
     })
     .sort((a, b) =>
       b.overdue - a.overdue ||
+      b.riskScore - a.riskScore ||
       b.high - a.high ||
       b.upcoming - a.upcoming ||
       b.total - a.total ||
@@ -235,48 +300,143 @@ function getGestaoMetrics(tasks) {
   };
 }
 
-  function getGestaoQuickActions(tasks) {
-    const today = getTodayKey();
-  
-    const overdue = tasks
-      .filter((task) => isTaskOverdue(task, today))
-      .sort((a, b) => {
-        const ra = getDateRangeForTask(a);
-        const rb = getDateRangeForTask(b);
-        return ra.end - rb.end;
-      });
-  
-    const highPriority = tasks
-      .filter((task) => ["alta", "critica"].includes(task.prioridade))
-      .sort((a, b) => {
-        const pa = a.prioridade === "critica" ? 2 : 1;
-        const pb = b.prioridade === "critica" ? 2 : 1;
-        return pb - pa;
-      });
-  
-    const upcoming = tasks
-      .filter((task) => isTaskUpcoming(task, today, 7))
-      .sort((a, b) => {
-        const ra = getDateRangeForTask(a);
-        const rb = getDateRangeForTask(b);
-        return ra.end - rb.end;
-      });
-  
-    const unassigned = tasks
-      .filter((task) => formatResponsavel(task) === "Sem responsável")
-      .sort((a, b) => {
-        const ra = getDateRangeForTask(a);
-        const rb = getDateRangeForTask(b);
-        return ra.start - rb.start;
-      });
-  
-    return {
-      overdue,
-      highPriority,
-      upcoming,
-      unassigned
-    };
+function getGestaoQuickActions(tasks) {
+  const today = getTodayKey();
+
+  const overdue = tasks
+    .filter((task) => isTaskOverdue(task, today))
+    .sort((a, b) => {
+      const aScore = getTaskRiskScore(a, today);
+      const bScore = getTaskRiskScore(b, today);
+      return bScore - aScore;
+    });
+
+  const highPriority = tasks
+    .filter((task) => ["alta", "critica"].includes(task.prioridade))
+    .sort((a, b) => {
+      const aScore = getTaskRiskScore(a, today);
+      const bScore = getTaskRiskScore(b, today);
+      return bScore - aScore;
+    });
+
+  const upcoming = tasks
+    .filter((task) => isTaskUpcoming(task, today, 7))
+    .sort((a, b) => {
+      const ra = getDateRangeForTask(a);
+      const rb = getDateRangeForTask(b);
+      return ra.end - rb.end;
+    });
+
+  const unassigned = tasks
+    .filter((task) => formatResponsavel(task) === "Sem responsável")
+    .sort((a, b) => {
+      const aScore = getTaskRiskScore(a, today);
+      const bScore = getTaskRiskScore(b, today);
+      return bScore - aScore;
+    });
+
+  return {
+    overdue,
+    highPriority,
+    upcoming,
+    unassigned
+  };
+}
+
+function getRadarData(tasks, metrics) {
+  const today = getTodayKey();
+
+  const orderedByRisk = [...tasks].sort((a, b) => getTaskRiskScore(b, today) - getTaskRiskScore(a, today));
+  const nextCriticalTask = orderedByRisk[0] || null;
+  const mostLoadedResponsavel = metrics.responsaveis[0] || null;
+  const mostPressuredProject = metrics.projetos[0] || null;
+
+  return {
+    nextCriticalTask,
+    mostLoadedResponsavel,
+    mostPressuredProject
+  };
+}
+
+function getFilterMeta(filterType, filterValue) {
+  const map = {
+    all: {
+      title: "Todas as tarefas ativas",
+      description: "Visão geral da operação atual."
+    },
+    overdue: {
+      title: "Tarefas em atraso",
+      description: "Itens vencidos que precisam de reação imediata."
+    },
+    high: {
+      title: "Tarefas de alta prioridade",
+      description: "Itens classificados como alta ou crítica."
+    },
+    upcoming: {
+      title: "Tarefas com vencimento em 7 dias",
+      description: "Curto prazo que já pede acompanhamento."
+    },
+    unassigned: {
+      title: "Tarefas sem responsável",
+      description: "Itens que ainda não têm dono definido."
+    },
+    responsavel: {
+      title: `Responsável: ${filterValue || "—"}`,
+      description: "Recorte operacional por responsável."
+    },
+    projeto: {
+      title: `Projeto: ${filterValue || "—"}`,
+      description: "Recorte operacional por projeto."
+    }
+  };
+
+  return map[filterType] || map.all;
+}
+
+function applyGestaoFilter(tasks) {
+  const today = getTodayKey();
+  const { filterType, filterValue, sortMode } = gestaoUiState;
+
+  let filtered = [...tasks];
+
+  if (filterType === "overdue") {
+    filtered = filtered.filter((task) => isTaskOverdue(task, today));
   }
+
+  if (filterType === "high") {
+    filtered = filtered.filter((task) => ["alta", "critica"].includes(task.prioridade));
+  }
+
+  if (filterType === "upcoming") {
+    filtered = filtered.filter((task) => isTaskUpcoming(task, today, 7));
+  }
+
+  if (filterType === "unassigned") {
+    filtered = filtered.filter((task) => formatResponsavel(task) === "Sem responsável");
+  }
+
+  if (filterType === "responsavel") {
+    filtered = filtered.filter((task) => formatResponsavel(task) === filterValue);
+  }
+
+  if (filterType === "projeto") {
+    filtered = filtered.filter((task) => formatProjeto(task) === filterValue);
+  }
+
+  filtered.sort((a, b) => {
+    if (sortMode === "due") {
+      const ra = getDateRangeForTask(a);
+      const rb = getDateRangeForTask(b);
+      const aEnd = ra ? ra.end.getTime() : Number.MAX_SAFE_INTEGER;
+      const bEnd = rb ? rb.end.getTime() : Number.MAX_SAFE_INTEGER;
+      return aEnd - bEnd || getTaskRiskScore(b, today) - getTaskRiskScore(a, today);
+    }
+
+    return getTaskRiskScore(b, today) - getTaskRiskScore(a, today);
+  });
+
+  return filtered;
+}
 
 function renderMetricCard(label, value, hint, tone = "") {
   return `
@@ -290,7 +450,12 @@ function renderMetricCard(label, value, hint, tone = "") {
 
 function renderResponsavelCard(item) {
   return `
-    <article class="cronograma-gestao-card ${item.conflictLevel !== "none" ? `is-${item.conflictLevel}` : ""}">
+    <button
+      class="cronograma-gestao-card ${item.conflictLevel !== "none" ? `is-${item.conflictLevel}` : ""}"
+      type="button"
+      data-action="filter-responsavel"
+      data-responsavel="${escapeHtml(item.nome)}"
+    >
       <div class="cronograma-gestao-card__head">
         <h3>${escapeHtml(item.nome)}</h3>
         ${
@@ -309,13 +474,18 @@ function renderResponsavelCard(item) {
           <strong>${item.upcoming}</strong> próximas de vencer
         </span>
       </div>
-    </article>
+    </button>
   `;
 }
 
 function renderProjetoCard(item) {
   return `
-    <article class="cronograma-gestao-card">
+    <button
+      class="cronograma-gestao-card"
+      type="button"
+      data-action="filter-projeto"
+      data-projeto="${escapeHtml(item.nome)}"
+    >
       <div class="cronograma-gestao-card__head">
         <h3>${escapeHtml(item.nome)}</h3>
         <span class="cronograma-gestao-badge">${item.total} tarefas</span>
@@ -335,77 +505,235 @@ function renderProjetoCard(item) {
           <strong>${item.responsaveis}</strong> responsáveis
         </span>
       </div>
-    </article>
+    </button>
   `;
 }
 
-function renderQuickList(title, items, emptyText, tone = "") {
+function renderGestaoTaskCard(task) {
+  const range = getDateRangeForTask(task);
+  const dataFim = range ? range.end.toLocaleDateString("pt-BR") : "Sem data";
+  const riskScore = getTaskRiskScore(task);
+  const overdue = isTaskOverdue(task);
+
   return `
-    <div class="cronograma-mini-list__group">
-      <div class="cronograma-mini-list__group-head">
-        <strong>${escapeHtml(title)}</strong>
-        <span class="cronograma-gestao-badge ${tone ? `cronograma-gestao-badge--${tone}` : ""}">
-          ${items.length}
-        </span>
-      </div>
+    <button
+      class="cronograma-gestao-task-card ${overdue ? "is-overdue" : ""}"
+      type="button"
+      data-action="open-task"
+      data-task-id="${escapeHtml(task.id || "")}"
+    >
+      <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
+      <span>${escapeHtml(formatProjeto(task))}</span>
+      <span>${escapeHtml(formatResponsavel(task))}</span>
 
-      ${
-        items.length
-          ? `
-            <div class="cronograma-mini-list">
-              ${items.map((task) => `
-                <div class="cronograma-mini-list__item">
-                  <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
-                  <span>${escapeHtml(formatProjeto(task))}</span>
-                  <span>${escapeHtml(formatResponsavel(task))}</span>
-                </div>
-              `).join("")}
-            </div>
-          `
-          : `<div class="cronograma-empty-state cronograma-empty-state--compact">${escapeHtml(emptyText)}</div>`
-      }
-    </div>
+      <div class="cronograma-gestao-task-card__meta">
+        <span>${escapeHtml(formatPrioridade(task.prioridade))}</span>
+        <span>${escapeHtml(formatStatus(task.status))}</span>
+        <span>Vence: ${escapeHtml(dataFim)}</span>
+        <span>Risco: ${escapeHtml(String(riskScore))}</span>
+      </div>
+    </button>
   `;
 }
 
-  function renderGestaoTaskCard(task) {
-    const range = getDateRangeForTask(task);
-    const dataFim = range ? range.end.toLocaleDateString("pt-BR") : "Sem data";
-  
-    return `
-      <button
-        class="cronograma-gestao-task-card"
-        type="button"
-        data-action="open-task"
-        data-task-id="${escapeHtml(task.id || "")}"
-      >
-        <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
-        <span>${escapeHtml(formatProjeto(task))}</span>
-        <span>${escapeHtml(formatResponsavel(task))}</span>
-        <div class="cronograma-gestao-task-card__meta">
-          <span>${escapeHtml(formatPrioridade(task.prioridade))}</span>
-          <span>${escapeHtml(formatStatus(task.status))}</span>
-          <span>Vence: ${escapeHtml(dataFim)}</span>
-        </div>
-      </button>
-    `;
-  }
-
-function renderGestaoBoardColumn(title, items, emptyText, tone = "") {
+function renderGestaoBoardColumn(title, items, emptyText, tone = "", filterType = "all") {
   return `
     <section class="cronograma-gestao-board__column">
       <div class="cronograma-gestao-board__head">
-        <h3>${escapeHtml(title)}</h3>
-        <span class="cronograma-gestao-badge ${tone ? `cronograma-gestao-badge--${tone}` : ""}">
-          ${items.length}
-        </span>
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+        </div>
+
+        <div class="cronograma-gestao-board__actions">
+          <span class="cronograma-gestao-badge ${tone ? `cronograma-gestao-badge--${tone}` : ""}">
+            ${items.length}
+          </span>
+          <button
+            class="cronograma-link-button"
+            type="button"
+            data-action="set-filter"
+            data-filter-type="${escapeHtml(filterType)}"
+          >
+            Ver tudo
+          </button>
+        </div>
       </div>
 
       <div class="cronograma-gestao-board__list">
         ${
           items.length
-            ? items.slice(0, 8).map(renderGestaoTaskCard).join("")
+            ? items.slice(0, 6).map(renderGestaoTaskCard).join("")
             : `<div class="cronograma-empty-state cronograma-empty-state--compact">${escapeHtml(emptyText)}</div>`
+        }
+      </div>
+    </section>
+  `;
+}
+
+function renderGestaoFilterToolbar() {
+  const filters = [
+    { key: "all", label: "Todas" },
+    { key: "overdue", label: "Atrasadas" },
+    { key: "high", label: "Alta prioridade" },
+    { key: "upcoming", label: "Próx. 7 dias" },
+    { key: "unassigned", label: "Sem responsável" }
+  ];
+
+  return `
+    <div class="cronograma-gestao-toolbar">
+      <div class="cronograma-gestao-toolbar__chips">
+        ${filters
+          .map(
+            (filter) => `
+              <button
+                class="cronograma-filter-chip ${gestaoUiState.filterType === filter.key ? "is-active" : ""}"
+                type="button"
+                data-action="set-filter"
+                data-filter-type="${escapeHtml(filter.key)}"
+              >
+                ${escapeHtml(filter.label)}
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+
+      <div class="cronograma-gestao-toolbar__sort">
+        <label for="gestao-sort-mode">Ordenar por</label>
+        <select id="gestao-sort-mode" data-action="change-sort">
+          <option value="risk" ${gestaoUiState.sortMode === "risk" ? "selected" : ""}>Risco</option>
+          <option value="due" ${gestaoUiState.sortMode === "due" ? "selected" : ""}>Prazo</option>
+        </select>
+      </div>
+    </div>
+  `;
+}
+
+function renderRadarCard(radar) {
+  const nextTask = radar.nextCriticalTask;
+  const topResponsavel = radar.mostLoadedResponsavel;
+  const topProjeto = radar.mostPressuredProject;
+
+  return `
+    <aside class="cronograma-panel cronograma-radar-panel">
+      <div class="cronograma-radar-panel__head">
+        <h3>Radar de execução</h3>
+        <p>Leitura gerencial imediata do que mais pressiona a operação agora.</p>
+      </div>
+
+      <div class="cronograma-radar-stack">
+        <section class="cronograma-radar-card">
+          <span class="cronograma-radar-card__label">Próxima atenção crítica</span>
+          ${
+            nextTask
+              ? `
+                <strong>${escapeHtml(nextTask.titulo || "Tarefa")}</strong>
+                <span>${escapeHtml(formatProjeto(nextTask))}</span>
+                <span>${escapeHtml(formatResponsavel(nextTask))}</span>
+                <button
+                  class="cronograma-link-button"
+                  type="button"
+                  data-action="open-task"
+                  data-task-id="${escapeHtml(nextTask.id || "")}"
+                >
+                  Abrir tarefa
+                </button>
+              `
+              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhuma tarefa ativa encontrada.</div>`
+          }
+        </section>
+
+        <section class="cronograma-radar-card">
+          <span class="cronograma-radar-card__label">Responsável mais carregado</span>
+          ${
+            topResponsavel
+              ? `
+                <strong>${escapeHtml(topResponsavel.nome)}</strong>
+                <span>${escapeHtml(String(topResponsavel.total))} tarefas ativas</span>
+                <span>${escapeHtml(String(topResponsavel.overdue))} atrasadas</span>
+                <button
+                  class="cronograma-link-button"
+                  type="button"
+                  data-action="filter-responsavel"
+                  data-responsavel="${escapeHtml(topResponsavel.nome)}"
+                >
+                  Ver tarefas
+                </button>
+              `
+              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Sem responsáveis ativos no período.</div>`
+          }
+        </section>
+
+        <section class="cronograma-radar-card">
+          <span class="cronograma-radar-card__label">Projeto mais pressionado</span>
+          ${
+            topProjeto
+              ? `
+                <strong>${escapeHtml(topProjeto.nome)}</strong>
+                <span>${escapeHtml(String(topProjeto.total))} tarefas ativas</span>
+                <span>${escapeHtml(String(topProjeto.overdue))} atrasadas</span>
+                <button
+                  class="cronograma-link-button"
+                  type="button"
+                  data-action="filter-projeto"
+                  data-projeto="${escapeHtml(topProjeto.nome)}"
+                >
+                  Ver tarefas
+                </button>
+              `
+              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhum projeto ativo encontrado.</div>`
+          }
+        </section>
+
+        <section class="cronograma-radar-card">
+          <span class="cronograma-radar-card__label">Atalhos de ação</span>
+          <div class="cronograma-radar-actions">
+            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="overdue">Ver atrasadas</button>
+            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="high">Ver críticas</button>
+            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="upcoming">Curto prazo</button>
+            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="unassigned">Sem responsável</button>
+          </div>
+        </section>
+      </div>
+    </aside>
+  `;
+}
+
+function renderFilteredResults(tasks) {
+  const meta = getFilterMeta(gestaoUiState.filterType, gestaoUiState.filterValue);
+
+  return `
+    <section class="cronograma-panel">
+      <div class="cronograma-section-head">
+        <div>
+          <h3>${escapeHtml(meta.title)}</h3>
+          <p>${escapeHtml(meta.description)}</p>
+        </div>
+
+        <div class="cronograma-gestao-results__actions">
+          <span class="cronograma-gestao-badge">${tasks.length} itens</span>
+          ${
+            gestaoUiState.filterType !== "all"
+              ? `
+                <button
+                  class="cronograma-link-button"
+                  type="button"
+                  data-action="set-filter"
+                  data-filter-type="all"
+                >
+                  Limpar filtro
+                </button>
+              `
+              : ""
+          }
+        </div>
+      </div>
+
+      <div class="cronograma-gestao-results">
+        ${
+          tasks.length
+            ? tasks.map(renderGestaoTaskCard).join("")
+            : `<div class="cronograma-empty-state">Nenhuma tarefa encontrada para este recorte.</div>`
         }
       </div>
     </section>
@@ -416,6 +744,8 @@ function getGestaoTemplate() {
   const tasks = getFilteredGestaoTasks();
   const metrics = getGestaoMetrics(tasks);
   const quick = getGestaoQuickActions(tasks);
+  const radar = getRadarData(tasks, metrics);
+  const filteredTasks = applyGestaoFilter(tasks);
 
   return `
     <div class="cronograma-view-grid">
@@ -437,6 +767,8 @@ function getGestaoTemplate() {
           ${renderMetricCard("Próx. 7 dias", String(metrics.upcoming), "Radar de curto prazo", metrics.upcoming ? "warning" : "")}
           ${renderMetricCard("Conflitos", String(metrics.responsaveisComConflito), "Responsáveis com frentes simultâneas", metrics.responsaveisComConflito ? "warning" : "")}
         </section>
+
+        ${renderGestaoFilterToolbar()}
 
         <section class="cronograma-panel">
           <div class="cronograma-section-head">
@@ -481,23 +813,17 @@ function getGestaoTemplate() {
           </div>
 
           <div class="cronograma-gestao-board">
-            ${renderGestaoBoardColumn("Em atraso", quick.overdue, "Nenhuma tarefa atrasada.", "danger")}
-            ${renderGestaoBoardColumn("Alta prioridade", quick.highPriority, "Nenhuma tarefa alta/crítica.", "warning")}
-            ${renderGestaoBoardColumn("Vence em 7 dias", quick.upcoming, "Nenhum vencimento próximo.")}
-            ${renderGestaoBoardColumn("Sem responsável", quick.unassigned, "Todas as tarefas têm responsável.")}
+            ${renderGestaoBoardColumn("Em atraso", quick.overdue, "Nenhuma tarefa atrasada.", "danger", "overdue")}
+            ${renderGestaoBoardColumn("Alta prioridade", quick.highPriority, "Nenhuma tarefa alta/crítica.", "warning", "high")}
+            ${renderGestaoBoardColumn("Vence em 7 dias", quick.upcoming, "Nenhum vencimento próximo.", "", "upcoming")}
+            ${renderGestaoBoardColumn("Sem responsável", quick.unassigned, "Todas as tarefas têm responsável.", "", "unassigned")}
           </div>
         </section>
-        
+
+        ${renderFilteredResults(filteredTasks)}
       </section>
 
-      <aside class="cronograma-panel">
-        <h3>Ação rápida</h3>
-
-        ${renderQuickList("Em atraso", quick.overdue, "Nenhuma tarefa atrasada.", "danger")}
-        ${renderQuickList("Alta prioridade", quick.highPriority, "Nenhuma tarefa alta/crítica.", "warning")}
-        ${renderQuickList("Vence em 7 dias", quick.upcoming, "Nenhum vencimento próximo.")}
-        ${renderQuickList("Sem responsável", quick.unassigned, "Todas as tarefas têm responsável.")}
-      </aside>
+      ${renderRadarCard(radar)}
     </div>
   `;
 }
@@ -570,12 +896,51 @@ function mountGestaoEvents() {
     const actionEl = event.target.closest("[data-action]");
     if (!actionEl) return;
 
-    const { action, taskId } = actionEl.dataset;
+    const {
+      action,
+      taskId,
+      filterType,
+      responsavel,
+      projeto
+    } = actionEl.dataset;
 
     if (action === "open-task" && taskId) {
       import("./tarefas.js").then(({ openTarefaEditor }) => {
         openTarefaEditor(taskId, { scrollToTop: true });
       });
+      return;
+    }
+
+    if (action === "set-filter") {
+      gestaoUiState.filterType = filterType || "all";
+      gestaoUiState.filterValue = "";
+      renderGestaoView();
+      return;
+    }
+
+    if (action === "filter-responsavel") {
+      gestaoUiState.filterType = "responsavel";
+      gestaoUiState.filterValue = responsavel || "";
+      renderGestaoView();
+      return;
+    }
+
+    if (action === "filter-projeto") {
+      gestaoUiState.filterType = "projeto";
+      gestaoUiState.filterValue = projeto || "";
+      renderGestaoView();
+    }
+  });
+
+  root.addEventListener("change", (event) => {
+    const actionEl = event.target.closest("[data-action]");
+    if (!actionEl) return;
+
+    const { action } = actionEl.dataset;
+
+    if (action === "change-sort") {
+      gestaoUiState.sortMode = actionEl.value || "risk";
+      renderGestaoView();
     }
   });
 }
