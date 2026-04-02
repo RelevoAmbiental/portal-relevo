@@ -353,6 +353,51 @@ function getTimelineStepDays() {
   return 15;
 }
 
+function isSameDate(dateA, dateB) {
+  return toDateKey(dateA) === toDateKey(dateB);
+}
+
+function isTimelineToday(date) {
+  const today = parseDateKey(getTodayKey());
+  return today ? isSameDate(date, today) : false;
+}
+
+function isTimelineWeekend(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6;
+}
+
+function isTimelineWeekStart(date) {
+  return date.getDay() === 1; // segunda
+}
+
+function isTimelineMonthStart(date) {
+  return date.getDate() === 1;
+}
+
+function renderTimelineHeaderCell(date) {
+  const dayNumber = String(date.getDate()).padStart(2, "0");
+  const weekday = date.toLocaleDateString("pt-BR", { weekday: "short" });
+  const monthLabel = date.toLocaleDateString("pt-BR", { month: "short" });
+
+  const classes = [
+    "cronograma-timeline-day"
+  ];
+
+  if (isTimelineToday(date)) classes.push("is-today");
+  if (isTimelineWeekend(date)) classes.push("is-weekend");
+  if (isTimelineWeekStart(date)) classes.push("is-week-start");
+  if (isTimelineMonthStart(date)) classes.push("is-month-start");
+
+  return `
+    <div class="${classes.join(" ")}">
+      <span class="cronograma-timeline-day__weekday">${escapeHtml(weekday)}</span>
+      <strong class="cronograma-timeline-day__number">${escapeHtml(dayNumber)}</strong>
+      ${isTimelineMonthStart(date) ? `<small class="cronograma-timeline-day__month">${escapeHtml(monthLabel)}</small>` : ""}
+    </div>
+  `;
+}
+
 function renderViewSwitch() {
   return `
     <div class="cronograma-calendar-view-switch" aria-label="Escalas do calendário">
@@ -579,19 +624,43 @@ function renderTimelineBar(task, timelineStart) {
     task.projeto?.cor ||
     "#cfd8d3";
 
+  const isOverdue = isTaskOverdue(task);
+  const isDone = task.status === "concluida";
+  const isInProgress = task.status === "andamento";
+  const isWatching = task.status === "acompanhando";
+
+  const barClasses = [
+    "cronograma-timeline-bar"
+  ];
+
+  if (isOverdue) barClasses.push("is-overdue");
+  if (isDone) barClasses.push("is-done");
+  if (isInProgress) barClasses.push("is-in-progress");
+  if (isWatching) barClasses.push("is-watching");
+
+  const tooltip = [
+    task.titulo || "Tarefa",
+    `Projeto: ${formatProjeto(task)}`,
+    `Responsável: ${formatResponsavel(task)}`,
+    `Janela: ${formatDate(task.dataInicio)} → ${formatDate(task.dataVencimento)}`,
+    `Duração: ${duration} dia${duration > 1 ? "s" : ""}`,
+    `Status: ${formatStatus(task.status)}`,
+    `Prioridade: ${formatPrioridade(task.prioridade)}`
+  ].join(" • ");
+
   return `
     <div
-      class="cronograma-timeline-bar"
+      class="${barClasses.join(" ")}"
       style="
         left: ${left}px;
         width: ${width}px;
-        --project-accent: ${projetoCor};
+        --project-accent: ${escapeHtml(projetoCor)};
       "
-      title="${escapeHtml(task.titulo)}"
+      title="${escapeHtml(tooltip)}"
       data-action="open-task"
       data-task-id="${escapeHtml(task.id || "")}"
     >
-      <span>${escapeHtml(task.titulo)}</span>
+      <span class="cronograma-timeline-bar__label">${escapeHtml(task.titulo || "Tarefa")}</span>
     </div>
   `;
 }
@@ -669,7 +738,7 @@ function groupTasksForTimeline(tasks) {
         for (const row of rows) {
           const conflict = row.some((existing) => {
             const r = getDateRangeForTask(existing);
-            return !(end <= r.start || start >= r.end);
+            return !(end < r.start || start > r.end);
           });
   
           if (!conflict) {
@@ -893,21 +962,33 @@ function getCalendarioTimelineTemplate() {
 
       ${renderViewSwitch()}
 
-      <section
-        class="cronograma-timeline"
-        style="--timeline-days: ${timeline.totalDays};"
-      >
+        <section
+          class="cronograma-timeline"
+          style="--timeline-days: ${timeline.totalDays};"
+        >
 
-        <div class="cronograma-timeline-grid">
-          ${Array.from({ length: timeline.totalDays }).map((_, i) => {
-            const d = new Date(timeline.start);
-            d.setDate(d.getDate() + i);
+          <div class="cronograma-timeline-grid">
+            ${Array.from({ length: timeline.totalDays }).map((_, i) => {
+              const d = new Date(timeline.start);
+              d.setDate(d.getDate() + i);
+              return renderTimelineHeaderCell(d);
+            }).join("")}
+          </div>
 
-            return `<div class="cronograma-timeline-day">
-              ${d.getDate()}
-            </div>`;
-          }).join("")}
-        </div>
+          <div class="cronograma-timeline-background">
+            ${Array.from({ length: timeline.totalDays }).map((_, i) => {
+              const d = new Date(timeline.start);
+              d.setDate(d.getDate() + i);
+          
+              const classes = ["cronograma-timeline-background__cell"];
+              if (isTimelineToday(d)) classes.push("is-today");
+              if (isTimelineWeekend(d)) classes.push("is-weekend");
+              if (isTimelineWeekStart(d)) classes.push("is-week-start");
+              if (isTimelineMonthStart(d)) classes.push("is-month-start");
+          
+              return `<div class="${classes.join(" ")}"></div>`;
+            }).join("")}
+          </div>
 
           ${groups.map((group) => `
             <div class="cronograma-timeline-row">
