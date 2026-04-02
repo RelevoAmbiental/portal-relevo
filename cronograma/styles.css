@@ -2637,3 +2637,147 @@ body.relevo-body {
   flex-direction: column;
   gap: 2px;
 }
+.cronograma-timeline {
+  position: relative;
+}
+
+.cronograma-timeline-grid {
+  position: relative;
+  z-index: 3;
+}
+
+.cronograma-timeline-background {
+  position: absolute;
+  inset: 56px 0 0 0;
+  display: grid;
+  grid-template-columns: repeat(var(--timeline-days), 60px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cronograma-timeline-background__cell {
+  min-height: 100%;
+  border-left: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cronograma-timeline-background__cell.is-weekend {
+  background: rgba(15, 23, 42, 0.025);
+}
+
+.cronograma-timeline-background__cell.is-week-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.14);
+}
+
+.cronograma-timeline-background__cell.is-month-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.22);
+}
+
+.cronograma-timeline-background__cell.is-today {
+  background:
+    linear-gradient(
+      to right,
+      rgba(34, 197, 94, 0.12),
+      rgba(34, 197, 94, 0.18),
+      rgba(34, 197, 94, 0.12)
+    );
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16);
+}
+
+.cronograma-timeline-day {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  text-align: center;
+  border-left: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cronograma-timeline-day.is-weekend {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.cronograma-timeline-day.is-week-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.14);
+}
+
+.cronograma-timeline-day.is-month-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.22);
+}
+
+.cronograma-timeline-day.is-today {
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16);
+  border-radius: 10px;
+}
+
+.cronograma-timeline-day__weekday {
+  font-size: 0.7rem;
+  line-height: 1;
+  text-transform: lowercase;
+  opacity: 0.72;
+}
+
+.cronograma-timeline-day__number {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.cronograma-timeline-day__month {
+  font-size: 0.68rem;
+  line-height: 1;
+  text-transform: capitalize;
+  opacity: 0.72;
+}
+
+.cronograma-timeline-subrow {
+  position: relative;
+  height: 28px;
+  margin-bottom: 6px;
+}
+
+.cronograma-timeline-responsavel-row__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+.cronograma-timeline-bar {
+  position: absolute;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 10px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  z-index: 4;
+}
+
+.cronograma-timeline-bar__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cronograma-timeline-bar.is-overdue {
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.35);
+}
+
+.cronograma-timeline-bar.is-done {
+  opacity: 0.72;
+  filter: saturate(0.78);
+}
+
+.cronograma-timeline-bar.is-in-progress {
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.28);
+}
+
+.cronograma-timeline-bar.is-watching {
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.28);
+}
