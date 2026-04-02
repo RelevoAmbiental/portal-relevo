@@ -2810,3 +2810,144 @@ body.relevo-body {
   background: rgba(245, 158, 11, 0.14);
   box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.18);
 }
+.cronograma-gestao-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cronograma-gestao-responsaveis,
+.cronograma-gestao-projetos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.cronograma-gestao-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(8px);
+  min-height: 140px;
+}
+
+.cronograma-gestao-card.is-medium {
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.08),
+    inset 4px 0 0 rgba(245, 158, 11, 0.95);
+}
+
+.cronograma-gestao-card.is-high {
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.08),
+    inset 4px 0 0 rgba(220, 38, 38, 0.95);
+}
+
+.cronograma-gestao-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cronograma-gestao-card__head h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+  color: #10231c;
+}
+
+.cronograma-gestao-card__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: rgba(16, 35, 28, 0.82);
+}
+
+.cronograma-gestao-card__metrics span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cronograma-gestao-card__metrics strong {
+  font-size: 1rem;
+  color: #10231c;
+}
+
+.cronograma-gestao-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  background: rgba(15, 23, 42, 0.08);
+  color: #10231c;
+}
+
+.cronograma-gestao-badge--warning {
+  background: rgba(245, 158, 11, 0.16);
+  color: #92400e;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.22);
+}
+
+.cronograma-gestao-card .is-danger {
+  color: #b91c1c;
+}
+
+.cronograma-gestao-card .is-warning {
+  color: #b45309;
+}
+
+.cronograma-mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cronograma-mini-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.cronograma-mini-list__item strong {
+  color: #10231c;
+}
+
+.cronograma-mini-list__item span {
+  color: rgba(16, 35, 28, 0.8);
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .cronograma-gestao-responsaveis,
+  .cronograma-gestao-projetos {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-gestao-card {
+    min-height: unset;
+  }
+
+  .cronograma-gestao-card__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
