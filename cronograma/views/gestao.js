@@ -38,6 +38,28 @@ function formatProjeto(task) {
   return (task.projetoNome || "").trim() || "Sem projeto";
 }
 
+function formatPrioridade(value) {
+  const map = {
+    baixa: "Baixa",
+    media: "Média",
+    alta: "Alta",
+    critica: "Crítica"
+  };
+
+  return map[value] || "Sem prioridade";
+}
+
+function formatStatus(value) {
+  const map = {
+    a_fazer: "A fazer",
+    andamento: "Em andamento",
+    acompanhando: "Acompanhando",
+    concluida: "Concluída"
+  };
+
+  return map[value] || "Sem status";
+}
+
 function getFilteredGestaoTasks() {
   const projetosMap = new Map(
     (state.projetos || []).map((projeto) => [
@@ -218,19 +240,35 @@ function getGestaoMetrics(tasks) {
   
     const overdue = tasks
       .filter((task) => isTaskOverdue(task, today))
-      .slice(0, 5);
+      .sort((a, b) => {
+        const ra = getDateRangeForTask(a);
+        const rb = getDateRangeForTask(b);
+        return ra.end - rb.end;
+      });
   
     const highPriority = tasks
       .filter((task) => ["alta", "critica"].includes(task.prioridade))
-      .slice(0, 5);
+      .sort((a, b) => {
+        const pa = a.prioridade === "critica" ? 2 : 1;
+        const pb = b.prioridade === "critica" ? 2 : 1;
+        return pb - pa;
+      });
   
     const upcoming = tasks
       .filter((task) => isTaskUpcoming(task, today, 7))
-      .slice(0, 5);
+      .sort((a, b) => {
+        const ra = getDateRangeForTask(a);
+        const rb = getDateRangeForTask(b);
+        return ra.end - rb.end;
+      });
   
     const unassigned = tasks
       .filter((task) => formatResponsavel(task) === "Sem responsável")
-      .slice(0, 5);
+      .sort((a, b) => {
+        const ra = getDateRangeForTask(a);
+        const rb = getDateRangeForTask(b);
+        return ra.start - rb.start;
+      });
   
     return {
       overdue,
@@ -330,6 +368,50 @@ function renderQuickList(title, items, emptyText, tone = "") {
   `;
 }
 
+  function renderGestaoTaskCard(task) {
+    const range = getDateRangeForTask(task);
+    const dataFim = range ? range.end.toLocaleDateString("pt-BR") : "Sem data";
+  
+    return `
+      <button
+        class="cronograma-gestao-task-card"
+        type="button"
+        data-action="open-task"
+        data-task-id="${escapeHtml(task.id || "")}"
+      >
+        <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
+        <span>${escapeHtml(formatProjeto(task))}</span>
+        <span>${escapeHtml(formatResponsavel(task))}</span>
+        <div class="cronograma-gestao-task-card__meta">
+          <span>${escapeHtml(formatPrioridade(task.prioridade))}</span>
+          <span>${escapeHtml(formatStatus(task.status))}</span>
+          <span>Vence: ${escapeHtml(dataFim)}</span>
+        </div>
+      </button>
+    `;
+  }
+
+function renderGestaoBoardColumn(title, items, emptyText, tone = "") {
+  return `
+    <section class="cronograma-gestao-board__column">
+      <div class="cronograma-gestao-board__head">
+        <h3>${escapeHtml(title)}</h3>
+        <span class="cronograma-gestao-badge ${tone ? `cronograma-gestao-badge--${tone}` : ""}">
+          ${items.length}
+        </span>
+      </div>
+
+      <div class="cronograma-gestao-board__list">
+        ${
+          items.length
+            ? items.slice(0, 8).map(renderGestaoTaskCard).join("")
+            : `<div class="cronograma-empty-state cronograma-empty-state--compact">${escapeHtml(emptyText)}</div>`
+        }
+      </div>
+    </section>
+  `;
+}
+
 function getGestaoTemplate() {
   const tasks = getFilteredGestaoTasks();
   const metrics = getGestaoMetrics(tasks);
@@ -389,6 +471,23 @@ function getGestaoTemplate() {
             }
           </div>
         </section>
+
+        <section class="cronograma-panel">
+          <div class="cronograma-section-head">
+            <div>
+              <h3>Quadro operacional</h3>
+              <p>Triagem rápida das tarefas que mais pedem ação no curto prazo.</p>
+            </div>
+          </div>
+
+          <div class="cronograma-gestao-board">
+            ${renderGestaoBoardColumn("Em atraso", quick.overdue, "Nenhuma tarefa atrasada.", "danger")}
+            ${renderGestaoBoardColumn("Alta prioridade", quick.highPriority, "Nenhuma tarefa alta/crítica.", "warning")}
+            ${renderGestaoBoardColumn("Vence em 7 dias", quick.upcoming, "Nenhum vencimento próximo.")}
+            ${renderGestaoBoardColumn("Sem responsável", quick.unassigned, "Todas as tarefas têm responsável.")}
+          </div>
+        </section>
+        
       </section>
 
       <aside class="cronograma-panel">
@@ -463,10 +562,29 @@ function ensureProjetosListener() {
   );
 }
 
+function mountGestaoEvents() {
+  const root = document.querySelector(".cronograma-view-grid");
+  if (!root) return;
+
+  root.addEventListener("click", (event) => {
+    const actionEl = event.target.closest("[data-action]");
+    if (!actionEl) return;
+
+    const { action, taskId } = actionEl.dataset;
+
+    if (action === "open-task" && taskId) {
+      import("./tarefas.js").then(({ openTarefaEditor }) => {
+        openTarefaEditor(taskId, { scrollToTop: true });
+      });
+    }
+  });
+}
+
 export function renderGestaoView() {
   ensureTarefasListener();
   ensureUsersListener();
   ensureProjetosListener();
 
   renderIntoApp(getGestaoTemplate());
+  mountGestaoEvents();
 }
