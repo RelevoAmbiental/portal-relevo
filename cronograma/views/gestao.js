@@ -213,6 +213,33 @@ function getGestaoMetrics(tasks) {
   };
 }
 
+  function getGestaoQuickActions(tasks) {
+    const today = getTodayKey();
+  
+    const overdue = tasks
+      .filter((task) => isTaskOverdue(task, today))
+      .slice(0, 5);
+  
+    const highPriority = tasks
+      .filter((task) => ["alta", "critica"].includes(task.prioridade))
+      .slice(0, 5);
+  
+    const upcoming = tasks
+      .filter((task) => isTaskUpcoming(task, today, 7))
+      .slice(0, 5);
+  
+    const unassigned = tasks
+      .filter((task) => formatResponsavel(task) === "Sem responsável")
+      .slice(0, 5);
+  
+    return {
+      overdue,
+      highPriority,
+      upcoming,
+      unassigned
+    };
+  }
+
 function renderMetricCard(label, value, hint, tone = "") {
   return `
     <div class="cronograma-calendar-kpi ${tone ? `cronograma-calendar-kpi--${tone}` : ""}">
@@ -274,9 +301,39 @@ function renderProjetoCard(item) {
   `;
 }
 
+function renderQuickList(title, items, emptyText, tone = "") {
+  return `
+    <div class="cronograma-mini-list__group">
+      <div class="cronograma-mini-list__group-head">
+        <strong>${escapeHtml(title)}</strong>
+        <span class="cronograma-gestao-badge ${tone ? `cronograma-gestao-badge--${tone}` : ""}">
+          ${items.length}
+        </span>
+      </div>
+
+      ${
+        items.length
+          ? `
+            <div class="cronograma-mini-list">
+              ${items.map((task) => `
+                <div class="cronograma-mini-list__item">
+                  <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
+                  <span>${escapeHtml(formatProjeto(task))}</span>
+                  <span>${escapeHtml(formatResponsavel(task))}</span>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : `<div class="cronograma-empty-state cronograma-empty-state--compact">${escapeHtml(emptyText)}</div>`
+      }
+    </div>
+  `;
+}
+
 function getGestaoTemplate() {
   const tasks = getFilteredGestaoTasks();
   const metrics = getGestaoMetrics(tasks);
+  const quick = getGestaoQuickActions(tasks);
 
   return `
     <div class="cronograma-view-grid">
@@ -335,17 +392,12 @@ function getGestaoTemplate() {
       </section>
 
       <aside class="cronograma-panel">
-        <h3>Leitura executiva</h3>
-        <div class="cronograma-mini-list">
-          <div class="cronograma-mini-list__item">
-            <strong>Agora</strong>
-            <span>Identifique responsáveis sobrecarregados e projetos com atraso acumulado.</span>
-          </div>
-          <div class="cronograma-mini-list__item">
-            <strong>Próxima etapa</strong>
-            <span>Quadro operacional de ação rápida, com recortes por atraso, prioridade e vencimento.</span>
-          </div>
-        </div>
+        <h3>Ação rápida</h3>
+
+        ${renderQuickList("Em atraso", quick.overdue, "Nenhuma tarefa atrasada.", "danger")}
+        ${renderQuickList("Alta prioridade", quick.highPriority, "Nenhuma tarefa alta/crítica.", "warning")}
+        ${renderQuickList("Vence em 7 dias", quick.upcoming, "Nenhum vencimento próximo.")}
+        ${renderQuickList("Sem responsável", quick.unassigned, "Todas as tarefas têm responsável.")}
       </aside>
     </div>
   `;
