@@ -2340,10 +2340,11 @@ body.relevo-body {
   }
 }
 /* =========================================
-   CALENDÁRIO — LINHA DO TEMPO
+   CALENDÁRIO — LINHA DO TEMPO / GANTT
 ========================================= */
 
 .cronograma-timeline {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -2352,6 +2353,8 @@ body.relevo-body {
 }
 
 .cronograma-timeline-grid {
+  position: relative;
+  z-index: 3;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 60px;
@@ -2373,18 +2376,95 @@ body.relevo-body {
   border-right: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.cronograma-timeline-day {
-  min-height: 46px;
+.cronograma-timeline-background {
+  position: absolute;
+  top: 57px;
+  left: 220px;
   display: grid;
-  place-items: center;
-  font-size: 0.82rem;
+  grid-template-columns: repeat(var(--timeline-days), 60px);
+  width: calc(var(--timeline-days, 15) * 60px);
+  height: calc(100% - 57px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cronograma-timeline-background__cell {
+  min-height: 100%;
+  border-left: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cronograma-timeline-background__cell.is-weekend {
+  background: rgba(15, 23, 42, 0.025);
+}
+
+.cronograma-timeline-background__cell.is-week-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.14);
+}
+
+.cronograma-timeline-background__cell.is-month-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.22);
+}
+
+.cronograma-timeline-background__cell.is-today {
+  background: linear-gradient(to right, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.18), rgba(34, 197, 94, 0.12));
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16);
+}
+
+.cronograma-timeline-day {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  text-align: center;
   font-weight: 700;
-  color: rgba(15, 23, 42, 0.72);
+  color: rgba(15, 23, 42, 0.78);
   background: linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, rgba(255, 255, 255, 0.96) 100%);
   border-left: 1px solid rgba(15, 23, 42, 0.06);
 }
 
+.cronograma-timeline-day.is-weekend {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.cronograma-timeline-day.is-week-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.14);
+}
+
+.cronograma-timeline-day.is-month-start {
+  border-left: 1px solid rgba(15, 23, 42, 0.22);
+}
+
+.cronograma-timeline-day.is-today {
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16);
+  border-radius: 10px;
+}
+
+.cronograma-timeline-day__weekday {
+  font-size: 0.7rem;
+  line-height: 1;
+  text-transform: lowercase;
+  opacity: 0.72;
+}
+
+.cronograma-timeline-day__number {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.cronograma-timeline-day__month {
+  font-size: 0.68rem;
+  line-height: 1;
+  text-transform: capitalize;
+  opacity: 0.72;
+}
+
 .cronograma-timeline-row {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 220px auto;
   width: max-content;
@@ -2394,7 +2474,6 @@ body.relevo-body {
   overflow: hidden;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
-  position: relative;
 }
 
 .cronograma-timeline-row__label {
@@ -2412,42 +2491,75 @@ body.relevo-body {
   z-index: 3;
 }
 
-.cronograma-timeline-row__bars {
+.cronograma-timeline-row__content {
+  display: flex;
+  flex-direction: column;
+  min-width: calc(var(--timeline-days, 15) * 60px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
   position: relative;
-  min-height: 72px;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.cronograma-timeline-responsavel-row {
+  display: grid;
+  grid-template-columns: 180px auto;
+  min-height: 64px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.cronograma-timeline-responsavel-row:first-child {
+  border-top: 0;
+}
+
+.cronograma-timeline-responsavel-row__label {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.72);
+  background: rgba(248, 250, 252, 0.82);
+  border-right: 1px solid rgba(15, 23, 42, 0.06);
+  word-break: break-word;
+  position: relative;
+  z-index: 2;
+}
+
+.cronograma-timeline-responsavel-row__bars {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 64px;
   min-width: calc(var(--timeline-days, 15) * 60px);
   overflow: hidden;
-  z-index: 1;
-  background:
-    repeating-linear-gradient(
-      to right,
-      rgba(15, 23, 42, 0.04) 0,
-      rgba(15, 23, 42, 0.04) 1px,
-      transparent 1px,
-      transparent 60px
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+}
+
+.cronograma-timeline-subrow {
+  position: relative;
+  height: 28px;
+  margin-bottom: 6px;
 }
 
 .cronograma-timeline-bar {
   position: absolute;
-  top: 16px;
-  height: 40px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
   border: 1px solid rgba(15, 23, 42, 0.10);
-  border-left: 6px solid var(--project-accent, #cfd8d3);
-  border-radius: 14px;
+  border-left: 5px solid var(--project-accent, #cfd8d3);
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
+  padding: 0 10px;
   cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
-  z-index: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  z-index: 4;
 }
 
 .cronograma-timeline-bar:hover {
@@ -2461,15 +2573,32 @@ body.relevo-body {
   outline-offset: 1px;
 }
 
+.cronograma-timeline-bar__label,
 .cronograma-timeline-bar span {
   display: block;
   width: 100%;
-  font-size: 0.87rem;
-  font-weight: 700;
-  color: #0f172a;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cronograma-timeline-bar.is-overdue {
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.35), 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.cronograma-timeline-bar.is-done {
+  opacity: 0.72;
+  filter: saturate(0.78);
+}
+
+.cronograma-timeline-bar.is-in-progress {
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.28), 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.cronograma-timeline-bar.is-watching {
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.28), 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 /* =========================================
@@ -2479,7 +2608,10 @@ body.relevo-body {
 @media (max-width: 1100px) {
   .cronograma-timeline-grid {
     grid-template-columns: 180px;
-    grid-auto-columns: 60px;
+  }
+
+  .cronograma-timeline-background {
+    left: 180px;
   }
 
   .cronograma-timeline-row {
@@ -2499,36 +2631,40 @@ body.relevo-body {
 
   .cronograma-timeline-grid {
     grid-template-columns: 150px;
-    grid-auto-columns: 56px;
+  }
+
+  .cronograma-timeline-background {
+    left: 150px;
   }
 
   .cronograma-timeline-row {
     grid-template-columns: 150px auto;
   }
 
-  .cronograma-timeline-row__bars {
-    min-height: 68px;
-    min-width: calc(var(--timeline-days, 15) * 56px);
-    background:
-      repeating-linear-gradient(
-        to right,
-        rgba(15, 23, 42, 0.04) 0,
-        rgba(15, 23, 42, 0.04) 1px,
-        transparent 1px,
-        transparent 56px
-      ),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  .cronograma-timeline-row__content {
+    min-width: calc(var(--timeline-days, 15) * 60px);
   }
 
-  .cronograma-timeline-bar {
-    top: 14px;
-    height: 38px;
+  .cronograma-timeline-responsavel-row {
+    grid-template-columns: 140px auto;
   }
 
+  .cronograma-timeline-responsavel-row__label {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .cronograma-timeline-responsavel-row__bars {
+    min-width: calc(var(--timeline-days, 15) * 60px);
+    min-height: 60px;
+  }
+
+  .cronograma-timeline-bar__label,
   .cronograma-timeline-bar span {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
   }
 }
+
 .cronograma-field--timeline-range {
   min-width: 150px;
 }
@@ -2625,159 +2761,4 @@ body.relevo-body {
   .cronograma-timeline-responsavel-row__bars .cronograma-timeline-bar {
     top: 11px;
   }
-}
-.cronograma-timeline-subrow {
-  position: relative;
-  height: 28px;
-  margin-bottom: 6px;
-}
-
-.cronograma-timeline-responsavel-row__bars {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.cronograma-timeline {
-  position: relative;
-}
-
-.cronograma-timeline-grid {
-  position: relative;
-  z-index: 3;
-}
-
-.cronograma-timeline-background {
-  position: absolute;
-  inset: 56px 0 0 0;
-  display: grid;
-  grid-template-columns: repeat(var(--timeline-days), 60px);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.cronograma-timeline-background__cell {
-  min-height: 100%;
-  border-left: 1px solid rgba(15, 23, 42, 0.06);
-}
-
-.cronograma-timeline-background__cell.is-weekend {
-  background: rgba(15, 23, 42, 0.025);
-}
-
-.cronograma-timeline-background__cell.is-week-start {
-  border-left: 1px solid rgba(15, 23, 42, 0.14);
-}
-
-.cronograma-timeline-background__cell.is-month-start {
-  border-left: 1px solid rgba(15, 23, 42, 0.22);
-}
-
-.cronograma-timeline-background__cell.is-today {
-  background:
-    linear-gradient(
-      to right,
-      rgba(34, 197, 94, 0.12),
-      rgba(34, 197, 94, 0.18),
-      rgba(34, 197, 94, 0.12)
-    );
-  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16);
-}
-
-.cronograma-timeline-day {
-  min-height: 56px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 4px;
-  text-align: center;
-  border-left: 1px solid rgba(15, 23, 42, 0.06);
-}
-
-.cronograma-timeline-day.is-weekend {
-  background: rgba(15, 23, 42, 0.03);
-}
-
-.cronograma-timeline-day.is-week-start {
-  border-left: 1px solid rgba(15, 23, 42, 0.14);
-}
-
-.cronograma-timeline-day.is-month-start {
-  border-left: 1px solid rgba(15, 23, 42, 0.22);
-}
-
-.cronograma-timeline-day.is-today {
-  background: rgba(34, 197, 94, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16);
-  border-radius: 10px;
-}
-
-.cronograma-timeline-day__weekday {
-  font-size: 0.7rem;
-  line-height: 1;
-  text-transform: lowercase;
-  opacity: 0.72;
-}
-
-.cronograma-timeline-day__number {
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.cronograma-timeline-day__month {
-  font-size: 0.68rem;
-  line-height: 1;
-  text-transform: capitalize;
-  opacity: 0.72;
-}
-
-.cronograma-timeline-subrow {
-  position: relative;
-  height: 28px;
-  margin-bottom: 6px;
-}
-
-.cronograma-timeline-responsavel-row__bars {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  position: relative;
-  z-index: 2;
-}
-
-.cronograma-timeline-bar {
-  position: absolute;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 0 10px;
-  cursor: pointer;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  z-index: 4;
-}
-
-.cronograma-timeline-bar__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cronograma-timeline-bar.is-overdue {
-  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.35);
-}
-
-.cronograma-timeline-bar.is-done {
-  opacity: 0.72;
-  filter: saturate(0.78);
-}
-
-.cronograma-timeline-bar.is-in-progress {
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.28);
-}
-
-.cronograma-timeline-bar.is-watching {
-  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.28);
 }
