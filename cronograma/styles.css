@@ -3261,3 +3261,68 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
+/* ===== Ajuste de layout da Gestão ===== */
+
+.cronograma-gestao-summary-card {
+  margin-top: 18px;
+}
+
+.cronograma-gestao-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cronograma-gestao-summary-grid .cronograma-calendar-kpi {
+  min-height: auto;
+  padding: 16px 18px;
+  border-radius: 18px;
+}
+
+.cronograma-gestao-summary-grid .cronograma-calendar-kpi span {
+  font-size: 0.88rem;
+}
+
+.cronograma-gestao-summary-grid .cronograma-calendar-kpi strong {
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+
+.cronograma-gestao-summary-grid .cronograma-calendar-kpi small {
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.cronograma-gestao-toolbar {
+  margin-top: 0;
+}
+
+.cronograma-radar-panel .cronograma-gestao-card {
+  padding: 16px;
+}
+
+.cronograma-radar-panel .cronograma-gestao-card__head {
+  align-items: flex-start;
+}
+
+.cronograma-radar-panel .cronograma-gestao-card__metrics {
+  margin-top: 10px;
+}
+
+@media (max-width: 1180px) {
+  .cronograma-gestao-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .cronograma-gestao-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .cronograma-gestao-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
