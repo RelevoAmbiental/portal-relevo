@@ -2984,3 +2984,88 @@ body.relevo-body {
   padding: 12px 14px;
   font-size: 0.9rem;
 }
+.cronograma-gestao-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cronograma-gestao-board__column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cronograma-gestao-board__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cronograma-gestao-board__head h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #10231c;
+}
+
+.cronograma-gestao-board__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cronograma-gestao-task-card {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.cronograma-gestao-task-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1);
+}
+
+.cronograma-gestao-task-card strong {
+  color: #10231c;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.cronograma-gestao-task-card span {
+  color: rgba(16, 35, 28, 0.8);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.cronograma-gestao-task-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 1200px) {
+  .cronograma-gestao-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .cronograma-gestao-board {
+    grid-template-columns: 1fr;
+  }
+}
