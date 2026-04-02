@@ -448,6 +448,27 @@ function renderMetricCard(label, value, hint, tone = "") {
   `;
 }
 
+function renderResumoExecutivoCard(metrics) {
+  return `
+    <section class="cronograma-panel cronograma-gestao-summary-card">
+      <div class="cronograma-section-head">
+        <div>
+          <h3>Resumo executivo</h3>
+          <p>Indicadores centrais da operação atual, em leitura compacta.</p>
+        </div>
+      </div>
+
+      <div class="cronograma-gestao-summary-grid">
+        ${renderMetricCard("Tarefas ativas", String(metrics.totalTasks), "Base operacional atual")}
+        ${renderMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
+        ${renderMetricCard("Alta prioridade", String(metrics.highPriority), "Itens críticos")}
+        ${renderMetricCard("Próx. 7 dias", String(metrics.upcoming), "Radar de curto prazo", metrics.upcoming ? "warning" : "")}
+        ${renderMetricCard("Conflitos", String(metrics.responsaveisComConflito), "Responsáveis com frentes simultâneas", metrics.responsaveisComConflito ? "warning" : "")}
+      </div>
+    </section>
+  `;
+}
+
 function renderResponsavelCard(item) {
   return `
     <button
@@ -609,6 +630,21 @@ function renderGestaoFilterToolbar() {
   `;
 }
 
+function renderGestaoFilterPanel() {
+  return `
+    <section class="cronograma-panel">
+      <div class="cronograma-section-head">
+        <div>
+          <h3>Filtros rápidos</h3>
+          <p>Use os recortes abaixo para focar imediatamente no que exige ação.</p>
+        </div>
+      </div>
+
+      ${renderGestaoFilterToolbar()}
+    </section>
+  `;
+}
+
 function renderRadarCard(radar) {
   const nextTask = radar.nextCriticalTask;
   const topResponsavel = radar.mostLoadedResponsavel;
@@ -744,7 +780,6 @@ function getGestaoTemplate() {
   const tasks = getFilteredGestaoTasks();
   const metrics = getGestaoMetrics(tasks);
   const quick = getGestaoQuickActions(tasks);
-  const radar = getRadarData(tasks, metrics);
   const filteredTasks = applyGestaoFilter(tasks);
 
   return `
@@ -760,15 +795,7 @@ function getGestaoTemplate() {
           </div>
         </div>
 
-        <section class="cronograma-calendar-kpis">
-          ${renderMetricCard("Tarefas ativas", String(metrics.totalTasks), "Base operacional atual")}
-          ${renderMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
-          ${renderMetricCard("Alta prioridade", String(metrics.highPriority), "Itens críticos")}
-          ${renderMetricCard("Próx. 7 dias", String(metrics.upcoming), "Radar de curto prazo", metrics.upcoming ? "warning" : "")}
-          ${renderMetricCard("Conflitos", String(metrics.responsaveisComConflito), "Responsáveis com frentes simultâneas", metrics.responsaveisComConflito ? "warning" : "")}
-        </section>
-
-        ${renderGestaoFilterToolbar()}
+        ${renderResumoExecutivoCard(metrics)}
 
         <section class="cronograma-panel">
           <div class="cronograma-section-head">
@@ -790,23 +817,6 @@ function getGestaoTemplate() {
         <section class="cronograma-panel">
           <div class="cronograma-section-head">
             <div>
-              <h3>Projetos sob atenção</h3>
-              <p>Ordenados por atraso e criticidade, para apoiar priorização gerencial.</p>
-            </div>
-          </div>
-
-          <div class="cronograma-gestao-projetos">
-            ${
-              metrics.projetos.length
-                ? metrics.projetos.slice(0, 10).map(renderProjetoCard).join("")
-                : `<div class="cronograma-empty-state">Nenhum projeto ativo com tarefas no período.</div>`
-            }
-          </div>
-        </section>
-
-        <section class="cronograma-panel">
-          <div class="cronograma-section-head">
-            <div>
               <h3>Quadro operacional</h3>
               <p>Triagem rápida das tarefas que mais pedem ação no curto prazo.</p>
             </div>
@@ -820,10 +830,25 @@ function getGestaoTemplate() {
           </div>
         </section>
 
+        ${renderGestaoFilterPanel()}
+
         ${renderFilteredResults(filteredTasks)}
       </section>
 
-      ${renderRadarCard(radar)}
+      <aside class="cronograma-panel cronograma-radar-panel">
+        <div class="cronograma-radar-panel__head">
+          <h3>Projetos sob atenção</h3>
+          <p>Projetos ordenados por atraso e criticidade para apoiar a priorização gerencial.</p>
+        </div>
+
+        <div class="cronograma-radar-stack">
+          ${
+            metrics.projetos.length
+              ? metrics.projetos.slice(0, 10).map(renderProjetoCard).join("")
+              : `<div class="cronograma-empty-state">Nenhum projeto ativo com tarefas no período.</div>`
+          }
+        </div>
+      </aside>
     </div>
   `;
 }
