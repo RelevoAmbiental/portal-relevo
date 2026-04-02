@@ -2762,3 +2762,51 @@ body.relevo-body {
     top: 11px;
   }
 }
+,.cronograma-timeline-responsavel-row {
+  transition: background-color 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  border-radius: 16px;
+}
+
+.cronograma-timeline-responsavel-row.has-conflict.is-medium {
+  background: rgba(245, 158, 11, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.14);
+}
+
+.cronograma-timeline-responsavel-row.has-conflict.is-high {
+  background: rgba(220, 38, 38, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.16);
+}
+
+.cronograma-timeline-responsavel-row__label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cronograma-timeline-responsavel-row__name {
+  font-weight: 600;
+}
+
+.cronograma-timeline-responsavel-row__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cronograma-timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1;
+  background: rgba(15, 23, 42, 0.07);
+  color: inherit;
+  white-space: nowrap;
+}
+
+.cronograma-timeline-badge--warning {
+  background: rgba(245, 158, 11, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.18);
+}
