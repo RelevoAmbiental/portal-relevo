@@ -343,21 +343,6 @@ function getGestaoQuickActions(tasks) {
   };
 }
 
-function getRadarData(tasks, metrics) {
-  const today = getTodayKey();
-
-  const orderedByRisk = [...tasks].sort((a, b) => getTaskRiskScore(b, today) - getTaskRiskScore(a, today));
-  const nextCriticalTask = orderedByRisk[0] || null;
-  const mostLoadedResponsavel = metrics.responsaveis[0] || null;
-  const mostPressuredProject = metrics.projetos[0] || null;
-
-  return {
-    nextCriticalTask,
-    mostLoadedResponsavel,
-    mostPressuredProject
-  };
-}
-
 function getFilterMeta(filterType, filterValue) {
   const map = {
     all: {
@@ -642,96 +627,6 @@ function renderGestaoFilterPanel() {
 
       ${renderGestaoFilterToolbar()}
     </section>
-  `;
-}
-
-function renderRadarCard(radar) {
-  const nextTask = radar.nextCriticalTask;
-  const topResponsavel = radar.mostLoadedResponsavel;
-  const topProjeto = radar.mostPressuredProject;
-
-  return `
-    <aside class="cronograma-panel cronograma-radar-panel">
-      <div class="cronograma-radar-panel__head">
-        <h3>Radar de execução</h3>
-        <p>Leitura gerencial imediata do que mais pressiona a operação agora.</p>
-      </div>
-
-      <div class="cronograma-radar-stack">
-        <section class="cronograma-radar-card">
-          <span class="cronograma-radar-card__label">Próxima atenção crítica</span>
-          ${
-            nextTask
-              ? `
-                <strong>${escapeHtml(nextTask.titulo || "Tarefa")}</strong>
-                <span>${escapeHtml(formatProjeto(nextTask))}</span>
-                <span>${escapeHtml(formatResponsavel(nextTask))}</span>
-                <button
-                  class="cronograma-link-button"
-                  type="button"
-                  data-action="open-task"
-                  data-task-id="${escapeHtml(nextTask.id || "")}"
-                >
-                  Abrir tarefa
-                </button>
-              `
-              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhuma tarefa ativa encontrada.</div>`
-          }
-        </section>
-
-        <section class="cronograma-radar-card">
-          <span class="cronograma-radar-card__label">Responsável mais carregado</span>
-          ${
-            topResponsavel
-              ? `
-                <strong>${escapeHtml(topResponsavel.nome)}</strong>
-                <span>${escapeHtml(String(topResponsavel.total))} tarefas ativas</span>
-                <span>${escapeHtml(String(topResponsavel.overdue))} atrasadas</span>
-                <button
-                  class="cronograma-link-button"
-                  type="button"
-                  data-action="filter-responsavel"
-                  data-responsavel="${escapeHtml(topResponsavel.nome)}"
-                >
-                  Ver tarefas
-                </button>
-              `
-              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Sem responsáveis ativos no período.</div>`
-          }
-        </section>
-
-        <section class="cronograma-radar-card">
-          <span class="cronograma-radar-card__label">Projeto mais pressionado</span>
-          ${
-            topProjeto
-              ? `
-                <strong>${escapeHtml(topProjeto.nome)}</strong>
-                <span>${escapeHtml(String(topProjeto.total))} tarefas ativas</span>
-                <span>${escapeHtml(String(topProjeto.overdue))} atrasadas</span>
-                <button
-                  class="cronograma-link-button"
-                  type="button"
-                  data-action="filter-projeto"
-                  data-projeto="${escapeHtml(topProjeto.nome)}"
-                >
-                  Ver tarefas
-                </button>
-              `
-              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhum projeto ativo encontrado.</div>`
-          }
-        </section>
-
-        <section class="cronograma-radar-card">
-          <span class="cronograma-radar-card__label">Atalhos de ação</span>
-          <div class="cronograma-radar-actions">
-            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="overdue">Ver atrasadas</button>
-            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="high">Ver críticas</button>
-            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="upcoming">Curto prazo</button>
-            <button type="button" class="cronograma-filter-chip" data-action="set-filter" data-filter-type="unassigned">Sem responsável</button>
-          </div>
-        </section>
-      </div>
-    </aside>
   `;
 }
 
