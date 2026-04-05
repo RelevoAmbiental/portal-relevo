@@ -332,6 +332,57 @@ function getDashboardQuickData(tasks) {
   };
 }
 
+function getOperationDiagnosis(metrics, quick) {
+  const pressureScore =
+    (metrics.overdue * 3) +
+    (metrics.highPriority * 2) +
+    (metrics.responsaveisComConflito * 2) +
+    (quick.unassigned.length * 2) +
+    (metrics.upcoming > 4 ? 2 : 0);
+
+  let level = "stable";
+  let title = "Operação estável";
+  let summary = "O cronograma está sob controle, com pressão operacional administrável.";
+  const points = [];
+
+  if (metrics.overdue > 0) {
+    points.push(`${metrics.overdue} tarefa(s) atrasada(s)`);
+  }
+
+  if (metrics.highPriority > 0) {
+    points.push(`${metrics.highPriority} item(ns) alta/crítica`);
+  }
+
+  if (metrics.responsaveisComConflito > 0) {
+    points.push(`${metrics.responsaveisComConflito} responsável(is) com conflito`);
+  }
+
+  if (quick.unassigned.length > 0) {
+    points.push(`${quick.unassigned.length} tarefa(s) sem responsável`);
+  }
+
+  if (metrics.upcoming > 0) {
+    points.push(`${metrics.upcoming} entrega(s) nos próximos 7 dias`);
+  }
+
+  if (pressureScore >= 14) {
+    level = "critical";
+    title = "Operação pressionada";
+    summary = "Há sinais claros de gargalo e risco de execução no curto prazo.";
+  } else if (pressureScore >= 6) {
+    level = "warning";
+    title = "Atenção moderada";
+    summary = "A operação segue funcional, mas já exige acompanhamento mais próximo.";
+  }
+
+  return {
+    level,
+    title,
+    summary,
+    points: points.length ? points : ["Sem alertas relevantes no momento."]
+  };
+}
+
 function getFilterMeta(filterType, filterValue) {
   const map = {
     all: {
@@ -419,6 +470,41 @@ function renderMetricCard(label, value, hint, tone = "") {
       <strong>${escapeHtml(value)}</strong>
       <small>${escapeHtml(hint)}</small>
     </div>
+  `;
+}
+
+function renderDiagnosisPanel(diagnosis) {
+  const badgeMap = {
+    stable: "Estável",
+    warning: "Atenção",
+    critical: "Pressão"
+  };
+
+  return `
+    <section class="cronograma-panel cronograma-dashboard-diagnosis">
+      <div class="cronograma-section-head">
+        <div>
+          <h3>Diagnóstico executivo</h3>
+          <p>Leitura sintética da operação para orientar a priorização imediata.</p>
+        </div>
+
+        <span class="cronograma-gestao-badge cronograma-dashboard-diagnosis__badge is-${escapeHtml(diagnosis.level)}">
+          ${escapeHtml(badgeMap[diagnosis.level] || "Leitura")}
+        </span>
+      </div>
+
+      <div class="cronograma-mini-list">
+        <div class="cronograma-mini-list__item">
+          <strong>${escapeHtml(diagnosis.title)}</strong>
+          <span>${escapeHtml(diagnosis.summary)}</span>
+        </div>
+
+        <div class="cronograma-mini-list__item">
+          <strong>Pontos de atenção</strong>
+          <span>${escapeHtml(diagnosis.points.join(" • "))}</span>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -510,7 +596,7 @@ function renderTaskCard(task) {
   `;
 }
 
-function renderDashboardTopCard(metrics) {
+function renderDashboardTopCard(metrics, diagnosis) {
   return `
     <section class="cronograma-panel cronograma-dashboard-top-card">
       <div class="cronograma-section-head">
@@ -522,6 +608,8 @@ function renderDashboardTopCard(metrics) {
           </p>
         </div>
       </div>
+
+      ${renderDiagnosisPanel(diagnosis)}
 
       <div class="cronograma-gestao-summary-grid">
         ${renderMetricCard("Projetos ativos", String(metrics.totalProjetosAtivos), "Frentes em operação")}
@@ -687,10 +775,11 @@ function getDashboardTemplate() {
   const metrics = getDashboardMetrics(tasks);
   const quick = getDashboardQuickData(tasks);
   const filteredTasks = applyDashboardFilter(tasks);
+  const diagnosis = getOperationDiagnosis(metrics, quick);
 
   return `
     <div class="cronograma-dashboard-layout">
-      ${renderDashboardTopCard(metrics)}
+      ${renderDashboardTopCard(metrics, diagnosis)}
 
       <div class="cronograma-view-grid">
         <section class="cronograma-panel cronograma-gestao-shell">
