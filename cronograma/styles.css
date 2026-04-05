@@ -3326,3 +3326,39 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
+/* ===== Dashboard — topo e lateral ===== */
+
+.cronograma-dashboard-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.cronograma-dashboard-top-card {
+  width: 100%;
+}
+
+.cronograma-dashboard-top-card__filters {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(11, 46, 27, 0.08);
+}
+
+.cronograma-dashboard-sidebar {
+  align-self: start;
+}
+
+.cronograma-dashboard-sidebar .cronograma-panel {
+  margin-bottom: 18px;
+}
+
+.cronograma-dashboard-sidebar .cronograma-panel:last-child {
+  margin-bottom: 0;
+}
+
+/* mata a herança incerta do radar antigo */
+.cronograma-dashboard-sidebar,
+.cronograma-dashboard-sidebar .cronograma-panel,
+.cronograma-radar-panel {
+  position: static;
+  top: auto;
+}
