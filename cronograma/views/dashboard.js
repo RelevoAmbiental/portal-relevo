@@ -383,6 +383,33 @@ function getOperationDiagnosis(metrics, quick) {
   };
 }
 
+function getProjectPressureMeta(project) {
+  const pressureScore =
+    (project.overdue * 4) +
+    (project.high * 3) +
+    (project.upcoming * 2) +
+    (project.total >= 6 ? 1 : 0);
+
+  if (pressureScore >= 8) {
+    return {
+      tone: "critical",
+      label: "Crítico"
+    };
+  }
+
+  if (pressureScore >= 3) {
+    return {
+      tone: "warning",
+      label: "Atenção"
+    };
+  }
+
+  return {
+    tone: "stable",
+    label: "Estável"
+  };
+}
+
 function getFilterMeta(filterType, filterValue) {
   const map = {
     all: {
@@ -539,30 +566,35 @@ function renderResponsavelCard(item) {
 }
 
 function renderProjetoCard(item) {
+  const pressure = getProjectPressureMeta(item);
+
   return `
     <button
-      class="cronograma-gestao-card"
+      class="cronograma-dashboard-project-chip is-${escapeHtml(pressure.tone)}"
       type="button"
       data-action="filter-projeto"
       data-projeto="${escapeHtml(item.nome)}"
+      title="Ver tarefas do projeto ${escapeHtml(item.nome)}"
     >
-      <div class="cronograma-gestao-card__head">
-        <h3>${escapeHtml(item.nome)}</h3>
-        <span class="cronograma-gestao-badge">${item.total} tarefas</span>
+      <div class="cronograma-dashboard-project-chip__top">
+        <span class="cronograma-dashboard-project-chip__dot"></span>
+        <strong>${escapeHtml(item.nome)}</strong>
       </div>
 
-      <div class="cronograma-gestao-card__metrics">
+      <div class="cronograma-dashboard-project-chip__meta">
+        <span class="cronograma-gestao-badge">${item.total} tarefas</span>
+        <span class="cronograma-dashboard-project-chip__status">${escapeHtml(pressure.label)}</span>
+      </div>
+
+      <div class="cronograma-dashboard-project-chip__stats">
         <span class="${item.overdue ? "is-danger" : ""}">
-          <strong>${item.overdue}</strong> atrasadas
+          ${escapeHtml(String(item.overdue))} atraso${item.overdue === 1 ? "" : "s"}
         </span>
         <span class="${item.high ? "is-warning" : ""}">
-          <strong>${item.high}</strong> altas/críticas
+          ${escapeHtml(String(item.high))} crítica${item.high === 1 ? "" : "s"}
         </span>
         <span>
-          <strong>${item.upcoming}</strong> vencem em 7 dias
-        </span>
-        <span>
-          <strong>${item.responsaveis}</strong> responsáveis
+          ${escapeHtml(String(item.upcoming))} vence${item.upcoming === 1 ? "" : "m"}
         </span>
       </div>
     </button>
@@ -787,14 +819,14 @@ function getDashboardTemplate() {
             <div class="cronograma-section-head">
               <div>
                 <h3>Projetos sob atenção</h3>
-                <p>Projetos ordenados por atraso, criticidade e pressão operacional.</p>
+                <p>Leitura compacta dos projetos mais pressionados. Clique em um card para abrir o recorte do projeto.</p>
               </div>
             </div>
 
-            <div class="cronograma-gestao-projetos">
+            <div class="cronograma-dashboard-project-grid">
               ${
                 metrics.projetos.length
-                  ? metrics.projetos.slice(0, 6).map(renderProjetoCard).join("")
+                  ? metrics.projetos.slice(0, 12).map(renderProjetoCard).join("")
                   : `<div class="cronograma-empty-state">Nenhum projeto ativo com tarefas no período.</div>`
               }
             </div>
