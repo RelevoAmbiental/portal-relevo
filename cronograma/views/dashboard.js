@@ -510,9 +510,9 @@ function renderTaskCard(task) {
   `;
 }
 
-function renderDashboardHero(metrics) {
+function renderDashboardTopCard(metrics) {
   return `
-    <section class="cronograma-panel">
+    <section class="cronograma-panel cronograma-dashboard-top-card">
       <div class="cronograma-section-head">
         <div>
           <p class="cronograma-section-head__eyebrow">Leitura executiva</p>
@@ -529,6 +529,17 @@ function renderDashboardHero(metrics) {
         ${renderMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
         ${renderMetricCard("Alta prioridade", String(metrics.highPriority), "Itens críticos")}
         ${renderMetricCard("Próx. 7 dias", String(metrics.upcoming), "Radar de curto prazo", metrics.upcoming ? "warning" : "")}
+      </div>
+
+      <div class="cronograma-dashboard-top-card__filters">
+        <div class="cronograma-section-head">
+          <div>
+            <h3>Filtros executivos</h3>
+            <p>Use os recortes abaixo para navegar nos principais resumos da operação.</p>
+          </div>
+        </div>
+
+        ${renderDashboardFilterToolbar()}
       </div>
     </section>
   `;
@@ -678,87 +689,78 @@ function getDashboardTemplate() {
   const filteredTasks = applyDashboardFilter(tasks);
 
   return `
-    <div class="cronograma-view-grid">
-      <section class="cronograma-panel cronograma-gestao-shell">
-        ${renderDashboardHero(metrics)}
+    <div class="cronograma-dashboard-layout">
+      ${renderDashboardTopCard(metrics)}
 
-        <section class="cronograma-panel">
-          <div class="cronograma-section-head">
-            <div>
-              <h3>Projetos sob atenção</h3>
-              <p>Projetos ordenados por atraso, criticidade e pressão operacional.</p>
+      <div class="cronograma-view-grid">
+        <section class="cronograma-panel cronograma-gestao-shell">
+          <section class="cronograma-panel">
+            <div class="cronograma-section-head">
+              <div>
+                <h3>Projetos sob atenção</h3>
+                <p>Projetos ordenados por atraso, criticidade e pressão operacional.</p>
+              </div>
             </div>
-          </div>
 
-          <div class="cronograma-gestao-projetos">
-            ${
-              metrics.projetos.length
-                ? metrics.projetos.slice(0, 6).map(renderProjetoCard).join("")
-                : `<div class="cronograma-empty-state">Nenhum projeto ativo com tarefas no período.</div>`
-            }
-          </div>
+            <div class="cronograma-gestao-projetos">
+              ${
+                metrics.projetos.length
+                  ? metrics.projetos.slice(0, 6).map(renderProjetoCard).join("")
+                  : `<div class="cronograma-empty-state">Nenhum projeto ativo com tarefas no período.</div>`
+              }
+            </div>
+          </section>
+
+          <section class="cronograma-panel">
+            <div class="cronograma-section-head">
+              <div>
+                <h3>Carga por responsável</h3>
+                <p>Leitura executiva de volume, atrasos e paralelismo por pessoa.</p>
+              </div>
+            </div>
+
+            <div class="cronograma-gestao-responsaveis">
+              ${
+                metrics.responsaveis.length
+                  ? metrics.responsaveis.slice(0, 6).map(renderResponsavelCard).join("")
+                  : `<div class="cronograma-empty-state">Nenhuma tarefa ativa encontrada.</div>`
+              }
+            </div>
+          </section>
+
+          ${renderFilteredResults(filteredTasks)}
         </section>
 
-        <section class="cronograma-panel">
-          <div class="cronograma-section-head">
-            <div>
-              <h3>Carga por responsável</h3>
-              <p>Leitura executiva de volume, atrasos e paralelismo por pessoa.</p>
-            </div>
-          </div>
+        <aside class="cronograma-panel cronograma-dashboard-sidebar">
+          ${renderDashboardQuickPanel(quick)}
 
-          <div class="cronograma-gestao-responsaveis">
-            ${
-              metrics.responsaveis.length
-                ? metrics.responsaveis.slice(0, 6).map(renderResponsavelCard).join("")
-                : `<div class="cronograma-empty-state">Nenhuma tarefa ativa encontrada.</div>`
-            }
-          </div>
-        </section>
-
-        <section class="cronograma-panel">
-          <div class="cronograma-section-head">
-            <div>
-              <h3>Filtros executivos</h3>
-              <p>Use os recortes abaixo para navegar nos principais resumos da operação.</p>
-            </div>
-          </div>
-
-          ${renderDashboardFilterToolbar()}
-        </section>
-
-        ${renderFilteredResults(filteredTasks)}
-      </section>
-
-      <aside class="cronograma-panel cronograma-radar-panel">
-        ${renderDashboardQuickPanel(quick)}
-
-        <section class="cronograma-panel">
-          <div class="cronograma-section-head">
-            <div>
-              <h3>Alertas de operação</h3>
-              <p>Leituras curtas para apoiar priorização rápida.</p>
-            </div>
-          </div>
-
-          <div class="cronograma-mini-list">
-            <div class="cronograma-mini-list__item">
-              <strong>${escapeHtml(String(metrics.overdue))} tarefas atrasadas</strong>
-              <span>Pendências vencidas que já impactam a fluidez da execução.</span>
+          <section class="cronograma-panel">
+            <div class="cronograma-section-head">
+              <div>
+                <h3>Alertas de operação</h3>
+                <p>Leituras curtas para apoiar priorização rápida.</p>
+              </div>
             </div>
 
-            <div class="cronograma-mini-list__item">
-              <strong>${escapeHtml(String(metrics.responsaveisComConflito))} responsáveis com conflito</strong>
-              <span>Indício de paralelismo alto ou sobrecarga de frente.</span>
-            </div>
+            <div class="cronograma-mini-list">
+              <div class="cronograma-mini-list__item">
+                <strong>${escapeHtml(String(metrics.overdue))} tarefas atrasadas</strong>
+                <span>Pendências vencidas que já impactam a fluidez da execução.</span>
+              </div>
 
-            <div class="cronograma-mini-list__item">
-              <strong>${escapeHtml(String(quick.unassigned.length))} tarefas sem responsável</strong>
-              <span>Itens ainda sem alocação clara de execução.</span>
+              <div class="cronograma-mini-list__item">
+                <strong>${escapeHtml(String(metrics.responsaveisComConflito))} responsáveis com conflito</strong>
+                <span>Indício de paralelismo alto ou sobrecarga de frente.</span>
+              </div>
+
+              <div class="cronograma-mini-list__item">
+                <strong>${escapeHtml(String(quick.unassigned.length))} tarefas sem responsável</strong>
+                <span>Itens ainda sem alocação clara de execução.</span>
+              </div>
             </div>
-          </div>
-        </section>
-      </aside>
+          </section>
+        </aside>
+      </div>
     </div>
   `;
 }
@@ -824,7 +826,7 @@ function ensureProjetosListener() {
 }
 
 function mountDashboardEvents() {
-  const root = document.querySelector(".cronograma-view-grid");
+  const root = document.querySelector(".cronograma-dashboard-layout");
   if (!root) return;
 
   root.addEventListener("click", (event) => {
