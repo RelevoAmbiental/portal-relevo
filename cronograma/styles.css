@@ -2762,7 +2762,7 @@ body.relevo-body {
     top: 11px;
   }
 }
-,.cronograma-timeline-responsavel-row {
+.cronograma-timeline-responsavel-row {
   transition: background-color 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
   border-radius: 16px;
 }
