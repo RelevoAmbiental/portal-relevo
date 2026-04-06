@@ -25,7 +25,8 @@ let unsubscribeProjetos = null;
 const dashboardUiState = {
   filterType: "all",
   filterValue: "",
-  sortMode: "risk"
+  sortMode: "risk",
+  selectedProject: ""
 };
 
 function escapeHtml(value) {
@@ -536,32 +537,115 @@ function renderProjetoCard(item) {
     <button
       class="cronograma-dashboard-project-chip is-${escapeHtml(pressure.tone)}"
       type="button"
-      data-action="filter-projeto"
+      data-action="open-project-detail"
       data-projeto="${escapeHtml(item.nome)}"
-      title="Ver tarefas do projeto ${escapeHtml(item.nome)}"
+      title="Abrir detalhes do projeto ${escapeHtml(item.nome)}"
     >
       <div class="cronograma-dashboard-project-chip__top">
-        <span class="cronograma-dashboard-project-chip__dot"></span>
-        <strong>${escapeHtml(item.nome)}</strong>
+        <div class="cronograma-dashboard-project-chip__title-wrap">
+          <span class="cronograma-dashboard-project-chip__dot"></span>
+          <strong>${escapeHtml(item.nome)}</strong>
+        </div>
+
+        <span class="cronograma-gestao-badge">${item.total} tarefa${item.total === 1 ? "" : "s"}</span>
       </div>
 
-      <div class="cronograma-dashboard-project-chip__meta">
-        <span class="cronograma-gestao-badge">${item.total} tarefas</span>
-        <span class="cronograma-dashboard-project-chip__status">${escapeHtml(pressure.label)}</span>
+      <div class="cronograma-dashboard-project-chip__status-row">
+        <span class="cronograma-dashboard-project-chip__status">
+          ${escapeHtml(pressure.label)}
+        </span>
       </div>
 
       <div class="cronograma-dashboard-project-chip__stats">
         <span class="${item.overdue ? "is-danger" : ""}">
-          ${escapeHtml(String(item.overdue))} atraso${item.overdue === 1 ? "" : "s"}
+          <strong>${escapeHtml(String(item.overdue))}</strong>
+          <small>atrasos</small>
         </span>
+
         <span class="${item.high ? "is-warning" : ""}">
-          ${escapeHtml(String(item.high))} crítica${item.high === 1 ? "" : "s"}
+          <strong>${escapeHtml(String(item.high))}</strong>
+          <small>críticas</small>
         </span>
+
         <span>
-          ${escapeHtml(String(item.upcoming))} vence${item.upcoming === 1 ? "" : "m"}
+          <strong>${escapeHtml(String(item.upcoming))}</strong>
+          <small>vencem</small>
         </span>
       </div>
     </button>
+  `;
+}
+
+function renderProjectDetailPanel(project) {
+  if (!project) return "";
+
+  const pressure = getProjectPressureMeta(project);
+
+  return `
+    <div class="cronograma-dashboard-project-modal" data-action="close-project-detail">
+      <div
+        class="cronograma-dashboard-project-modal__dialog is-${escapeHtml(pressure.tone)}"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Detalhes do projeto ${escapeHtml(project.nome)}"
+        onclick="event.stopPropagation()"
+      >
+        <div class="cronograma-dashboard-project-modal__head">
+          <div>
+            <span class="cronograma-dashboard-project-modal__eyebrow">Projeto sob atenção</span>
+            <h3>${escapeHtml(project.nome)}</h3>
+          </div>
+
+          <button
+            type="button"
+            class="cronograma-dashboard-project-modal__close"
+            data-action="close-project-detail"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="cronograma-dashboard-project-modal__summary">
+          <span class="cronograma-gestao-badge">${escapeHtml(pressure.label)}</span>
+          <span class="cronograma-gestao-badge">${project.total} tarefa${project.total === 1 ? "" : "s"}</span>
+          <span class="cronograma-gestao-badge">${project.responsaveis} responsável${project.responsaveis === 1 ? "" : "is"}</span>
+        </div>
+
+        <div class="cronograma-dashboard-project-modal__grid">
+          <div class="cronograma-dashboard-project-modal__metric">
+            <strong>${project.overdue}</strong>
+            <span>Atrasadas</span>
+          </div>
+
+          <div class="cronograma-dashboard-project-modal__metric">
+            <strong>${project.high}</strong>
+            <span>Altas/Críticas</span>
+          </div>
+
+          <div class="cronograma-dashboard-project-modal__metric">
+            <strong>${project.upcoming}</strong>
+            <span>Vencem em 7 dias</span>
+          </div>
+
+          <div class="cronograma-dashboard-project-modal__metric">
+            <strong>${project.riskScore}</strong>
+            <span>Score de risco</span>
+          </div>
+        </div>
+
+        <div class="cronograma-dashboard-project-modal__footer">
+          <button
+            type="button"
+            class="cronograma-filter-chip"
+            data-action="filter-projeto"
+            data-projeto="${escapeHtml(project.nome)}"
+          >
+            Ver tarefas do projeto
+          </button>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -598,9 +682,9 @@ function renderDashboardTopCard(metrics, diagnosis) {
       <div class="cronograma-section-head">
         <div>
           <p class="cronograma-section-head__eyebrow">Leitura executiva</p>
-          <h2>Dashboard do cronograma</h2>
+          <h2>Resumo Executivo</h2>
           <p>
-            Painel de entrada da aplicação com indicadores, gargalos e resumos da operação atual.
+            Indicadores, gargalos e resumos da operação atual.
           </p>
         </div>
       </div>
@@ -773,6 +857,8 @@ function getDashboardTemplate() {
   const quick = getDashboardQuickData(tasks);
   const filteredTasks = applyDashboardFilter(tasks);
   const diagnosis = getOperationDiagnosis(metrics, quick);
+  const selectedProject =
+    metrics.projetos.find((item) => item.nome === dashboardUiState.selectedProject) || null;
 
   return `
     <div class="cronograma-dashboard-layout">
@@ -784,7 +870,7 @@ function getDashboardTemplate() {
             <div class="cronograma-section-head">
               <div>
                 <h3>Projetos sob atenção</h3>
-                <p>Leitura compacta dos projetos mais pressionados. Clique em um card para abrir o recorte do projeto.</p>
+                <p>Clique em um card para abrir os detalhes do projeto.</p>
               </div>
             </div>
 
@@ -846,6 +932,8 @@ function getDashboardTemplate() {
             </div>
           </section>
         </aside>
+
+        ${renderProjectDetailPanel(selectedProject)}
       </div>
     </div>
   `;
@@ -934,9 +1022,22 @@ function mountDashboardEvents() {
       return;
     }
 
+    if (action === "open-project-detail") {
+      dashboardUiState.selectedProject = projeto || "";
+      renderDashboardView();
+      return;
+    }
+
+    if (action === "close-project-detail") {
+      dashboardUiState.selectedProject = "";
+      renderDashboardView();
+      return;
+    }
+    
     if (action === "set-filter") {
       dashboardUiState.filterType = filterType || "all";
       dashboardUiState.filterValue = "";
+      dashboardUiState.selectedProject = "";
       renderDashboardView();
       return;
     }
@@ -944,6 +1045,7 @@ function mountDashboardEvents() {
     if (action === "filter-responsavel") {
       dashboardUiState.filterType = "responsavel";
       dashboardUiState.filterValue = responsavel || "";
+      dashboardUiState.selectedProject = "";
       renderDashboardView();
       return;
     }
@@ -951,7 +1053,9 @@ function mountDashboardEvents() {
     if (action === "filter-projeto") {
       dashboardUiState.filterType = "projeto";
       dashboardUiState.filterValue = projeto || "";
+      dashboardUiState.selectedProject = "";
       renderDashboardView();
+      return;
     }
   });
 
