@@ -343,27 +343,6 @@ function getOperationDiagnosis(metrics, quick) {
   let level = "stable";
   let title = "Operação estável";
   let summary = "O cronograma está sob controle, com pressão operacional administrável.";
-  const points = [];
-
-  if (metrics.overdue > 0) {
-    points.push(`${metrics.overdue} tarefa(s) atrasada(s)`);
-  }
-
-  if (metrics.highPriority > 0) {
-    points.push(`${metrics.highPriority} item(ns) alta/crítica`);
-  }
-
-  if (metrics.responsaveisComConflito > 0) {
-    points.push(`${metrics.responsaveisComConflito} responsável(is) com conflito`);
-  }
-
-  if (quick.unassigned.length > 0) {
-    points.push(`${quick.unassigned.length} tarefa(s) sem responsável`);
-  }
-
-  if (metrics.upcoming > 0) {
-    points.push(`${metrics.upcoming} entrega(s) nos próximos 7 dias`);
-  }
 
   if (pressureScore >= 14) {
     level = "critical";
@@ -378,8 +357,7 @@ function getOperationDiagnosis(metrics, quick) {
   return {
     level,
     title,
-    summary,
-    points: points.length ? points : ["Sem alertas relevantes no momento."]
+    summary
   };
 }
 
@@ -500,7 +478,7 @@ function renderMetricCard(label, value, hint, tone = "") {
   `;
 }
 
-function renderDiagnosisPanel(diagnosis) {
+function renderOperationStatusBar(diagnosis) {
   const badgeMap = {
     stable: "Estável",
     warning: "Atenção",
@@ -508,30 +486,16 @@ function renderDiagnosisPanel(diagnosis) {
   };
 
   return `
-    <section class="cronograma-panel cronograma-dashboard-diagnosis">
-      <div class="cronograma-section-head">
-        <div>
-          <h3>Diagnóstico executivo</h3>
-          <p>Leitura sintética da operação para orientar a priorização imediata.</p>
-        </div>
+    <div class="cronograma-dashboard-status-bar is-${escapeHtml(diagnosis.level)}">
+      <span class="cronograma-gestao-badge cronograma-dashboard-status-bar__badge">
+        ${escapeHtml(badgeMap[diagnosis.level] || "Leitura")}
+      </span>
 
-        <span class="cronograma-gestao-badge cronograma-dashboard-diagnosis__badge is-${escapeHtml(diagnosis.level)}">
-          ${escapeHtml(badgeMap[diagnosis.level] || "Leitura")}
-        </span>
+      <div class="cronograma-dashboard-status-bar__text">
+        <strong>${escapeHtml(diagnosis.title)}</strong>
+        <span>${escapeHtml(diagnosis.summary)}</span>
       </div>
-
-      <div class="cronograma-mini-list">
-        <div class="cronograma-mini-list__item">
-          <strong>${escapeHtml(diagnosis.title)}</strong>
-          <span>${escapeHtml(diagnosis.summary)}</span>
-        </div>
-
-        <div class="cronograma-mini-list__item">
-          <strong>Pontos de atenção</strong>
-          <span>${escapeHtml(diagnosis.points.join(" • "))}</span>
-        </div>
-      </div>
-    </section>
+    </div>
   `;
 }
 
@@ -641,15 +605,16 @@ function renderDashboardTopCard(metrics, diagnosis) {
         </div>
       </div>
 
-      ${renderDiagnosisPanel(diagnosis)}
-
       <div class="cronograma-gestao-summary-grid">
         ${renderMetricCard("Projetos ativos", String(metrics.totalProjetosAtivos), "Frentes em operação")}
         ${renderMetricCard("Tarefas ativas", String(metrics.totalTasks), "Base operacional aberta")}
         ${renderMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
         ${renderMetricCard("Alta prioridade", String(metrics.highPriority), "Itens críticos")}
         ${renderMetricCard("Próx. 7 dias", String(metrics.upcoming), "Radar de curto prazo", metrics.upcoming ? "warning" : "")}
+        ${renderMetricCard("Conflitos", String(metrics.responsaveisComConflito), "Responsáveis com frentes simultâneas", metrics.responsaveisComConflito ? "warning" : "")}
       </div>
+
+      ${renderOperationStatusBar(diagnosis)}
 
       <div class="cronograma-dashboard-top-card__filters">
         <div class="cronograma-section-head">
