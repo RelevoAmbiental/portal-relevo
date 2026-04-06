@@ -582,13 +582,12 @@ function renderProjectDetailPanel(project) {
   const pressure = getProjectPressureMeta(project);
 
   return `
-    <div class="cronograma-dashboard-project-modal" data-action="close-project-detail">
+    <div class="cronograma-dashboard-project-modal">
       <div
         class="cronograma-dashboard-project-modal__dialog is-${escapeHtml(pressure.tone)}"
         role="dialog"
         aria-modal="true"
         aria-label="Detalhes do projeto ${escapeHtml(project.nome)}"
-        onclick="event.stopPropagation()"
       >
         <div class="cronograma-dashboard-project-modal__head">
           <div>
@@ -1004,6 +1003,13 @@ function mountDashboardEvents() {
   if (!root) return;
 
   root.addEventListener("click", (event) => {
+    const clickedOverlay = event.target.classList.contains("cronograma-dashboard-project-modal");
+    if (clickedOverlay) {
+      dashboardUiState.selectedProject = "";
+      renderDashboardView();
+      return;
+    }
+
     const actionEl = event.target.closest("[data-action]");
     if (!actionEl) return;
 
@@ -1033,7 +1039,7 @@ function mountDashboardEvents() {
       renderDashboardView();
       return;
     }
-    
+
     if (action === "set-filter") {
       dashboardUiState.filterType = filterType || "all";
       dashboardUiState.filterValue = "";
