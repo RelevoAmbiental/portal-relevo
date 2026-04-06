@@ -229,21 +229,38 @@ function getDashboardMetrics(tasks) {
     .map(([nome, responsavelTasks]) => {
       const stats = getResponsavelTimelineStats(responsavelTasks);
       const riskScore = responsavelTasks.reduce((sum, task) => sum + getTaskRiskScore(task, today), 0);
+      const overdueCount = responsavelTasks.filter((task) => isTaskOverdue(task, today)).length;
+      const upcomingCount = responsavelTasks.filter((task) => isTaskUpcoming(task, today, 7)).length;
+      const highCount = responsavelTasks.filter((task) => ["alta", "critica"].includes(task.prioridade)).length;
 
-      return {
+      const baseItem = {
         nome,
         total: responsavelTasks.length,
-        overdue: responsavelTasks.filter((task) => isTaskOverdue(task, today)).length,
-        upcoming: responsavelTasks.filter((task) => isTaskUpcoming(task, today, 7)).length,
+        overdue: overdueCount,
+        high: highCount,
+        upcoming: upcomingCount,
         fronts: stats.concurrentFronts,
         hasConflict: stats.hasConflict,
         conflictLevel: stats.conflictLevel,
         riskScore
       };
+
+      const pressure = getResponsavelPressureMeta(baseItem);
+
+      return {
+        ...baseItem,
+        pressureTone: pressure.tone,
+        pressureLabel: pressure.label,
+        pressureSummary: pressure.summary,
+        pressureScore: pressure.pressureScore,
+        pressureDominant: pressure.dominant,
+        dominantLabel: getResponsavelDominantLabel(pressure, baseItem)
+      };
     })
     .sort((a, b) =>
+      b.pressureScore - a.pressureScore ||
       b.overdue - a.overdue ||
-      b.riskScore - a.riskScore ||
+      b.high - a.high ||
       b.fronts - a.fronts ||
       b.total - a.total ||
       a.nome.localeCompare(b.nome, "pt-BR")
@@ -289,6 +306,7 @@ function getDashboardMetrics(tasks) {
     );
 
   const responsaveisComConflito = responsaveis.filter((item) => item.hasConflict).length;
+  const responsaveisPressionados = responsaveis.filter((item) => item.pressureTone === "critical").length;
 
   return {
     totalTasks: tasks.length,
@@ -297,6 +315,7 @@ function getDashboardMetrics(tasks) {
     highPriority: highPriority.length,
     upcoming: upcoming.length,
     responsaveisComConflito,
+    responsaveisPressionados,
     responsaveis,
     projetos
   };
@@ -387,6 +406,136 @@ function getProjectPressureMeta(project) {
     tone: "stable",
     label: "Estável"
   };
+}
+
+function getResponsavelPressureMeta(item) {
+  const volumeScore =
+    item.total >= 8 ? 4 :
+    item.total >= 6 ? 3 :
+    item.total >= 4 ? 2 :
+    item.total >= 2 ? 1 : 0;
+
+  const urgencyScore =
+    (item.overdue * 4) +
+    (item.high * 3) +
+    (item.upcoming * 2);
+
+  const conflictScore =
+    item.fronts >= 4 ? 5 :
+    item.fronts === 3 ? 4 :
+    item.fronts === 2 ? 2 : 0;
+
+  const pressureScore = volumeScore + urgencyScore + conflictScore;
+
+  let tone = "stable";
+  let label = "Estável";
+  let summary = "Carga distribuída e administrável.";
+  let dominant = "volume";
+
+  const dominantScore = Math.max(volumeScore, urgencyScore, conflictScore);
+
+  if (dominantScore === urgencyScore) dominant = "urgencia";
+  else if (dominantScore === conflictScore) dominant = "conflito";
+
+  if (pressureScore >= 14) {
+    tone = "critical";
+    label = "Pressionado";
+    summary = "Há combinação relevante de volume, urgência e/ou paralelismo.";
+  } else if (pressureScore >= 7) {
+    tone = "warning";
+    label = "Atenção";
+    summary = "A carga exige acompanhamento mais próximo.";
+  }
+
+  return {
+    tone,
+    label,
+    summary,
+    dominant,
+    pressureScore,
+    volumeScore,
+    urgencyScore,
+    conflictScore
+  };
+}
+
+function getResponsavelDominantLabel(meta, item) {
+  if (meta.dominant === "urgencia") {
+    if (item.overdue > 0) return "Urgência alta";
+    if (item.upcoming > 0) return "Prazo pressionado";
+    return "Execução sensível";
+  }
+
+  if (meta.dominant === "conflito") {
+    return item.fronts > 1 ? `${item.fronts} frentes paralelas` : "Sem conflito";
+  }
+
+  if (item.total >= 6) return "Volume alto";
+  if (item.total >= 4) return "Volume moderado";
+  return "Carga controlada";
+}
+
+function buildDashboardAlerts(metrics, quick) {
+  const alerts = [];
+
+  if (metrics.overdue > 0) {
+    alerts.push({
+      tone: metrics.overdue >= 4 ? "danger" : "warning",
+      title: `${metrics.overdue} tarefa${metrics.overdue === 1 ? "" : "s"} atrasada${metrics.overdue === 1 ? "" : "s"}`,
+      description: "Pendências vencidas que já exigem reação operacional."
+    });
+  }
+
+  if (metrics.responsaveisComConflito > 0) {
+    alerts.push({
+      tone: metrics.responsaveisComConflito >= 2 ? "warning" : "stable",
+      title: `${metrics.responsaveisComConflito} responsável${metrics.responsaveisComConflito === 1 ? "" : "is"} com conflito`,
+      description: "Há paralelismo relevante em mais de uma frente ao mesmo tempo."
+    });
+  }
+
+  if (quick.unassigned.length > 0) {
+    alerts.push({
+      tone: "warning",
+      title: `${quick.unassigned.length} tarefa${quick.unassigned.length === 1 ? "" : "s"} sem responsável`,
+      description: "Itens sem dono definido ainda aumentam o risco de dispersão."
+    });
+  }
+
+  const pressuredResponsaveis = metrics.responsaveis.filter(
+    (item) => item.pressureTone === "critical"
+  );
+
+  if (pressuredResponsaveis.length > 0) {
+    const names = pressuredResponsaveis
+      .slice(0, 2)
+      .map((item) => item.nome)
+      .join(" / ");
+
+    alerts.push({
+      tone: "danger",
+      title: `${pressuredResponsaveis.length} responsável${pressuredResponsaveis.length === 1 ? "" : "is"} pressionado${pressuredResponsaveis.length === 1 ? "" : "s"}`,
+      description: `Maior pressão atual em: ${names}${pressuredResponsaveis.length > 2 ? "..." : ""}.`
+    });
+  }
+
+  if (metrics.upcoming >= 5) {
+    alerts.push({
+      tone: "stable",
+      title: `${metrics.upcoming} entregas no radar de 7 dias`,
+      description: "O curto prazo está mais carregado e merece alinhamento fino."
+    });
+  }
+
+  if (!alerts.length) {
+    alerts.push({
+      tone: "stable",
+      title: "Sem alertas críticos agora",
+      description: "A operação segue sem sinais fortes de sobrecarga imediata."
+    });
+  }
+
+  return alerts.slice(0, 4);
 }
 
 function getFilterMeta(filterType, filterValue) {
@@ -501,29 +650,53 @@ function renderOperationStatusBar(diagnosis) {
 }
 
 function renderResponsavelCard(item) {
+  const toneClass = item.pressureTone !== "stable"
+    ? `is-${item.pressureTone === "critical" ? "high" : "medium"}`
+    : "";
+
   return `
     <button
-      class="cronograma-gestao-card ${item.conflictLevel !== "none" ? `is-${item.conflictLevel}` : ""}"
+      class="cronograma-gestao-card ${toneClass}"
       type="button"
       data-action="filter-responsavel"
       data-responsavel="${escapeHtml(item.nome)}"
+      title="Filtrar tarefas de ${escapeHtml(item.nome)}"
     >
       <div class="cronograma-gestao-card__head">
         <h3>${escapeHtml(item.nome)}</h3>
-        ${
-          item.fronts > 1
-            ? `<span class="cronograma-gestao-badge cronograma-gestao-badge--warning">${item.fronts} frentes</span>`
-            : `<span class="cronograma-gestao-badge">${item.fronts} frente</span>`
-        }
+        <span class="cronograma-gestao-badge ${item.pressureTone !== "stable" ? "cronograma-gestao-badge--warning" : ""}">
+          ${escapeHtml(item.pressureLabel)}
+        </span>
       </div>
 
       <div class="cronograma-gestao-card__metrics">
-        <span><strong>${item.total}</strong> tarefas ativas</span>
+        <span>
+          <strong>${item.total}</strong> tarefas
+        </span>
+
         <span class="${item.overdue ? "is-danger" : ""}">
           <strong>${item.overdue}</strong> atrasadas
         </span>
+
+        <span class="${item.high ? "is-warning" : ""}">
+          <strong>${item.high}</strong> altas/críticas
+        </span>
+
         <span>
-          <strong>${item.upcoming}</strong> próximas de vencer
+          <strong>${item.upcoming}</strong> vencem logo
+        </span>
+
+        <span class="${item.fronts > 1 ? "is-warning" : ""}">
+          <strong>${item.fronts}</strong> frentes
+        </span>
+      </div>
+
+      <div class="cronograma-dashboard-responsavel-card__footer">
+        <span class="cronograma-gestao-badge">
+          ${escapeHtml(item.dominantLabel)}
+        </span>
+        <span class="cronograma-gestao-badge">
+          Score ${escapeHtml(String(item.pressureScore))}
         </span>
       </div>
     </button>
@@ -773,7 +946,7 @@ function renderDashboardQuickPanel(quick) {
 
           ${
             quick.upcoming.length
-              ? quick.upcoming.slice(0, 4).map((task) => `
+              ? quick.upcoming.slice(0, 3).map((task) => `
                 <div class="cronograma-mini-list__item">
                   <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
                   <span>${escapeHtml(formatProjeto(task))}</span>
@@ -786,24 +959,53 @@ function renderDashboardQuickPanel(quick) {
 
         <div class="cronograma-mini-list__group">
           <div class="cronograma-mini-list__group-head">
-            <strong>Pendências críticas</strong>
-            <button class="cronograma-link-button" type="button" data-action="set-filter" data-filter-type="high">
-              Abrir lista
+            <strong>Maiores riscos</strong>
+            <button class="cronograma-link-button" type="button" data-action="set-filter" data-filter-type="all">
+              Ver tudo
             </button>
           </div>
 
           ${
-            quick.highPriority.length
-              ? quick.highPriority.slice(0, 4).map((task) => `
-                <div class="cronograma-mini-list__item">
-                  <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
-                  <span>${escapeHtml(formatProjeto(task))}</span>
-                  <span>${escapeHtml(formatResponsavel(task))}</span>
-                </div>
-              `).join("")
-              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhuma tarefa alta ou crítica neste momento.</div>`
+            quick.overdue.length || quick.highPriority.length
+              ? [...new Map(
+                  [...quick.overdue, ...quick.highPriority]
+                    .sort((a, b) => getTaskRiskScore(b) - getTaskRiskScore(a))
+                    .slice(0, 3)
+                    .map((task) => [task.id || task.titulo, task])
+                ).values()].map((task) => `
+                  <div class="cronograma-mini-list__item">
+                    <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
+                    <span>${escapeHtml(formatProjeto(task))}</span>
+                    <span>Risco ${escapeHtml(String(getTaskRiskScore(task)))}</span>
+                  </div>
+                `).join("")
+              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhum risco relevante no momento.</div>`
           }
         </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderDashboardAlertsPanel(metrics, quick) {
+  const alerts = buildDashboardAlerts(metrics, quick);
+
+  return `
+    <section class="cronograma-panel">
+      <div class="cronograma-section-head">
+        <div>
+          <h3>Alertas de operação</h3>
+          <p>Leituras curtas para apoiar priorização rápida.</p>
+        </div>
+      </div>
+
+      <div class="cronograma-mini-list">
+        ${alerts.map((alert) => `
+          <div class="cronograma-mini-list__item">
+            <strong>${escapeHtml(alert.title)}</strong>
+            <span>${escapeHtml(alert.description)}</span>
+          </div>
+        `).join("")}
       </div>
     </section>
   `;
@@ -886,7 +1088,7 @@ function getDashboardTemplate() {
             <div class="cronograma-section-head">
               <div>
                 <h3>Carga por responsável</h3>
-                <p>Leitura executiva de volume, atrasos e paralelismo por pessoa.</p>
+                <p>Leitura executiva de volume, urgência e conflito por responsável.</p>
               </div>
             </div>
 
@@ -904,32 +1106,7 @@ function getDashboardTemplate() {
 
         <aside class="cronograma-panel cronograma-dashboard-sidebar">
           ${renderDashboardQuickPanel(quick)}
-
-          <section class="cronograma-panel">
-            <div class="cronograma-section-head">
-              <div>
-                <h3>Alertas de operação</h3>
-                <p>Leituras curtas para apoiar priorização rápida.</p>
-              </div>
-            </div>
-
-            <div class="cronograma-mini-list">
-              <div class="cronograma-mini-list__item">
-                <strong>${escapeHtml(String(metrics.overdue))} tarefas atrasadas</strong>
-                <span>Pendências vencidas que já impactam a fluidez da execução.</span>
-              </div>
-
-              <div class="cronograma-mini-list__item">
-                <strong>${escapeHtml(String(metrics.responsaveisComConflito))} responsáveis com conflito</strong>
-                <span>Indício de paralelismo alto ou sobrecarga de frente.</span>
-              </div>
-
-              <div class="cronograma-mini-list__item">
-                <strong>${escapeHtml(String(quick.unassigned.length))} tarefas sem responsável</strong>
-                <span>Itens ainda sem alocação clara de execução.</span>
-              </div>
-            </div>
-          </section>
+          ${renderDashboardAlertsPanel(metrics, quick)}
         </aside>
 
         ${renderProjectDetailPanel(selectedProject)}
