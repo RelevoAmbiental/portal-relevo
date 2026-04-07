@@ -3780,3 +3780,12 @@ body.relevo-body {
     justify-content: space-between;
   }
 }
+.cronograma-gestao-summary-compact {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+.cronograma-gestao-summary-compact .cronograma-calendar-kpi {
+  width: 100% !important;
+  margin: 0 !important;
+}
