@@ -3528,3 +3528,255 @@ body.relevo-body {
 .cronograma-gestao-summary-card--compact .cronograma-calendar-kpi small {
   margin-top: 2px;
 }
+/* =========================
+   GESTÃO — AJUSTES FINAIS
+   ========================= */
+
+.cronograma-view-grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cronograma-gestao-shell {
+  gap: 18px;
+}
+
+/* Resumo compacto */
+.cronograma-gestao-summary-compact {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.cronograma-gestao-summary-compact .cronograma-calendar-kpi {
+  min-height: 88px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(16, 24, 20, 0.06);
+}
+
+.cronograma-gestao-summary-compact .cronograma-calendar-kpi span {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.cronograma-gestao-summary-compact .cronograma-calendar-kpi strong {
+  font-size: 2.2rem;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.cronograma-gestao-summary-compact .cronograma-calendar-kpi small {
+  display: none;
+}
+
+/* Painéis gerais */
+.cronograma-gestao-shell > .cronograma-panel {
+  padding: 22px 24px;
+  border-radius: 28px;
+}
+
+.cronograma-section-head {
+  margin-bottom: 14px;
+}
+
+.cronograma-section-head h3 {
+  margin-bottom: 4px;
+}
+
+/* Toolbar */
+.cronograma-gestao-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cronograma-gestao-toolbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cronograma-gestao-toolbar__sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Kanban */
+.cronograma-gestao-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.cronograma-kanban-column {
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(33, 57, 42, 0.08);
+  border-radius: 22px;
+  padding: 14px;
+  min-width: 0;
+}
+
+.cronograma-kanban-column__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cronograma-kanban-column__head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.cronograma-kanban-column__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cronograma-kanban-column__list {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.cronograma-kanban-column .cronograma-empty-state--compact {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Cards de tarefa — padronização */
+.cronograma-gestao-task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 16px 16px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(33, 57, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(16, 24, 20, 0.06);
+  text-align: left;
+}
+
+.cronograma-gestao-task-card strong {
+  font-size: 0.98rem;
+  line-height: 1.3;
+}
+
+.cronograma-gestao-task-card > span {
+  font-size: 0.9rem;
+  line-height: 1.25;
+  color: #4c5f54;
+}
+
+.cronograma-gestao-task-card__meta {
+  display: grid;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px solid rgba(33, 57, 42, 0.08);
+}
+
+.cronograma-gestao-task-card__meta span {
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.cronograma-gestao-task-card.is-overdue {
+  border-color: rgba(185, 28, 28, 0.18);
+}
+
+/* Fila tática / resultados */
+.cronograma-gestao-results {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.cronograma-gestao-results__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* SWOT */
+.cronograma-mini-list {
+  display: grid;
+  gap: 12px;
+}
+
+.cronograma-mini-list__item {
+  display: grid;
+  gap: 4px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(33, 57, 42, 0.06);
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+  .cronograma-gestao-summary-compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cronograma-gestao-results {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .cronograma-gestao-summary-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cronograma-gestao-board {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-gestao-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cronograma-gestao-shell > .cronograma-panel {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cronograma-gestao-summary-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-gestao-results {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-kanban-column {
+    padding: 12px;
+  }
+
+  .cronograma-gestao-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cronograma-gestao-toolbar__sort {
+    justify-content: space-between;
+  }
+}
