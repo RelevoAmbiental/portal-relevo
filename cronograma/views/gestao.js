@@ -1,4 +1,4 @@
-,import { renderIntoApp } from "../ui/layout.js";
+import { renderIntoApp } from "../ui/layout.js";
 import {
   state,
   setProjetos,
