@@ -705,21 +705,13 @@ function renderMetricCard(label, value, hint, tone = "") {
 
 function renderResumoExecutivoCard(metrics) {
   return `
-    <section class="cronograma-panel cronograma-gestao-summary-card">
-      <div class="cronograma-section-head">
-        <div>
-          <p class="cronograma-section-head__eyebrow">Leitura gerencial</p>
-          <h3>Resumo da operação</h3>
-          <p>Indicadores para orientar triagem, priorização e alocação de esforço.</p>
-        </div>
-      </div>
-
+    <section class="cronograma-panel cronograma-gestao-summary-card cronograma-gestao-summary-card--compact">
       <div class="cronograma-gestao-summary-grid">
-        ${renderMetricCard("Projetos ativos", String(metrics.totalProjetos), "Frentes com tarefas abertas")}
-        ${renderMetricCard("Tarefas ativas", String(metrics.totalTasks), "Base operacional aberta")}
         ${renderMetricCard("Atrasadas", String(metrics.overdue), "Pendências vencidas", metrics.overdue ? "danger" : "")}
         ${renderMetricCard("Alta prioridade", String(metrics.highPriority), "Itens sensíveis")}
         ${renderMetricCard("Sem responsável", String(metrics.unassigned), "Risco de dispersão", metrics.unassigned ? "warning" : "")}
+        ${renderMetricCard("Em andamento", String(metrics.andamento), "Execução ativa")}
+        ${renderMetricCard("Conflitos", String(metrics.responsaveisComConflito), "Frentes simultâneas", metrics.responsaveisComConflito ? "warning" : "")}
       </div>
     </section>
   `;
@@ -812,41 +804,6 @@ function renderResponsavelCard(item) {
       <div class="cronograma-gestao-card__metrics">
         <span><strong>${escapeHtml(item.dominantLabel)}</strong></span>
         <span>Score de pressão: <strong>${escapeHtml(String(item.pressureScore))}</strong></span>
-      </div>
-    </button>
-  `;
-}
-
-function renderProjetoCard(item) {
-  const toneClass = item.pressureTone !== "stable"
-    ? `is-${item.pressureTone === "critical" ? "high" : "medium"}`
-    : "";
-
-  return `
-    <button
-      class="cronograma-gestao-card ${toneClass}"
-      type="button"
-      data-action="filter-projeto"
-      data-projeto="${escapeHtml(item.nome)}"
-      title="Filtrar tarefas do projeto ${escapeHtml(item.nome)}"
-    >
-      <div class="cronograma-gestao-card__head">
-        <h3>${escapeHtml(item.nome)}</h3>
-        <span class="cronograma-gestao-badge ${item.pressureTone !== "stable" ? "cronograma-gestao-badge--warning" : ""}">
-          ${escapeHtml(item.pressureLabel)}
-        </span>
-      </div>
-
-      <div class="cronograma-gestao-card__metrics">
-        <span><strong>${item.total}</strong> tarefas abertas</span>
-        <span class="${item.overdue ? "is-danger" : ""}">
-          <strong>${item.overdue}</strong> atrasadas
-        </span>
-        <span class="${item.high ? "is-warning" : ""}">
-          <strong>${item.high}</strong> altas/críticas
-        </span>
-        <span><strong>${item.upcoming}</strong> no curto prazo</span>
-        <span><strong>${item.responsaveis}</strong> responsáveis</span>
       </div>
     </button>
   `;
@@ -1065,76 +1022,6 @@ function renderResponsaveisPanel(metrics) {
   `;
 }
 
-function renderRadarPanel(metrics, operational) {
-  const topProjects = metrics.projetos.slice(0, 6);
-
-  return `
-    <aside class="cronograma-panel cronograma-radar-panel">
-      <div class="cronograma-radar-panel__head">
-        <h3>Projetos sob atenção</h3>
-        <p>Ordenados por pressão operacional e criticidade do recorte atual.</p>
-      </div>
-
-      <div class="cronograma-radar-stack">
-        ${
-          topProjects.length
-            ? topProjects.map(renderProjetoCard).join("")
-            : `<div class="cronograma-empty-state">Nenhum projeto ativo com tarefas no período.</div>`
-        }
-      </div>
-
-      <div class="cronograma-mini-list" style="margin-top:18px;">
-        <div class="cronograma-mini-list__group">
-          <div class="cronograma-mini-list__group-head">
-            <strong>Cadência da semana</strong>
-          </div>
-
-          <div class="cronograma-mini-list__item">
-            <strong>${metrics.upcoming} entrega${metrics.upcoming === 1 ? "" : "s"} no radar</strong>
-            <span>Itens que vencem em até 7 dias e pedem acompanhamento fino.</span>
-          </div>
-
-          <div class="cronograma-mini-list__item">
-            <strong>${metrics.overdue} pendência${metrics.overdue === 1 ? "" : "s"} vencida${metrics.overdue === 1 ? "" : "s"}</strong>
-            <span>Volume que já saiu do planejado e pode afetar fluidez.</span>
-          </div>
-
-          <div class="cronograma-mini-list__item">
-            <strong>${metrics.unassigned} item${metrics.unassigned === 1 ? "" : "s"} sem dono</strong>
-            <span>Pontos de indefinição que merecem alocação imediata.</span>
-          </div>
-        </div>
-
-        <div class="cronograma-mini-list__group">
-          <div class="cronograma-mini-list__group-head">
-            <strong>Pontos quentes</strong>
-            <button
-              class="cronograma-link-button"
-              type="button"
-              data-action="set-filter"
-              data-filter-type="high"
-            >
-              Abrir
-            </button>
-          </div>
-
-          ${
-            operational.topRisks.length
-              ? operational.topRisks.slice(0, 3).map((task) => `
-                <div class="cronograma-mini-list__item">
-                  <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
-                  <span>${escapeHtml(formatProjeto(task))}</span>
-                  <span>Risco ${escapeHtml(String(getTaskRiskScore(task)))}</span>
-                </div>
-              `).join("")
-              : `<div class="cronograma-empty-state cronograma-empty-state--compact">Nenhum ponto quente no momento.</div>`
-          }
-        </div>
-      </div>
-    </aside>
-  `;
-}
-
 function getGestaoTemplate() {
   const tasks = getGestaoTasks();
   const metrics = getGestaoMetrics(tasks);
@@ -1143,7 +1030,7 @@ function getGestaoTemplate() {
   const filteredTasks = applyGestaoFilter(tasks);
 
   return `
-    <div class="cronograma-view-grid">
+    <div class="cronograma-view-grid cronograma-view-grid--single">
       <section class="cronograma-panel cronograma-gestao-shell">
         <div class="cronograma-section-head">
           <div>
@@ -1157,14 +1044,12 @@ function getGestaoTemplate() {
 
         ${renderResumoExecutivoCard(metrics)}
         ${renderGestaoFilterPanel()}
-        ${renderQuickActionPanel(operational)}
         ${renderKanbanPanel(operational)}
-        ${renderSwotPanel(swot)}
+        ${renderQuickActionPanel(operational)}
         ${renderResponsaveisPanel(metrics)}
+        ${renderSwotPanel(swot)}
         ${renderFilteredResults(filteredTasks)}
       </section>
-
-      ${renderRadarPanel(metrics, operational)}
     </div>
   `;
 }
