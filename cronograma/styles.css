@@ -3508,3 +3508,23 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
+.cronograma-view-grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cronograma-gestao-summary-card--compact {
+  padding: 14px 18px;
+}
+
+.cronograma-gestao-summary-card--compact .cronograma-gestao-summary-grid {
+  gap: 12px;
+}
+
+.cronograma-gestao-summary-card--compact .cronograma-calendar-kpi {
+  min-height: auto;
+  padding: 12px 14px;
+}
+
+.cronograma-gestao-summary-card--compact .cronograma-calendar-kpi small {
+  margin-top: 2px;
+}
