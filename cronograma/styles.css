@@ -3809,3 +3809,55 @@ body.relevo-body {
   border-radius: 18px;
   background: rgba(22, 163, 74, 0.05);
 }
+/* SWOT MATRIZ */
+
+.cronograma-swot-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 14px;
+}
+
+.cronograma-swot-quadrant {
+  padding: 16px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.cronograma-swot-quadrant__header {
+  font-size: 1rem;
+}
+
+.cronograma-swot-quadrant__body {
+  display: grid;
+  gap: 8px;
+}
+
+.cronograma-swot-item {
+  font-size: 0.9rem;
+}
+
+/* Cores suaves padrão Relevo */
+
+.cronograma-swot-strength {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+
+.cronograma-swot-weakness {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+
+.cronograma-swot-opportunity {
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.2);
+}
+
+.cronograma-swot-threat {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+}
