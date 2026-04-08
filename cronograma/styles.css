@@ -3789,3 +3789,23 @@ body.relevo-body {
   width: 100% !important;
   margin: 0 !important;
 }
+/* Kanban drag and drop */
+.cronograma-gestao-task-card[draggable="true"] {
+  cursor: grab;
+}
+
+.cronograma-gestao-task-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.cronograma-gestao-task-card.is-dragging {
+  opacity: 0.55;
+  transform: rotate(1deg) scale(0.98);
+}
+
+.cronograma-kanban-column__list.is-drop-target {
+  outline: 2px dashed rgba(22, 163, 74, 0.45);
+  outline-offset: 4px;
+  border-radius: 18px;
+  background: rgba(22, 163, 74, 0.05);
+}
