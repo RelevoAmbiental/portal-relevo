@@ -948,23 +948,49 @@ function renderSwotGroup(title, items) {
   `;
 }
 
-function renderSwotPanel(swot) {
+function renderSwotPanel(swot) function renderSwotPanel(metrics, operational) {
+  const matrix = buildSwotMatrix(metrics, operational);
+
   return `
     <section class="cronograma-panel">
       <div class="cronograma-section-head">
         <div>
           <h3>Matriz SWOT operacional</h3>
-          <p>Leitura estratégica automática para apoiar decisões curtas de gestão.</p>
         </div>
       </div>
 
-      <div class="cronograma-gestao-board">
-        ${renderSwotGroup("Forças", swot.strengths)}
-        ${renderSwotGroup("Fraquezas", swot.weaknesses)}
-        ${renderSwotGroup("Oportunidades", swot.opportunities)}
-        ${renderSwotGroup("Ameaças", swot.threats)}
+      <div class="cronograma-swot-matrix">
+
+        ${renderSwotQuadrant("Forças", matrix.strengths, "strength")}
+        ${renderSwotQuadrant("Fraquezas", matrix.weaknesses, "weakness")}
+        ${renderSwotQuadrant("Oportunidades", matrix.opportunities, "opportunity")}
+        ${renderSwotQuadrant("Ameaças", matrix.threats, "threat")}
+
       </div>
     </section>
+  `;
+}
+
+function renderSwotQuadrant(title, items, type) {
+  return `
+    <div class="cronograma-swot-quadrant cronograma-swot-${type}">
+      <div class="cronograma-swot-quadrant__header">
+        <strong>${escapeHtml(title)}</strong>
+      </div>
+
+      <div class="cronograma-swot-quadrant__body">
+        ${
+          items.length
+            ? items.map(item => `
+              <div class="cronograma-swot-item">
+                <strong>${escapeHtml(item.title)}</strong>
+                <span>${escapeHtml(item.description)}</span>
+              </div>
+            `).join("")
+            : `<span class="cronograma-muted">Sem registros</span>`
+        }
+      </div>
+    </div>
   `;
 }
 
