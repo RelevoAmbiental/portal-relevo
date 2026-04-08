@@ -6,7 +6,10 @@ import {
   setUsers
 } from "../core/state.js";
 import { listenProjetos } from "../services/firestore-projetos.js";
-import { listenTarefas } from "../services/firestore-tarefas.js";
+import {
+  listenTarefas,
+  atualizarTarefa
+} from "../services/firestore-tarefas.js";
 import { listenUsers } from "../services/firestore-users.js";
 import {
   countUniqueResponsaveis,
@@ -26,6 +29,12 @@ const gestaoUiState = {
   filterType: "all",
   filterValue: "",
   sortMode: "risk"
+};
+const gestaoDragState = {
+  taskId: "",
+  fromStatus: "",
+  toStatus: "",
+  isSaving: false
 };
 
 function escapeHtml(value) {
@@ -693,6 +702,42 @@ function applyGestaoFilter(tasks) {
   return filtered;
 }
 
+function getKanbanAllowedStatuses() {
+  return ["a_fazer", "andamento", "acompanhando"];
+}
+
+function isKanbanStatus(value) {
+  return getKanbanAllowedStatuses().includes(value);
+}
+
+function resetKanbanDragState() {
+  gestaoDragState.taskId = "";
+  gestaoDragState.fromStatus = "";
+  gestaoDragState.toStatus = "";
+}
+
+async function moveTaskToStatus(taskId, nextStatus) {
+  if (!taskId || !isKanbanStatus(nextStatus) || gestaoDragState.isSaving) return;
+
+  const task = (state.tarefas || []).find((item) => item.id === taskId);
+  if (!task) return;
+  if (task.status === nextStatus) return;
+
+  gestaoDragState.isSaving = true;
+
+  try {
+    await atualizarTarefa(taskId, {
+      status: nextStatus
+    });
+  } catch (error) {
+    console.error("Erro ao mover tarefa no Kanban:", error);
+  } finally {
+    gestaoDragState.isSaving = false;
+    resetKanbanDragState();
+    renderGestaoView();
+  }
+}
+
 function renderMetricCard(label, value, hint, tone = "") {
   return `
     <div class="cronograma-calendar-kpi ${tone ? `cronograma-calendar-kpi--${tone}` : ""}">
@@ -770,13 +815,17 @@ function renderGestaoTaskCard(task) {
   const dataFim = range ? range.end.toLocaleDateString("pt-BR") : "Sem data";
   const riskScore = getTaskRiskScore(task);
   const overdue = isTaskOverdue(task);
+  const currentStatus = task.status || "a_fazer";
 
   return `
     <button
       class="cronograma-gestao-task-card ${overdue ? "is-overdue" : ""}"
       type="button"
+      draggable="true"
       data-action="open-task"
       data-task-id="${escapeHtml(task.id || "")}"
+      data-drag-task-id="${escapeHtml(task.id || "")}"
+      data-drag-status="${escapeHtml(currentStatus)}"
     >
       <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
       <span>${escapeHtml(formatProjeto(task))}</span>
@@ -794,7 +843,10 @@ function renderGestaoTaskCard(task) {
 
 function renderKanbanColumn(statusKey, title, items, emptyText, tone = "") {
   return `
-    <section class="cronograma-kanban-column">
+    <section
+      class="cronograma-kanban-column"
+      data-drop-status="${escapeHtml(statusKey)}"
+    >
       <div class="cronograma-kanban-column__head">
         <h3>${escapeHtml(title)}</h3>
 
@@ -814,7 +866,11 @@ function renderKanbanColumn(statusKey, title, items, emptyText, tone = "") {
         </div>
       </div>
 
-      <div class="cronograma-kanban-column__list">
+      <div
+        class="cronograma-kanban-column__list"
+        data-drop-zone="true"
+        data-drop-status="${escapeHtml(statusKey)}"
+      >
         ${
           items.length
             ? items.slice(0, 5).map(renderGestaoTaskCard).join("")
@@ -1091,6 +1147,86 @@ function mountGestaoEvents() {
       gestaoUiState.sortMode = actionEl.value || "risk";
       renderGestaoView();
     }
+  });
+
+  root.addEventListener("dragstart", (event) => {
+    const card = event.target.closest("[data-drag-task-id]");
+    if (!card) return;
+
+    const { dragTaskId, dragStatus } = card.dataset;
+    if (!dragTaskId || !isKanbanStatus(dragStatus)) return;
+
+    gestaoDragState.taskId = dragTaskId;
+    gestaoDragState.fromStatus = dragStatus;
+    gestaoDragState.toStatus = "";
+
+    card.classList.add("is-dragging");
+
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", dragTaskId);
+    }
+  });
+
+  root.addEventListener("dragend", (event) => {
+    const card = event.target.closest("[data-drag-task-id]");
+    if (card) {
+      card.classList.remove("is-dragging");
+    }
+
+    root.querySelectorAll("[data-drop-zone].is-drop-target").forEach((zone) => {
+      zone.classList.remove("is-drop-target");
+    });
+
+    resetKanbanDragState();
+  });
+
+  root.addEventListener("dragover", (event) => {
+    const dropZone = event.target.closest("[data-drop-zone]");
+    if (!dropZone || !gestaoDragState.taskId) return;
+
+    event.preventDefault();
+    gestaoDragState.toStatus = dropZone.dataset.dropStatus || "";
+
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
+  });
+
+  root.addEventListener("dragenter", (event) => {
+    const dropZone = event.target.closest("[data-drop-zone]");
+    if (!dropZone || !gestaoDragState.taskId) return;
+
+    dropZone.classList.add("is-drop-target");
+  });
+
+  root.addEventListener("dragleave", (event) => {
+    const dropZone = event.target.closest("[data-drop-zone]");
+    if (!dropZone) return;
+
+    const related = event.relatedTarget;
+    if (related && dropZone.contains(related)) return;
+
+    dropZone.classList.remove("is-drop-target");
+  });
+
+  root.addEventListener("drop", async (event) => {
+    const dropZone = event.target.closest("[data-drop-zone]");
+    if (!dropZone || !gestaoDragState.taskId) return;
+
+    event.preventDefault();
+
+    root.querySelectorAll("[data-drop-zone].is-drop-target").forEach((zone) => {
+      zone.classList.remove("is-drop-target");
+    });
+
+    const nextStatus = dropZone.dataset.dropStatus || "";
+    if (!isKanbanStatus(nextStatus)) {
+      resetKanbanDragState();
+      return;
+    }
+
+    await moveTaskToStatus(gestaoDragState.taskId, nextStatus);
   });
 }
 
