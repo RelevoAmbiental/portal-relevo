@@ -927,28 +927,7 @@ function renderKanbanColumn(statusKey, title, items, emptyText, tone = "") {
   `;
 }
 
-function renderSwotGroup(title, items) {
-  return `
-    <section class="cronograma-gestao-board__column">
-      <div class="cronograma-gestao-board__head">
-        <div>
-          <h3>${escapeHtml(title)}</h3>
-        </div>
-      </div>
-
-      <div class="cronograma-mini-list">
-        ${items.map((item) => `
-          <div class="cronograma-mini-list__item">
-            <strong>${escapeHtml(item.title)}</strong>
-            <span>${escapeHtml(item.description)}</span>
-          </div>
-        `).join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderSwotPanel(swot) function renderSwotPanel(metrics, operational) {
+function renderSwotPanel(metrics, operational) {
   const matrix = buildSwotMatrix(metrics, operational);
 
   return `
@@ -960,12 +939,10 @@ function renderSwotPanel(swot) function renderSwotPanel(metrics, operational) {
       </div>
 
       <div class="cronograma-swot-matrix">
-
         ${renderSwotQuadrant("Forças", matrix.strengths, "strength")}
         ${renderSwotQuadrant("Fraquezas", matrix.weaknesses, "weakness")}
         ${renderSwotQuadrant("Oportunidades", matrix.opportunities, "opportunity")}
         ${renderSwotQuadrant("Ameaças", matrix.threats, "threat")}
-
       </div>
     </section>
   `;
@@ -981,7 +958,7 @@ function renderSwotQuadrant(title, items, type) {
       <div class="cronograma-swot-quadrant__body">
         ${
           items.length
-            ? items.map(item => `
+            ? items.map((item) => `
               <div class="cronograma-swot-item">
                 <strong>${escapeHtml(item.title)}</strong>
                 <span>${escapeHtml(item.description)}</span>
@@ -1080,7 +1057,6 @@ function getGestaoTemplate() {
   const tasks = getGestaoTasks();
   const metrics = getGestaoMetrics(tasks);
   const operational = getGestaoOperationalData(tasks);
-  const swot = buildSwotMatrix(metrics, operational);
   const filteredTasks = applyGestaoFilter(tasks);
 
   return `
@@ -1090,7 +1066,8 @@ function getGestaoTemplate() {
         ${renderGestaoFilterPanel()}
         ${renderKanbanPanel(operational)}
         ${renderQuickActionPanel(operational)}
-        ${renderSwotPanel(swot)}
+        ${renderSwotPanel(metrics, operational)}
+        ${renderRaciPanel(state.tarefas, state.users)}
         ${gestaoUiState.filterType !== "all" ? renderFilteredResults(filteredTasks) : ""}
       </section>
     </div>
@@ -1313,6 +1290,58 @@ function mountGestaoEvents() {
 
     await moveTaskToStatus(gestaoDragState.taskId, nextStatus);
   });
+}
+
+function renderRaciPanel(tasks, users) {
+  const visibleTasks = tasks.slice(0, 8);
+  const visibleUsers = users.slice(0, 4);
+
+  return `
+    <section class="cronograma-panel">
+      <div class="cronograma-section-head">
+        <div>
+          <h3>Matriz RACI</h3>
+        </div>
+      </div>
+
+      <div class="cronograma-raci">
+
+        <div class="cronograma-raci-grid">
+
+          <div></div>
+
+          ${visibleUsers.map(user => `
+            <div class="cronograma-raci-user">
+              ${escapeHtml(user.nome || user.email || "Usuário")}
+            </div>
+          `).join("")}
+
+          ${visibleTasks.map(task => `
+            ${renderRaciRow(task, visibleUsers)}
+          `).join("")}
+
+        </div>
+
+      </div>
+    </section>
+  `;
+}
+
+function renderRaciRow(task, users) {
+  return `
+    <div class="cronograma-raci-task">
+      ${escapeHtml(task.titulo || "Tarefa")}
+    </div>
+
+    ${users.map(user => {
+      const isResponsible = task.responsavel === user.nome;
+      return `
+        <div class="cronograma-raci-cell ${isResponsible ? "is-r" : ""}">
+          ${isResponsible ? "R" : ""}
+        </div>
+      `;
+    }).join("")}
+  `;
 }
 
 export function renderGestaoView() {
