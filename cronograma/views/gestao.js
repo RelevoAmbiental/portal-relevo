@@ -791,6 +791,7 @@ async function updateTaskRaci(taskId, userId, nextValue) {
     projetoId: task.projetoId || "",
     projetoNome: task.projetoNome || "",
     responsavel: task.responsavel || "",
+    responsavelUid: task.responsavelUid || "",
     prioridade: task.prioridade || "media",
     status: task.status || "a_fazer",
     dataInicio: task.dataInicio || "",
