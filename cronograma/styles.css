@@ -3861,3 +3861,35 @@ body.relevo-body {
   background: rgba(239,68,68,0.08);
   border: 1px solid rgba(239,68,68,0.2);
 }
+/* RACI */
+
+.cronograma-raci-grid {
+  display: grid;
+  grid-template-columns: 200px repeat(4, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.cronograma-raci-user {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cronograma-raci-task {
+  font-size: 0.9rem;
+}
+
+.cronograma-raci-cell {
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cronograma-raci-cell.is-r {
+  background: rgba(59,130,246,0.25);
+  font-weight: bold;
+}
