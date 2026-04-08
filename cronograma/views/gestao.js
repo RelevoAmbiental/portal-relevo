@@ -34,7 +34,8 @@ const gestaoDragState = {
   taskId: "",
   fromStatus: "",
   toStatus: "",
-  isSaving: false
+  isSaving: false,
+  ignoreClickUntil: 0
 };
 
 function escapeHtml(value) {
@@ -716,25 +717,60 @@ function resetKanbanDragState() {
   gestaoDragState.toStatus = "";
 }
 
+function getKanbanDropZone(target) {
+  if (!target) return null;
+
+  return (
+    target.closest("[data-drop-zone]") ||
+    target.closest("[data-drop-status]")?.querySelector("[data-drop-zone]") ||
+    null
+  );
+}
+
 async function moveTaskToStatus(taskId, nextStatus) {
   if (!taskId || !isKanbanStatus(nextStatus) || gestaoDragState.isSaving) return;
 
-  const task = (state.tarefas || []).find((item) => item.id === taskId);
+  const previousTasks = [...(state.tarefas || [])];
+  const task = previousTasks.find((item) => item.id === taskId);
+
   if (!task) return;
   if (task.status === nextStatus) return;
 
   gestaoDragState.isSaving = true;
 
+  const optimisticTasks = previousTasks.map((item) =>
+    item.id === taskId ? { ...item, status: nextStatus } : item
+  );
+
+  setTarefas(optimisticTasks);
+  renderGestaoView();
+
+  const payload = {
+    titulo: task.titulo || "",
+    descricao: task.descricao || "",
+    projetoId: task.projetoId || "",
+    projetoNome: task.projetoNome || "",
+    responsavel: task.responsavel || "",
+    prioridade: task.prioridade || "media",
+    status: nextStatus,
+    dataInicio: task.dataInicio || "",
+    dataVencimento: task.dataVencimento || "",
+    recorrencia: task.recorrencia || "",
+    subtarefas: Array.isArray(task.subtarefas) ? task.subtarefas : [],
+    etiquetas: Array.isArray(task.etiquetas) ? task.etiquetas : [],
+    arquivada: Boolean(task.arquivada)
+  };
+
   try {
-    await atualizarTarefa(taskId, {
-      status: nextStatus
-    });
+    await atualizarTarefa(taskId, payload);
   } catch (error) {
     console.error("Erro ao mover tarefa no Kanban:", error);
+    setTarefas(previousTasks);
+    renderGestaoView();
   } finally {
     gestaoDragState.isSaving = false;
+    gestaoDragState.ignoreClickUntil = Date.now() + 250;
     resetKanbanDragState();
-    renderGestaoView();
   }
 }
 
@@ -810,7 +846,8 @@ function renderGestaoFilterPanel() {
   `;
 }
 
-function renderGestaoTaskCard(task) {
+function renderGestaoTaskCard(task, options = {}) {
+  const { draggable = false } = options;
   const range = getDateRangeForTask(task);
   const dataFim = range ? range.end.toLocaleDateString("pt-BR") : "Sem data";
   const riskScore = getTaskRiskScore(task);
@@ -818,26 +855,29 @@ function renderGestaoTaskCard(task) {
   const currentStatus = task.status || "a_fazer";
 
   return `
-    <button
+    <article
       class="cronograma-gestao-task-card ${overdue ? "is-overdue" : ""}"
-      type="button"
-      draggable="true"
-      data-action="open-task"
-      data-task-id="${escapeHtml(task.id || "")}"
-      data-drag-task-id="${escapeHtml(task.id || "")}"
-      data-drag-status="${escapeHtml(currentStatus)}"
+      ${draggable ? 'draggable="true"' : ""}
+      ${draggable ? `data-drag-task-id="${escapeHtml(task.id || "")}"` : ""}
+      ${draggable ? `data-drag-status="${escapeHtml(currentStatus)}"` : ""}
     >
-      <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
-      <span>${escapeHtml(formatProjeto(task))}</span>
-      <span>${escapeHtml(formatResponsavel(task))}</span>
+      <div
+        class="cronograma-gestao-task-card__body"
+        data-action="open-task"
+        data-task-id="${escapeHtml(task.id || "")}"
+      >
+        <strong>${escapeHtml(task.titulo || "Tarefa")}</strong>
+        <span>${escapeHtml(formatProjeto(task))}</span>
+        <span>${escapeHtml(formatResponsavel(task))}</span>
 
-      <div class="cronograma-gestao-task-card__meta">
-        <span>${escapeHtml(formatPrioridade(task.prioridade))}</span>
-        <span>${escapeHtml(formatStatus(task.status))}</span>
-        <span>Vence: ${escapeHtml(dataFim)}</span>
-        <span>Risco: ${escapeHtml(String(riskScore))}</span>
+        <div class="cronograma-gestao-task-card__meta">
+          <span>${escapeHtml(formatPrioridade(task.prioridade))}</span>
+          <span>${escapeHtml(formatStatus(task.status))}</span>
+          <span>Vence: ${escapeHtml(dataFim)}</span>
+          <span>Risco: ${escapeHtml(String(riskScore))}</span>
+        </div>
       </div>
-    </button>
+    </article>
   `;
 }
 
@@ -873,7 +913,7 @@ function renderKanbanColumn(statusKey, title, items, emptyText, tone = "") {
       >
         ${
           items.length
-            ? items.slice(0, 5).map(renderGestaoTaskCard).join("")
+            ? items.slice(0, 5).map((task) => renderGestaoTaskCard(task, { draggable: true })).join("")
             : `<div class="cronograma-empty-state cronograma-empty-state--compact">${escapeHtml(emptyText)}</div>`
         }
       </div>
@@ -955,7 +995,7 @@ function renderFilteredResults(tasks) {
       <div class="cronograma-gestao-results">
         ${
           tasks.length
-            ? tasks.slice(0, 18).map(renderGestaoTaskCard).join("")
+            ? tasks.slice(0, 18).map((task) => renderGestaoTaskCard(task)).join("")
             : `<div class="cronograma-empty-state">Nenhuma tarefa encontrada para este recorte.</div>`
         }
       </div>
@@ -977,7 +1017,7 @@ function renderQuickActionPanel(operational) {
       <div class="cronograma-gestao-results">
         ${
           items.length
-            ? items.map(renderGestaoTaskCard).join("")
+            ? items.map((task) => renderGestaoTaskCard(task)).join("")
             : `<div class="cronograma-empty-state">Nenhum item crítico no momento.</div>`
         }
       </div>
@@ -1103,6 +1143,8 @@ function mountGestaoEvents() {
     } = actionEl.dataset;
 
     if (action === "open-task" && taskId) {
+      if (Date.now() < gestaoDragState.ignoreClickUntil) return;
+
       import("./tarefas.js").then(({ openTarefaEditor }) => {
         openTarefaEditor(taskId, { scrollToTop: true });
       });
@@ -1134,6 +1176,7 @@ function mountGestaoEvents() {
       gestaoUiState.filterType = "projeto";
       gestaoUiState.filterValue = projeto || "";
       renderGestaoView();
+      return;
     }
   });
 
@@ -1159,6 +1202,7 @@ function mountGestaoEvents() {
     gestaoDragState.taskId = dragTaskId;
     gestaoDragState.fromStatus = dragStatus;
     gestaoDragState.toStatus = "";
+    gestaoDragState.ignoreClickUntil = Date.now() + 300;
 
     card.classList.add("is-dragging");
 
@@ -1177,12 +1221,10 @@ function mountGestaoEvents() {
     root.querySelectorAll("[data-drop-zone].is-drop-target").forEach((zone) => {
       zone.classList.remove("is-drop-target");
     });
-
-    resetKanbanDragState();
   });
 
   root.addEventListener("dragover", (event) => {
-    const dropZone = event.target.closest("[data-drop-zone]");
+    const dropZone = getKanbanDropZone(event.target);
     if (!dropZone || !gestaoDragState.taskId) return;
 
     event.preventDefault();
@@ -1194,14 +1236,14 @@ function mountGestaoEvents() {
   });
 
   root.addEventListener("dragenter", (event) => {
-    const dropZone = event.target.closest("[data-drop-zone]");
+    const dropZone = getKanbanDropZone(event.target);
     if (!dropZone || !gestaoDragState.taskId) return;
 
     dropZone.classList.add("is-drop-target");
   });
 
   root.addEventListener("dragleave", (event) => {
-    const dropZone = event.target.closest("[data-drop-zone]");
+    const dropZone = getKanbanDropZone(event.target);
     if (!dropZone) return;
 
     const related = event.relatedTarget;
@@ -1211,7 +1253,7 @@ function mountGestaoEvents() {
   });
 
   root.addEventListener("drop", async (event) => {
-    const dropZone = event.target.closest("[data-drop-zone]");
+    const dropZone = getKanbanDropZone(event.target);
     if (!dropZone || !gestaoDragState.taskId) return;
 
     event.preventDefault();
