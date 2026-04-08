@@ -75,6 +75,20 @@ function validateTarefa(payload) {
   }
 }
 
+function validateTarefaUpdate(payload) {
+  if (!payload.titulo) {
+    throw new Error("Informe o título da tarefa.");
+  }
+
+  if (!payload.projetoId) {
+    throw new Error("Selecione um projeto.");
+  }
+
+  if (!payload.responsavelUid && !payload.responsavel) {
+    throw new Error("Selecione um responsável.");
+  }
+}
+
 function normalizeTarefa(doc) {
   const data = doc.data() || {};
 
@@ -160,7 +174,7 @@ export async function atualizarTarefa(id, payload) {
   const db = ensureDb();
   const user = ensureUser();
   const data = sanitizeTarefa(payload);
-  validateTarefa(data);
+  validateTarefaUpdate(data);
 
   await db.collection("tarefas").doc(id).update({
     ...data,
