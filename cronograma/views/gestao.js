@@ -732,7 +732,13 @@ async function moveTaskToStatus(taskId, nextStatus) {
 
   const previousTasks = [...(state.tarefas || [])];
   const task = previousTasks.find((item) => item.id === taskId);
-
+  
+  if (!task?.responsavel || !String(task.responsavel).trim()) {
+  console.warn("Kanban: tarefa sem responsável não pode mudar de status.", task);
+  gestaoDragState.ignoreClickUntil = Date.now() + 250;
+  resetKanbanDragState();
+  return;
+  }
   if (!task) return;
   if (task.status === nextStatus) return;
 
@@ -1067,7 +1073,10 @@ function getGestaoTemplate() {
 
 function ensureTarefasListener() {
   if (unsubscribeTarefas) return;
-
+  const currentUser = window.__RELEVO_USER__ || window.__FIREBASE_USER__ || null;
+  if (!currentUser) {
+    return;
+  }
   unsubscribeTarefas = listenTarefas(
     (items) => {
       setTarefas(items);
@@ -1088,6 +1097,11 @@ function ensureTarefasListener() {
 function ensureUsersListener() {
   if (unsubscribeUsers) return;
 
+  const currentUser = window.__RELEVO_USER__ || window.__FIREBASE_USER__ || null;
+  if (!currentUser) {
+     return;
+  }
+
   unsubscribeUsers = listenUsers(
     (items) => {
       setUsers(items);
@@ -1107,7 +1121,10 @@ function ensureUsersListener() {
 
 function ensureProjetosListener() {
   if (unsubscribeProjetos) return;
-
+  const currentUser = window.__RELEVO_USER__ || window.__FIREBASE_USER__ || null;
+  if (!currentUser) {
+    return;
+  }
   unsubscribeProjetos = listenProjetos(
     (items) => {
       setProjetos(items);
