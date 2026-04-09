@@ -47,6 +47,39 @@ const raciState = {
   }))
 };
 
+function loadRaciColumns() {
+  try {
+    const data = localStorage.getItem("relevo_raci_columns");
+    const parsed = data ? JSON.parse(data) : [];
+
+    if (!Array.isArray(parsed)) return;
+
+    raciState.columns = Array.from({ length: 5 }, (_, i) => {
+      const saved = parsed[i] || {};
+      return {
+        slot: i,
+        userId: saved.userId || "",
+        userName: saved.userName || ""
+      };
+    });
+  } catch (e) {
+    console.warn("Erro ao carregar cabeçalhos do RACI:", e);
+    raciState.columns = Array.from({ length: 5 }, (_, i) => ({
+      slot: i,
+      userId: "",
+      userName: ""
+    }));
+  }
+}
+
+function saveRaciColumns() {
+  try {
+    localStorage.setItem("relevo_raci_columns", JSON.stringify(raciState.columns));
+  } catch (e) {
+    console.warn("Erro ao salvar cabeçalhos do RACI:", e);
+  }
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -1220,21 +1253,22 @@ function mountGestaoEvents() {
       gestaoUiState.sortMode = actionEl.value || "risk";
       renderGestaoView();
     }
-    if (action === "set-raci-column") {
-  const slot = Number(actionEl.dataset.slot);
-  const userId = actionEl.value;
-
-  const user = (state.users || []).find(u => (u.uid || u.id) === userId);
-
-  raciState.columns[slot] = {
-    slot,
-    userId,
-    userName: user?.nome || user?.email || ""
-  };
-
-  renderGestaoView();
-  return;
-}
+  if (action === "set-raci-column") {
+    const slot = Number(actionEl.dataset.slot);
+    const userId = actionEl.value;
+  
+    const user = (state.users || []).find((u) => (u.uid || u.id) === userId);
+  
+    raciState.columns[slot] = {
+      slot,
+      userId: userId || "",
+      userName: userId ? (user?.nome || user?.email || "") : ""
+    };
+  
+    saveRaciColumns();
+    renderGestaoView();
+    return;
+  }
 
   if (action === "set-raci-value") {
     const taskId = actionEl.dataset.taskId;
@@ -1430,6 +1464,7 @@ export function renderGestaoView() {
   ensureProjetosListener();
 
   loadRaci();
+  loadRaciColumns();
   renderIntoApp(getGestaoTemplate());
   mountGestaoEvents();
 }
