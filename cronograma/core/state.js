@@ -25,7 +25,9 @@ export const state = {
   calendarioFiltroProjeto: "todos",
   calendarioFiltroResponsavel: "todos",
   calendarioFiltroFase: "todos",
-  calendarioMostrarArquivadas: false
+  calendarioMostrarArquivadas: false,
+
+  raci: {}
 };
 
 export function setView(view) {
@@ -83,7 +85,6 @@ export function setUsers(items) {
   state.usersLoaded = true;
 }
 
-
 export function setCalendarioMesReferencia(value) {
   state.calendarioMesReferencia = value || new Date().toISOString().slice(0, 7) + "-01";
 }
@@ -110,4 +111,23 @@ export function setCalendarioFiltroFase(value) {
 
 export function setCalendarioMostrarArquivadas(value) {
   state.calendarioMostrarArquivadas = Boolean(value);
+}
+
+export function loadRaci() {
+  try {
+    const data = localStorage.getItem("relevo_raci");
+    const parsed = data ? JSON.parse(data) : {};
+    state.raci = parsed && typeof parsed === "object" ? parsed : {};
+  } catch (e) {
+    console.warn("Erro ao carregar RACI:", e);
+    state.raci = {};
+  }
+}
+
+export function saveRaci() {
+  try {
+    localStorage.setItem("relevo_raci", JSON.stringify(state.raci));
+  } catch (e) {
+    console.warn("Erro ao salvar RACI:", e);
+  }
 }
