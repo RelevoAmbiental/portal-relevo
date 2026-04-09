@@ -4201,3 +4201,16 @@ body.relevo-body {
     padding: 8px 10px;
   }
 }
+.cronograma-gestao-board {
+  align-items: start;
+}
+
+.cronograma-kanban-column {
+  min-height: 0;
+}
+
+.cronograma-kanban-column__list {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 0.35rem;
+}
