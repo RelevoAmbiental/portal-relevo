@@ -3508,26 +3508,7 @@ body.relevo-body {
     grid-template-columns: 1fr;
   }
 }
-.cronograma-view-grid--single {
-  grid-template-columns: minmax(0, 1fr);
-}
 
-.cronograma-gestao-summary-card--compact {
-  padding: 14px 18px;
-}
-
-.cronograma-gestao-summary-card--compact .cronograma-gestao-summary-grid {
-  gap: 12px;
-}
-
-.cronograma-gestao-summary-card--compact .cronograma-calendar-kpi {
-  min-height: auto;
-  padding: 12px 14px;
-}
-
-.cronograma-gestao-summary-card--compact .cronograma-calendar-kpi small {
-  margin-top: 2px;
-}
 /* =========================
    GESTÃO — AJUSTES FINAIS
    ========================= */
@@ -3780,15 +3761,7 @@ body.relevo-body {
     justify-content: space-between;
   }
 }
-.cronograma-gestao-summary-compact {
-  display: grid !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-}
 
-.cronograma-gestao-summary-compact .cronograma-calendar-kpi {
-  width: 100% !important;
-  margin: 0 !important;
-}
 /* Kanban drag and drop */
 .cronograma-gestao-task-card[draggable="true"] {
   cursor: grab;
@@ -3861,227 +3834,7 @@ body.relevo-body {
   background: rgba(239,68,68,0.08);
   border: 1px solid rgba(239,68,68,0.2);
 }
-/* RACI */
 
-.cronograma-raci-grid {
-  display: grid;
-  grid-template-columns: 200px repeat(4, 1fr);
-  gap: 8px;
-  align-items: center;
-}
-
-.cronograma-raci-user {
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.cronograma-raci-task {
-  font-size: 0.9rem;
-}
-
-.cronograma-raci-cell {
-  height: 36px;
-  border-radius: 8px;
-  background: rgba(0,0,0,0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cronograma-raci-cell.is-r {
-  background: rgba(59,130,246,0.25);
-  font-weight: bold;
-}
-/* RACI */
-
-.cronograma-raci-grid {
-  display: grid;
-  grid-template-columns: 200px repeat(4, 1fr);
-  gap: 8px;
-  align-items: center;
-}
-
-.cronograma-raci-user {
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.cronograma-raci-task {
-  font-size: 0.9rem;
-}
-
-.cronograma-raci-cell {
-  height: 36px;
-  border-radius: 8px;
-  background: rgba(0,0,0,0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cronograma-raci-cell.is-r {
-  background: rgba(59,130,246,0.25);
-  font-weight: bold;
-}
-/* =========================
-   RACI — INTERATIVO
-   ========================= */
-
-.cronograma-raci {
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.cronograma-raci-legend {
-  margin: 4px 0 0;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: var(--cron-text-soft);
-}
-
-.cronograma-raci-legend strong {
-  color: var(--cron-primary);
-  font-weight: 800;
-}
-
-.cronograma-raci-grid {
-  display: grid;
-  gap: 10px;
-  align-items: stretch;
-  min-width: 760px;
-}
-
-.cronograma-raci-user {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 44px;
-  padding: 8px 10px;
-  border-radius: 14px;
-  background: rgba(11, 46, 27, 0.06);
-  color: var(--cron-primary);
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.cronograma-raci-task {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(11, 46, 27, 0.08);
-  color: var(--cron-text);
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.cronograma-raci-cell {
-  min-height: 44px;
-  width: 100%;
-  border: 1px solid rgba(11, 46, 27, 0.08);
-  border-radius: 14px;
-  background: rgba(11, 46, 27, 0.04);
-  color: var(--cron-text-soft);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 10px;
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    transform 0.14s ease,
-    box-shadow 0.14s ease,
-    border-color 0.14s ease,
-    background 0.14s ease,
-    color 0.14s ease;
-}
-
-.cronograma-raci-cell:hover {
-  transform: translateY(-1px);
-  border-color: rgba(31, 107, 69, 0.20);
-  box-shadow: 0 8px 18px rgba(15, 54, 30, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-}
-
-.cronograma-raci-cell:focus-visible {
-  outline: 2px solid rgba(31, 107, 69, 0.32);
-  outline-offset: 2px;
-}
-
-.cronograma-raci-cell.is-empty {
-  cursor: default;
-  opacity: 0.65;
-}
-
-.cronograma-raci-cell.is-r {
-  background: rgba(34, 197, 94, 0.16);
-  border-color: rgba(34, 197, 94, 0.26);
-  color: #166534;
-  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.10);
-}
-
-.cronograma-raci-cell.is-a {
-  background: rgba(59, 130, 246, 0.14);
-  border-color: rgba(59, 130, 246, 0.24);
-  color: #1d4ed8;
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.08);
-}
-
-.cronograma-raci-cell.is-c {
-  background: rgba(245, 158, 11, 0.14);
-  border-color: rgba(245, 158, 11, 0.24);
-  color: #b45309;
-  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.08);
-}
-
-.cronograma-raci-cell.is-i {
-  background: rgba(168, 85, 247, 0.14);
-  border-color: rgba(168, 85, 247, 0.24);
-  color: #7e22ce;
-  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.08);
-}
-
-@media (max-width: 980px) {
-  .cronograma-raci-grid {
-    min-width: 680px;
-  }
-}
-
-@media (max-width: 640px) {
-  .cronograma-raci-legend {
-    font-size: 0.74rem;
-  }
-
-  .cronograma-raci-grid {
-    min-width: 620px;
-    gap: 8px;
-  }
-
-  .cronograma-raci-user,
-  .cronograma-raci-task,
-  .cronograma-raci-cell {
-    min-height: 40px;
-    border-radius: 12px;
-  }
-
-  .cronograma-raci-task {
-    font-size: 0.88rem;
-  }
-
-  .cronograma-raci-cell {
-    font-size: 0.9rem;
-  }
-}
 /* =========================
    RACI — MODELO SIMPLIFICADO
    ========================= */
@@ -4213,4 +3966,168 @@ body.relevo-body {
   max-height: 520px;
   overflow-y: auto;
   padding-right: 0.35rem;
+}
+/* =========================
+   GESTÃO — FEEDBACK VISUAL E REFINO FINAL
+   ========================= */
+
+.cronograma-panel,
+.cronograma-gestao-task-card,
+.cronograma-kanban-column,
+.cronograma-filter-chip,
+.cronograma-link-button,
+.cronograma-raci-select-top,
+.cronograma-raci-select,
+.cronograma-gestao-toolbar__sort select {
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    color 0.18s ease;
+}
+
+/* Painéis */
+.cronograma-gestao-shell > .cronograma-panel:hover {
+  box-shadow: 0 14px 30px rgba(16, 24, 20, 0.08);
+}
+
+/* Toolbar e filtros */
+.cronograma-filter-chip:active {
+  transform: scale(0.985);
+}
+
+.cronograma-filter-chip.is-active {
+  box-shadow: 0 8px 20px rgba(21, 107, 69, 0.10);
+}
+
+.cronograma-link-button {
+  border-radius: 10px;
+  padding: 4px 6px;
+}
+
+.cronograma-link-button:hover {
+  background: rgba(11, 46, 27, 0.06);
+  text-decoration: none;
+}
+
+.cronograma-link-button:focus-visible,
+.cronograma-filter-chip:focus-visible,
+.cronograma-gestao-toolbar__sort select:focus-visible,
+.cronograma-raci-select-top:focus-visible,
+.cronograma-raci-select:focus-visible,
+.cronograma-gestao-task-card:focus-visible {
+  outline: 2px solid rgba(31, 107, 69, 0.28);
+  outline-offset: 2px;
+}
+
+/* Kanban */
+.cronograma-kanban-column {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.cronograma-kanban-column__list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 107, 69, 0.35) rgba(11, 46, 27, 0.06);
+}
+
+.cronograma-kanban-column__list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.cronograma-kanban-column__list::-webkit-scrollbar-track {
+  background: rgba(11, 46, 27, 0.06);
+  border-radius: 999px;
+}
+
+.cronograma-kanban-column__list::-webkit-scrollbar-thumb {
+  background: rgba(31, 107, 69, 0.28);
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.cronograma-kanban-column__list::-webkit-scrollbar-thumb:hover {
+  background: rgba(31, 107, 69, 0.42);
+}
+
+.cronograma-kanban-column__list.is-drop-target {
+  outline: 2px dashed rgba(22, 163, 74, 0.45);
+  outline-offset: 4px;
+  border-radius: 18px;
+  background: rgba(22, 163, 74, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.10);
+}
+
+/* Cards */
+.cronograma-gestao-task-card {
+  position: relative;
+}
+
+.cronograma-gestao-task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(16, 24, 20, 0.10);
+}
+
+.cronograma-gestao-task-card:active {
+  transform: scale(0.992);
+}
+
+.cronograma-gestao-task-card__body {
+  display: grid;
+  gap: 8px;
+}
+
+.cronograma-gestao-task-card.is-overdue {
+  background: linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,246,246,0.92) 100%);
+}
+
+.cronograma-gestao-task-card.is-dragging {
+  opacity: 0.58;
+  transform: rotate(1deg) scale(0.985);
+  box-shadow: 0 18px 30px rgba(16, 24, 20, 0.12);
+}
+
+/* Resultados */
+.cronograma-gestao-results > .cronograma-gestao-task-card {
+  min-height: 100%;
+}
+
+/* RACI */
+.cronograma-raci-task {
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.cronograma-raci-task:hover {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(31, 107, 69, 0.14);
+  box-shadow: 0 8px 18px rgba(15, 54, 30, 0.05);
+}
+
+.cronograma-raci-select-top:hover,
+.cronograma-raci-select:hover {
+  transform: translateY(-1px);
+}
+
+.cronograma-raci-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+  background: rgba(11, 46, 27, 0.04);
+  color: rgba(23, 48, 31, 0.45);
+}
+
+/* Estados utilitários futuros */
+.cronograma-soft-success {
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.12);
+}
+
+.cronograma-soft-warning {
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.12);
+}
+
+.cronograma-soft-danger {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.12);
 }
