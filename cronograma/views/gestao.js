@@ -1240,7 +1240,7 @@ function mountGestaoEvents() {
     const userId = actionEl.dataset.userId;
     const value = actionEl.value;
   
-    const tasks = [...(state.tarefas ||)];
+    const tasks = [...(state.tarefas || [])];
   
     const updated = tasks.map(t => {
       if (t.id !== taskId) return t;
