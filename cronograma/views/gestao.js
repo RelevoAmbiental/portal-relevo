@@ -3,7 +3,9 @@ import {
   state,
   setProjetos,
   setTarefas,
-  setUsers
+  setUsers,
+  loadRaci,
+  saveRaci
 } from "../core/state.js";
 import { listenProjetos } from "../services/firestore-projetos.js";
 import {
@@ -724,26 +726,6 @@ function resetKanbanDragState() {
   gestaoDragState.toStatus = "";
 }
 
-function buildRaciTaskPayload(task, raci) {
-  return {
-    titulo: task.titulo || "",
-    descricao: task.descricao || "",
-    projetoId: task.projetoId || "",
-    projetoNome: task.projetoNome || "",
-    responsavel: task.responsavel || "",
-    responsavelUid: task.responsavelUid || "",
-    prioridade: task.prioridade || "media",
-    status: task.status || "a_fazer",
-    dataInicio: task.dataInicio || "",
-    dataVencimento: task.dataVencimento || "",
-    recorrencia: task.recorrencia || "",
-    subtarefas: Array.isArray(task.subtarefas) ? task.subtarefas : [],
-    etiquetas: Array.isArray(task.etiquetas) ? task.etiquetas : [],
-    arquivada: Boolean(task.arquivada),
-    raci: raci || {}
-  };
-}
-
 function getKanbanDropZone(target) {
   if (!target) return null;
 
@@ -1254,42 +1236,32 @@ function mountGestaoEvents() {
   return;
 }
 
-if (action === "set-raci-value") {
-  const taskId = actionEl.dataset.taskId;
-  const userId = actionEl.dataset.userId;
-  const value = actionEl.value;
-
-  if (!taskId || !userId) return;
-
-  const previousTasks = [...(state.tarefas || [])];
-
-  const updated = previousTasks.map((t) => {
-    if (t.id !== taskId) return t;
-
-    const raci = { ...(t.raci || {}) };
-
-    if (!value) delete raci[userId];
-    else raci[userId] = value;
-
-    return { ...t, raci };
-  });
-
-  setTarefas(updated);
-  renderGestaoView();
-
-  const task = updated.find((t) => t.id === taskId);
-  if (!task) return;
-
-  const payload = buildRaciTaskPayload(task, task.raci);
-
-  atualizarTarefa(taskId, payload).catch((err) => {
-    console.error("Erro RACI:", err);
-    setTarefas(previousTasks);
+  if (action === "set-raci-value") {
+    const taskId = actionEl.dataset.taskId;
+    const userId = actionEl.dataset.userId;
+    const value = actionEl.value;
+  
+    if (!taskId || !userId) return;
+  
+    if (!state.raci[taskId] || typeof state.raci[taskId] !== "object") {
+      state.raci[taskId] = {};
+    }
+  
+    if (!value) {
+      delete state.raci[taskId][userId];
+    } else {
+      state.raci[taskId][userId] = value;
+    }
+  
+    if (Object.keys(state.raci[taskId]).length === 0) {
+      delete state.raci[taskId];
+    }
+  
+    saveRaci();
     renderGestaoView();
-  });
-
-  return;
-}
+    return;
+  }
+    
   });
 
   root.addEventListener("dragstart", (event) => {
@@ -1377,7 +1349,7 @@ function renderRaciPanel(tasks, users) {
     .filter(t => !t.arquivada && t.status !== "concluida")
     .slice(0, 8);
 
-  const usuarios = (users || []).sort((a, b) =>
+  const usuarios = [...(users || [])].sort((a, b) =>
     (a.nome || "").localeCompare(b.nome || "", "pt-BR")
   );
 
@@ -1431,7 +1403,7 @@ function renderRaciRow(task) {
 
     ${raciState.columns.map((col) => {
       const userId = col.userId;
-      const value = userId ? (task.raci?.[userId] || "") : "";
+      const value = userId ? (state.raci?.[task.id]?.[userId] || "") : "";
 
       return `
         <select
@@ -1457,6 +1429,7 @@ export function renderGestaoView() {
   ensureUsersListener();
   ensureProjetosListener();
 
+  loadRaci();
   renderIntoApp(getGestaoTemplate());
   mountGestaoEvents();
 }
