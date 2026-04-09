@@ -37,6 +37,13 @@ const gestaoDragState = {
   isSaving: false,
   ignoreClickUntil: 0
 };
+const raciState = {
+  columns: Array.from({ length: 5 }, (_, i) => ({
+    slot: i,
+    userId: "",
+    userName: ""
+  }))
+};
 
 function escapeHtml(value) {
   return String(value || "")
@@ -717,94 +724,6 @@ function resetKanbanDragState() {
   gestaoDragState.toStatus = "";
 }
 
-const RACI_VALUES = ["", "R", "A", "C", "I"];
-
-function getUsuariosRaci(users = []) {
-  return (users || [])
-    .filter((user) => {
-      const tipo = String(user?.tipo || "").toLowerCase();
-      return tipo === "gestao" || tipo === "colaborador" || tipo === "cliente";
-    })
-    .sort((a, b) =>
-      String(a?.nome || a?.email || "").localeCompare(
-        String(b?.nome || b?.email || ""),
-        "pt-BR"
-      )
-    );
-}
-
-function getTarefasRaci(tasks = []) {
-  return (tasks || [])
-    .filter((task) => !task?.arquivada && task?.status !== "concluida")
-    .slice(0, 8);
-}
-
-function getTaskRaciValue(task, user) {
-  if (!task || !user) return "";
-
-  const raciMap = task.raci || {};
-  const uid = user.uid || user.id || "";
-  if (uid && raciMap[uid]) {
-    return raciMap[uid];
-  }
-  
-  if (uid && task.responsavelUid && task.responsavelUid === uid) {
-    return "R";
-  }
-
-  const responsavelTask = String(task.responsavel || "").trim().toLowerCase();
-  const nomeUser = String(user.nome || "").trim().toLowerCase();
-  const emailUser = String(user.email || "").trim().toLowerCase();
-
-  if (responsavelTask && (responsavelTask === nomeUser || responsavelTask === emailUser)) {
-    return "R";
-  }
-
-  return "";
-}
-
-function buildRaciPayload(task, userId, nextValue) {
-  const currentRaci = { ...(task?.raci || {}) };
-
-  if (!userId) {
-    return currentRaci;
-  }
-
-  if (!nextValue) {
-    delete currentRaci[userId];
-  } else {
-    currentRaci[userId] = nextValue;
-  }
-
-  return currentRaci;
-}
-
-async function updateTaskRaci(taskId, userId, nextValue) {
-  const task = (state.tarefas || []).find((item) => item.id === taskId);
-  if (!task) return;
-
-  const nextRaci = buildRaciPayload(task, userId, nextValue);
-
-  const payload = {
-    titulo: task.titulo || "",
-    descricao: task.descricao || "",
-    projetoId: task.projetoId || "",
-    projetoNome: task.projetoNome || "",
-    responsavel: task.responsavel || "",
-    responsavelUid: task.responsavelUid || "",
-    prioridade: task.prioridade || "media",
-    status: task.status || "a_fazer",
-    dataInicio: task.dataInicio || "",
-    dataVencimento: task.dataVencimento || "",
-    recorrencia: task.recorrencia || "",
-    subtarefas: Array.isArray(task.subtarefas) ? task.subtarefas : [],
-    etiquetas: Array.isArray(task.etiquetas) ? task.etiquetas : [],
-    arquivada: Boolean(task.arquivada),
-    raci: nextRaci
-  };
-
-  await atualizarTarefa(taskId, payload);
-}
 
 function getKanbanDropZone(target) {
   if (!target) return null;
@@ -1260,36 +1179,6 @@ function mountGestaoEvents() {
       return;
     }
 
-        if (action === "cycle-raci") {
-      const raciCell = actionEl;
-      const raciTaskId = raciCell.dataset.taskId || "";
-      const raciUserId = raciCell.dataset.userId || "";
-      const currentValue = raciCell.dataset.value || "";
-
-      const currentIndex = RACI_VALUES.indexOf(currentValue);
-      const nextValue = RACI_VALUES[(currentIndex + 1) % RACI_VALUES.length];
-
-      const previousTasks = [...(state.tarefas || [])];
-      const optimisticTasks = previousTasks.map((task) => {
-        if (task.id !== raciTaskId) return task;
-
-        return {
-          ...task,
-          raci: buildRaciPayload(task, raciUserId, nextValue)
-        };
-      });
-
-      setTarefas(optimisticTasks);
-      renderGestaoView();
-
-      updateTaskRaci(raciTaskId, raciUserId, nextValue).catch((error) => {
-        console.error("Erro ao atualizar célula da matriz RACI:", error);
-        setTarefas(previousTasks);
-        renderGestaoView();
-      });
-
-      return;
-    }
 
     if (action === "set-filter") {
       gestaoUiState.filterType = filterType || "all";
@@ -1330,6 +1219,56 @@ function mountGestaoEvents() {
       gestaoUiState.sortMode = actionEl.value || "risk";
       renderGestaoView();
     }
+    if (action === "set-raci-column") {
+  const slot = Number(actionEl.dataset.slot);
+  const userId = actionEl.value;
+
+  const user = (state.users || []).find(u => (u.uid || u.id) === userId);
+
+  raciState.columns[slot] = {
+    slot,
+    userId,
+    userName: user?.nome || user?.email || ""
+  };
+
+  renderGestaoView();
+  return;
+}
+
+  if (action === "set-raci-value") {
+    const taskId = actionEl.dataset.taskId;
+    const userId = actionEl.dataset.userId;
+    const value = actionEl.value;
+  
+    const tasks = [...(state.tarefas ||)];
+  
+    const updated = tasks.map(t => {
+      if (t.id !== taskId) return t;
+  
+      const raci = { ...(t.raci || {}) };
+  
+      if (!userId) return t;
+  
+      if (!value) delete raci[userId];
+      else raci[userId] = value;
+  
+      return { ...t, raci };
+    });
+  
+    setTarefas(updated);
+    renderGestaoView();
+  
+    const task = updated.find(t => t.id === taskId);
+  
+    atualizarTarefa(taskId, {
+      ...task,
+      raci: task.raci
+    }).catch(err => {
+      console.error("Erro RACI:", err);
+    });
+  
+    return;
+  }
   });
 
   root.addEventListener("dragstart", (event) => {
@@ -1413,8 +1352,13 @@ function mountGestaoEvents() {
 }
 
 function renderRaciPanel(tasks, users) {
-  const visibleTasks = getTarefasRaci(tasks);
-  const visibleUsers = getUsuariosRaci(users);
+  const visibleTasks = (tasks || [])
+    .filter(t => !t.arquivada && t.status !== "concluida")
+    .slice(0, 8);
+
+  const usuarios = (users || []).sort((a, b) =>
+    (a.nome || "").localeCompare(b.nome || "", "pt-BR")
+  );
 
   return `
     <section class="cronograma-panel">
@@ -1422,7 +1366,6 @@ function renderRaciPanel(tasks, users) {
         <div>
           <h3>Matriz RACI</h3>
           <p class="cronograma-raci-legend">
-            <strong>R</strong> Responsável ·
             <strong>A</strong> Aprovador ·
             <strong>C</strong> Consultado ·
             <strong>I</strong> Informado
@@ -1431,55 +1374,56 @@ function renderRaciPanel(tasks, users) {
       </div>
 
       <div class="cronograma-raci">
-        <div
-          class="cronograma-raci-grid"
-          style="grid-template-columns: minmax(240px, 1.4fr) repeat(${visibleUsers.length || 1}, minmax(120px, 1fr));"
-        >
+        <div class="cronograma-raci-grid" style="grid-template-columns: 240px repeat(5, 1fr);">
+
           <div></div>
 
-          ${visibleUsers.length
-            ? visibleUsers.map((user) => `
-              <div class="cronograma-raci-user">
-                ${escapeHtml(user.nome || user.email || "Usuário")}
-              </div>
-            `).join("")
-            : `<div class="cronograma-raci-user">Sem operadores</div>`}
+          ${raciState.columns.map(col => `
+            <select 
+              data-action="set-raci-column"
+              data-slot="${col.slot}"
+              class="cronograma-raci-select-top"
+            >
+              <option value="">Selecionar</option>
+              ${usuarios.map(u => `
+                <option value="${u.uid || u.id}" ${(col.userId === (u.uid || u.id)) ? "selected" : ""}>
+                  ${escapeHtml(u.nome || u.email)}
+                </option>
+              `).join("")}
+            </select>
+          `).join("")}
 
-          ${
-            visibleTasks.length
-              ? visibleTasks.map((task) => renderRaciRow(task, visibleUsers)).join("")
-              : `
-                <div class="cronograma-raci-task">Sem tarefas ativas</div>
-                ${visibleUsers.map(() => `<div class="cronograma-raci-cell is-empty">—</div>`).join("")}
-              `
-          }
+          ${visibleTasks.map(task => renderRaciRow(task)).join("")}
+
         </div>
       </div>
     </section>
   `;
 }
 
-function renderRaciRow(task, users) {
+function renderRaciRow(task) {
   return `
     <div class="cronograma-raci-task">
       ${escapeHtml(task.titulo || "Tarefa")}
     </div>
 
-    ${users.map((user) => {
-      const value = getTaskRaciValue(task, user);
+    ${raciState.columns.map(col => {
+      const userId = col.userId;
+
+      const value = task.raci?.[userId] || "";
 
       return `
-        <button
-          type="button"
-          class="cronograma-raci-cell ${value ? `is-${value.toLowerCase()}` : ""}"
-          data-action="cycle-raci"
+        <select
+          class="cronograma-raci-select"
+          data-action="set-raci-value"
           data-task-id="${escapeHtml(task.id || "")}"
-          data-user-id="${escapeHtml(user.uid || user.id || "")}"
-          data-value="${escapeHtml(value)}"
-          title="Clique para alternar entre R, A, C, I"
+          data-user-id="${escapeHtml(userId)}"
         >
-          ${escapeHtml(value || "")}
-        </button>
+          <option value="">—</option>
+          <option value="A" ${value === "A" ? "selected" : ""}>A</option>
+          <option value="C" ${value === "C" ? "selected" : ""}>C</option>
+          <option value="I" ${value === "I" ? "selected" : ""}>I</option>
+        </select>
       `;
     }).join("")}
   `;
