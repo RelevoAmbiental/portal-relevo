@@ -4,7 +4,7 @@ const LIMITE_PADRAO_MEUS = 10;
 class DespesasApp {
   constructor() {
     this.CONFIG = {
-      projetos: ['ADM Geral', 'BR-135/BA', 'EOL Santo Sé', 'LT Jacobina', 'Grande Sertão 1'],
+      projetos: ['ADM Geral', 'BR-135/BA', 'EOL Santo Sé', 'LT Jacobina', 'Transnordestina'],
       funcionarios: ['Gleisson', 'Yuri', 'Lucas', 'Danilo', 'Roberto Aquino', 'Daniel', 'Tiago', 'Samuel Neto', 'Roberto Inácio', 'Samuel Almeida', 'Gerly', 'Henever'],
       tiposDespesa: [
         'Água', 'Almoço / Jantar', 'Aluguel de Carro', 'Café da Manhã',
