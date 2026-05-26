@@ -5,7 +5,7 @@ class DespesasApp {
   constructor() {
     this.CONFIG = {
       projetos: ['ADM Geral', 'BR-135/BA', 'EOL Santo Sé', 'LT Jacobina', 'Grande Sertão 1'],
-      funcionarios: ['Gleisson', 'Yuri', 'João', 'Danilo', 'Roberto Aquino', 'Daniel', 'Tiago', 'Samuel Neto', 'Roberto Inácio', 'Samuel Almeida', 'Gerly', 'Henever'],
+      funcionarios: ['Gleisson', 'Yuri', 'Lucas', 'Danilo', 'Roberto Aquino', 'Daniel', 'Tiago', 'Samuel Neto', 'Roberto Inácio', 'Samuel Almeida', 'Gerly', 'Henever'],
       tiposDespesa: [
         'Água', 'Almoço / Jantar', 'Aluguel de Carro', 'Café da Manhã',
         'Combustível', 'Correios', 'EPI', 'Ferramentas', 'Hospedagem / Hotel',
