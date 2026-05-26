@@ -25,7 +25,8 @@
     "ADM Geral",
     "LT Jacobina",
     "EOL Sento Sé",
-    "BR-135/BA"
+    "BR-135/BA",
+    "Transnordestina"
   ];
 
   const ATIVIDADES = [
