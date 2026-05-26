@@ -12,6 +12,7 @@
     "Samuel",
     "Tiago",
     "Gleysson",
+    "Lucas",
     "Gerly",
     "Henever",
     "Roberto Aquino",
